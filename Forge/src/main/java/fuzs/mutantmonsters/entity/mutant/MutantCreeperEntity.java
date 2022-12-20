@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.entity.CreeperMinionEntity;
 import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.entity.ai.goal.MBMeleeAttackGoal;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.pathfinding.MBGroundPathNavigator;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.util.MutatedExplosion;
@@ -40,7 +41,6 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
-import java.util.Iterator;
 
 public class MutantCreeperEntity extends Monster {
     private static final EntityDataAccessor<Byte> STATUS;
@@ -217,7 +217,7 @@ public class MutantCreeperEntity extends Monster {
         this.lastJumpTick = this.jumpTick;
         if (this.isJumpAttacking()) {
             if (this.jumpTick == 0) {
-                this.level.playSound((Player) null, this, MBSoundEvents.ENTITY_MUTANT_CREEPER_PRIMED, this.getSoundSource(), 2.0F, this.getVoicePitch());
+                this.level.playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_PRIMED_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, this.getVoicePitch());
             }
 
             ++this.jumpTick;
@@ -263,7 +263,7 @@ public class MutantCreeperEntity extends Monster {
             this.deathCause = cause;
             this.setCharging(false);
             this.level.broadcastEntityEvent(this, (byte)3);
-            this.level.playSound(null, this, MBSoundEvents.ENTITY_MUTANT_CREEPER_DEATH, this.getSoundSource(), 2.0F, 1.0F);
+            this.level.playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, 1.0F);
             if (this.lastHurtByPlayerTime > 0) {
                 this.lastHurtByPlayerTime += 100;
             }
@@ -317,17 +317,17 @@ public class MutantCreeperEntity extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return MBSoundEvents.ENTITY_MUTANT_CREEPER_AMBIENT;
+        return ModRegistry.ENTITY_MUTANT_CREEPER_AMBIENT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_MUTANT_CREEPER_HURT;
+        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_MUTANT_CREEPER_HURT;
+        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.get();
     }
 
     @Override
@@ -413,8 +413,8 @@ public class MutantCreeperEntity extends Monster {
         public void tick() {
             MutantCreeperEntity.this.getNavigation().stop();
             int i = MutantCreeperEntity.this.chargeTime % 20;
-            if (i == 0 || i == 20) {
-                MutantCreeperEntity.this.playSound(MBSoundEvents.ENTITY_MUTANT_CREEPER_CHARGE, 0.6F, 0.7F + MutantCreeperEntity.this.random.nextFloat() * 0.6F);
+            if (i == 0) {
+                MutantCreeperEntity.this.playSound(ModRegistry.ENTITY_MUTANT_CREEPER_CHARGE_SOUND_EVENT.get(), 0.6F, 0.7F + MutantCreeperEntity.this.random.nextFloat() * 0.6F);
             }
 
             ++MutantCreeperEntity.this.chargeTime;
@@ -456,7 +456,7 @@ public class MutantCreeperEntity extends Monster {
         @Override
         public void start() {
             for(int i = (int)Math.ceil((double)(MutantCreeperEntity.this.getHealth() / MutantCreeperEntity.this.getMaxHealth()) * 4.0); i > 0; --i) {
-                CreeperMinionEntity minion = (CreeperMinionEntity) MBEntityType.CREEPER_MINION.create(MutantCreeperEntity.this.level);
+                CreeperMinionEntity minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(MutantCreeperEntity.this.level);
                 double x = MutantCreeperEntity.this.getX() + (double)MutantCreeperEntity.this.random.nextFloat() - (double)MutantCreeperEntity.this.random.nextFloat();
                 double y = MutantCreeperEntity.this.getY() + (double)(MutantCreeperEntity.this.random.nextFloat() * 0.5F);
                 double z = MutantCreeperEntity.this.getZ() + (double)MutantCreeperEntity.this.random.nextFloat() - (double)MutantCreeperEntity.this.random.nextFloat();

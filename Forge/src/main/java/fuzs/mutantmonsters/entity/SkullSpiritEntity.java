@@ -45,12 +45,12 @@ public class SkullSpiritEntity extends Entity {
     }
 
     public SkullSpiritEntity(Level worldIn, Mob target) {
-        this(MBEntityType.SKULL_SPIRIT, worldIn);
+        this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.get(), worldIn);
         this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(target.getId()));
     }
 
     public SkullSpiritEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
-        this(MBEntityType.SKULL_SPIRIT, worldIn);
+        this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.get(), worldIn);
     }
 
     protected void defineSynchedData() {

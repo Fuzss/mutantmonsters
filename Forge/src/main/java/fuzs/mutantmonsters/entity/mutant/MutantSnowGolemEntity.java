@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.entity.ai.goal.FleeRainGoal;
 import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.entity.projectile.ThrowableBlockEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.pathfinding.MBGroundPathNavigator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -397,12 +398,12 @@ public class MutantSnowGolemEntity extends AbstractGolem implements RangedAttack
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_MUTANT_SNOW_GOLEM_HURT;
+        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_MUTANT_SNOW_GOLEM_DEATH;
+        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_DEATH_SOUND_EVENT.get();
     }
 
     @Override

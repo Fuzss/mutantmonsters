@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters.item;
 
 import fuzs.mutantmonsters.entity.projectile.ChemicalXEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
@@ -69,12 +70,12 @@ public class ChemicalXItem extends Item {
         @Override
         public boolean isIngredient(ItemStack ingredient) {
             Item item = ingredient.getItem();
-            return item == MBItems.ENDERSOUL_HAND || item == MBItems.HULK_HAMMER || item == MBItems.CREEPER_SHARD || item == MBItems.MUTANT_SKELETON_SKULL;
+            return item == ModRegistry.ENDERSOUL_HAND_ITEM.get() || item == ModRegistry.HULK_HAMMER_ITEM.get() || item == ModRegistry.CREEPER_SHARD_ITEM.get() || item == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get();
         }
 
         @Override
         public ItemStack getOutput(ItemStack input, ItemStack ingredient) {
-            return this.isInput(input) && this.isIngredient(ingredient) ? new ItemStack(MBItems.CHEMICAL_X) : ItemStack.EMPTY;
+            return this.isInput(input) && this.isIngredient(ingredient) ? new ItemStack(ModRegistry.CHEMICAL_X_ITEM.get()) : ItemStack.EMPTY;
         }
     }
 }

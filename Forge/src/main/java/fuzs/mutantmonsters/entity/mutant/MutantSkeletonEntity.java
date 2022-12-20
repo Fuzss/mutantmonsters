@@ -8,6 +8,7 @@ import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.entity.ai.goal.MBMeleeAttackGoal;
 import fuzs.mutantmonsters.entity.projectile.MutantArrowEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.pathfinding.MBGroundPathNavigator;
 import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.core.BlockPos;
@@ -39,7 +40,6 @@ import net.minecraftforge.network.PlayMessages;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class MutantSkeletonEntity extends Monster implements IAnimatedEntity {
@@ -59,7 +59,7 @@ public class MutantSkeletonEntity extends Monster implements IAnimatedEntity {
     }
 
     public MutantSkeletonEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
-        this(MBEntityType.MUTANT_SKELETON, worldIn);
+        this(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), worldIn);
     }
 
     @Override
@@ -262,22 +262,22 @@ public class MutantSkeletonEntity extends Monster implements IAnimatedEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return MBSoundEvents.ENTITY_MUTANT_SKELETON_AMBIENT;
+        return ModRegistry.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_MUTANT_SKELETON_HURT;
+        return ModRegistry.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_MUTANT_SKELETON_DEATH;
+        return ModRegistry.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.get();
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockIn) {
-        this.playSound(MBSoundEvents.ENTITY_MUTANT_SKELETON_STEP, 0.15F, 1.0F);
+        this.playSound(ModRegistry.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.get(), 0.15F, 1.0F);
     }
 
     static {
@@ -333,10 +333,8 @@ public class MutantSkeletonEntity extends Monster implements IAnimatedEntity {
 
             if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
                 if (!this.shots.isEmpty()) {
-                    Iterator var2 = this.shots.iterator();
 
-                    while(var2.hasNext()) {
-                        MutantArrowEntity arrowEntity = (MutantArrowEntity)var2.next();
+                    for (MutantArrowEntity arrowEntity : this.shots) {
                         this.mob.level.addFreshEntity(arrowEntity);
                     }
 

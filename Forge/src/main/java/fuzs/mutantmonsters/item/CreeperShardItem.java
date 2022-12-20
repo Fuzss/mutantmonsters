@@ -20,12 +20,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Wearable;
+import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CreeperShardItem extends Item implements Wearable {
+public class CreeperShardItem extends Item implements Vanishable {
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
     public CreeperShardItem(Item.Properties properties) {

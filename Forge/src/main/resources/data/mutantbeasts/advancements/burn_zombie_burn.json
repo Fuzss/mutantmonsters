@@ -1,0 +1,42 @@
+{
+	"parent": "mutantbeasts:root",
+	"display": {
+		"icon": {
+			"item": "minecraft:flint_and_steel"
+		},
+		"title": {
+			"translate": "advancements.mutantbeasts.burn_zombie_burn.title"
+		},
+		"description": {
+			"translate": "advancements.mutantbeasts.burn_zombie_burn.description"
+		},
+		"frame": "task",
+		"show_toast": true,
+		"announce_to_chat": true,
+		"hidden": false
+	},
+	"criteria": {
+		"used_flint_and_steel": {
+			"trigger": "minecraft:player_interacted_with_entity",
+			"conditions": {
+				"item": {
+					"item": "minecraft:flint_and_steel"
+				},
+				"entity": [
+					{
+						"condition": "minecraft:entity_properties",
+						"predicate": {
+							"type": "mutantbeasts:mutant_zombie"
+						},
+						"entity": "this"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"used_flint_and_steel"
+		]
+	]
+}

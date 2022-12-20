@@ -6,6 +6,7 @@ import fuzs.mutantmonsters.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.entity.ai.goal.MBMeleeAttackGoal;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.pathfinding.MBGroundPathNavigator;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.util.SeismicWave;
@@ -55,7 +56,6 @@ import net.minecraftforge.network.PlayMessages;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class MutantZombieEntity extends Monster implements IAnimatedEntity {
@@ -88,7 +88,7 @@ public class MutantZombieEntity extends Monster implements IAnimatedEntity {
     }
 
     public MutantZombieEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
-        this(MBEntityType.MUTANT_ZOMBIE, worldIn);
+        this(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), worldIn);
     }
 
     @Override
@@ -502,17 +502,17 @@ public class MutantZombieEntity extends Monster implements IAnimatedEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return MBSoundEvents.ENTITY_MUTANT_ZOMBIE_AMBIENT;
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_AMBIENT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_MUTANT_ZOMBIE_HURT;
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_MUTANT_ZOMBIE_DEATH;
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_DEATH_SOUND_EVENT.get();
     }
 
     @Override
@@ -622,7 +622,7 @@ public class MutantZombieEntity extends Monster implements IAnimatedEntity {
                     this.attackTarget.invulnerableTime = 10;
                     EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
                     EntityUtil.stunRavager(this.attackTarget);
-                    ((MutantZombieEntity)this.mob).playSound(MBSoundEvents.ENTITY_MUTANT_ZOMBIE_GRUNT, 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                    ((MutantZombieEntity)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
                 }
 
                 if ((this.mob.onGround || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
@@ -678,17 +678,15 @@ public class MutantZombieEntity extends Monster implements IAnimatedEntity {
             }
 
             if (this.mob.animationTick == 10) {
-                ((MutantZombieEntity)this.mob).playSound(MBSoundEvents.ENTITY_MUTANT_ZOMBIE_ROAR, 3.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
-                Iterator var1 = this.mob.level.getEntities(this.mob, this.mob.getBoundingBox().inflate(12.0, 8.0, 12.0)).iterator();
+                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ROAR_SOUND_EVENT.get(), 3.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
 
-                while(var1.hasNext()) {
-                    Entity entity = (Entity)var1.next();
+                for (Entity entity : this.mob.level.getEntities(this.mob, this.mob.getBoundingBox().inflate(12.0, 8.0, 12.0))) {
                     if (this.mob.canHarm(entity) && this.mob.distanceToSqr(entity) <= 196.0) {
                         double x = entity.getX() - this.mob.getX();
                         double z = entity.getZ() - this.mob.getZ();
                         double d = Math.sqrt(x * x + z * z);
                         entity.setDeltaMovement(x / d * 0.699999988079071, 0.30000001192092896, z / d * 0.699999988079071);
-                        entity.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), (float)(2 + this.mob.random.nextInt(2)));
+                        entity.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), (float) (2 + this.mob.random.nextInt(2)));
                         EntityUtil.sendPlayerVelocityPacket(entity);
                     }
                 }
@@ -734,7 +732,7 @@ public class MutantZombieEntity extends Monster implements IAnimatedEntity {
         public void start() {
             super.start();
             this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
-            ((MutantZombieEntity)this.mob).playSound(MBSoundEvents.ENTITY_MUTANT_ZOMBIE_ATTACK, 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+            ((MutantZombieEntity)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
         }
 
         @Override

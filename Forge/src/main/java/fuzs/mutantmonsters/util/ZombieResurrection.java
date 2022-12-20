@@ -3,6 +3,8 @@ package fuzs.mutantmonsters.util;
 import fuzs.mutantmonsters.entity.ai.goal.TrackSummonerGoal;
 import fuzs.mutantmonsters.entity.mutant.MutantZombieEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
@@ -116,8 +118,8 @@ public class ZombieResurrection extends BlockPos {
 
         if (checkDay && world.isDay()) {
             BlockPos lightPos = new BlockPos(x, y + 1, z);
-            float f = world.dimensionType().brightness(world.getMaxLocalRawBrightness(lightPos));
-            if (f > 0.5F && world.canSeeSkyFromBelowWater(lightPos) && world.random.nextInt(3) != 0) {
+            float f = world.getPathfindingCostFromLightLevels(lightPos);
+            if (f > 0.0F && world.canSeeSkyFromBelowWater(lightPos) && world.random.nextInt(3) != 0) {
                 return -1;
             }
         }
@@ -126,11 +128,12 @@ public class ZombieResurrection extends BlockPos {
     }
 
     public static EntityType<? extends Zombie> getZombieByLocation(Level world, BlockPos pos) {
-        Biome biome = world.getBiome(pos).value();
+        Holder<Biome> biome = world.getBiome(pos);
         int chance = world.random.nextInt(100);
-        if (biome.getBiomeCategory() == Category.DESERT) {
+        // TODO replace with proper tags
+        if (biome.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {
             return chance < 80 && world.canSeeSky(pos) ? EntityType.HUSK : (chance < 1 ? EntityType.ZOMBIE_VILLAGER : EntityType.ZOMBIE);
-        } else if ((biome.getBiomeCategory() == Category.OCEAN || biome.getBiomeCategory() == Category.RIVER) && world.isWaterAt(pos)) {
+        } else if ((biome.is(BiomeTags.REQUIRED_OCEAN_MONUMENT_SURROUNDING)) && world.isWaterAt(pos)) {
             return EntityType.DROWNED;
         } else {
             return chance < 95 ? EntityType.ZOMBIE : EntityType.ZOMBIE_VILLAGER;

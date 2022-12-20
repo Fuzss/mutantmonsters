@@ -1,5 +1,7 @@
 package fuzs.mutantmonsters.entity.projectile;
 
+import fuzs.mutantmonsters.entity.mutant.MutantSkeletonEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -43,7 +45,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public MutantArrowEntity(Level world, LivingEntity shooter, LivingEntity target) {
-        this(MBEntityType.MUTANT_ARROW, world);
+        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), world);
         this.shooter = shooter;
         if (!world.isClientSide) {
             this.setTargetX(target.getX());
@@ -66,9 +68,10 @@ public class MutantArrowEntity extends Entity {
     }
 
     public MutantArrowEntity(PlayMessages.SpawnEntity packet, Level world) {
-        this(MBEntityType.MUTANT_ARROW, world);
+        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), world);
     }
 
+    @Override
     protected void defineSynchedData() {
         this.entityData.define(TARGET_X, 0);
         this.entityData.define(TARGET_Y, 0);
@@ -78,7 +81,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public double getTargetX() {
-        return (double)(Integer)this.entityData.get(TARGET_X) / 10000.0;
+        return (double) this.entityData.get(TARGET_X) / 10000.0;
     }
 
     public void setTargetX(double targetX) {
@@ -86,7 +89,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public double getTargetY() {
-        return (double)(Integer)this.entityData.get(TARGET_Y) / 10000.0;
+        return (double) this.entityData.get(TARGET_Y) / 10000.0;
     }
 
     public void setTargetY(double targetY) {
@@ -94,7 +97,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public double getTargetZ() {
-        return (double)(Integer)this.entityData.get(TARGET_Z) / 10000.0;
+        return (double) this.entityData.get(TARGET_Z) / 10000.0;
     }
 
     public void setTargetZ(double targetZ) {
@@ -102,7 +105,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public float getSpeed() {
-        return (Float)this.entityData.get(SPEED) / 10.0F;
+        return this.entityData.get(SPEED) / 10.0F;
     }
 
     public void setSpeed(float speed) {
@@ -110,7 +113,7 @@ public class MutantArrowEntity extends Entity {
     }
 
     public int getClones() {
-        return (Integer)this.entityData.get(CLONES);
+        return this.entityData.get(CLONES);
     }
 
     public void setClones(int clones) {
@@ -131,6 +134,7 @@ public class MutantArrowEntity extends Entity {
         this.effectInstance = effectInstance;
     }
 
+    @Override
     public void tick() {
         super.tick();
         double x = this.getTargetX() - this.getX();
@@ -170,7 +174,7 @@ public class MutantArrowEntity extends Entity {
         double d3 = this.getX() - targetX;
         double d4 = this.getY() - targetY;
         double d5 = this.getZ() - targetZ;
-        double dist = (double) Mth.sqrt((float) (d3 * d3 + d4 * d4 + d5 * d5));
+        double dist = Mth.sqrt((float) (d3 * d3 + d4 * d4 + d5 * d5));
         double dx = (targetX - this.getX()) / dist;
         double dy = (targetY - this.getY()) / dist;
         double dz = (targetZ - this.getZ()) / dist;
@@ -189,6 +193,7 @@ public class MutantArrowEntity extends Entity {
 
         for (Entity entity : this.pointedEntities) {
             DamageSource damageSource = (new IndirectEntityDamageSource("arrow", this, this.shooter) {
+                @Override
                 public Vec3 getSourcePosition() {
                     return null;
                 }
@@ -211,12 +216,15 @@ public class MutantArrowEntity extends Entity {
         this.pointedEntities.clear();
     }
 
+    @Override
     public void addAdditionalSaveData(CompoundTag compound) {
     }
 
+    @Override
     public void readAdditionalSaveData(CompoundTag compound) {
     }
 
+    @Override
     public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }

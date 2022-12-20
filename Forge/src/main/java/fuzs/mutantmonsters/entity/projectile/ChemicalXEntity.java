@@ -35,19 +35,19 @@ public class ChemicalXEntity extends ThrowableItemProjectile {
     }
 
     public ChemicalXEntity(LivingEntity livingEntityIn, Level worldIn) {
-        super(MBEntityType.CHEMICAL_X, livingEntityIn, worldIn);
+        super(ModRegistry.CHEMICAL_X_ENTITY_TYPE.get(), livingEntityIn, worldIn);
     }
 
     public ChemicalXEntity(double x, double y, double z, Level worldIn) {
-        super(MBEntityType.CHEMICAL_X, x, y, z, worldIn);
+        super(ModRegistry.CHEMICAL_X_ENTITY_TYPE.get(), x, y, z, worldIn);
     }
 
     public ChemicalXEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
-        super(MBEntityType.CHEMICAL_X, worldIn);
+        super(ModRegistry.CHEMICAL_X_ENTITY_TYPE.get(), worldIn);
     }
 
     protected Item getDefaultItem() {
-        return MBItems.CHEMICAL_X;
+        return ModRegistry.CHEMICAL_X_ITEM.get();
     }
 
     protected float getGravity() {
@@ -124,16 +124,16 @@ public class ChemicalXEntity extends ThrowableItemProjectile {
     }
 
     static {
-        MUTATIONS = ImmutableMap.builder()
-            .put(EntityType.CREEPER, MBEntityType.MUTANT_CREEPER)
-            .put(EntityType.ENDERMAN, MBEntityType.MUTANT_ENDERMAN)
-            .put(EntityType.PIG, MBEntityType.SPIDER_PIG)
-            .put(EntityType.SKELETON, MBEntityType.MUTANT_SKELETON)
-            .put(EntityType.SNOW_GOLEM, MBEntityType.MUTANT_SNOW_GOLEM)
-            .put(EntityType.ZOMBIE, MBEntityType.MUTANT_ZOMBIE).build();
+        MUTATIONS = ImmutableMap.<EntityType<? extends Mob>, EntityType<? extends Mob>>builder()
+            .put(EntityType.CREEPER, ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get())
+            .put(EntityType.ENDERMAN, ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get())
+            .put(EntityType.PIG, ModRegistry.SPIDER_PIG_ENTITY_TYPE.get())
+            .put(EntityType.SKELETON, ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get())
+            .put(EntityType.SNOW_GOLEM, ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get())
+            .put(EntityType.ZOMBIE, ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get()).build();
         IS_APPLICABLE = (target) -> {
             EntityType<?> entityType = target.getType();
-            return target.canChangeDimensions() && !MUTATIONS.containsValue(entityType) && entityType != MBEntityType.CREEPER_MINION && entityType != MBEntityType.ENDERSOUL_CLONE;
+            return target.canChangeDimensions() && !MUTATIONS.containsValue(entityType) && entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.get() && entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get();
         };
         PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
     }

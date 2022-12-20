@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters.entity;
 
 import fuzs.mutantmonsters.entity.mutant.MutantCreeperEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.util.MutatedExplosion;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,7 +47,7 @@ public class CreeperMinionEggEntity extends Entity {
     }
 
     public CreeperMinionEggEntity(MutantCreeperEntity spawner, Entity owner) {
-        this(MBEntityType.CREEPER_MINION_EGG, spawner.level);
+        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), spawner.level);
         this.ownerUUID = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
         if (spawner.isCharged()) {
@@ -56,54 +57,64 @@ public class CreeperMinionEggEntity extends Entity {
     }
 
     public CreeperMinionEggEntity(PlayMessages.SpawnEntity packet, Level world) {
-        this(MBEntityType.CREEPER_MINION_EGG, world);
+        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), world);
     }
 
+    @Override
     protected void defineSynchedData() {
         this.entityData.define(CHARGED, false);
     }
 
     public boolean isCharged() {
-        return (Boolean)this.entityData.get(CHARGED);
+        return this.entityData.get(CHARGED);
     }
 
     public void setCharged(boolean charged) {
         this.entityData.set(CHARGED, charged);
     }
 
+    @Override
     public double getMyRidingOffset() {
         return this.getVehicle() instanceof Player ? (double)this.getBbHeight() - (this.getVehicle().getPose() == Pose.CROUCHING ? 0.35 : 0.2) : 0.0;
     }
 
+    @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getBbHeight();
+        return this.getBbHeight();
     }
 
-    protected boolean isMovementNoisy() {
-        return false;
+    @Override
+    protected Entity.MovementEmission getMovementEmission() {
+        return MovementEmission.EVENTS;
     }
 
+    @Override
     public boolean canCollideWith(Entity entity) {
         return Boat.canVehicleCollide(this, entity);
     }
 
+    @Override
     public boolean isPickable() {
         return this.isAlive();
     }
 
+    @Override
     public boolean isPushable() {
         return this.isAlive();
     }
 
+    @Override
     public boolean canRiderInteract() {
         return true;
     }
 
+    @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
 
+    @Override
     public void lerpMotion(double x, double y, double z) {
         super.lerpMotion(x, y, z);
         this.velocityX = x;
@@ -112,7 +123,7 @@ public class CreeperMinionEggEntity extends Entity {
     }
 
     private void hatch() {
-        CreeperMinionEntity minion = (CreeperMinionEntity)MBEntityType.CREEPER_MINION.create(this.level);
+        CreeperMinionEntity minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(this.level);
         if (this.ownerUUID != null) {
             Player playerEntity = this.level.getPlayerByUUID(this.ownerUUID);
             if (playerEntity != null && !ForgeEventFactory.onAnimalTame(minion, playerEntity)) {
@@ -127,15 +138,17 @@ public class CreeperMinionEggEntity extends Entity {
 
         minion.setPos(this.getX(), this.getY(), this.getZ());
         this.level.addFreshEntity(minion);
-        this.playSound(MBSoundEvents.ENTITY_CREEPER_MINION_EGG_HATCH, 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
-        this.remove();
+        this.playSound(ModRegistry.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.get(), 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
+        this.discard();
     }
 
+    @Override
     public void thunderHit(ServerLevel serverWorld, LightningBolt lightningBoltEntity) {
         super.thunderHit(serverWorld, lightningBoltEntity);
         this.setCharged(true);
     }
 
+    @Override
     public void tick() {
         super.tick();
         if (!this.isNoGravity()) {
@@ -165,6 +178,7 @@ public class CreeperMinionEggEntity extends Entity {
 
     }
 
+    @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (this.getVehicle() == player) {
             this.getTopPassenger(player).stopRiding();
@@ -181,13 +195,14 @@ public class CreeperMinionEggEntity extends Entity {
 
     private Entity getTopPassenger(Entity entity) {
         List<Entity> list = entity.getPassengers();
-        return !list.isEmpty() ? this.getTopPassenger((Entity)list.get(0)) : entity;
+        return !list.isEmpty() ? this.getTopPassenger(list.get(0)) : entity;
     }
 
     private void playMountSound(boolean mount) {
         this.playSound(SoundEvents.ITEM_PICKUP, 0.7F, (mount ? 0.6F : 0.3F) + this.random.nextFloat() * 0.1F);
     }
 
+    @Override
     public boolean hurt(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) {
             return false;
@@ -209,11 +224,11 @@ public class CreeperMinionEggEntity extends Entity {
                                 this.spawnAtLocation(Items.GUNPOWDER);
                             }
                         } else {
-                            this.spawnAtLocation(MBItems.CREEPER_SHARD);
+                            this.spawnAtLocation(ModRegistry.CREEPER_SHARD_ITEM.get());
                         }
                     }
 
-                    this.remove();
+                    this.discard();
                 }
 
                 return true;
@@ -223,6 +238,7 @@ public class CreeperMinionEggEntity extends Entity {
         }
     }
 
+    @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
         compound.putInt("Health", this.health);
         compound.putInt("Age", this.age);
@@ -237,6 +253,7 @@ public class CreeperMinionEggEntity extends Entity {
 
     }
 
+    @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         if (compound.contains("Health")) {
             this.health = compound.getInt("Health");
@@ -256,6 +273,7 @@ public class CreeperMinionEggEntity extends Entity {
 
     }
 
+    @Override
     public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }

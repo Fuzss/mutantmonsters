@@ -41,7 +41,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -111,7 +110,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
     }
 
     public MutantEndermanEntity(PlayMessages.SpawnEntity packet, Level world) {
-        this(MBEntityType.MUTANT_ENDERMAN, world);
+        this(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), world);
     }
 
     @Override
@@ -132,7 +131,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
         this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this));
         this.targetSelector.addGoal(1, new FindTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Endermite.class, true));
-        this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal(this, false));
+        this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, false));
     }
 
     public static AttributeSupplier.Builder registerAttributes() {
@@ -188,7 +187,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
     private void setClone(boolean isClone) {
         this.entityData.set(CLONE, isClone);
-        this.playSound(MBSoundEvents.ENTITY_MUTANT_ENDERMAN_MORPH, 2.0F, this.getVoicePitch());
+        this.playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_MORPH_SOUND_EVENT.get(), 2.0F, this.getVoicePitch());
         this.level.broadcastEntityEvent(this, (byte)0);
     }
 
@@ -250,7 +249,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
     @Override
     public EntityDimensions getDimensions(Pose poseIn) {
-        return this.isClone() ? MBEntityType.ENDERSOUL_CLONE.getDimensions() : super.getDimensions(poseIn);
+        return this.isClone() ? ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get().getDimensions() : super.getDimensions(poseIn);
     }
 
     @Override
@@ -373,18 +372,13 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 this.capturedEntities = this.level.getEntities(this, this.getBoundingBox().inflate(20.0, 12.0, 20.0), EndersoulFragmentEntity.IS_VALID_TARGET);
             } else {
                 Iterator<Entity> iterator = this.capturedEntities.iterator();
-
-                while(true) {
-                    while(iterator.hasNext()) {
-                        Entity entity = iterator.next();
-                        if (!(this.distanceToSqr(entity) > 400.0) && !entity.isSpectator() && entity.isAddedToWorld()) {
-                            entity.xRot += (this.random.nextFloat() - 0.3F) * 6.0F;
-                        } else {
-                            iterator.remove();
-                        }
+                while(iterator.hasNext()) {
+                    Entity entity = iterator.next();
+                    if (!(this.distanceToSqr(entity) > 400.0) && !entity.isSpectator() && entity.isAddedToWorld()) {
+                        entity.setXRot(entity.getXRot() + (this.random.nextFloat() - 0.3F) * 6.0F);
+                    } else {
+                        iterator.remove();
                     }
-
-                    return;
                 }
             }
         }
@@ -462,7 +456,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
     }
 
     private int getAvailableHand() {
-        List<Integer> list = new ArrayList();
+        List<Integer> list = new ArrayList<>();
 
         for(int i = 0; i < this.heldBlock.length; ++i) {
             if (this.heldBlock[i] == 0) {
@@ -501,8 +495,8 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
     }
 
     private int getThrowingHand() {
-        List<Integer> outer = new ArrayList();
-        List<Integer> inner = new ArrayList();
+        List<Integer> outer = new ArrayList<>();
+        List<Integer> inner = new ArrayList<>();
 
         for(int i = 0; i < this.heldBlock.length; ++i) {
             if (this.heldBlock[i] > 0) {
@@ -550,7 +544,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 double x = entityIn.getX() + (this.random.nextDouble() - 0.5) * 24.0;
                 double y = entityIn.getY() + (double)this.random.nextInt(5) + 4.0;
                 double z = entityIn.getZ() + (this.random.nextDouble() - 0.5) * 24.0;
-                this.teleportTo(x, y, z);
+                this.teleportToPosition(x, y, z);
             }
 
             if (flag) {
@@ -628,7 +622,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
             double x = this.getX() + (this.random.nextDouble() - 0.5) * 2.0 * radius;
             double y = this.getY() + (double)this.random.nextInt((int)radius * 2) - radius;
             double z = this.getZ() + (this.random.nextDouble() - 0.5) * 2.0 * radius;
-            return this.teleportTo(x, y, z);
+            return this.teleportToPosition(x, y, z);
         }
     }
 
@@ -652,11 +646,11 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 z = this.getZ() + (this.random.nextDouble() - 0.5) * 8.0 - vec.z * radius;
             }
 
-            return this.teleportTo(x, y, z);
+            return this.teleportToPosition(x, y, z);
         }
     }
 
-    private boolean teleportTo(double x, double y, double z) {
+    private boolean teleportToPosition(double x, double y, double z) {
         if (!this.isEffectiveAi()) {
             return false;
         } else if (this.isClone()) {
@@ -664,8 +658,8 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
             if (flag) {
                 this.stopRiding();
                 if (!this.isSilent()) {
-                    this.level.playLocalSound(this.xo, this.yo, this.zo, MBSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT, this.getSoundSource(), 1.0F, 1.0F, false);
-                    this.playSound(MBSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT, 1.0F, 1.0F);
+                    this.level.playLocalSound(this.xo, this.yo, this.zo, ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), this.getSoundSource(), 1.0F, 1.0F, false);
+                    this.playSound(ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
                 }
             }
 
@@ -708,12 +702,9 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
             damageSource = DamageSource.playerAttack((Player) attacker);
         }
 
-        Iterator var5 = attacker.level.getEntities(attacker, attacker.getBoundingBox().inflate(radius), EndersoulFragmentEntity.IS_VALID_TARGET).iterator();
-
-        while(var5.hasNext()) {
-            Entity entity = (Entity)var5.next();
+        for (Entity entity : attacker.level.getEntities(attacker, attacker.getBoundingBox().inflate(radius), EndersoulFragmentEntity.IS_VALID_TARGET)) {
             if (entity instanceof LivingEntity && entity.hurt(damageSource, 4.0F) && attacker.getRandom().nextInt(3) == 0) {
-                ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.BLINDNESS, duration));
+                ((LivingEntity) entity).addEffect(new MobEffectInstance(MobEffects.BLINDNESS, duration));
             }
 
             double x = entity.getX() - attacker.getX();
@@ -784,7 +775,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
     protected void tickDeath() {
         this.setDeltaMovement(0.0, Math.min(this.getDeltaMovement().y, 0.0), 0.0);
         if (this.deathTime == 80) {
-            this.playSound(MBSoundEvents.ENTITY_MUTANT_ENDERMAN_DEATH, 5.0F, this.getVoicePitch());
+            this.playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_DEATH_SOUND_EVENT.get(), 5.0F, this.getVoicePitch());
         }
 
         if (this.deathTime >= 60) {
@@ -841,7 +832,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
         if (this.deathTime >= DEATH_ANIMATION.getDuration()) {
             this.dropExperience();
-            this.remove();
+            this.kill();
         }
 
     }
@@ -866,7 +857,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
     @Override
     protected Component getTypeName() {
-        return this.isClone() ? MBEntityType.ENDERSOUL_CLONE.getDescription() : super.getTypeName();
+        return this.isClone() ? ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get().getDescription() : super.getTypeName();
     }
 
     @Override
@@ -933,17 +924,17 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return MBSoundEvents.ENTITY_MUTANT_ENDERMAN_AMBIENT;
+        return ModRegistry.ENTITY_MUTANT_ENDERMAN_AMBIENT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_MUTANT_ENDERMAN_HURT;
+        return ModRegistry.ENTITY_MUTANT_ENDERMAN_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_MUTANT_ENDERMAN_HURT;
+        return ModRegistry.ENTITY_MUTANT_ENDERMAN_HURT_SOUND_EVENT.get();
     }
 
     private boolean isBeingLookedAtBy(LivingEntity target) {
@@ -1119,8 +1110,8 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 this.mob.setPos((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
             });
             if (!this.mob.isSilent()) {
-                this.mob.level.playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, MBSoundEvents.ENTITY_MUTANT_ENDERMAN_TELEPORT, this.mob.getSoundSource(), 1.0F, 1.0F);
-                ((MutantEndermanEntity)this.mob).playSound(MBSoundEvents.ENTITY_MUTANT_ENDERMAN_TELEPORT, 1.0F, 1.0F);
+                this.mob.level.playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, ModRegistry.ENTITY_MUTANT_ENDERMAN_TELEPORT_SOUND_EVENT.get(), this.mob.getSoundSource(), 1.0F, 1.0F);
+                ((MutantEndermanEntity)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
             }
 
             MutantEndermanEntity.teleportAttack(this.mob);
@@ -1137,7 +1128,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
             this.mob.stopRiding();
             this.mob.fallDistance = 0.0F;
             this.mob.getTeleportPosition().ifPresent((pos) -> {
-                this.mob.teleportTo((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
+                this.mob.teleportToPosition((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
             });
             super.stop();
             this.mob.setTeleportPosition(null);
@@ -1171,7 +1162,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
                 this.mob.level.getLevelData().setRaining(false);
                 this.mob.level.broadcastEntityEvent(this.mob, (byte)0);
-                ((MutantEndermanEntity)this.mob).playSound(MBSoundEvents.ENTITY_MUTANT_ENDERMAN_SCREAM, 5.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
+                ((MutantEndermanEntity)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_SCREAM_SOUND_EVENT.get(), 5.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
 
                 for (Entity entity : this.mob.level.getEntities(this.mob, this.mob.getBoundingBox().inflate(20.0, 12.0, 20.0), EndersoulFragmentEntity.IS_VALID_TARGET)) {
                     if (this.mob.distanceToSqr(entity) < 400.0) {
@@ -1208,7 +1199,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
     }
 
     static class CloneGoal extends AnimationGoal<MutantEndermanEntity> {
-        private final List<EndersoulCloneEntity> cloneList = new ArrayList();
+        private final List<EndersoulCloneEntity> cloneList = new ArrayList<>();
         private LivingEntity attackTarget;
 
         public CloneGoal(MutantEndermanEntity mob) {
@@ -1252,7 +1243,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
             double x = this.attackTarget.getX() + (this.mob.random.nextDouble() - 0.5) * 24.0;
             double y = this.attackTarget.getY() + 8.0;
             double z = this.attackTarget.getZ() + (this.mob.random.nextDouble() - 0.5) * 24.0;
-            this.mob.teleportTo(x, y, z);
+            this.mob.teleportToPosition(x, y, z);
             EntityUtil.divertAttackers(this.mob, this.getRandomClone());
         }
 
@@ -1280,7 +1271,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
             for (EndersoulCloneEntity clone : this.cloneList) {
                 if (clone.isAlive()) {
-                    clone.remove();
+                    clone.discard();
                     EntityUtil.divertAttackers(clone, this.mob);
                 }
             }
@@ -1292,7 +1283,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
         }
 
         private void createClone(double x, double y, double z) {
-            EndersoulCloneEntity clone = (EndersoulCloneEntity)MBEntityType.ENDERSOUL_CLONE.create(this.mob.level);
+            EndersoulCloneEntity clone = (EndersoulCloneEntity)ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get().create(this.mob.level);
             clone.setCloner(this.mob);
             this.cloneList.add(clone);
             if (!EntityUtil.teleportTo(clone, x, y, z)) {
@@ -1323,22 +1314,20 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
                 this.mob.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.0F, this.mob.getVoicePitch());
                 boolean lower = this.mob.getActiveArm() >= 2;
                 float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                Iterator var3 = this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0)).iterator();
 
-                while(var3.hasNext()) {
-                    LivingEntity livingEntity = (LivingEntity)var3.next();
+                for (LivingEntity livingEntity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
                     if (!(livingEntity instanceof MutantEndermanEntity) && !(livingEntity instanceof EndersoulCloneEntity)) {
                         double dist = this.mob.distanceTo(livingEntity);
                         double x = this.mob.getX() - livingEntity.getX();
                         double z = this.mob.getZ() - livingEntity.getZ();
-                        if (this.mob.getBoundingBox().minY <= livingEntity.getBoundingBox().maxY && dist <= 4.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 3.0F + (1.0F - (float)dist / 4.0F) * 40.0F) {
+                        if (this.mob.getBoundingBox().minY <= livingEntity.getBoundingBox().maxY && dist <= 4.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 3.0F + (1.0F - (float) dist / 4.0F) * 40.0F) {
                             livingEntity.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (lower ? 1.0F : 3.0F) : 0.0F);
                             float power = 0.4F + this.mob.random.nextFloat() * 0.2F;
                             if (!lower) {
                                 power += 0.2F;
                             }
 
-                            livingEntity.setDeltaMovement(-x / dist * (double)power, power * 0.6F, -z / dist * (double)power);
+                            livingEntity.setDeltaMovement(-x / dist * (double) power, power * 0.6F, -z / dist * (double) power);
                             EntityUtil.sendPlayerVelocityPacket(livingEntity);
                         }
                     }
@@ -1371,7 +1360,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
         public void start() {
             super.start();
             this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
-            this.mob.level.playSound(null, this.mob, MBSoundEvents.ENTITY_MUTANT_ENDERMAN_STARE, this.mob.getSoundSource(), 2.5F, 0.7F + this.mob.random.nextFloat() * 0.2F);
+            this.mob.level.playSound(null, this.mob, ModRegistry.ENTITY_MUTANT_ENDERMAN_STARE_SOUND_EVENT.get(), this.mob.getSoundSource(), 2.5F, 0.7F + this.mob.random.nextFloat() * 0.2F);
         }
 
         @Override

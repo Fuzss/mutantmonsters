@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.entity.projectile;
 
 import fuzs.mutantmonsters.entity.mutant.MutantEndermanEntity;
 import fuzs.mutantmonsters.entity.mutant.MutantSnowGolemEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -38,7 +39,6 @@ import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PlayMessages;
 
 import javax.annotation.Nullable;
-import java.util.Iterator;
 import java.util.OptionalInt;
 
 public class ThrowableBlockEntity extends ThrowableProjectile implements IEntityAdditionalSpawnData {
@@ -54,7 +54,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
     }
 
     public ThrowableBlockEntity(double x, double y, double z, LivingEntity livingEntityIn) {
-        super(MBEntityType.THROWABLE_BLOCK, x, y, z, livingEntityIn.level);
+        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), x, y, z, livingEntityIn.level);
         this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
         this.setOwner(livingEntityIn);
         this.ownerType = livingEntityIn.getType();
@@ -94,9 +94,10 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
     }
 
     public ThrowableBlockEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
-        this(MBEntityType.THROWABLE_BLOCK, worldIn);
+        this(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), worldIn);
     }
 
+    @Override
     protected void defineSynchedData() {
         this.entityData.define(OWNER_ENTITY_ID, OptionalInt.empty());
         this.entityData.define(HELD, false);
@@ -119,6 +120,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
         this.entityData.set(HELD, held);
     }
 
+    @Override
     public void setOwner(Entity entityIn) {
         super.setOwner(entityIn);
         if (entityIn != null) {
@@ -127,26 +129,31 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     protected float getGravity() {
         if (this.ownerType == EntityType.PLAYER) {
             return 0.04F;
         } else {
-            return this.ownerType == MBEntityType.MUTANT_SNOW_GOLEM ? 0.06F : 0.01F;
+            return this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get() ? 0.06F : 0.01F;
         }
     }
 
-    protected boolean isMovementNoisy() {
-        return false;
+    @Override
+    protected Entity.MovementEmission getMovementEmission() {
+        return MovementEmission.EVENTS;
     }
 
+    @Override
     public boolean isPickable() {
-        return this.isAlive() && this.ownerType != MBEntityType.MUTANT_SNOW_GOLEM;
+        return this.isAlive() && this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get();
     }
 
+    @Override
     public boolean isPushable() {
         return this.isHeld() && this.isAlive();
     }
 
+    @Override
     public void push(Entity entityIn) {
         if (entityIn != this.getOwner()) {
             super.push(entityIn);
@@ -154,6 +161,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     public void handleEntityEvent(byte id) {
         if (id == 3) {
             for(int i = 0; i < 60; ++i) {
@@ -169,6 +177,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     public void tick() {
         if (this.isHeld()) {
             if (!this.level.isClientSide) {
@@ -197,7 +206,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
                 float offset = 0.6F;
                 this.setDeltaMovement(x * (double)offset, y * (double)offset, z * (double)offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level.isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity)thrower).isHolding(MBItems.ENDERSOUL_HAND))) {
+                if (!this.level.isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity)thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
                     this.setHeld(false);
                 }
             }
@@ -207,19 +216,21 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     protected boolean canHitEntity(Entity entity) {
         if (!super.canHitEntity(entity)) {
             return false;
         } else {
-            return this.ownerType != MBEntityType.MUTANT_SNOW_GOLEM || MutantSnowGolemEntity.canHarm(this.getOwner(), entity);
+            return this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get() || MutantSnowGolemEntity.canHarm(this.getOwner(), entity);
         }
     }
 
+    @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (itemStack.getItem() != MBItems.ENDERSOUL_HAND) {
+        } else if (itemStack.getItem() != ModRegistry.ENDERSOUL_HAND_ITEM.get()) {
             return InteractionResult.PASS;
         } else if (this.isHeld()) {
             if (this.getOwner() == player) {
@@ -252,16 +263,15 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
         this.shoot((double)(-Mth.sin(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f), (double)(-Mth.sin(this.getXRot() / 180.0F * 3.1415927F) * f), (double)(Mth.cos(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f), 1.4F, 1.0F);
     }
 
+    @Override
     protected void onHit(HitResult result) {
         Entity thrower = this.getOwner();
         LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity)thrower : null;
-        if (this.ownerType == MBEntityType.MUTANT_SNOW_GOLEM) {
-            Iterator var4 = this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity).iterator();
+        if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
 
-            while(var4.hasNext()) {
-                Mob mobEntity = (Mob)var4.next();
+            for (Mob mobEntity : this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
-                    mobEntity.hurt(DamageSource.indirectMobAttack(this, livingEntity), 4.0F + (float)this.random.nextInt(3));
+                    mobEntity.hurt(DamageSource.indirectMobAttack(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
                 }
             }
 
@@ -321,6 +331,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.put("BlockState", NbtUtils.writeBlockState(this.blockState));
@@ -331,6 +342,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.setHeld(compound.getBoolean("Held"));
@@ -344,16 +356,19 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements IEntity
 
     }
 
+    @Override
     public void writeSpawnData(FriendlyByteBuf buffer) {
         buffer.writeVarInt(Block.getId(this.blockState));
         buffer.writeUtf(this.ownerType == null ? "" : Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
     }
 
+    @Override
     public void readSpawnData(FriendlyByteBuf additionalData) {
         this.blockState = Block.stateById(additionalData.readVarInt());
         this.ownerType = EntityType.byString(additionalData.readUtf(32767)).orElse(null);
     }
 
+    @Override
     public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }

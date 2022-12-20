@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.entity;
 
+import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -28,8 +29,8 @@ import java.lang.ref.WeakReference;
 
 public class BodyPartEntity extends Entity {
     private static final EntityDataAccessor<Byte> PART;
-    private boolean yawPositive;
-    private boolean pitchPositive;
+    private final boolean yawPositive;
+    private final boolean pitchPositive;
     private WeakReference<Mob> owner;
     private double velocityX;
     private double velocityY;
@@ -47,46 +48,52 @@ public class BodyPartEntity extends Entity {
     }
 
     public BodyPartEntity(Level world, Mob owner, int part) {
-        this(MBEntityType.BODY_PART, world);
-        this.owner = new WeakReference(owner);
+        this(ModRegistry.BODY_PART_ENTITY_TYPE.get(), world);
+        this.owner = new WeakReference<>(owner);
         this.setPart(part);
         this.setPos(owner.getX(), owner.getY() + (double)(3.2F * (0.25F + this.random.nextFloat() * 0.5F)), owner.getZ());
         this.setRemainingFireTicks(owner.getRemainingFireTicks());
     }
 
     public BodyPartEntity(PlayMessages.SpawnEntity packet, Level world) {
-        this(MBEntityType.BODY_PART, world);
+        this(ModRegistry.BODY_PART_ENTITY_TYPE.get(), world);
     }
 
+    @Override
     protected void defineSynchedData() {
         this.entityData.define(PART, (byte)0);
     }
 
     public int getPart() {
-        return (Byte)this.entityData.get(PART);
+        return this.entityData.get(PART);
     }
 
     private void setPart(int id) {
         this.entityData.set(PART, (byte)id);
     }
 
+    @Override
     public ItemStack getPickedResult(HitResult target) {
         return new ItemStack(this.getItemByPart());
     }
 
-    protected boolean isMovementNoisy() {
-        return false;
+    @Override
+    protected Entity.MovementEmission getMovementEmission() {
+        return MovementEmission.EVENTS;
     }
 
+    @Override
     public boolean isPickable() {
         return this.isAlive();
     }
 
+    @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
         this.setPos(x, y, z);
         this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
 
+    @Override
     public void lerpMotion(double x, double y, double z) {
         this.velocityX = x;
         this.velocityY = y;
@@ -94,6 +101,7 @@ public class BodyPartEntity extends Entity {
         this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
 
+    @Override
     public void tick() {
         super.tick();
         if (!this.isNoGravity()) {
@@ -111,7 +119,7 @@ public class BodyPartEntity extends Entity {
             this.setXRot(this.getXRot() + 15.0F * (float)(this.pitchPositive ? 1 : -1));
 
             for (Entity entity : this.level.getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(DamageSource.thrown(this, (Entity) (this.owner != null ? (Entity) this.owner.get() : this)), 4.0F + (float) this.random.nextInt(4))) {
+                if (entity.hurt(DamageSource.thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
                     entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
                 }
             }
@@ -124,11 +132,12 @@ public class BodyPartEntity extends Entity {
         }
 
         if (!this.level.isClientSide && this.despawnTimer >= this.getMaxAge()) {
-            this.remove();
+            this.discard();
         }
 
     }
 
+    @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             this.spawnAtLocation(this.getItemByPart()).setNoPickUpDelay();
@@ -139,9 +148,10 @@ public class BodyPartEntity extends Entity {
     }
 
     private boolean canHarm(Entity entity) {
-        return entity.isPickable() && entity.getType() != MBEntityType.MUTANT_SKELETON;
+        return entity.isPickable() && entity.getType() != ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get();
     }
 
+    @Override
     protected Component getTypeName() {
         return Component.translatable(this.getItemByPart().getDescriptionId());
     }
@@ -149,15 +159,15 @@ public class BodyPartEntity extends Entity {
     public Item getItemByPart() {
         int part = this.getPart();
         if (part == 0) {
-            return MBItems.MUTANT_SKELETON_PELVIS;
+            return ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.get();
         } else if (part >= 1 && part < 19) {
-            return MBItems.MUTANT_SKELETON_RIB;
+            return ModRegistry.MUTANT_SKELETON_RIB_ITEM.get();
         } else if (part == 19) {
-            return MBItems.MUTANT_SKELETON_SKULL;
+            return ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get();
         } else if (part >= 21 && part < 29) {
-            return MBItems.MUTANT_SKELETON_LIMB;
+            return ModRegistry.MUTANT_SKELETON_LIMB_ITEM.get();
         } else {
-            return part != 29 && part != 30 ? Items.AIR : MBItems.MUTANT_SKELETON_SHOULDER_PAD;
+            return part != 29 && part != 30 ? Items.AIR : ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.get();
         }
     }
 
@@ -165,16 +175,19 @@ public class BodyPartEntity extends Entity {
         return 6000;
     }
 
+    @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
         compound.putByte("Part", (byte)this.getPart());
         compound.putShort("DespawnTimer", (short)this.despawnTimer);
     }
 
+    @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         this.setPart(compound.getByte("Part"));
         this.despawnTimer = compound.getShort("DespawnTimer");
     }
 
+    @Override
     public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }

@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.entity.ai.goal.MBMeleeAttackGoal;
 import fuzs.mutantmonsters.entity.ai.goal.OwnerTargetGoal;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,7 +52,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -138,7 +138,8 @@ public class SpiderPigEntity extends TamableAnimal implements PlayerRideableJump
         return TEMPTATION_ITEMS.test(stack);
     }
 
-    public boolean causeFallDamage(float distance, float damageMultiplier) {
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
         return false;
     }
 
@@ -454,7 +455,7 @@ public class SpiderPigEntity extends TamableAnimal implements PlayerRideableJump
         }
 
         if (isPigOrSpider(livingEntity)) {
-            EntityUtil.convertMobWithNBT(livingEntity, MBEntityType.SPIDER_PIG, false);
+            EntityUtil.convertMobWithNBT(livingEntity, ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), false);
         }
 
     }
@@ -482,7 +483,7 @@ public class SpiderPigEntity extends TamableAnimal implements PlayerRideableJump
         if (this.random.nextInt(20) == 0) {
             return EntityType.PIG.create(serverWorld);
         } else {
-            SpiderPigEntity spiderPig = (SpiderPigEntity)MBEntityType.SPIDER_PIG.create(serverWorld);
+            SpiderPigEntity spiderPig = ModRegistry.SPIDER_PIG_ENTITY_TYPE.get().create(serverWorld);
             UUID uuid = this.getOwnerUUID();
             if (uuid != null) {
                 spiderPig.setOwnerUUID(uuid);
@@ -506,10 +507,8 @@ public class SpiderPigEntity extends TamableAnimal implements PlayerRideableJump
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
         if (!this.level.isClientSide && !this.webList.isEmpty()) {
-            Iterator var1 = this.webList.iterator();
 
-            while(var1.hasNext()) {
-                WebPos webPos = (WebPos)var1.next();
+            for (WebPos webPos : this.webList) {
                 this.removeWeb(webPos);
             }
         }
@@ -554,17 +553,17 @@ public class SpiderPigEntity extends TamableAnimal implements PlayerRideableJump
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return MBSoundEvents.ENTITY_SPIDER_PIG_AMBIENT;
+        return ModRegistry.ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return MBSoundEvents.ENTITY_SPIDER_PIG_HURT;
+        return ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return MBSoundEvents.ENTITY_SPIDER_PIG_DEATH;
+        return ModRegistry.ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT.get();
     }
 
     @Override
