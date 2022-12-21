@@ -50,5 +50,6 @@ public class MutantMonstersClient implements ClientModConstructor {
     public void onRegisterLayerDefinitions(LayerDefinitionsContext context) {
         context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_HAND_LEFT, () -> EndersoulHandModel.createBodyLayer(false));
         context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_HAND_RIGHT, () -> EndersoulHandModel.createBodyLayer(true));
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SKULL, ClientModRegistry::createSkullModelLayer);
     }
 }
