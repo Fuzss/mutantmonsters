@@ -25,8 +25,10 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
         super(context, entityModelIn, shadowSizeIn);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    @Override
     public void render(T entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        if (!MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn))) {
+        if (!MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn))) {
             matrixStackIn.pushPose();
             this.model.attackTime = this.getAttackAnim(entityIn, partialTicks);
             boolean shouldSit = entityIn.isPassenger() && entityIn.getVehicle().shouldRiderSit();

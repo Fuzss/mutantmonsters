@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 public class EndersoulLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.prefix("textures/item/endersoul.png");
+    public static final ResourceLocation TEXTURE = MutantMonsters.prefix("textures/item/endersoul.png");
 
     public EndersoulLayer(RenderLayerParent<T, M> entityRendererIn) {
         super(entityRendererIn);

@@ -6,20 +6,72 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
-import fuzs.mutantmonsters.client.renderer.entity.model.EndersoulHandModel;
+import fuzs.mutantmonsters.client.renderer.entity.*;
+import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionShoulderLayer;
+import fuzs.mutantmonsters.client.renderer.entity.model.*;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.client.core.ClientModConstructor;
 import fuzs.puzzleslib.client.renderer.DynamicBuiltinModelItemRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EndermanModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class MutantMonstersClient implements ClientModConstructor {
+
+    @Override
+    public void onRegisterEntityRenderers(EntityRenderersContext context) {
+        context.registerEntityRenderer(ModRegistry.BODY_PART_ENTITY_TYPE.get(), BodyPartRenderer::new);
+        context.registerEntityRenderer(ModRegistry.CHEMICAL_X_ENTITY_TYPE.get(), ThrownItemRenderer::new);
+        context.registerEntityRenderer(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), CreeperMinionRenderer::new);
+        context.registerEntityRenderer(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), CreeperMinionEggRenderer::new);
+        context.registerEntityRenderer(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), EndersoulCloneRenderer::new);
+        context.registerEntityRenderer(ModRegistry.ENDERSOUL_FRAGMENT_ENTITY_TYPE.get(), EndersoulFragmentRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), MutantArrowRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), MutantCreeperRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), MutantEndermanRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), MutantSkeletonRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get(), MutantSnowGolemRenderer::new);
+        context.registerEntityRenderer(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), MutantZombieRenderer::new);
+        context.registerEntityRenderer(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.get(), context1 -> {
+            return new EntityRenderer<Entity>(context1) {
+
+                @Override
+                public ResourceLocation getTextureLocation(Entity entity) {
+                    return null;
+                }
+            };
+        });
+        context.registerEntityRenderer(ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), SpiderPigRenderer::new);
+        context.registerEntityRenderer(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), ThrowableBlockRenderer::new);
+    }
+
+    @Override
+    public void onRegisterBlockEntityRenderers(BlockEntityRenderersContext context) {
+        context.registerBlockEntityRenderer(ModRegistry.SKULL_BLOCK_ENTITY_TYPE.get(), SkullBlockRenderer::new);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onRegisterLivingEntityRenderLayers(LivingEntityRenderLayersContext context) {
+        context.registerRenderLayer(EntityType.PLAYER, (renderLayerParent, context1) -> {
+            return new CreeperMinionShoulderLayer<>((RenderLayerParent<Player, PlayerModel<Player>>) renderLayerParent, context1.getModelSet());
+        });
+    }
 
     @Override
     public void onRegisterBuiltinModelItemRenderers(BuiltinModelItemRendererContext context) {
@@ -48,8 +100,27 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterLayerDefinitions(LayerDefinitionsContext context) {
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SKULL, ClientModRegistry::createSkullModelLayer);
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION_EGG, () -> CreeperMinionEggModel.createBodyLayer(new CubeDeformation(0.0F)));
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION_EGG_ARMOR, () -> CreeperMinionEggModel.createBodyLayer(new CubeDeformation(1.0F)));
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION, () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(0.0F)));
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION_ARMOR, () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(2.0F)));
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION_SHOULDER, () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(0.0F)));
+        context.registerLayerDefinition(ClientModRegistry.CREEPER_MINION_SHOULDER_ARMOR, () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(2.0F)));
+        context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_CLONE, EndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_FRAGMENT, EndersoulFragmentModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_HAND_LEFT, () -> EndersoulHandModel.createBodyLayer(false));
         context.registerLayerDefinition(ClientModRegistry.ENDER_SOUL_HAND_RIGHT, () -> EndersoulHandModel.createBodyLayer(true));
-        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SKULL, ClientModRegistry::createSkullModelLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_ARROW, MutantArrowModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_CREEPER, () -> MutantCreeperModel.createBodyLayer(new CubeDeformation(0.0F)));
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_CREEPER_ARMOR, () -> MutantCreeperModel.createBodyLayer(new CubeDeformation(2.0F)));
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_CROSSBOW, MutantCrossbowModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_ENDERMAN, MutantEndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.ENDERMAN_CLONE, EndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON, MutantSkeletonModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART, MutantSkeletonPartModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM, MutantSnowGolemModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.SPIDER_PIG, SpiderPigModel::createBodyLayer);
     }
 }

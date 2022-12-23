@@ -6,6 +6,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 public class CreeperMinionModel extends HierarchicalModel<CreeperMinionEntity> {
     private final ModelPart root;
@@ -44,7 +45,7 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinionEntity> {
     }
 
     @Override
-    public void setupAnim(CreeperMinionEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(@Nullable CreeperMinionEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         limbSwing *= 3.0F;
         this.head.yRot = netHeadYaw * 0.017453292F;
         this.head.xRot = headPitch * 0.017453292F;
@@ -58,7 +59,7 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinionEntity> {
         this.leg2.setPos(2.0F, 18.0F, 4.0F);
         this.leg3.setPos(-2.0F, 18.0F, -4.0F);
         this.leg4.setPos(2.0F, 18.0F, -4.0F);
-        if (entity.isInSittingPose()) {
+        if (entity == null || entity.isInSittingPose()) {
             this.head.y += 6.0F;
             this.body.y += 6.0F;
             this.leg1.y += 4.0F;
