@@ -23,11 +23,13 @@ public interface IAnimatedEntity extends IEntityAdditionalSpawnData {
         return this.getAnimation() != Animation.NONE;
     }
 
+    @Override
     default void writeSpawnData(FriendlyByteBuf buffer) {
         buffer.writeInt(ArrayUtils.indexOf(this.getAnimations(), this.getAnimation()));
         buffer.writeInt(this.getAnimationTick());
     }
 
+    @Override
     default void readSpawnData(FriendlyByteBuf additionalData) {
         int animationId = additionalData.readInt();
         this.setAnimation(animationId < 0 ? Animation.NONE : this.getAnimations()[animationId]);
@@ -36,11 +38,11 @@ public interface IAnimatedEntity extends IEntityAdditionalSpawnData {
 
     static <T extends Entity & IAnimatedEntity> void sendAnimationPacket(T entity, Animation animation) {
         if (!entity.level.isClientSide) {
-            ((IAnimatedEntity)entity).setAnimation(animation);
-            ((IAnimatedEntity)entity).setAnimationTick(0);
+            entity.setAnimation(animation);
+            entity.setAnimationTick(0);
             MBPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> {
                 return entity;
-            }), new AnimationPacket(entity.getId(), ArrayUtils.indexOf(((IAnimatedEntity)entity).getAnimations(), animation)));
+            }), new AnimationPacket(entity.getId(), ArrayUtils.indexOf(entity.getAnimations(), animation)));
         }
 
     }

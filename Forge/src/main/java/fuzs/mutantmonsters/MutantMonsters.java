@@ -60,4 +60,8 @@ public class MutantMonsters implements ModConstructor {
     public static ResourceLocation prefix(String name) {
         return new ResourceLocation(MOD_ID, name);
     }
+
+    public static ResourceLocation getEntityTexture(String name) {
+        return prefix("textures/entity/" + name + ".png");
+    }
 }

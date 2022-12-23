@@ -12,12 +12,9 @@ public class Animator {
     private int prevTempTick;
     private boolean correctAnim;
     private IAnimatedEntity animEntity;
-    private final Map<ModelPart, Transform> transformMap = new HashMap();
-    private final Map<ModelPart, Transform> prevTransformMap = new HashMap();
+    private final Map<ModelPart, Transform> transformMap = new HashMap<>();
+    private final Map<ModelPart, Transform> prevTransformMap = new HashMap<>();
     private float partialTick;
-
-    public Animator() {
-    }
 
     public IAnimatedEntity getEntity() {
         return this.animEntity;
@@ -135,11 +132,8 @@ public class Animator {
     }
 
     public static void resetAngles(ModelPart... boxes) {
-        ModelPart[] var1 = boxes;
-        int var2 = boxes.length;
 
-        for(int var3 = 0; var3 < var2; ++var3) {
-            ModelPart box = var1[var3];
+        for (ModelPart box : boxes) {
             resetAngles(box);
         }
 
