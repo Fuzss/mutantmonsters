@@ -27,7 +27,9 @@ public class ClientModRegistry {
     public static final ModelLayerLocation MUTANT_ENDERMAN = REGISTRY.register("mutant_enderman");
     public static final ModelLayerLocation ENDERMAN_CLONE = REGISTRY.register("enderman_clone");
     public static final ModelLayerLocation MUTANT_SKELETON = REGISTRY.register("mutant_skeleton");
+    public static final ModelLayerLocation MUTANT_SKELETON_SPINE = REGISTRY.register("mutant_skeleton_spine");
     public static final ModelLayerLocation MUTANT_SKELETON_PART = REGISTRY.register("mutant_skeleton_part");
+    public static final ModelLayerLocation MUTANT_SKELETON_PART_SPINE = REGISTRY.register("mutant_skeleton_part_spine");
     public static final ModelLayerLocation MUTANT_SNOW_GOLEM = REGISTRY.register("mutant_snow_golem");
     public static final ModelLayerLocation MUTANT_ZOMBIE = REGISTRY.register("mutant_zombie");
     public static final ModelLayerLocation SPIDER_PIG = REGISTRY.register("spider_pig");

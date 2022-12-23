@@ -18,7 +18,7 @@ public class BodyPartRenderer extends EntityRenderer<BodyPartEntity> {
 
     public BodyPartRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.partModel = new MutantSkeletonPartModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON_PART));
+        this.partModel = new MutantSkeletonPartModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON_PART), context.bakeLayer(ClientModRegistry.MUTANT_SKELETON_PART_SPINE));
     }
 
     @Override

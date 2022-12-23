@@ -1,8 +1,8 @@
 package fuzs.mutantmonsters.util;
 
-import com.mojang.math.Vector3d;
-import fuzs.mutantmonsters.MutantMonsters;
+import com.google.common.collect.ImmutableMap;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.mixin.accessor.RavagerAccessor;
 import fuzs.mutantmonsters.packet.MBPacketHandler;
 import fuzs.mutantmonsters.packet.SpawnParticlePacket;
 import net.minecraft.core.BlockPos;
@@ -28,8 +28,8 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Ravager;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -37,20 +37,16 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Map;
 
-public class EntityUtil {
-    private static final Field STUN_TICK = ObfuscationReflectionHelper.findField(Ravager.class, "field_213692_bA");
-    private static final Method GET_SKULL_DROP = ObfuscationReflectionHelper.findMethod(Zombie.class, "func_190732_dj", new Class[0]);
+public final class EntityUtil {
+    private static final Map<EntityType<?>, Item> VANILLA_SKULLS_MAP = ImmutableMap.of(EntityType.CREEPER, Items.CREEPER_HEAD, EntityType.ZOMBIE, Items.ZOMBIE_HEAD, EntityType.SKELETON, Items.SKELETON_SKULL, EntityType.WITHER_SKELETON, Items.WITHER_SKELETON_SKULL, EntityType.ENDER_DRAGON, Items.DRAGON_HEAD);
 
-    public EntityUtil() {
+    private EntityUtil() {
+
     }
 
     public static float getHeadAngle(LivingEntity livingEntity, double x, double z) {
@@ -66,10 +62,8 @@ public class EntityUtil {
             areaeffectcloudentity.setWaitTime(10);
             areaeffectcloudentity.setDuration(areaeffectcloudentity.getDuration() / 2);
             areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / (float)areaeffectcloudentity.getDuration());
-            Iterator var3 = collection.iterator();
 
-            while(var3.hasNext()) {
-                MobEffectInstance effectinstance = (MobEffectInstance)var3.next();
+            for (MobEffectInstance effectinstance : collection) {
                 areaeffectcloudentity.addEffect(new MobEffectInstance(effectinstance));
             }
 
@@ -80,14 +74,10 @@ public class EntityUtil {
 
     public static void stunRavager(LivingEntity livingEntity) {
         if (livingEntity instanceof Ravager) {
-            try {
-                if (STUN_TICK.getInt(livingEntity) == 0) {
-                    STUN_TICK.setInt(livingEntity, 40);
-                    livingEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-                    livingEntity.level.broadcastEntityEvent(livingEntity, (byte)39);
-                }
-            } catch (IllegalAccessException | IllegalArgumentException var2) {
-                MutantMonsters.LOGGER.warn("Failed to access ravager stunTick", var2);
+            if (((RavagerAccessor) livingEntity).mutantmonsters$getStunnedTick() == 0) {
+                ((RavagerAccessor) livingEntity).mutantmonsters$setStunnedTick(40);
+                livingEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
+                livingEntity.level.broadcastEntityEvent(livingEntity, (byte)39);
             }
         }
 
@@ -276,20 +266,8 @@ public class EntityUtil {
         return entity instanceof LivingEntity ? 1.0 - ((LivingEntity)entity).getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 1.0;
     }
 
-    public static ItemStack getSkullDrop(LivingEntity livingEntity) {
-        if (livingEntity instanceof Zombie) {
-            try {
-                return (ItemStack)GET_SKULL_DROP.invoke(livingEntity);
-            } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException var2) {
-                MutantMonsters.LOGGER.warn("Failed to access skull drop from zombie", var2);
-                return livingEntity.getType() == EntityType.ZOMBIE ? new ItemStack(Items.ZOMBIE_HEAD) : ItemStack.EMPTY;
-            }
-        } else if (livingEntity.getType() == EntityType.CREEPER) {
-            return new ItemStack(Items.CREEPER_HEAD);
-        } else if (livingEntity.getType() == EntityType.SKELETON) {
-            return new ItemStack(Items.SKELETON_SKULL);
-        } else {
-            return livingEntity.getType() == EntityType.WITHER_SKELETON ? new ItemStack(Items.WITHER_SKELETON_SKULL) : ItemStack.EMPTY;
-        }
+    public static ItemStack getSkullDrop(EntityType<?> entityType) {
+        if (!VANILLA_SKULLS_MAP.containsKey(entityType)) return ItemStack.EMPTY;
+        return new ItemStack(VANILLA_SKULLS_MAP.get(entityType));
     }
 }

@@ -30,6 +30,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class MutantMonstersClient implements ClientModConstructor {
 
@@ -78,16 +79,25 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), new DynamicBuiltinModelItemRenderer() {
             private static final ResourceLocation ENDER_SOUL_HAND_TEXTURE = MutantMonsters.prefix("textures/item/endersoul_hand_model.png");
 
-            private final EndersoulHandModel enderSoulHandModel = new EndersoulHandModel(Minecraft.getInstance().getEntityModels().bakeLayer(ClientModRegistry.ENDER_SOUL_HAND_RIGHT), true);
+            private final Minecraft minecraft = Minecraft.getInstance();
+            @Nullable
+            private EndersoulHandModel enderSoulHandModel;
 
             @Override
             public void renderByItem(ItemStack stack, ItemTransforms.TransformType mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
                 matrices.pushPose();
-                float ageInTicks = (float) Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getFrameTime();
-                this.enderSoulHandModel.setAngles();
+                float ageInTicks = (float) this.minecraft.player.tickCount + this.minecraft.getFrameTime();
+                this.getEnderSoulHandModel().setAngles();
                 VertexConsumer ivertexbuilder = ItemRenderer.getFoilBufferDirect(vertexConsumers, RenderType.energySwirl(ENDER_SOUL_HAND_TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F), true, stack.hasFoil());
-                this.enderSoulHandModel.renderToBuffer(matrices, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
+                this.getEnderSoulHandModel().renderToBuffer(matrices, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
                 matrices.popPose();
+            }
+
+            private EndersoulHandModel getEnderSoulHandModel() {
+                if (this.enderSoulHandModel == null) {
+                    this.enderSoulHandModel = new EndersoulHandModel(this.minecraft.getEntityModels().bakeLayer(ClientModRegistry.ENDER_SOUL_HAND_RIGHT), true);
+                }
+                return this.enderSoulHandModel;
             }
         });
     }
@@ -118,7 +128,9 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ClientModRegistry.MUTANT_ENDERMAN, MutantEndermanModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.ENDERMAN_CLONE, EndermanModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON, MutantSkeletonModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(false));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART, MutantSkeletonPartModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(true));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM, MutantSnowGolemModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.SPIDER_PIG, SpiderPigModel::createBodyLayer);

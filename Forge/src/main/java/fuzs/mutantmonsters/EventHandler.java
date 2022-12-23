@@ -116,7 +116,7 @@ public class EventHandler {
         }
 
         if ((trueSource instanceof MutantCreeperEntity && ((MutantCreeperEntity)trueSource).isCharged() || trueSource instanceof CreeperMinionEntity && ((CreeperMinionEntity)trueSource).isCharged()) && event.getSource().isExplosion()) {
-            ItemStack itemStack = EntityUtil.getSkullDrop(event.getEntity());
+            ItemStack itemStack = EntityUtil.getSkullDrop(event.getEntity().getType());
             if (!itemStack.isEmpty()) {
                 event.getDrops().add(new ItemEntity(trueSource.level, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), itemStack));
             }

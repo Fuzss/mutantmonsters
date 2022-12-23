@@ -742,7 +742,7 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonEntity> {
         this.partialTick = partialTick;
     }
 
-    static class Spine {
+    public static class Spine {
         public final ModelPart middle;
         public final ModelPart[] side1 = new ModelPart[3];
         public final ModelPart[] side2 = new ModelPart[3];
