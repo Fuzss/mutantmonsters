@@ -43,7 +43,7 @@
 	"gui.mutantbeasts.creeper_minion_tracker.show_name": "Always Show Name",
 	"gui.mutantbeasts.creeper_minion_tracker.destroys_blocks": "Destroys Blocks",
 	"gui.mutantbeasts.creeper_minion_tracker.ride_on_shoulder": "Ride On Shoulder",
-	"itemGroup.mutantbeasts": "Mutant Beasts",
+	"itemGroup.mutantbeasts.main": "Mutant Beasts",
 	"item.mutantbeasts.creeper_minion_spawn_egg": "Creeper Minion Spawn Egg",
 	"item.mutantbeasts.mutant_creeper_spawn_egg": "Mutant Creeper Spawn Egg",
 	"item.mutantbeasts.mutant_enderman_spawn_egg": "Mutant Enderman Spawn Egg",

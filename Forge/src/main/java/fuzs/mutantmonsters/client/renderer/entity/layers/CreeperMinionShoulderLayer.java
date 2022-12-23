@@ -5,11 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.CreeperMinionRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.model.CreeperMinionModel;
+import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -43,7 +43,7 @@ public class CreeperMinionShoulderLayer<T extends Player> extends RenderLayer<T,
             this.model.setupAnim(null, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
             if (compoundnbt.getBoolean("Powered")) {
-                VertexConsumer ivertexbuilder1 = bufferIn.getBuffer(RenderType.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
+                VertexConsumer ivertexbuilder1 = bufferIn.getBuffer(MBRenderType.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
                 this.chargedModel.setupAnim(null, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
                 this.chargedModel.renderToBuffer(matrixStackIn, ivertexbuilder1, packedLightIn, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
             }

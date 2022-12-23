@@ -6,7 +6,9 @@ import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.model.MutantSnowGolemModel;
+import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
 import fuzs.mutantmonsters.entity.mutant.MutantSnowGolemEntity;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -23,11 +25,11 @@ import net.minecraft.world.level.block.Blocks;
 public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, MutantSnowGolemModel> {
     static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_snow_golem/mutant_snow_golem");
     private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonsters.getEntityTexture("mutant_snow_golem/jack_o_lantern");
-    private static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(MutantMonsters.getEntityTexture("mutant_snow_golem/glow"));
+    private static final RenderType GLOW_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.getEntityTexture("mutant_snow_golem/glow"));
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);
-        this.addLayer(new JackOLanternLayer(this));
+        this.addLayer(new JackOLanternLayer(this, context.getModelSet()));
         this.addLayer(new HeldBlockLayer(this, context.getBlockRenderDispatcher()));
     }
 
@@ -82,15 +84,19 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, 
     }
 
     static class JackOLanternLayer extends RenderLayer<MutantSnowGolemEntity, MutantSnowGolemModel> {
-        public JackOLanternLayer(RenderLayerParent<MutantSnowGolemEntity, MutantSnowGolemModel> entityRendererIn) {
+        private final MutantSnowGolemModel headModel;
+
+        public JackOLanternLayer(RenderLayerParent<MutantSnowGolemEntity, MutantSnowGolemModel> entityRendererIn, EntityModelSet entityModelSet) {
             super(entityRendererIn);
+            this.headModel = new MutantSnowGolemModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD)).setRenderHeadOnly();
         }
 
         @Override
         public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantSnowGolemEntity livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
             if (livingEntity.hasJackOLantern()) {
                 if (!livingEntity.isInvisible()) {
-                    renderColoredCutoutModel(this.getParentModel(), MutantSnowGolemRenderer.JACK_O_LANTERN_TEXTURE, matrixStackIn, bufferIn, packedLightIn, livingEntity, 1.0F, 1.0F, 1.0F);
+                    this.getParentModel().copyPropertiesTo(this.headModel);
+                    renderColoredCutoutModel(this.headModel, MutantSnowGolemRenderer.JACK_O_LANTERN_TEXTURE, matrixStackIn, bufferIn, packedLightIn, livingEntity, 1.0F, 1.0F, 1.0F);
                 }
 
                 float green = Math.max(0.0F, 0.8F + 0.05F * Mth.cos(ageInTicks * 0.15F));

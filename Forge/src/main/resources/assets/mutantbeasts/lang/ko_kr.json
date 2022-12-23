@@ -32,7 +32,7 @@
 	"entity.mutantbeasts.skull_spirit": "해골 영혼",
 	"entity.mutantbeasts.spider_pig": "거미-돼지",
 	"entity.mutantbeasts.throwable_block": "투척 블록",
-	"itemGroup.mutantbeasts": "돌연변이 짐승",
+	"itemGroup.mutantbeasts.main": "돌연변이 짐승",
 	"item.mutantbeasts.creeper_minion_spawn_egg": "크리퍼 미니온 스폰 알",
 	"item.mutantbeasts.mutant_creeper_spawn_egg": "돌연변이 크리퍼 스폰 알",
 	"item.mutantbeasts.mutant_enderman_spawn_egg": "돌연변이 엔더맨 스폰 알",

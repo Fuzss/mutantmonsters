@@ -9,6 +9,7 @@ import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionShoulderLayer;
 import fuzs.mutantmonsters.client.renderer.entity.model.*;
+import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.client.core.ClientModConstructor;
 import fuzs.puzzleslib.client.renderer.DynamicBuiltinModelItemRenderer;
@@ -17,7 +18,6 @@ import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -88,7 +88,7 @@ public class MutantMonstersClient implements ClientModConstructor {
                 matrices.pushPose();
                 float ageInTicks = (float) this.minecraft.player.tickCount + this.minecraft.getFrameTime();
                 this.getEnderSoulHandModel().setAngles();
-                VertexConsumer ivertexbuilder = ItemRenderer.getFoilBufferDirect(vertexConsumers, RenderType.energySwirl(ENDER_SOUL_HAND_TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F), true, stack.hasFoil());
+                VertexConsumer ivertexbuilder = ItemRenderer.getFoilBufferDirect(vertexConsumers, MBRenderType.energySwirl(ENDER_SOUL_HAND_TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F), true, stack.hasFoil());
                 this.getEnderSoulHandModel().renderToBuffer(matrices, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
                 matrices.popPose();
             }
@@ -131,7 +131,8 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(false));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART, MutantSkeletonPartModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(true));
-        context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM, MutantSnowGolemModel::createBodyLayer);
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM, () -> MutantSnowGolemModel.createBodyLayer(128, 64));
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD, () -> MutantSnowGolemModel.createBodyLayer(64, 32));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.SPIDER_PIG, SpiderPigModel::createBodyLayer);
     }

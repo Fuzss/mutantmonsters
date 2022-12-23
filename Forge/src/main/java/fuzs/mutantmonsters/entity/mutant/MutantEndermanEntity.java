@@ -832,7 +832,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
         if (this.deathTime >= DEATH_ANIMATION.getDuration()) {
             this.dropExperience();
-            this.kill();
+            this.discard();
         }
 
     }

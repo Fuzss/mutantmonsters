@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.client.renderer.entity.model;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.entity.mutant.MutantSnowGolemEntity;
@@ -9,13 +10,15 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
+import java.util.List;
+
 public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemEntity> {
+    private final List<ModelPart> parts;
     private final ModelPart pelvis;
     private final ModelPart abdomen;
     private final ModelPart chest;
     private final ModelPart head;
     private final ModelPart innerHead;
-    private final ModelPart headCore;
     private final ModelPart arm1;
     private final ModelPart innerArm1;
     private final ModelPart arm2;
@@ -40,26 +43,32 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemEntity> {
         this.chest = this.abdomen.getChild("chest");
         this.head = this.chest.getChild("head");
         this.innerHead = this.head.getChild("inner_head");
-        this.headCore = this.head.getChild("head_core");
         this.arm1 = this.chest.getChild("arm1");
         this.innerArm1 = this.arm1.getChild("inner_arm1");
         this.arm2 = this.chest.getChild("arm2");
         this.innerArm2 = this.arm2.getChild("inner_arm2");
-        this.foreArm1 = this.arm1.getChild("fore_arm1");
+        this.foreArm1 = this.innerArm1.getChild("fore_arm1");
         this.innerForeArm1 = this.foreArm1.getChild("inner_fore_arm1");
-        this.foreArm2 = this.arm2.getChild("fore_arm2");
+        this.foreArm2 = this.innerArm2.getChild("fore_arm2");
         this.innerForeArm2 = this.foreArm2.getChild("inner_fore_arm2");
         this.leg1 = this.pelvis.getChild("leg1");
         this.innerLeg1 = this.leg1.getChild("inner_leg1");
         this.leg2 = this.pelvis.getChild("leg2");
         this.innerLeg2 = this.leg2.getChild("inner_leg2");
-        this.foreLeg1 = this.leg1.getChild("fore_leg1");
+        this.foreLeg1 = this.innerLeg1.getChild("fore_leg1");
         this.innerForeLeg1 = this.foreLeg1.getChild("inner_fore_leg1");
-        this.foreLeg2 = this.leg2.getChild("fore_leg2");
+        this.foreLeg2 = this.innerLeg2.getChild("fore_leg2");
         this.innerForeLeg2 = this.foreLeg2.getChild("inner_fore_leg2");
+        this.parts = modelPart.getAllParts().collect(ImmutableList.toImmutableList());
     }
 
-    public static LayerDefinition createBodyLayer() {
+    public MutantSnowGolemModel setRenderHeadOnly() {
+        this.parts.forEach(t -> t.skipDraw = true);
+        this.head.skipDraw = this.innerHead.skipDraw = false;
+        return this;
+    }
+
+    public static LayerDefinition createBodyLayer(int textureWidth, int textureHeight) {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
 
@@ -69,29 +78,35 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemEntity> {
 
         PartDefinition head = chest.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0), PartPose.offset(0.0F, -12.0F, -2.0F));
         // texture size for inner head is decreased to 64, 32 in original, doesn't really work with new system
-        head.addOrReplaceChild("inner_head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO);
-        head.addOrReplaceChild("head_core", CubeListBuilder.create().texOffs(64, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F).texOffs(80, 46).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition innerHead = head.addOrReplaceChild("inner_head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO);
+        innerHead.addOrReplaceChild("head_core", CubeListBuilder.create().texOffs(64, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F).texOffs(80, 46).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition arm1 = chest.addOrReplaceChild("arm1", CubeListBuilder.create().texOffs(68, 16), PartPose.offset(-9.0F, -11.0F, 0.0F));
-        arm1.addOrReplaceChild("inner_arm1", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
-        PartDefinition foreArm1 = arm1.addOrReplaceChild("fore_arm1", CubeListBuilder.create().texOffs(96, 0), PartPose.offset(0.0F, 10.0F, 0.0F));
+        PartDefinition innerArm1 = arm1.addOrReplaceChild("inner_arm1", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
+        PartDefinition foreArm1 = innerArm1.addOrReplaceChild("fore_arm1", CubeListBuilder.create().texOffs(96, 0), PartPose.offset(0.0F, 10.0F, 0.0F));
         foreArm1.addOrReplaceChild("inner_fore_arm1", CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F), PartPose.ZERO);
 
         PartDefinition arm2 = chest.addOrReplaceChild("arm2", CubeListBuilder.create().texOffs(68, 16).mirror(), PartPose.offset(9.0F, -11.0F, 0.0F));
-        arm2.addOrReplaceChild("inner_arm2", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
-        PartDefinition foreArm2 = arm2.addOrReplaceChild("fore_arm2", CubeListBuilder.create().texOffs(96, 0).mirror(), PartPose.offset(0.0F, 10.0F, 0.0F));
+        PartDefinition innerArm2 = arm2.addOrReplaceChild("inner_arm2", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
+        PartDefinition foreArm2 = innerArm2.addOrReplaceChild("fore_arm2", CubeListBuilder.create().texOffs(96, 0).mirror(), PartPose.offset(0.0F, 10.0F, 0.0F));
         foreArm2.addOrReplaceChild("inner_fore_arm2", CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F), PartPose.ZERO);
 
         PartDefinition leg1 = pelvis.addOrReplaceChild("leg1", CubeListBuilder.create().texOffs(88, 18), PartPose.offset(-4.0F, -1.0F, -3.0F));
-        leg1.addOrReplaceChild("inner_leg1", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
-        PartDefinition foreLeg1 = leg1.addOrReplaceChild("fore_leg1", CubeListBuilder.create().texOffs(88, 32), PartPose.offset(-1.0F, 6.0F, -0.0F));
+        PartDefinition innerLeg1 = leg1.addOrReplaceChild("inner_leg1", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
+        PartDefinition foreLeg1 = innerLeg1.addOrReplaceChild("fore_leg1", CubeListBuilder.create().texOffs(88, 32), PartPose.offset(-1.0F, 6.0F, -0.0F));
         foreLeg1.addOrReplaceChild("inner_fore_leg1", CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
 
         PartDefinition leg2 = pelvis.addOrReplaceChild("leg2", CubeListBuilder.create().texOffs(88, 18).mirror(), PartPose.offset(4.0F, -1.0F, -3.0F));
-        leg2.addOrReplaceChild("inner_leg2", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
-        PartDefinition foreLeg2 = leg2.addOrReplaceChild("fore_leg2", CubeListBuilder.create().texOffs(88, 32).mirror(), PartPose.offset(1.0F, 6.0F, -0.0F));
+        PartDefinition innerLeg2 = leg2.addOrReplaceChild("inner_leg2", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
+        PartDefinition foreLeg2 = innerLeg2.addOrReplaceChild("fore_leg2", CubeListBuilder.create().texOffs(88, 32).mirror(), PartPose.offset(1.0F, 6.0F, -0.0F));
         foreLeg2.addOrReplaceChild("inner_fore_leg2", CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 128, 64);
+        return LayerDefinition.create(mesh, textureWidth, textureHeight);
+    }
+
+    public void copyPropertiesTo(MutantSnowGolemModel otherModel) {
+        for (int i = 0; i < this.parts.size(); i++) {
+            otherModel.parts.get(i).copyFrom(this.parts.get(i));
+        }
     }
 
     @Override

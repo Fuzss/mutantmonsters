@@ -32,7 +32,7 @@
 	"entity.mutantbeasts.skull_spirit": "Espíritu del cráneo",
 	"entity.mutantbeasts.spider_pig": "Cerdo-Araña",
 	"entity.mutantbeasts.throwable_block": "Bloque Lanzable",
-	"itemGroup.mutantbeasts": "Bestias Mutantes",
+	"itemGroup.mutantbeasts.main": "Bestias Mutantes",
 	"item.mutantbeasts.creeper_minion_spawn_egg": "Generador de Creeper-Seguidor",
 	"item.mutantbeasts.mutant_creeper_spawn_egg": "Generador de Creeper Mutante",
 	"item.mutantbeasts.mutant_enderman_spawn_egg": "Generador de Enderman Mutante",

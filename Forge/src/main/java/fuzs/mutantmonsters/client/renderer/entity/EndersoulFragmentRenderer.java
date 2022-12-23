@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.model.EndersoulFragmentModel;
+import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
 import fuzs.mutantmonsters.entity.EndersoulFragmentEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -32,7 +32,7 @@ public class EndersoulFragmentRenderer extends EntityRenderer<EndersoulFragmentE
         matrixStackIn.scale(1.6F, 1.6F, 1.6F);
         float ageInTicks = (float)entityIn.tickCount + partialTicks;
         this.model.setupAnim(entityIn, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        VertexConsumer ivertexbuilder = bufferIn.getBuffer(RenderType.energySwirl(TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F));
+        VertexConsumer ivertexbuilder = bufferIn.getBuffer(MBRenderType.energySwirl(TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F));
         this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
         matrixStackIn.popPose();
     }

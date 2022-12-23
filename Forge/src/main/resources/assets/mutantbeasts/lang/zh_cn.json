@@ -32,7 +32,7 @@
 	"entity.mutantbeasts.skull_spirit": "骷髅灵魂",
 	"entity.mutantbeasts.spider_pig": "蜘蛛猪",
 	"entity.mutantbeasts.throwable_block": "可抛掷的方块",
-	"itemGroup.mutantbeasts": "突变生物",
+	"itemGroup.mutantbeasts.main": "突变生物",
 	"item.mutantbeasts.creeper_minion_spawn_egg": "苦力怕仆从刷怪蛋",
 	"item.mutantbeasts.mutant_creeper_spawn_egg": "苦力怕变异体刷怪蛋",
 	"item.mutantbeasts.mutant_enderman_spawn_egg": "末影人变异体刷怪蛋",
