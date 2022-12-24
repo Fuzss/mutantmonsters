@@ -17,6 +17,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -145,9 +148,13 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ClientModRegistry.MUTANT_ENDERMAN, MutantEndermanModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.ENDERMAN_CLONE, EndermanModel::createBodyLayer);
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON, MutantSkeletonModel::createBodyLayer);
-        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(false));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART, MutantSkeletonPartModel::createBodyLayer);
-        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART_SPINE, () -> MutantSkeletonModel.Spine.createBodyLayer(true));
+        context.registerLayerDefinition(ClientModRegistry.MUTANT_SKELETON_PART_SPINE, () -> {
+            MeshDefinition mesh = new MeshDefinition();
+            PartDefinition root = mesh.getRoot();
+            MutantSkeletonModel.Spine.createSpineLayer(root, -1);
+            return LayerDefinition.create(mesh, 128, 128);
+        });
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM, () -> MutantSnowGolemModel.createBodyLayer(128, 64));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD, () -> MutantSnowGolemModel.createBodyLayer(64, 32));
         context.registerLayerDefinition(ClientModRegistry.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);

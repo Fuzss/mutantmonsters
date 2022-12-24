@@ -22,7 +22,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeletonEntity, Mu
     private static final ResourceLocation CROSSBOW_TEXTURE = MutantMonsters.entityTexture("mutant_crossbow");
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
-        super(context, new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON), context.bakeLayer(ClientModRegistry.MUTANT_SKELETON_SPINE), context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)), 0.6F);
+        super(context, new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON), context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)), 0.6F);
         this.addLayer(new CrossbowLayer(this, context.getModelSet()));
     }
 

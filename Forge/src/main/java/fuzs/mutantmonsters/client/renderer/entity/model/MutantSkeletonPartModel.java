@@ -20,8 +20,8 @@ public class MutantSkeletonPartModel extends Model {
         ImmutableList.Builder<ModelPart> builder = ImmutableList.builder();
         builder.add(modelPart.getChild("pelvis"));
         for (int i = 0; i < 3; ++i) {
-            MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart);
-            spine.setAngles(3.1415927F, i == 1);
+            MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart, "");
+            spine.setAngles(i == 1);
             for (int j = 0; j < 3; j++) {
                 builder.add(spine.side1[i], spine.side2[i]);
             }

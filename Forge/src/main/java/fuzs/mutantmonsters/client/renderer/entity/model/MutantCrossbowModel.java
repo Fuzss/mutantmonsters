@@ -37,7 +37,7 @@ public class MutantCrossbowModel extends Model {
     public static LayerDefinition createBodyLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        PartDefinition armWear = root.addOrReplaceChild("arm_wear", CubeListBuilder.create().texOffs(0, 64).addBox(-2.0F, -3.0F, -2.0F, 4.0F, 6.0F, 4.0F, new CubeDeformation(0.3F)), PartPose.ZERO);
+        PartDefinition armWear = root.addOrReplaceChild("arm_wear", CubeListBuilder.create().texOffs(0, 64).addBox(-2.0F, -3.0F, -2.0F, 4.0F, 6.0F, 4.0F, new CubeDeformation(0.3F)), PartPose.offset(0.0F, 8.0F, 0.0F));
         PartDefinition middle = armWear.addOrReplaceChild("middle", CubeListBuilder.create().texOffs(16, 64).addBox(-2.0F, -2.0F, -3.0F, 4.0F, 4.0F, 6.0F), PartPose.offset(-3.5F, 0.0F, 0.0F));
         PartDefinition middle1 = middle.addOrReplaceChild("middle1", CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F), PartPose.offset(0.0F, 0.6F, -4.0F));
         PartDefinition middle2 = middle.addOrReplaceChild("middle2", CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F), PartPose.offset(0.0F, 0.6F, 4.0F));

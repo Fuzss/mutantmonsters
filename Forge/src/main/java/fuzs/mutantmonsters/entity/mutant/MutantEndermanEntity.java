@@ -601,7 +601,7 @@ public class MutantEndermanEntity extends Monster implements NeutralMob, IAnimat
 
     @Override
     public boolean addEffect(MobEffectInstance effectInstanceIn, @Nullable Entity entity) {
-        return !this.isClone() && super.addEffect(effectInstanceIn);
+        return !this.isClone() && super.addEffect(effectInstanceIn, entity);
     }
 
     private boolean teleportByChance(int chance, @Nullable Entity entity) {

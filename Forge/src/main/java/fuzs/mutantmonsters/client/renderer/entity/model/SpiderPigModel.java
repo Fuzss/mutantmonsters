@@ -124,6 +124,11 @@ public class SpiderPigModel extends AgeableListModel<SpiderPigEntity> {
 
     @Override
     public void setupAnim(SpiderPigEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        this.setAngles();
+        this.animate(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+    }
+
+    private void setAngles() {
         Animator.resetAngles(this.head, this.innerHead, this.body1, this.body2, this.butt);
         Animator.resetAngles(this.frontLeg1, this.innerFrontLeg1, this.lowerFrontLeg1, this.innerLowerFrontLeg1, this.frontLeg2, this.innerFrontLeg2, this.lowerFrontLeg2, this.innerLowerFrontLeg2);
         Animator.resetAngles(this.middleLeg1, this.innerMiddleLeg1, this.lowerMiddleLeg1, this.innerLowerMiddleLeg1, this.middleLeg2, this.innerMiddleLeg2, this.lowerMiddleLeg2, this.innerLowerMiddleLeg2);
@@ -137,9 +142,9 @@ public class SpiderPigModel extends AgeableListModel<SpiderPigEntity> {
         this.innerFrontLeg1.zRot += 2.0943952F;
         this.lowerFrontLeg1.zRot += -1.6534699F;
         this.frontLeg2.xRot += -(this.body1.xRot + this.body2.xRot);
-        ++this.frontLeg2.yRot;
+        this.frontLeg2.yRot += 1.0471976F;
         this.innerFrontLeg2.zRot += -2.0943952F;
-        ++this.lowerFrontLeg2.zRot;
+        this.lowerFrontLeg2.zRot += 1.6534699F;
         this.middleLeg1.xRot += -(this.body1.xRot + this.body2.xRot);
         this.middleLeg1.yRot += -0.31415927F;
         this.innerMiddleLeg1.zRot += 2.0399954F;
@@ -147,7 +152,7 @@ public class SpiderPigModel extends AgeableListModel<SpiderPigEntity> {
         this.middleLeg2.xRot += -(this.body1.xRot + this.body2.xRot);
         this.middleLeg2.yRot += 0.31415927F;
         this.innerMiddleLeg2.zRot += -2.0399954F;
-        ++this.lowerMiddleLeg2.zRot;
+        this.lowerMiddleLeg2.zRot += 1.6534699F;
         this.backLeg1.xRot += -0.3926991F;
         this.innerBackLeg1.zRot += 0.3926991F;
         this.lowerBackLeg1.zRot += -0.3926991F;
@@ -156,6 +161,9 @@ public class SpiderPigModel extends AgeableListModel<SpiderPigEntity> {
         this.innerBackLeg2.zRot += -0.3926991F;
         this.lowerBackLeg2.zRot += 0.3926991F;
         this.innerLowerBackLeg2.xRot += 0.5711987F;
+    }
+
+    private void animate(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         float moveAnim = Mth.sin(limbSwing * 0.9F) * limbSwingAmount;
         float moveAnim1 = Mth.sin(limbSwing * 0.9F + 0.3F) * limbSwingAmount;
         float moveAnim1d = Mth.sin(limbSwing * 0.9F + 0.3F + 0.5F) * limbSwingAmount;
