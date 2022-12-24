@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeperEntity, MutantCreeperModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_creeper");
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_creeper");
 
     public MutantCreeperRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantCreeperModel(context.bakeLayer(ClientModRegistry.MUTANT_CREEPER)), 1.5F);

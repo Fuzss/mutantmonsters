@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombieEntity, MutantZombieModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_zombie");
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_zombie");
 
     public MutantZombieRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantZombieModel(context.bakeLayer(ClientModRegistry.MUTANT_ZOMBIE)), 1.0F);

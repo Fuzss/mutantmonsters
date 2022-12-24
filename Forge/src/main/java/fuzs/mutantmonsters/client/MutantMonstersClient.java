@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
@@ -25,6 +26,8 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -75,9 +78,23 @@ public class MutantMonstersClient implements ClientModConstructor {
     }
 
     @Override
+    public void onRegisterAdditionalModels(AdditionalModelsContext context) {
+        context.registerAdditionalModel(ENDERSOUL_MODEL);
+    }
+
+    public static final ResourceLocation ENDERSOUL_MODEL = new ModelResourceLocation(MutantMonsters.id("endersoul_hand_in_hand"), "inventory");
+
+    public static BakedModel mutantmonsters$getModel(BakedModel bakedModel, ItemStack itemStack, ItemModelShaper itemModelShaper, ResourceLocation model) {
+        if (itemStack.is(ModRegistry.ENDERSOUL_HAND_ITEM.get())) {
+            return itemModelShaper.getModelManager().getModel(model);
+        }
+        return bakedModel;
+    }
+
+    @Override
     public void onRegisterBuiltinModelItemRenderers(BuiltinModelItemRendererContext context) {
         context.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), new DynamicBuiltinModelItemRenderer() {
-            private static final ResourceLocation ENDER_SOUL_HAND_TEXTURE = MutantMonsters.prefix("textures/item/endersoul_hand_model.png");
+            private static final ResourceLocation ENDER_SOUL_HAND_TEXTURE = MutantMonsters.id("textures/item/endersoul_hand_model.png");
 
             private final Minecraft minecraft = Minecraft.getInstance();
             @Nullable

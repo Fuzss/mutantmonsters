@@ -1,21 +1,6 @@
 {
-	"parent": "forge:item/default",
-	"loader": "forge:separate-perspective",
-	"base": {
-		"parent": "mutantbeasts:item/endersoul_hand_gui"
-	},
-	"perspectives": {
-		"first_person_left_hand": {
-			"parent": "mutantbeasts:item/endersoul_hand_model"
-		},
-		"first_person_right_hand": {
-			"parent": "mutantbeasts:item/endersoul_hand_model"
-		},
-		"third_person_left_hand": {
-			"parent": "mutantbeasts:item/endersoul_hand_model"
-		},
-		"third_person_right_hand": {
-			"parent": "mutantbeasts:item/endersoul_hand_model"
-		}
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "mutantbeasts:item/endersoul_hand"
 	}
 }

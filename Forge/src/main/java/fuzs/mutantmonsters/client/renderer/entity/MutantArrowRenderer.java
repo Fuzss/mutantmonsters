@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class MutantArrowRenderer extends EntityRenderer<MutantArrowEntity> {
-    public static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_arrow");
+    public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_arrow");
 
     private final MutantArrowModel model;
 

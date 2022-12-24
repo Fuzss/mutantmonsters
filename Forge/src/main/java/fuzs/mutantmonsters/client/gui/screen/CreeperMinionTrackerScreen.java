@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class CreeperMinionTrackerScreen extends Screen {
-    private static final ResourceLocation TEXTURE = MutantMonsters.prefix("textures/gui/creeper_minion_tracker.png");
+    private static final ResourceLocation TEXTURE = MutantMonsters.id("textures/gui/creeper_minion_tracker.png");
     private final int xSize = 176;
     private final int ySize = 166;
     private int guiX;

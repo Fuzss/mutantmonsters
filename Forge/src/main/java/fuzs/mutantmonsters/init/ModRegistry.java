@@ -121,8 +121,8 @@ public class ModRegistry {
     public static final RegistryReference<SoundEvent> ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.spider_pig.death");
     public static final RegistryReference<SoundEvent> ENTITY_SPIDER_PIG_HURT_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.spider_pig.hurt");
 
-    public static final TagKey<Block> MUTANT_ENDERMAN_HOLABLE = BlockTags.create(MutantMonsters.prefix("mutant_enderman_holdable"));
-    public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE = BlockTags.create(MutantMonsters.prefix("endersoul_hand_holdable"));
+    public static final TagKey<Block> MUTANT_ENDERMAN_HOLABLE = BlockTags.create(MutantMonsters.id("mutant_enderman_holdable"));
+    public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE = BlockTags.create(MutantMonsters.id("endersoul_hand_holdable"));
 
     public static void touch() {
 

@@ -26,7 +26,7 @@ public class MutantMonstersForgeClient {
 
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent evt) {
-        SkullBlockRenderer.SKIN_BY_TYPE.put(MBSkullBlock.Types.MUTANT_SKELETON, MutantMonsters.prefix("textures/entity/mutant_skeleton.png"));
+        SkullBlockRenderer.SKIN_BY_TYPE.put(MBSkullBlock.Types.MUTANT_SKELETON, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
     }
 
     @SubscribeEvent

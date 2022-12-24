@@ -18,8 +18,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class MutantSkeletonRenderer extends MobRenderer<MutantSkeletonEntity, MutantSkeletonModel> {
-    public static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_skeleton");
-    private static final ResourceLocation CROSSBOW_TEXTURE = MutantMonsters.getEntityTexture("mutant_crossbow");
+    public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_skeleton");
+    private static final ResourceLocation CROSSBOW_TEXTURE = MutantMonsters.entityTexture("mutant_crossbow");
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON), context.bakeLayer(ClientModRegistry.MUTANT_SKELETON_SPINE), context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)), 0.6F);

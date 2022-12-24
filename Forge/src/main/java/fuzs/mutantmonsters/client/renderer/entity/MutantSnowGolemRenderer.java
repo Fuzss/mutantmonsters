@@ -23,9 +23,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 
 public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, MutantSnowGolemModel> {
-    static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_snow_golem/mutant_snow_golem");
-    private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonsters.getEntityTexture("mutant_snow_golem/jack_o_lantern");
-    private static final RenderType GLOW_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.getEntityTexture("mutant_snow_golem/glow"));
+    static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/mutant_snow_golem");
+    private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/jack_o_lantern");
+    private static final RenderType GLOW_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.entityTexture("mutant_snow_golem/glow"));
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);

@@ -25,7 +25,7 @@ public enum MBArmorMaterial implements ArmorMaterial {
     private final Supplier<Ingredient> repairMaterial;
 
     MBArmorMaterial(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn, SoundEvent equipSoundIn, float toughness, Supplier<Ingredient> repairMaterialSupplier) {
-        this.name = MutantMonsters.prefix(nameIn).toString();
+        this.name = MutantMonsters.id(nameIn).toString();
         this.maxDamageFactor = maxDamageFactorIn;
         this.damageReductionAmountArray = damageReductionAmountsIn;
         this.enchantability = enchantabilityIn;

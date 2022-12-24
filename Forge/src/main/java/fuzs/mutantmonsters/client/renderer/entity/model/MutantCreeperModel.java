@@ -49,10 +49,10 @@ public class MutantCreeperModel extends EntityModel<MutantCreeperEntity> {
         frontRightLeg.addOrReplaceChild("front_right_fore_leg", CubeListBuilder.create().texOffs(96, 0).addBox(-3.5F, 0.0F, -4.0F, 7.0F, 20.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, -14.0F));
         PartDefinition frontLeftLeg = pelvis.addOrReplaceChild("front_left_leg", CubeListBuilder.create().texOffs(40, 24).mirror().addBox(-3.0F, -4.0F, -14.0F, 6.0F, 4.0F, 14.0F, cubeDeformation), PartPose.offset(-3.0F, 0.0F, 0.0F));
         frontLeftLeg.addOrReplaceChild("front_left_fore_leg", CubeListBuilder.create().texOffs(96, 0).mirror().addBox(-3.5F, 0.0F, -4.0F, 7.0F, 20.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, -14.0F));
-        PartDefinition backLeftLeg = pelvis.addOrReplaceChild("back_left_leg", CubeListBuilder.create().texOffs(0, 44).addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation), PartPose.offset(2.0F, -2.0F, 4.0F));
-        backLeftLeg.addOrReplaceChild("back_left_fore_leg", CubeListBuilder.create().texOffs(0, 44).mirror().addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation), PartPose.offset(-2.0F, -2.0F, 4.0F));
-        PartDefinition backRightLeg = pelvis.addOrReplaceChild("back_right_leg", CubeListBuilder.create().texOffs(80, 28).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, 14.0F));
-        backRightLeg.addOrReplaceChild("back_right_fore_leg", CubeListBuilder.create().texOffs(80, 28).mirror().addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, 14.0F));
+        PartDefinition backRightLeg = pelvis.addOrReplaceChild("back_right_leg", CubeListBuilder.create().texOffs(0, 44).addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation), PartPose.offset(2.0F, -2.0F, 4.0F));
+        backRightLeg.addOrReplaceChild("back_right_fore_leg", CubeListBuilder.create().texOffs(80, 28).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, 14.0F));
+        PartDefinition backLeftLeg = pelvis.addOrReplaceChild("back_left_leg", CubeListBuilder.create().texOffs(0, 44).mirror().addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation), PartPose.offset(-2.0F, -2.0F, 4.0F));
+        backLeftLeg.addOrReplaceChild("back_left_fore_leg", CubeListBuilder.create().texOffs(80, 28).mirror().addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation), PartPose.offset(0.0F, -4.0F, 14.0F));
         return LayerDefinition.create(mesh, 128, 64);
     }
 

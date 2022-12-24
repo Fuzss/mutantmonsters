@@ -11,11 +11,11 @@ import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public class SpiderPigRenderer extends MobRenderer<SpiderPigEntity, SpiderPigModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("spider_pig/spider_pig");
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("spider_pig/spider_pig");
 
     public SpiderPigRenderer(EntityRendererProvider.Context context) {
         super(context, new SpiderPigModel(context.bakeLayer(ClientModRegistry.SPIDER_PIG)), 0.8F);
-        this.addLayer(new SaddleLayer<>(this, this.model, MutantMonsters.getEntityTexture("spider_pig/saddle")));
+        this.addLayer(new SaddleLayer<>(this, this.model, MutantMonsters.entityTexture("spider_pig/saddle")));
     }
 
     @Override

@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEggEntity> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("creeper_minion_egg");
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("creeper_minion_egg");
     private final CreeperMinionEggModel eggModel;
     private final CreeperMinionEggModel chargedModel;
 

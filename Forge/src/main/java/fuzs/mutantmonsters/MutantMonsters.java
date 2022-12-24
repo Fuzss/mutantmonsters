@@ -57,11 +57,11 @@ public class MutantMonsters implements ModConstructor {
         context.registerSpawnPlacement(ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING, Animal::checkAnimalSpawnRules);
     }
 
-    public static ResourceLocation prefix(String name) {
+    public static ResourceLocation id(String name) {
         return new ResourceLocation(MOD_ID, name);
     }
 
-    public static ResourceLocation getEntityTexture(String name) {
-        return prefix("textures/entity/" + name + ".png");
+    public static ResourceLocation entityTexture(String name) {
+        return id("textures/entity/" + name + ".png");
     }
 }

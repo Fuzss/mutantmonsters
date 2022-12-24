@@ -68,7 +68,7 @@ public class SpawnParticlePacket {
 
     void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
-            Optional<Level> optional = LogicalSidedProvider.CLIENTWORLD.get(((NetworkEvent.Context)context.get()).getDirection().getReceptionSide());
+            Optional<Level> optional = LogicalSidedProvider.CLIENTWORLD.get(context.get().getDirection().getReceptionSide());
             optional.ifPresent((world) -> {
                 int i;
                 if (this.particleData == ModRegistry.ENDERSOUL_PARTICLE_TYPE.get()) {
@@ -79,7 +79,7 @@ public class SpawnParticlePacket {
                         double tempX = this.posX + (double)(world.random.nextFloat() - 0.5F) * this.speedX;
                         double tempY = this.posY + (double)(world.random.nextFloat() - 0.5F) * this.speedY + 0.5;
                         double tempZ = this.posZ + (double)(world.random.nextFloat() - 0.5F) * this.speedZ;
-                        world.addAlwaysVisibleParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), true, tempX, tempY, tempZ, (double)f, (double)f1, (double)f2);
+                        world.addAlwaysVisibleParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), true, tempX, tempY, tempZ, f, f1, f2);
                     }
                 } else {
                     for(i = 0; i < this.amount; ++i) {
@@ -92,6 +92,6 @@ public class SpawnParticlePacket {
 
             });
         });
-        ((NetworkEvent.Context)context.get()).setPacketHandled(true);
+        context.get().setPacketHandled(true);
     }
 }

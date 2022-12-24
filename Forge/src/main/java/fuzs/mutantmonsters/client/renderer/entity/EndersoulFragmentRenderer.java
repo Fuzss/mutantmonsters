@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class EndersoulFragmentRenderer extends EntityRenderer<EndersoulFragmentEntity> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("endersoul_fragment");
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("endersoul_fragment");
     private final EndersoulFragmentModel model;
 
     public EndersoulFragmentRenderer(EntityRendererProvider.Context context) {

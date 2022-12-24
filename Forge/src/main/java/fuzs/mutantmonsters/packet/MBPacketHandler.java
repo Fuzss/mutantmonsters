@@ -6,7 +6,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class MBPacketHandler {
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(MutantMonsters.prefix("main"), () -> {
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(MutantMonsters.id("main"), () -> {
         return "1";
     }, "1"::equals, "1"::equals);
 

@@ -26,9 +26,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEndermanEntity, EntityModel<MutantEndermanEntity>> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.getEntityTexture("mutant_enderman/mutant_enderman");
-    private static final ResourceLocation DEATH_TEXTURE = MutantMonsters.getEntityTexture("mutant_enderman/death");
-    private static final RenderType EYES_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.getEntityTexture("mutant_enderman/eyes"));
+    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_enderman/mutant_enderman");
+    private static final ResourceLocation DEATH_TEXTURE = MutantMonsters.entityTexture("mutant_enderman/death");
+    private static final RenderType EYES_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.entityTexture("mutant_enderman/eyes"));
     private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(TEXTURE);
     private final MutantEndermanModel endermanModel;
     private final EndermanModel<MutantEndermanEntity> cloneModel;
