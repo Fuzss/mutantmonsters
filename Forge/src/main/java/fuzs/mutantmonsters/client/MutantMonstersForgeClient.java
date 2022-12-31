@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters.client;
 
 import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.block.MBSkullBlock;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.client.core.ClientFactories;
@@ -25,12 +26,12 @@ public class MutantMonstersForgeClient {
 
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent evt) {
-        SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
+        SkullBlockRenderer.SKIN_BY_TYPE.put(MBSkullBlock.Types.MUTANT_SKELETON, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
     }
 
     @SubscribeEvent
     public static void onCreateSkullModels(final EntityRenderersEvent.CreateSkullModels evt) {
-        evt.registerSkullModel(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, new SkullModel(evt.getEntityModelSet().bakeLayer(ClientModRegistry.MUTANT_SKELETON_SKULL)));
+        evt.registerSkullModel(MBSkullBlock.Types.MUTANT_SKELETON, new SkullModel(evt.getEntityModelSet().bakeLayer(ClientModRegistry.MUTANT_SKELETON_SKULL)));
     }
 
     @SubscribeEvent

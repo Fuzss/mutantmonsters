@@ -1,0 +1,523 @@
+package fuzs.mutantmonsters.entity.mutant;
+
+import fuzs.mutantmonsters.client.animationapi.Animation;
+import fuzs.mutantmonsters.client.animationapi.IAnimatedEntity;
+import fuzs.mutantmonsters.entity.BodyPartEntity;
+import fuzs.mutantmonsters.entity.ai.goal.AnimationGoal;
+import fuzs.mutantmonsters.entity.ai.goal.AvoidDamageGoal;
+import fuzs.mutantmonsters.entity.ai.goal.HurtByNearestTargetGoal;
+import fuzs.mutantmonsters.entity.ai.goal.MBMeleeAttackGoal;
+import fuzs.mutantmonsters.entity.projectile.MutantArrowEntity;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.pathfinding.MBGroundPathNavigator;
+import fuzs.mutantmonsters.util.EntityUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.network.PlayMessages;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
+public class MutantSkeletonEntity extends Monster implements IAnimatedEntity {
+    public static final Animation MELEE_ANIMATION = new Animation(14);
+    public static final Animation CONSTRICT_RIBS_ANIMATION = new Animation(20);
+    public static final Animation SHOOT_ANIMATION = new Animation(32);
+    public static final Animation MULTI_SHOT_ANIMATION = new Animation(30);
+    private static final Animation[] ANIMATIONS;
+    private Animation animation;
+    private int animationTick;
+
+    public MutantSkeletonEntity(EntityType<? extends MutantSkeletonEntity> type, Level worldIn) {
+        super(type, worldIn);
+        this.animation = Animation.NONE;
+        this.maxUpStep = 1.0F;
+        this.xpReward = 30;
+    }
+
+    public MutantSkeletonEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
+        this(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), worldIn);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new MeleeGoal(this));
+        this.goalSelector.addGoal(0, new ShootGoal(this));
+        this.goalSelector.addGoal(0, new MultiShotGoal(this));
+        this.goalSelector.addGoal(0, new ConstrictRibsGoal(this));
+        this.goalSelector.addGoal(1, (new MBMeleeAttackGoal(this, 1.1)).setMaxAttackTick(5));
+        this.goalSelector.addGoal(2, new AvoidDamageGoal(this, 1.0));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this, WitherBoss.class));
+        this.targetSelector.addGoal(1, (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Wolf.class, true));
+    }
+
+    public static AttributeSupplier.Builder registerAttributes() {
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FOLLOW_RANGE, 96.0).add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.75).add(ForgeMod.SWIM_SPEED.get(), 5.0);
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose poseIn, EntityDimensions sizeIn) {
+        return 3.25F;
+    }
+
+    @Override
+    public MobType getMobType() {
+        return MobType.UNDEAD;
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level worldIn) {
+        return new MBGroundPathNavigator(this, worldIn);
+    }
+
+    @Override
+    protected BodyRotationControl createBodyControl() {
+        return super.createBodyControl();
+    }
+
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return 1;
+    }
+
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
+        return false;
+    }
+
+    @Override
+    protected void updateNoActionTime() {
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.isAnimationPlaying()) {
+            ++this.animationTick;
+        }
+
+        if (this.level.isNight() && this.tickCount % 100 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()) {
+            this.heal(2.0F);
+        }
+
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity entityIn) {
+        if (!this.isAnimationPlaying()) {
+            if (this.random.nextInt(4) != 0) {
+                this.animation = MELEE_ANIMATION;
+            } else {
+                this.animation = CONSTRICT_RIBS_ANIMATION;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        return !(source.getEntity() instanceof MutantSkeletonEntity) && super.hurt(source, amount);
+    }
+
+    @Override
+    protected boolean canRide(Entity entityIn) {
+        return false;
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+
+    @Override
+    protected void blockedByShield(LivingEntity livingEntity) {
+        livingEntity.hurtMarked = true;
+    }
+
+    @Override
+    public Animation getAnimation() {
+        return this.animation;
+    }
+
+    @Override
+    public void setAnimation(Animation animation) {
+        this.animation = animation;
+    }
+
+    @Override
+    public Animation[] getAnimations() {
+        return ANIMATIONS;
+    }
+
+    @Override
+    public int getAnimationTick() {
+        return this.animationTick;
+    }
+
+    @Override
+    public void setAnimationTick(int tick) {
+        this.animationTick = tick;
+    }
+
+    @Override
+    public void die(DamageSource cause) {
+        super.die(cause);
+        if (!this.level.isClientSide) {
+
+            for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
+                livingEntity.hurt(DamageSource.mobAttack(this).bypassArmor(), 7.0F);
+            }
+
+            for(int i = 0; i < 18; ++i) {
+                int j = i;
+                if (i >= 3) {
+                    j = i + 1;
+                }
+
+                if (j >= 4) {
+                    ++j;
+                }
+
+                if (j >= 5) {
+                    ++j;
+                }
+
+                if (j >= 6) {
+                    ++j;
+                }
+
+                if (j >= 9) {
+                    ++j;
+                }
+
+                if (j >= 10) {
+                    ++j;
+                }
+
+                if (j >= 11) {
+                    ++j;
+                }
+
+                if (j >= 12) {
+                    ++j;
+                }
+
+                if (j >= 15) {
+                    ++j;
+                }
+
+                if (j >= 16) {
+                    ++j;
+                }
+
+                if (j >= 17) {
+                    ++j;
+                }
+
+                if (j >= 18) {
+                    ++j;
+                }
+
+                if (j >= 20) {
+                    ++j;
+                }
+
+                BodyPartEntity part = new BodyPartEntity(this.level, this, j);
+                part.setDeltaMovement(part.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
+                this.level.addFreshEntity(part);
+            }
+        }
+
+        this.deathTime = 19;
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return ModRegistry.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return ModRegistry.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return ModRegistry.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.get();
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState blockIn) {
+        this.playSound(ModRegistry.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.get(), 0.15F, 1.0F);
+    }
+
+    static {
+        ANIMATIONS = new Animation[]{MELEE_ANIMATION, CONSTRICT_RIBS_ANIMATION, SHOOT_ANIMATION, MULTI_SHOT_ANIMATION};
+    }
+
+    static class MultiShotGoal extends AnimationGoal<MutantSkeletonEntity> {
+        private final List<MutantArrowEntity> shots = new ArrayList<>();
+        private LivingEntity attackTarget;
+
+        public MultiShotGoal(MutantSkeletonEntity mob) {
+            super(mob);
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK, Flag.JUMP));
+        }
+
+        @Override
+        protected Animation getAnimation() {
+            return MutantSkeletonEntity.MULTI_SHOT_ANIMATION;
+        }
+
+        @Override
+        public boolean canUse() {
+            this.attackTarget = this.mob.getTarget();
+            return this.attackTarget != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(this.attackTarget) || this.mob.getVehicle() == this.attackTarget);
+        }
+
+        @Override
+        public void tick() {
+            this.mob.getNavigation().stop();
+            this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
+            if (this.mob.animationTick == 10) {
+                this.mob.stopRiding();
+                double x = this.attackTarget.getX() - this.mob.getX();
+                double z = this.attackTarget.getZ() - this.mob.getZ();
+                float scale = 0.06F + this.mob.random.nextFloat() * 0.03F;
+                if (this.mob.distanceToSqr(this.attackTarget) < 16.0) {
+                    x *= -1.0;
+                    z *= -1.0;
+                    scale = (float)((double)scale * 5.0);
+                }
+
+                this.mob.stuckSpeedMultiplier = Vec3.ZERO;
+                this.mob.setDeltaMovement(x * (double)scale, 1.100000023841858 * (double) this.mob.getBlockJumpFactor(), z * (double)scale);
+            }
+
+            if (this.mob.animationTick == 15) {
+                this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3, 1.0F, 1.0F);
+            }
+
+            if (this.mob.animationTick == 20) {
+                this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+            }
+
+            if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
+                if (!this.shots.isEmpty()) {
+
+                    for (MutantArrowEntity arrowEntity : this.shots) {
+                        this.mob.level.addFreshEntity(arrowEntity);
+                    }
+
+                    this.shots.clear();
+                }
+
+                for(int i = 0; i < 6; ++i) {
+                    MutantArrowEntity shot = new MutantArrowEntity(this.mob.level, this.mob, this.attackTarget);
+                    shot.setSpeed(1.2F - this.mob.random.nextFloat() * 0.1F);
+                    shot.setClones(2);
+                    shot.randomize(3.0F);
+                    shot.setDamage(5 + this.mob.random.nextInt(5));
+                    this.shots.add(shot);
+                }
+
+                this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+            }
+
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.shots.clear();
+            this.attackTarget = null;
+        }
+    }
+
+    static class ShootGoal extends AnimationGoal<MutantSkeletonEntity> {
+        private LivingEntity attackTarget;
+
+        public ShootGoal(MutantSkeletonEntity mob) {
+            super(mob);
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        protected Animation getAnimation() {
+            return MutantSkeletonEntity.SHOOT_ANIMATION;
+        }
+
+        @Override
+        public boolean canUse() {
+            this.attackTarget = this.mob.getTarget();
+            return this.attackTarget != null && !this.mob.isAnimationPlaying() && this.mob.random.nextInt(12) == 0 && this.mob.distanceToSqr(this.attackTarget) > 4.0 && this.mob.hasLineOfSight(this.attackTarget);
+        }
+
+        @Override
+        public void tick() {
+            this.mob.getNavigation().stop();
+            this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
+            if (this.mob.animationTick == 5) {
+                this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_2, 1.0F, 1.0F);
+            }
+
+            if (this.mob.animationTick == 20) {
+                this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+            }
+
+            if (this.mob.animationTick == 26 && this.attackTarget.isAlive()) {
+                MutantArrowEntity arrowEntity = new MutantArrowEntity(this.mob.level, this.mob, this.attackTarget);
+                if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() instanceof EntityDamageSource) {
+                    arrowEntity.randomize((float) this.mob.hurtTime / 2.0F);
+                } else if (!this.mob.hasLineOfSight(this.attackTarget)) {
+                    arrowEntity.randomize(0.5F + this.mob.random.nextFloat());
+                }
+
+                if (this.mob.random.nextInt(4) == 0) {
+                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
+                }
+
+                if (this.mob.random.nextInt(4) == 0) {
+                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
+                }
+
+                if (this.mob.random.nextInt(4) == 0) {
+                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
+                }
+
+                this.mob.level.addFreshEntity(arrowEntity);
+                this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+            }
+
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.attackTarget = null;
+        }
+    }
+
+    static class ConstrictRibsGoal extends AnimationGoal<MutantSkeletonEntity> {
+        private LivingEntity attackTarget;
+
+        public ConstrictRibsGoal(MutantSkeletonEntity mob) {
+            super(mob);
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        protected Animation getAnimation() {
+            return MutantSkeletonEntity.CONSTRICT_RIBS_ANIMATION;
+        }
+
+        @Override
+        public boolean canUse() {
+            this.attackTarget = this.mob.getTarget();
+            return this.attackTarget != null && super.canUse();
+        }
+
+        @Override
+        public void tick() {
+            this.mob.getNavigation().stop();
+            if (this.mob.animationTick < 6) {
+                this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
+            }
+
+            if (this.mob.animationTick == 5) {
+                this.attackTarget.stopRiding();
+            }
+
+            if (this.mob.animationTick == 6) {
+                float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                if (!this.attackTarget.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                    EntityUtil.disableShield(this.attackTarget, 100);
+                }
+
+                double motionX = (double)(1.0F + this.mob.random.nextFloat() * 0.4F) * (double)(this.mob.random.nextBoolean() ? 1 : -1);
+                double motionY = 0.4F + this.mob.random.nextFloat() * 0.8F;
+                double motionZ = (double)(1.0F + this.mob.random.nextFloat() * 0.4F) * (double)(this.mob.random.nextBoolean() ? 1 : -1);
+                this.attackTarget.setDeltaMovement(motionX, motionY, motionZ);
+                EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
+                this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+            }
+
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.attackTarget = null;
+        }
+    }
+
+    static class MeleeGoal extends AnimationGoal<MutantSkeletonEntity> {
+        public MeleeGoal(MutantSkeletonEntity mob) {
+            super(mob);
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        protected Animation getAnimation() {
+            return MutantSkeletonEntity.MELEE_ANIMATION;
+        }
+
+        @Override
+        public void tick() {
+            this.mob.getNavigation().stop();
+            if (this.mob.getTarget() != null && this.mob.getTarget().isAlive()) {
+                this.mob.lookControl.setLookAt(this.mob.getTarget(), 30.0F, 30.0F);
+            }
+
+            if (this.mob.animationTick == 3) {
+                float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
+
+                for (LivingEntity livingEntity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
+                    if (!(livingEntity instanceof MutantSkeletonEntity)) {
+                        double dist = this.mob.distanceTo(livingEntity);
+                        double x = this.mob.getX() - livingEntity.getX();
+                        double z = this.mob.getZ() - livingEntity.getZ();
+                        if (dist <= 3.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 60.0F) {
+                            float power = 1.8F + (float) this.mob.random.nextInt(5) * 0.15F;
+                            livingEntity.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
+                            livingEntity.setDeltaMovement(-x / dist * (double) power, Math.max(0.2800000011920929, livingEntity.getDeltaMovement().y), -z / dist * (double) power);
+                            EntityUtil.sendPlayerVelocityPacket(livingEntity);
+                        }
+                    }
+                }
+
+                this.mob.playSound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F));
+            }
+
+        }
+    }
+}
