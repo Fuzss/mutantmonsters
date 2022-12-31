@@ -1,9 +1,9 @@
 package fuzs.mutantmonsters.entity;
 
+import fuzs.mutantmonsters.entity.projectile.ChemicalXEntity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.util.MutatedExplosion;
-import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -107,7 +107,7 @@ public class SkullSpirit extends Entity {
                 if (!this.level.isClientSide) {
                     this.target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, this.target.getDeltaMovement().y, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
                     if (--this.attachedTick <= 0) {
-                        EntityType<? extends Mob> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
+                        EntityType<? extends Mob> mutantType = ChemicalXEntity.getMutantOf(this.target);
                         if (mutantType != null && this.random.nextFloat() < 0.75F) {
                             MutatedExplosion.create(this, 2.0F, false, Explosion.BlockInteraction.NONE);
                             Mob mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);

@@ -2,8 +2,6 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.client.core.ClientAbstractions;
-import fuzs.mutantmonsters.core.CommonAbstractions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,18 +15,25 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderNameTagEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
 
 public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<T>> extends MobRenderer<T, M> {
     public AlternateMobRenderer(EntityRendererProvider.Context context, M entityModelIn, float shadowSizeIn) {
         super(context, entityModelIn, shadowSizeIn);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void render(T entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        if (ClientAbstractions.INSTANCE.onRenderLiving$Pre(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn)) return;
+        if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn))) {
+            return;
+        }
         matrixStackIn.pushPose();
         this.model.attackTime = this.getAttackAnim(entityIn, partialTicks);
-        boolean shouldSit = entityIn.isPassenger() && CommonAbstractions.INSTANCE.shouldRiderSit(entityIn.getVehicle());
+        boolean shouldSit = entityIn.isPassenger() && entityIn.getVehicle().shouldRiderSit();
         this.model.riding = shouldSit;
         this.model.young = entityIn.isBaby();
         float rotationYaw = Mth.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
@@ -102,11 +107,13 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
         }
 
         matrixStackIn.popPose();
-        ClientAbstractions.INSTANCE.getEntityDisplayName(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn, this.shouldShowName(entityIn)).ifPresent(component -> {
-            this.renderNameTag(entityIn, component, matrixStackIn, bufferIn, packedLightIn);
-        });
+        RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entityIn, entityIn.getDisplayName(), this, matrixStackIn, bufferIn, packedLightIn, partialTicks);
+        MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
+        if (renderNameplateEvent.getResult() != Event.Result.DENY && (renderNameplateEvent.getResult() == Event.Result.ALLOW || this.shouldShowName(entityIn))) {
+            this.renderNameTag(entityIn, renderNameplateEvent.getContent(), matrixStackIn, bufferIn, packedLightIn);
+        }
 
-        ClientAbstractions.INSTANCE.onRenderLiving$Post(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn);
+        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn));
     }
 
     protected boolean hasAlternateRender(T mob, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {

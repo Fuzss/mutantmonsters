@@ -5,13 +5,11 @@ import fuzs.mutantmonsters.entity.SkullSpirit;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -29,8 +27,8 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
     };
     public static final TargetingConditions PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
 
-    public ChemicalXMobEffect(MobEffectCategory mobEffectCategory, int effectColor) {
-        super(mobEffectCategory, effectColor);
+    public ChemicalXMobEffect(int i) {
+        super(MobEffectCategory.HARMFUL, i);
     }
 
     @Override
@@ -41,18 +39,6 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
             target.level.addFreshEntity(spirit);
             target.level.broadcastEntityEvent(target, (byte)3);
             target.discard();
-        }
-    }
-
-    @Nullable
-    public static EntityType<? extends Mob> getMutantOf(LivingEntity target) {
-        EntityType<?> targetType = target.getType();
-        if (!MUTATIONS.containsKey(targetType)) {
-            return null;
-        } else if (targetType == EntityType.PIG && (!target.hasEffect(MobEffects.UNLUCK) || target.getEffect(MobEffects.UNLUCK).getAmplifier() != 13)) {
-            return null;
-        } else {
-            return targetType == EntityType.ZOMBIE && target.isBaby() ? null : MUTATIONS.get(targetType);
         }
     }
 }

@@ -5,7 +5,6 @@ import fuzs.mutantmonsters.entity.mutant.MutantEndermanEntity;
 import fuzs.mutantmonsters.entity.mutant.MutantSnowGolemEntity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -35,11 +34,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PlayMessages;
 
 import javax.annotation.Nullable;
 import java.util.OptionalInt;
 
-public class ThrowableBlockEntity extends ThrowableProjectile implements AdditionalAddEntityData {
+public class ThrowableBlockEntity extends ThrowableProjectile implements IEntityAdditionalSpawnData {
     private static final EntityDataAccessor<OptionalInt> OWNER_ENTITY_ID = SynchedEntityData.defineId(ThrowableBlockEntity.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
     private static final EntityDataAccessor<Boolean> HELD = SynchedEntityData.defineId(ThrowableBlockEntity.class, EntityDataSerializers.BOOLEAN);
     private BlockState blockState;
@@ -71,7 +73,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements Additio
             double d0 = attackTarget.getX() - this.getX();
             double d1 = attackTarget.getY(0.33) - this.getY();
             double d2 = attackTarget.getZ() - this.getZ();
-            double d3 = Mth.sqrt((float) (d0 * d0 + d2 * d2));
+            double d3 = (double)Mth.sqrt((float) (d0 * d0 + d2 * d2));
             this.shoot(d0, d1 + d3 * 0.1, d2, 1.4F, 1.0F);
         } else {
             this.throwBlock(enderman);
@@ -89,6 +91,10 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements Additio
         this((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5, player);
         this.blockState = blockState;
         this.setHeld(true);
+    }
+
+    public ThrowableBlockEntity(PlayMessages.SpawnEntity packet, Level worldIn) {
+        this(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), worldIn);
     }
 
     @Override
@@ -254,7 +260,7 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements Additio
         this.setYRot(thrower.getYRot());
         this.setXRot(thrower.getXRot());
         float f = 0.4F;
-        this.shoot(-Mth.sin(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f, -Mth.sin(this.getXRot() / 180.0F * 3.1415927F) * f, Mth.cos(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f, 1.4F, 1.0F);
+        this.shoot((double)(-Mth.sin(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f), (double)(-Mth.sin(this.getXRot() / 180.0F * 3.1415927F) * f), (double)(Mth.cos(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f), 1.4F, 1.0F);
     }
 
     @Override
@@ -351,19 +357,19 @@ public class ThrowableBlockEntity extends ThrowableProjectile implements Additio
     }
 
     @Override
-    public void writeAdditionalAddEntityData(FriendlyByteBuf buffer) {
+    public void writeSpawnData(FriendlyByteBuf buffer) {
         buffer.writeVarInt(Block.getId(this.blockState));
         buffer.writeUtf(this.ownerType == null ? "" : Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
     }
 
     @Override
-    public void readAdditionalAddEntityData(FriendlyByteBuf additionalData) {
+    public void readSpawnData(FriendlyByteBuf additionalData) {
         this.blockState = Block.stateById(additionalData.readVarInt());
         this.ownerType = EntityType.byString(additionalData.readUtf(32767)).orElse(null);
     }
 
     @Override
     public Packet<?> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

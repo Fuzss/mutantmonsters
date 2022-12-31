@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.util;
 
-import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.entity.ai.goal.TrackSummonerGoal;
 import fuzs.mutantmonsters.entity.mutant.MutantZombieEntity;
 import net.minecraft.core.BlockPos;
@@ -122,8 +121,8 @@ public class ZombieResurrection extends BlockPos {
                 world.levelEvent(2001, abovePos, Block.getId(world.getBlockState(this)));
                 if (!world.isClientSide) {
                     zombieEntity.moveTo(abovePos, mutantZombie.getYRot(), 0.0F);
-                    CommonAbstractions.INSTANCE.getGoalSelector(zombieEntity).addGoal(0, new TrackSummonerGoal(zombieEntity, mutantZombie));
-                    CommonAbstractions.INSTANCE.getGoalSelector(zombieEntity).addGoal(3, new MoveTowardsRestrictionGoal(zombieEntity, 1.0));
+                    zombieEntity.goalSelector.addGoal(0, new TrackSummonerGoal(zombieEntity, mutantZombie));
+                    zombieEntity.goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(zombieEntity, 1.0));
                     world.addFreshEntity(zombieEntity);
                 }
 
