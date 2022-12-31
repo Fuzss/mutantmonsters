@@ -5,16 +5,26 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ForgeAbstractions implements CommonAbstractions {
 
@@ -45,5 +55,45 @@ public class ForgeAbstractions implements CommonAbstractions {
     @Override
     public BlockParticleOption setBlockParticlePos(BlockParticleOption particleOption, BlockPos pos) {
         return particleOption.setPos(pos);
+    }
+
+    @Override
+    public GoalSelector getGoalSelector(Mob mob) {
+        return mob.goalSelector;
+    }
+
+    @Override
+    public boolean onExplosionStart(Level level, Explosion explosion) {
+        return ForgeEventFactory.onExplosionStart(level, explosion);
+    }
+
+    @Override
+    public void onExplosionDetonate(Level level, Explosion explosion, List<Entity> list, double diameter) {
+        ForgeEventFactory.onExplosionDetonate(level, explosion, list, diameter);
+    }
+
+    @Override
+    public @Nullable Entity getExplosionExploder(Explosion explosion) {
+        return explosion.getExploder();
+    }
+
+    @Override
+    public Vec3 getExplosionPosition(Explosion explosion) {
+        return explosion.getPosition();
+    }
+
+    @Override
+    public boolean isArrowInfinite(ArrowItem arrow, ItemStack projectile, ItemStack bow, Player player) {
+        return arrow.isInfinite(projectile, bow, player);
+    }
+
+    @Override
+    public AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow) {
+        return bow.customArrow(arrow);
+    }
+
+    @Override
+    public boolean shouldRiderSit(Entity vehicle) {
+        return vehicle.shouldRiderSit();
     }
 }

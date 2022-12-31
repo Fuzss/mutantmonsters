@@ -5,8 +5,10 @@
   "package": "fuzs.mutantmonsters.mixin",
   "refmap": "mutantmonsters.refmap.json",
   "mixins": [
+    "accessor.RavagerAccessor"
   ],
   "client": [
+    "client.ItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

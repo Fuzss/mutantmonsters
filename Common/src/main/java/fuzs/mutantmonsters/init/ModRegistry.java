@@ -3,9 +3,9 @@ package fuzs.mutantmonsters.init;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.entity.*;
 import fuzs.mutantmonsters.entity.mutant.*;
-import fuzs.mutantmonsters.entity.projectile.ChemicalXEntity;
 import fuzs.mutantmonsters.entity.projectile.MutantArrowEntity;
 import fuzs.mutantmonsters.entity.projectile.ThrowableBlockEntity;
+import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.item.*;
 import fuzs.mutantmonsters.world.level.block.SkullWithItemTagBlock;
 import fuzs.mutantmonsters.world.level.block.WallSkullWithItemTagBlock;
@@ -20,10 +20,14 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,10 +37,10 @@ import net.minecraft.world.level.material.Material;
 import java.util.function.Supplier;
 
 public class ModRegistry {
-    public static final CreativeModeTab CREATIVE_MODE_TAB = CommonAbstractions.INSTANCE.creativeTab(MutantMonsters.MOD_ID, new Supplier<>() {
+    public static final CreativeModeTab CREATIVE_MODE_TAB = CommonAbstractions.INSTANCE.creativeModeTab(MutantMonsters.MOD_ID, new Supplier<>() {
         @Override
         public ItemStack get() {
-            return new ItemStack(CHEMICAL_X_ITEM.get());
+            return new ItemStack(MUTANT_SKELETON_SKULL_ITEM.get());
         }
     });
     public static final SkullBlock.Type MUTANT_SKELETON_SKULL_TYPE = new SkullBlock.Type() {};
@@ -51,7 +55,6 @@ public class ModRegistry {
     public static final RegistryReference<EntityType<MutantZombieEntity>> MUTANT_ZOMBIE_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("mutant_zombie", () -> EntityType.Builder.<MutantZombieEntity>of(MutantZombieEntity::new, MobCategory.MONSTER).sized(1.8F, 3.2F));
     public static final RegistryReference<EntityType<SpiderPigEntity>> SPIDER_PIG_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("spider_pig", () -> EntityType.Builder.of(SpiderPigEntity::new, MobCategory.CREATURE).sized(1.4F, 0.9F));
     public static final RegistryReference<EntityType<MutantSkeletonBodyPart>> BODY_PART_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("body_part", () -> EntityType.Builder.<MutantSkeletonBodyPart>of(MutantSkeletonBodyPart::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(0.7F, 0.7F));
-    public static final RegistryReference<EntityType<ChemicalXEntity>> CHEMICAL_X_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("chemical_x", () -> EntityType.Builder.<ChemicalXEntity>of(ChemicalXEntity::new, MobCategory.MISC).clientTrackingRange(10).updateInterval(10).sized(0.25F, 0.25F));
     public static final RegistryReference<EntityType<CreeperMinionEggEntity>> CREEPER_MINION_EGG_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("creeper_minion_egg", () -> EntityType.Builder.<CreeperMinionEggEntity>of(CreeperMinionEggEntity::new, MobCategory.MISC).clientTrackingRange(10).updateInterval(20).sized(0.5625F, 0.75F));
     public static final RegistryReference<EntityType<EndersoulCloneEntity>> ENDERSOUL_CLONE_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("endersoul_clone", () -> EntityType.Builder.of(EndersoulCloneEntity::new, MobCategory.MONSTER).sized(0.6F, 2.9F));
     public static final RegistryReference<EntityType<EndersoulFragment>> ENDERSOUL_FRAGMENT_ENTITY_TYPE = REGISTRY.registerEntityTypeBuilder("endersoul_fragment", () -> EntityType.Builder.<EndersoulFragment>of(EndersoulFragment::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(0.75F, 0.75F));
@@ -65,7 +68,6 @@ public class ModRegistry {
     public static final RegistryReference<Item> MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM = REGISTRY.whenNotOn(ModLoader.FORGE).registerItem("mutant_snow_golem_spawn_egg", () -> new SpawnEggItem(MUTANT_SNOW_GOLEM_ENTITY_TYPE.get(), 15073279, 16753434, new Item.Properties().tab(CREATIVE_MODE_TAB)));
     public static final RegistryReference<Item> MUTANT_ZOMBIE_SPAWN_EGG_ITEM = REGISTRY.whenNotOn(ModLoader.FORGE).registerItem("mutant_zombie_spawn_egg", () -> new SpawnEggItem(MUTANT_ZOMBIE_ENTITY_TYPE.get(), 7969893, 44975, new Item.Properties().tab(CREATIVE_MODE_TAB)));
     public static final RegistryReference<Item> SPIDER_PIG_SPAWN_EGG_ITEM = REGISTRY.whenNotOn(ModLoader.FORGE).registerItem("spider_pig_spawn_egg", () -> new SpawnEggItem(SPIDER_PIG_ENTITY_TYPE.get(), 3419431, 15771042, new Item.Properties().tab(CREATIVE_MODE_TAB)));
-    public static final RegistryReference<Item> CHEMICAL_X_ITEM = REGISTRY.registerItem("chemical_x", () -> new ChemicalXItem(new Item.Properties().tab(CREATIVE_MODE_TAB).stacksTo(1).rarity(Rarity.EPIC)));
     public static final RegistryReference<Item> CREEPER_MINION_TRACKER_ITEM = REGISTRY.registerItem("creeper_minion_tracker", () -> new Item(new Item.Properties().tab(CREATIVE_MODE_TAB).stacksTo(1)));
     public static final RegistryReference<Item> CREEPER_SHARD_ITEM = REGISTRY.registerItem("creeper_shard", () -> new CreeperShardItem(new Item.Properties().tab(CREATIVE_MODE_TAB).durability(32).rarity(Rarity.UNCOMMON)));
     public static final RegistryReference<Item> ENDERSOUL_HAND_ITEM = REGISTRY.whenNotOn(ModLoader.FORGE).registerItem("endersoul_hand", () -> new EndersoulHandItem(new Item.Properties().tab(CREATIVE_MODE_TAB).durability(240).rarity(Rarity.EPIC)));
@@ -81,6 +83,8 @@ public class ModRegistry {
     public static final RegistryReference<Item> MUTANT_SKELETON_LEGGINGS_ITEM = REGISTRY.registerItem("mutant_skeleton_leggings", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, EquipmentSlot.LEGS, new Item.Properties().tab(CREATIVE_MODE_TAB)));
     public static final RegistryReference<Item> MUTANT_SKELETON_BOOTS_ITEM = REGISTRY.registerItem("mutant_skeleton_boots", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, EquipmentSlot.FEET, new Item.Properties().tab(CREATIVE_MODE_TAB)));
     public static final RegistryReference<BlockEntityType<SkullWithItemTagBlockEntity>> SKULL_BLOCK_ENTITY_TYPE = REGISTRY.registerBlockEntityTypeBuilder("skull", () -> ModBlockEntityTypeBuilder.of(SkullWithItemTagBlockEntity::new, MUTANT_SKELETON_SKULL_BLOCK.get(), MUTANT_SKELETON_WALL_SKULL_BLOCK.get()));
+    public static final RegistryReference<MobEffect> CHEMICAL_X_MOB_EFFECT = REGISTRY.registerMobEffect("chemical_x", () -> new ChemicalXMobEffect(MobEffectCategory.HARMFUL, 4393481));
+    public static final RegistryReference<Potion> CHEMICAL_X_POTION = REGISTRY.registerPotion("chemical_x", () -> new Potion(new MobEffectInstance(CHEMICAL_X_MOB_EFFECT.get(), 1)));
     public static final RegistryReference<SimpleParticleType> ENDERSOUL_PARTICLE_TYPE = REGISTRY.register(Registry.PARTICLE_TYPE_REGISTRY, "endersoul", () -> new SimpleParticleType(false));
     public static final RegistryReference<SimpleParticleType> SKULL_SPIRIT_PARTICLE_TYPE = REGISTRY.register(Registry.PARTICLE_TYPE_REGISTRY, "skull_spirit", () -> new SimpleParticleType(true));
     public static final RegistryReference<SoundEvent> ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.creeper_minion.ambient");

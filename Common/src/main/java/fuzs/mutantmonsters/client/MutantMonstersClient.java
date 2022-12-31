@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -45,7 +44,6 @@ public class MutantMonstersClient implements ClientModConstructor {
     @Override
     public void onRegisterEntityRenderers(EntityRenderersContext context) {
         context.registerEntityRenderer(ModRegistry.BODY_PART_ENTITY_TYPE.get(), BodyPartRenderer::new);
-        context.registerEntityRenderer(ModRegistry.CHEMICAL_X_ENTITY_TYPE.get(), ThrownItemRenderer::new);
         context.registerEntityRenderer(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), CreeperMinionRenderer::new);
         context.registerEntityRenderer(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), CreeperMinionEggRenderer::new);
         context.registerEntityRenderer(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), EndersoulCloneRenderer::new);

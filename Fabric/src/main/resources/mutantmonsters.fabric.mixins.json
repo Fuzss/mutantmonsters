@@ -5,7 +5,13 @@
   "package": "fuzs.mutantmonsters.mixin",
   "refmap": "mutantmonsters.refmap.json",
   "mixins": [
-    "LivingEntityMixin"
+    "BowItemFabricMixin",
+    "EntityFabricMixin",
+    "LivingEntityFabricMixin",
+    "PlayerFabricMixin",
+    "ServerPlayerFabricMixin",
+    "accessor.ExplosionFabricAccessor",
+    "accessor.MobFabricAccessor"
   ],
   "client": [
   ],

@@ -1,19 +1,23 @@
 package fuzs.mutantmonsters;
 
+import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.entity.CreeperMinionEntity;
 import fuzs.mutantmonsters.entity.EndersoulFragment;
 import fuzs.mutantmonsters.entity.mutant.MutantCreeperEntity;
 import fuzs.mutantmonsters.entity.mutant.MutantZombieEntity;
 import fuzs.mutantmonsters.entity.mutant.SpiderPigEntity;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.world.item.ArmorBlockItem;
-import fuzs.mutantmonsters.world.item.HulkHammerItem;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.util.SeismicWave;
+import fuzs.mutantmonsters.world.item.ArmorBlockItem;
+import fuzs.mutantmonsters.world.item.HulkHammerItem;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.Unit;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -21,133 +25,123 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.ArrowLooseEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.phys.EntityHitResult;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
-@Mod.EventBusSubscriber(modid = MutantMonsters.MOD_ID)
 public class EventHandler {
 
-    @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
-        if (!event.getLevel().isClientSide && event.getEntity() instanceof PathfinderMob creature) {
+    public static void onEntityJoinServerLevel(Entity entity, ServerLevel level) {
+        if (entity instanceof PathfinderMob creature) {
             if (EntityUtil.isFeline(creature)) {
-                creature.goalSelector.addGoal(2, new AvoidEntityGoal<>(creature, MutantCreeperEntity.class, 16.0F, 1.33, 1.33));
+                CommonAbstractions.INSTANCE.getGoalSelector(creature).addGoal(2, new AvoidEntityGoal<>(creature, MutantCreeperEntity.class, 16.0F, 1.33, 1.33));
             }
 
             if (creature.getType() == EntityType.PIG) {
-                creature.goalSelector.addGoal(2, new TemptGoal(creature, 1.0, Ingredient.of(Items.FERMENTED_SPIDER_EYE), false));
+                CommonAbstractions.INSTANCE.getGoalSelector(creature).addGoal(2, new TemptGoal(creature, 1.0, Ingredient.of(Items.FERMENTED_SPIDER_EYE), false));
             }
 
             if (creature.getType() == EntityType.VILLAGER) {
-                creature.goalSelector.addGoal(0, new AvoidEntityGoal<>(creature, MutantZombieEntity.class, 12.0F, 0.8, 0.8));
+                CommonAbstractions.INSTANCE.getGoalSelector(creature).addGoal(0, new AvoidEntityGoal<>(creature, MutantZombieEntity.class, 12.0F, 0.8, 0.8));
             }
 
             if (creature.getType() == EntityType.WANDERING_TRADER) {
-                creature.goalSelector.addGoal(1, new AvoidEntityGoal<>(creature, MutantZombieEntity.class, 12.0F, 0.5, 0.5));
+                CommonAbstractions.INSTANCE.getGoalSelector(creature).addGoal(1, new AvoidEntityGoal<>(creature, MutantZombieEntity.class, 12.0F, 0.5, 0.5));
             }
         }
-
     }
 
-    @SubscribeEvent
-    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        ItemStack stack = event.getEntity().getItemInHand(event.getHand());
-        if (event.getTarget().getType() == EntityType.PIG && !((LivingEntity) event.getTarget()).hasEffect(MobEffects.UNLUCK) && stack.getItem() == Items.FERMENTED_SPIDER_EYE) {
-            if (!event.getEntity().isCreative()) {
-                stack.shrink(1);
+    public static InteractionResult onEntityInteract(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        if (entity instanceof Pig pig && !pig.hasEffect(MobEffects.UNLUCK)) {
+            ItemStack stackInHand = player.getItemInHand(hand);
+            if (stackInHand.getItem() == Items.FERMENTED_SPIDER_EYE) {
+                if (!player.isCreative()) {
+                    stackInHand.shrink(1);
+                }
+
+                pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600, 13));
+                return InteractionResult.SUCCESS;
             }
-
-            ((LivingEntity) event.getTarget()).addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600, 13));
-            event.setCancellationResult(InteractionResult.SUCCESS);
         }
-
+        return InteractionResult.PASS;
     }
 
-    @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getEntity() instanceof Player && event.getEntity().getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ArmorBlockItem) {
-            float damage = event.getAmount();
+    public static Optional<Unit> onLivingHurt(LivingEntity entity, DamageSource source, float amount) {
+        if (entity instanceof Player && entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ArmorBlockItem) {
+            float damage = amount;
             if (!(damage <= 0.0F)) {
                 damage /= 4.0F;
                 if (damage < 1.0F) {
                     damage = 1.0F;
                 }
 
-                ItemStack itemstack = event.getEntity().getItemBySlot(EquipmentSlot.HEAD);
-                if (!event.getSource().isFire() || !itemstack.getItem().isFireResistant()) {
-                    itemstack.hurtAndBreak((int) damage, event.getEntity(), (livingEntity) -> {
+                ItemStack itemstack = entity.getItemBySlot(EquipmentSlot.HEAD);
+                if (!source.isFire() || !itemstack.getItem().isFireResistant()) {
+                    itemstack.hurtAndBreak((int) damage, entity, (livingEntity) -> {
                         livingEntity.broadcastBreakEvent(EquipmentSlot.HEAD);
                     });
                 }
             }
         }
-
+        return Optional.empty();
     }
 
-    @SubscribeEvent
-    public static void onLivingDrops(LivingDropsEvent event) {
-        Entity trueSource = event.getSource().getEntity();
-        if (SpiderPigEntity.isPigOrSpider(event.getEntity()) && trueSource instanceof SpiderPigEntity) {
-            event.setCanceled(true);
+    public static Optional<Unit> onLivingDrops(LivingEntity entity, DamageSource source, Collection<ItemEntity> drops, int lootingLevel, boolean recentlyHit) {
+        Entity trueSource = source.getEntity();
+        if (SpiderPigEntity.isPigOrSpider(entity) && trueSource instanceof SpiderPigEntity) {
+            return Optional.of(Unit.INSTANCE);
         }
 
-        if ((trueSource instanceof MutantCreeperEntity && ((MutantCreeperEntity) trueSource).isCharged() || trueSource instanceof CreeperMinionEntity && ((CreeperMinionEntity) trueSource).isCharged()) && event.getSource().isExplosion()) {
-            ItemStack itemStack = EntityUtil.getSkullDrop(event.getEntity().getType());
+        if ((trueSource instanceof MutantCreeperEntity && ((MutantCreeperEntity) trueSource).isCharged() || trueSource instanceof CreeperMinionEntity && ((CreeperMinionEntity) trueSource).isCharged()) && source.isExplosion()) {
+            ItemStack itemStack = EntityUtil.getSkullDrop(entity.getType());
             if (!itemStack.isEmpty()) {
-                event.getDrops().add(new ItemEntity(trueSource.level, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), itemStack));
+                drops.add(new ItemEntity(trueSource.level, entity.getX(), entity.getY(), entity.getZ(), itemStack));
             }
         }
-
+        return Optional.empty();
     }
 
-    @SubscribeEvent
-    public static void onLivingUseItem(LivingEntityUseItemEvent.Tick event) {
-        if (event.getEntity().getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get() && event.getItem().getUseAnimation() == UseAnim.BOW && event.getDuration() > 4) {
-            event.setDuration(event.getDuration() - 3);
+    public static OptionalInt onItemUseTick(LivingEntity entity, ItemStack item, int duration) {
+        if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {
+            if (item.getItem() instanceof BowItem && (item.getUseDuration() - duration) < 20) {
+                return OptionalInt.of(duration - 3);
+            }
         }
-
+        return OptionalInt.empty();
     }
 
-    @SubscribeEvent
-    public static void onPlayerShootArrow(ArrowLooseEvent event) {
-        if (event.getEntity().getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get() && event.hasAmmo()) {
-            event.setCanceled(true);
-            Player player = event.getEntity();
-            Level world = event.getLevel();
-            ItemStack bow = event.getBow();
+    public static Optional<Unit> onArrowLoose(Player player, ItemStack bow, Level level, int charge, boolean hasAmmo) {
+        if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get() && hasAmmo) {
             boolean inAir = !player.isOnGround() && !player.isInWater() && !player.isInLava();
             ItemStack ammo = player.getProjectile(bow);
-            if (!ammo.isEmpty() || event.hasAmmo()) {
+            if (!ammo.isEmpty() || hasAmmo) {
                 if (ammo.isEmpty()) {
                     ammo = new ItemStack(Items.ARROW);
                 }
 
-                float velocity = BowItem.getPowerForTime(bow.getUseDuration() - event.getCharge());
-                boolean infiniteArrows = player.getAbilities().instabuild || ammo.getItem() instanceof ArrowItem && ((ArrowItem) ammo.getItem()).isInfinite(ammo, bow, player);
-                if (!world.isClientSide) {
-                    ArrowItem arrowitem = (ArrowItem) ((ArrowItem) (ammo.getItem() instanceof ArrowItem ? ammo.getItem() : Items.ARROW));
-                    AbstractArrow abstractarrowentity = arrowitem.createArrow(world, ammo, player);
-                    abstractarrowentity = ((BowItem) bow.getItem()).customArrow(abstractarrowentity);
+                float velocity = BowItem.getPowerForTime(bow.getUseDuration() - charge);
+                boolean infiniteArrows = player.getAbilities().instabuild || ammo.getItem() instanceof ArrowItem && CommonAbstractions.INSTANCE.isArrowInfinite((ArrowItem) ammo.getItem(), ammo, bow, player);
+                if (!level.isClientSide) {
+                    ArrowItem arrowitem = (ArrowItem) (ammo.getItem() instanceof ArrowItem ? ammo.getItem() : Items.ARROW);
+                    AbstractArrow abstractarrowentity = arrowitem.createArrow(level, ammo, player);
+                    abstractarrowentity = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) bow.getItem(), abstractarrowentity);
                     abstractarrowentity.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity * 3.0F, 1.0F);
                     if (velocity == 1.0F && inAir) {
                         abstractarrowentity.setCritArrow(true);
@@ -175,10 +169,10 @@ public class EventHandler {
                         abstractarrowentity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
                     }
 
-                    world.addFreshEntity(abstractarrowentity);
+                    level.addFreshEntity(abstractarrowentity);
                 }
 
-                world.playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 1.2F) + velocity * 0.5F);
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 1.2F) + velocity * 0.5F);
                 if (!infiniteArrows && !player.getAbilities().instabuild) {
                     ammo.shrink(1);
                     if (ammo.isEmpty()) {
@@ -188,25 +182,24 @@ public class EventHandler {
 
                 player.awardStat(Stats.ITEM_USED.get(bow.getItem()));
             }
+            return Optional.of(Unit.INSTANCE);
         }
-
+        return Optional.empty();
     }
 
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        playShoulderEntitySound(event.player, event.player.getShoulderEntityLeft());
-        playShoulderEntitySound(event.player, event.player.getShoulderEntityRight());
-        if (!event.player.level.isClientSide && !HulkHammerItem.WAVES.isEmpty() && HulkHammerItem.WAVES.containsKey(event.player.getUUID())) {
-            Player player = event.player;
+    public static void onPlayerTick$End(Player player) {
+        playShoulderEntitySound(player, player.getShoulderEntityLeft());
+        playShoulderEntitySound(player, player.getShoulderEntityRight());
+        if (!player.level.isClientSide && !HulkHammerItem.WAVES.isEmpty() && HulkHammerItem.WAVES.containsKey(player.getUUID())) {
             List<SeismicWave> waveList = HulkHammerItem.WAVES.get(player.getUUID());
 
             while (waveList.size() > 16) {
                 waveList.remove(0);
             }
 
-            SeismicWave wave = (SeismicWave) waveList.remove(0);
+            SeismicWave wave = waveList.remove(0);
             wave.affectBlocks(player.level, player);
-            AABB box = new AABB((double) wave.getX(), (double) wave.getY() + 1.0, (double) wave.getZ(), (double) wave.getX() + 1.0, (double) wave.getY() + 2.0, (double) wave.getZ() + 1.0);
+            AABB box = new AABB(wave.getX(), (double) wave.getY() + 1.0, wave.getZ(), (double) wave.getX() + 1.0, (double) wave.getY() + 2.0, (double) wave.getZ() + 1.0);
 
             for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
                 if (livingEntity != player && player.getVehicle() != livingEntity) {
@@ -218,15 +211,12 @@ public class EventHandler {
                 HulkHammerItem.WAVES.remove(player.getUUID());
             }
         }
-
     }
 
-    @SubscribeEvent
-    public static void onItemToss(ItemTossEvent event) {
-        Level world = event.getEntity().level;
-        Player player = event.getPlayer();
+    public static Optional<Unit> onItemToss(ItemEntity entityItem, Player player) {
+        Level world = player.level;
         if (!world.isClientSide) {
-            ItemStack stack = event.getEntity().getItem();
+            ItemStack stack = entityItem.getItem();
             boolean isHand = stack.getItem() == ModRegistry.ENDERSOUL_HAND_ITEM.get() && stack.isDamaged();
             if (stack.getItem() == Items.ENDER_EYE || isHand) {
                 int count = 0;
@@ -246,20 +236,20 @@ public class EventHandler {
                         stack.setDamageValue(Math.max(dmg, 0));
                     } else {
                         ItemStack newStack = new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get());
-                        newStack.setDamageValue(ModRegistry.ENDERSOUL_HAND_ITEM.get().getMaxDamage(stack) - addDmg);
-                        event.getEntity().setItem(newStack);
+                        newStack.setDamageValue(ModRegistry.ENDERSOUL_HAND_ITEM.get().getMaxDamage() - addDmg);
+                        entityItem.setItem(newStack);
                     }
                 }
             }
         }
-
+        return Optional.empty();
     }
 
     private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
         if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
             EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
                 if (player.level.random.nextInt(500) == 0) {
-                    player.level.playSound((Player) null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.2F + 1.5F);
+                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.2F + 1.5F);
                 }
 
             });
