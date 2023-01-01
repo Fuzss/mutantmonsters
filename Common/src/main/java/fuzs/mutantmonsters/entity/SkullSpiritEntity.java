@@ -28,23 +28,23 @@ import net.minecraft.world.phys.Vec3;
 import java.util.OptionalInt;
 import java.util.UUID;
 
-public class SkullSpirit extends Entity {
-    private static final EntityDataAccessor<OptionalInt> TARGET_ENTITY_ID = SynchedEntityData.defineId(SkullSpirit.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
-    private static final EntityDataAccessor<Boolean> ATTACHED = SynchedEntityData.defineId(SkullSpirit.class, EntityDataSerializers.BOOLEAN);
+public class SkullSpiritEntity extends Entity {
+    private static final EntityDataAccessor<OptionalInt> TARGET_ENTITY_ID = SynchedEntityData.defineId(SkullSpiritEntity.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
+    private static final EntityDataAccessor<Boolean> ATTACHED = SynchedEntityData.defineId(SkullSpiritEntity.class, EntityDataSerializers.BOOLEAN);
 
     private Mob target;
     private int startTick;
     private int attachedTick;
     private UUID targetUUID;
 
-    public SkullSpirit(EntityType<? extends SkullSpirit> type, Level worldIn) {
+    public SkullSpiritEntity(EntityType<? extends SkullSpiritEntity> type, Level worldIn) {
         super(type, worldIn);
         this.startTick = 15;
         this.attachedTick = 80 + this.random.nextInt(40);
         this.noPhysics = true;
     }
 
-    public SkullSpirit(Level worldIn, Mob target) {
+    public SkullSpiritEntity(Level worldIn, Mob target) {
         this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.get(), worldIn);
         this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(target.getId()));
     }
@@ -81,10 +81,8 @@ public class SkullSpirit extends Entity {
                 if (entity instanceof Mob) {
                     this.target = (Mob) entity;
                 }
-
             });
         }
-
     }
 
     @Override
@@ -95,7 +93,7 @@ public class SkullSpirit extends Entity {
     @Override
     public void tick() {
         if (this.targetUUID != null && this.level instanceof ServerLevel) {
-            Entity entity = ((ServerLevel)this.level).getEntity(this.targetUUID);
+            Entity entity = ((ServerLevel) this.level).getEntity(this.targetUUID);
             if (entity instanceof Mob) {
                 this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(entity.getId()));
                 this.targetUUID = null;
@@ -127,7 +125,6 @@ public class SkullSpirit extends Entity {
                             this.setAttached(false);
                             MutatedExplosion.create(this, 2.0F, false, Explosion.BlockInteraction.NONE);
                         }
-
                         this.discard();
                     }
                 }
@@ -137,10 +134,10 @@ public class SkullSpirit extends Entity {
                     this.target.hurt(DamageSource.MAGIC, 0.0F);
                 }
 
-                for(int i = 0; i < 3; ++i) {
-                    double posX = this.target.getX() + (double)(this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double)this.target.getBbWidth();
-                    double posY = this.target.getY() + 0.5 + (double)(this.random.nextFloat() * this.target.getBbHeight());
-                    double posZ = this.target.getZ() + (double)(this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double)this.target.getBbWidth();
+                for (int i = 0; i < 3; ++i) {
+                    double posX = this.target.getX() + (double) (this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double) this.target.getBbWidth();
+                    double posY = this.target.getY() + 0.5 + (double) (this.random.nextFloat() * this.target.getBbHeight());
+                    double posZ = this.target.getZ() + (double) (this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double) this.target.getBbWidth();
                     double x = this.random.nextGaussian() * 0.02;
                     double y = this.random.nextGaussian() * 0.02;
                     double z = this.random.nextGaussian() * 0.02;
@@ -152,24 +149,26 @@ public class SkullSpirit extends Entity {
                 this.zo = this.getZ();
                 this.setDeltaMovement(Vec3.ZERO);
                 if (this.startTick-- >= 0) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3F * (float)this.startTick / 15.0F, 0.0));
+                    this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3F * (float) this.startTick / 15.0F, 0.0));
                 }
 
                 double x = this.target.getX() - this.getX();
                 double y = this.target.getY() - this.getY();
                 double z = this.target.getZ() - this.getZ();
                 double d = Math.sqrt(x * x + y * y + z * z);
-                this.setDeltaMovement(this.getDeltaMovement().add(x / d * 0.20000000298023224, y / d * 0.20000000298023224, z / d * 0.20000000298023224));
-                this.move(MoverType.SELF, this.getDeltaMovement());
+                if (d != 0.0) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(x / d * 0.20000000298023224, y / d * 0.20000000298023224, z / d * 0.20000000298023224));
+                    this.move(MoverType.SELF, this.getDeltaMovement());
+                }
                 if (!this.level.isClientSide && this.distanceToSqr(this.target) < 1.0) {
                     this.setAttached(true);
                 }
 
-                for(int i = 0; i < 16; ++i) {
+                for (int i = 0; i < 16; ++i) {
                     float xx = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float yy = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float zz = (this.random.nextFloat() - 0.5F) * 1.2F;
-                    this.level.addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), this.getX() + (double)xx, this.getY() + (double)yy, this.getZ() + (double)zz, 0.0, 0.0, 0.0);
+                    this.level.addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
                 }
             }
         } else {
@@ -184,7 +183,6 @@ public class SkullSpirit extends Entity {
         if (this.target != null) {
             compound.putUUID("Target", this.target.getUUID());
         }
-
     }
 
     @Override
@@ -194,6 +192,5 @@ public class SkullSpirit extends Entity {
         if (compound.hasUUID("Target")) {
             this.targetUUID = compound.getUUID("Target");
         }
-
     }
 }

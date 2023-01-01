@@ -21,7 +21,10 @@
 			"conditions": {
 				"items": [
 					{
-						"item": "mutantbeasts:chemical_x"
+						"items": [
+							"minecraft:potion"
+						],
+						"potion": "mutantbeasts:chemical_x"
 					}
 				]
 			}

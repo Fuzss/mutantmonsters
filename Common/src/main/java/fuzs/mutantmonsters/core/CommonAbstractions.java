@@ -54,4 +54,6 @@ public interface CommonAbstractions {
     AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow);
 
     boolean shouldRiderSit(Entity vehicle);
+
+    boolean isBossMob(LivingEntity entity);
 }

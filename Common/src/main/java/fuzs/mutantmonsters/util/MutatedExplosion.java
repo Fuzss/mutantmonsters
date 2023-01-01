@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.util;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.entity.SkullSpirit;
+import fuzs.mutantmonsters.entity.SkullSpiritEntity;
 import fuzs.mutantmonsters.entity.mutant.MutantCreeperEntity;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import net.minecraft.core.BlockPos;
@@ -98,7 +98,7 @@ public class MutatedExplosion extends Explosion {
             List<Entity> list = this.world.getEntities(exploder, new AABB(k, minY, minZ, l, maxY, maxZ), (entityx) -> {
                 if (entityx.ignoreExplosion()) {
                     return false;
-                } else if (exploder instanceof SkullSpirit skullSpirit) {
+                } else if (exploder instanceof SkullSpiritEntity skullSpirit) {
                     if (entityx == skullSpirit.getTarget()) {
                         return !skullSpirit.isAttached();
                     } else {

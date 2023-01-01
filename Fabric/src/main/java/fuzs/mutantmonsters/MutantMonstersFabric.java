@@ -16,8 +16,8 @@ public class MutantMonstersFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID).accept(new MutantMonsters());
         ModRegistryFabric.touch();
+        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID).accept(new MutantMonsters());
         registerHandlers();
     }
 

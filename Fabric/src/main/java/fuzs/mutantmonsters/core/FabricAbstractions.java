@@ -95,4 +95,9 @@ public class FabricAbstractions implements CommonAbstractions {
     public boolean shouldRiderSit(Entity vehicle) {
         return true;
     }
+
+    @Override
+    public boolean isBossMob(LivingEntity entity) {
+        return !entity.canChangeDimensions();
+    }
 }

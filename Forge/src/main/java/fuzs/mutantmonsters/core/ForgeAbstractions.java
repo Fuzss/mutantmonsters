@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -95,5 +96,10 @@ public class ForgeAbstractions implements CommonAbstractions {
     @Override
     public boolean shouldRiderSit(Entity vehicle) {
         return vehicle.shouldRiderSit();
+    }
+
+    @Override
+    public boolean isBossMob(LivingEntity entity) {
+        return entity.getType().is(Tags.EntityTypes.BOSSES);
     }
 }
