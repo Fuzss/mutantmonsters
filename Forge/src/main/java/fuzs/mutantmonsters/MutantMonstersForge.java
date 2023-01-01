@@ -1,7 +1,9 @@
 package fuzs.mutantmonsters;
 
-import fuzs.mutantmonsters.entity.mutant.MutantSkeletonEntity;
-import fuzs.mutantmonsters.entity.mutant.MutantZombieEntity;
+import fuzs.mutantmonsters.handler.EntityEventsHandler;
+import fuzs.mutantmonsters.handler.PlayerEventsHandler;
+import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
+import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModRegistryForge;
 import fuzs.puzzleslib.core.CommonFactories;
@@ -39,39 +41,39 @@ public class MutantMonstersForge {
 
     private static void registerHandlers() {
         MinecraftForge.EVENT_BUS.addListener((final LivingHurtEvent evt) -> {
-            EventHandler.onLivingHurt(evt.getEntity(), evt.getSource(), evt.getAmount());
+            EntityEventsHandler.onLivingHurt(evt.getEntity(), evt.getSource(), evt.getAmount());
         });
         MinecraftForge.EVENT_BUS.addListener((final LivingEntityUseItemEvent.Tick evt) -> {
-            EventHandler.onItemUseTick(evt.getEntity(), evt.getItem(), evt.getDuration()).ifPresent(evt::setDuration);
+            PlayerEventsHandler.onItemUseTick(evt.getEntity(), evt.getItem(), evt.getDuration()).ifPresent(evt::setDuration);
         });
         MinecraftForge.EVENT_BUS.addListener((final ArrowLooseEvent evt) -> {
-            EventHandler.onArrowLoose(evt.getEntity(), evt.getBow(), evt.getLevel(), evt.getCharge(), evt.hasAmmo()).ifPresent(unit -> evt.setCanceled(true));
+            PlayerEventsHandler.onArrowLoose(evt.getEntity(), evt.getBow(), evt.getLevel(), evt.getCharge(), evt.hasAmmo()).ifPresent(unit -> evt.setCanceled(true));
         });
         MinecraftForge.EVENT_BUS.addListener((final PlayerInteractEvent.EntityInteractSpecific evt) -> {
-            InteractionResult result = EventHandler.onEntityInteract(evt.getEntity(), evt.getLevel(), evt.getHand(), evt.getTarget(), new EntityHitResult(evt.getTarget(), evt.getLocalPos().add(evt.getTarget().position())));
+            InteractionResult result = EntityEventsHandler.onEntityInteract(evt.getEntity(), evt.getLevel(), evt.getHand(), evt.getTarget(), new EntityHitResult(evt.getTarget(), evt.getLocalPos().add(evt.getTarget().position())));
             if (result != InteractionResult.PASS) {
                 evt.setCancellationResult(result);
                 evt.setCanceled(true);
             }
         });
         MinecraftForge.EVENT_BUS.addListener((final TickEvent.PlayerTickEvent evt) -> {
-            if (evt.phase == TickEvent.Phase.END) EventHandler.onPlayerTick$End(evt.player);
+            if (evt.phase == TickEvent.Phase.END) PlayerEventsHandler.onPlayerTick$End(evt.player);
         });
         MinecraftForge.EVENT_BUS.addListener((final ItemTossEvent evt) -> {
-            EventHandler.onItemToss(evt.getEntity(), evt.getPlayer()).ifPresent(unit -> evt.setCanceled(true));
+            PlayerEventsHandler.onItemToss(evt.getEntity(), evt.getPlayer()).ifPresent(unit -> evt.setCanceled(true));
         });
         MinecraftForge.EVENT_BUS.addListener((final EntityJoinLevelEvent evt) -> {
-            if (evt.getLevel() instanceof ServerLevel level) EventHandler.onEntityJoinServerLevel(evt.getEntity(), level);
+            if (evt.getLevel() instanceof ServerLevel level) EntityEventsHandler.onEntityJoinServerLevel(evt.getEntity(), level);
         });
         MinecraftForge.EVENT_BUS.addListener((final LivingDropsEvent evt) -> {
-            EventHandler.onLivingDrops(evt.getEntity(), evt.getSource(), evt.getDrops(), evt.getLootingLevel(), evt.isRecentlyHit()).ifPresent(unit -> evt.setCanceled(true));
+            EntityEventsHandler.onLivingDrops(evt.getEntity(), evt.getSource(), evt.getDrops(), evt.getLootingLevel(), evt.isRecentlyHit()).ifPresent(unit -> evt.setCanceled(true));
         });
     }
 
     @SubscribeEvent
     public static void onEntityAttributeCreation(final EntityAttributeCreationEvent evt) {
-        evt.put(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), MutantSkeletonEntity.registerAttributes().add(ForgeMod.SWIM_SPEED.get(), 5.0).build());
-        evt.put(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), MutantZombieEntity.registerAttributes().add(ForgeMod.SWIM_SPEED.get(), 4.0).build());
+        evt.put(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), MutantSkeleton.registerAttributes().add(ForgeMod.SWIM_SPEED.get(), 5.0).build());
+        evt.put(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), MutantZombie.registerAttributes().add(ForgeMod.SWIM_SPEED.get(), 4.0).build());
     }
 
     @SubscribeEvent

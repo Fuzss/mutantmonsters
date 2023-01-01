@@ -6,6 +6,8 @@ import fuzs.mutantmonsters.api.event.entity.living.LivingDropsCallback;
 import fuzs.mutantmonsters.api.event.entity.living.LivingEntityUseItemEvents;
 import fuzs.mutantmonsters.api.event.entity.living.LivingHurtCallback;
 import fuzs.mutantmonsters.api.event.entity.player.ArrowLooseCallback;
+import fuzs.mutantmonsters.handler.EntityEventsHandler;
+import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistryFabric;
 import fuzs.puzzleslib.core.CommonFactories;
 import net.fabricmc.api.ModInitializer;
@@ -22,13 +24,13 @@ public class MutantMonstersFabric implements ModInitializer {
     }
 
     private static void registerHandlers() {
-        LivingHurtCallback.EVENT.register(EventHandler::onLivingHurt);
-        LivingEntityUseItemEvents.TICK.register(EventHandler::onItemUseTick);
-        ArrowLooseCallback.EVENT.register(EventHandler::onArrowLoose);
-        UseEntityCallback.EVENT.register(EventHandler::onEntityInteract);
-        PlayerTickEvents.END_TICK.register(EventHandler::onPlayerTick$End);
-        ServerEntityEvents.ENTITY_LOAD.register(EventHandler::onEntityJoinServerLevel);
-        ItemTossCallback.EVENT.register(EventHandler::onItemToss);
-        LivingDropsCallback.EVENT.register(EventHandler::onLivingDrops);
+        LivingHurtCallback.EVENT.register(EntityEventsHandler::onLivingHurt);
+        LivingEntityUseItemEvents.TICK.register(PlayerEventsHandler::onItemUseTick);
+        ArrowLooseCallback.EVENT.register(PlayerEventsHandler::onArrowLoose);
+        UseEntityCallback.EVENT.register(EntityEventsHandler::onEntityInteract);
+        PlayerTickEvents.END_TICK.register(PlayerEventsHandler::onPlayerTick$End);
+        ServerEntityEvents.ENTITY_LOAD.register(EntityEventsHandler::onEntityJoinServerLevel);
+        ItemTossCallback.EVENT.register(PlayerEventsHandler::onItemToss);
+        LivingDropsCallback.EVENT.register(EntityEventsHandler::onLivingDrops);
     }
 }

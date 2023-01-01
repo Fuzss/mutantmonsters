@@ -3,14 +3,14 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
-import fuzs.mutantmonsters.client.renderer.entity.model.CreeperMinionModel;
-import fuzs.mutantmonsters.entity.CreeperMinionEntity;
+import fuzs.mutantmonsters.client.model.CreeperMinionModel;
+import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-public class CreeperMinionRenderer extends MobRenderer<CreeperMinionEntity, CreeperMinionModel> {
+public class CreeperMinionRenderer extends MobRenderer<CreeperMinion, CreeperMinionModel> {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/creeper/creeper.png");
 
     public CreeperMinionRenderer(EntityRendererProvider.Context context) {
@@ -19,7 +19,7 @@ public class CreeperMinionRenderer extends MobRenderer<CreeperMinionEntity, Cree
     }
 
     @Override
-    protected void scale(CreeperMinionEntity entitylivingbaseIn, PoseStack matrixStackIn, float partialTickTime) {
+    protected void scale(CreeperMinion entitylivingbaseIn, PoseStack matrixStackIn, float partialTickTime) {
         float f = entitylivingbaseIn.getFlashIntensity(partialTickTime);
         float f1 = 1.0F + Mth.sin(f * 100.0F) * f * 0.01F;
         f = Mth.clamp(f, 0.0F, 1.0F);
@@ -31,13 +31,13 @@ public class CreeperMinionRenderer extends MobRenderer<CreeperMinionEntity, Cree
     }
 
     @Override
-    protected float getWhiteOverlayProgress(CreeperMinionEntity livingEntityIn, float partialTicks) {
+    protected float getWhiteOverlayProgress(CreeperMinion livingEntityIn, float partialTicks) {
         float f = livingEntityIn.getFlashIntensity(partialTicks);
         return (int)(f * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(f, 0.5F, 1.0F);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(CreeperMinionEntity entity) {
+    public ResourceLocation getTextureLocation(CreeperMinion entity) {
         return TEXTURE;
     }
 }

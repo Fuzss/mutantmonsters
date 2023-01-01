@@ -4,13 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
-import fuzs.mutantmonsters.client.renderer.entity.model.MutantCreeperModel;
-import fuzs.mutantmonsters.entity.mutant.MutantCreeperEntity;
+import fuzs.mutantmonsters.client.model.MutantCreeperModel;
+import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeperEntity, MutantCreeperModel> {
+public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeper, MutantCreeperModel> {
     private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_creeper");
 
     public MutantCreeperRenderer(EntityRendererProvider.Context context) {
@@ -19,7 +19,7 @@ public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeperEnt
     }
 
     @Override
-    protected void scale(MutantCreeperEntity livingEntity, PoseStack matrixStackIn, float partialTickTime) {
+    protected void scale(MutantCreeper livingEntity, PoseStack matrixStackIn, float partialTickTime) {
         float scale = 1.2F;
         this.shadowRadius = 1.5F;
         if (livingEntity.deathTime > 0) {
@@ -32,18 +32,18 @@ public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeperEnt
     }
 
     @Override
-    protected float getWhiteOverlayProgress(MutantCreeperEntity livingEntityIn, float partialTicks) {
+    protected float getWhiteOverlayProgress(MutantCreeper livingEntityIn, float partialTicks) {
         float f = livingEntityIn.getOverlayColor(partialTicks);
         return livingEntityIn.isJumpAttacking() && livingEntityIn.deathTime == 0 ? ((int)(f * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(f, 0.5F, 1.0F)) : f;
     }
 
     @Override
-    protected float getFlipDegrees(MutantCreeperEntity livingEntity) {
+    protected float getFlipDegrees(MutantCreeper livingEntity) {
         return 0.0F;
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantCreeperEntity entity) {
+    public ResourceLocation getTextureLocation(MutantCreeper entity) {
         return TEXTURE;
     }
 }

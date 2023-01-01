@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.util.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;

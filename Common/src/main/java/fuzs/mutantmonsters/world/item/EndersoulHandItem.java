@@ -2,8 +2,8 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.entity.mutant.MutantEndermanEntity;
-import fuzs.mutantmonsters.entity.projectile.ThrowableBlockEntity;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.core.BlockPos;
@@ -61,7 +61,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
         Player player = context.getPlayer();
         if (context.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (!blockState.is(ModRegistry.ENDERSOUL_HAND_HOLDABLE)) {
+        } else if (!MutantEnderman.canBlockBeHeld(world, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE)) {
             return InteractionResult.PASS;
         } else if (!world.mayInteract(player, pos)) {
             return InteractionResult.PASS;
@@ -69,7 +69,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
             return InteractionResult.PASS;
         } else {
             if (!world.isClientSide) {
-                world.addFreshEntity(new ThrowableBlockEntity(player, blockState, pos));
+                world.addFreshEntity(new ThrowableBlock(player, blockState, pos));
                 world.removeBlock(pos, false);
             }
 
@@ -105,7 +105,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
                     worldIn.playSound(null, playerIn.xo, playerIn.yo, playerIn.zo, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
                     playerIn.teleportTo((double)endPos.getX() + 0.5, (double)endPos.getY(), (double)endPos.getZ() + 0.5);
                     worldIn.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
-                    MutantEndermanEntity.teleportAttack(playerIn);
+                    MutantEnderman.teleportAttack(playerIn);
                     EntityUtil.sendParticlePacket(playerIn, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
                     playerIn.getCooldowns().addCooldown(this, 40);
                     stack.hurtAndBreak(4, playerIn, (e) -> {

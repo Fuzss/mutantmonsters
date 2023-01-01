@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
+import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -23,7 +23,7 @@ public class EndersoulLayer<T extends LivingEntity, M extends EntityModel<T>> ex
     public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         this.getParentModel().prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
         this.getParentModel().setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        VertexConsumer ivertexbuilder = bufferIn.getBuffer(MBRenderType.energySwirl(TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F));
+        VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantRenderTypes.energySwirl(TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F));
         this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, this.getAlpha(entity, partialTicks));
     }
 

@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.world.effect;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.entity.SkullSpiritEntity;
+import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -41,7 +41,7 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         Level level = livingEntity.level;
         if (!level.isClientSide && livingEntity instanceof Mob target && PREDICATE.test(null, target)) {
-            SkullSpiritEntity spirit = new SkullSpiritEntity(level, target);
+            SkullSpirit spirit = new SkullSpirit(level, target);
             spirit.moveTo(target.getX(), target.getY(), target.getZ());
             level.addFreshEntity(spirit);
         }

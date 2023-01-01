@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.world.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.util.SeismicWave;
+import fuzs.mutantmonsters.core.SeismicWave;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;

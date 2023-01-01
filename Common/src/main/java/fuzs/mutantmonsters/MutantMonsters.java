@@ -1,14 +1,14 @@
 package fuzs.mutantmonsters;
 
-import fuzs.mutantmonsters.entity.CreeperMinionEntity;
-import fuzs.mutantmonsters.entity.EndersoulCloneEntity;
-import fuzs.mutantmonsters.entity.mutant.*;
+import fuzs.mutantmonsters.world.entity.CreeperMinion;
+import fuzs.mutantmonsters.world.entity.EndersoulClone;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.S2CAnimationMessage;
 import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
 import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
 import fuzs.mutantmonsters.network.S2CSeismicWaveFluidParticlesMessage;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
+import fuzs.mutantmonsters.world.entity.mutant.*;
 import fuzs.puzzleslib.core.CommonFactories;
 import fuzs.puzzleslib.core.ModConstructor;
 import fuzs.puzzleslib.core.ModLoaderEnvironment;
@@ -54,15 +54,15 @@ public class MutantMonsters implements ModConstructor {
 
     @Override
     public void onEntityAttributeCreation(EntityAttributesCreateContext context) {
-        context.registerEntityAttributes(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), CreeperMinionEntity.registerAttributes());
-        context.registerEntityAttributes(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), EndersoulCloneEntity.registerAttributes());
-        context.registerEntityAttributes(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), MutantCreeperEntity.registerAttributes());
-        context.registerEntityAttributes(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), MutantEndermanEntity.registerAttributes());
-        context.registerEntityAttributes(ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get(), MutantSnowGolemEntity.registerAttributes());
-        context.registerEntityAttributes(ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), SpiderPigEntity.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), CreeperMinion.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), EndersoulClone.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), MutantCreeper.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), MutantEnderman.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get(), MutantSnowGolem.registerAttributes());
+        context.registerEntityAttributes(ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), SpiderPig.registerAttributes());
         if (!ModLoaderEnvironment.INSTANCE.getModLoader().isForge()) {
-            context.registerEntityAttributes(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), MutantSkeletonEntity.registerAttributes());
-            context.registerEntityAttributes(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), MutantZombieEntity.registerAttributes());
+            context.registerEntityAttributes(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), MutantSkeleton.registerAttributes());
+            context.registerEntityAttributes(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), MutantZombie.registerAttributes());
         }
     }
 
@@ -71,7 +71,7 @@ public class MutantMonsters implements ModConstructor {
         context.registerSpawnPlacement(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
         context.registerSpawnPlacement(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
         context.registerSpawnPlacement(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
-        context.registerSpawnPlacement(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MutantEndermanEntity::canSpawn);
+        context.registerSpawnPlacement(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MutantEnderman::canSpawn);
         context.registerSpawnPlacement(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
         context.registerSpawnPlacement(ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
         context.registerSpawnPlacement(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

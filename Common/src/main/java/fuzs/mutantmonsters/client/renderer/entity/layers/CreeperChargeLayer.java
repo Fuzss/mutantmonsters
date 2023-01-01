@@ -2,9 +2,9 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
-import fuzs.mutantmonsters.entity.CreeperMinionEntity;
-import fuzs.mutantmonsters.entity.mutant.MutantCreeperEntity;
+import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
+import fuzs.mutantmonsters.world.entity.CreeperMinion;
+import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -24,10 +24,10 @@ public class CreeperChargeLayer<T extends Entity, M extends EntityModel<T>> exte
 
     @Override
     public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity instanceof MutantCreeperEntity && ((MutantCreeperEntity)entity).isCharged() || entity instanceof CreeperMinionEntity && ((CreeperMinionEntity)entity).isCharged()) {
+        if (entity instanceof MutantCreeper && ((MutantCreeper)entity).isCharged() || entity instanceof CreeperMinion && ((CreeperMinion)entity).isCharged()) {
             this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
             this.getParentModel().copyPropertiesTo(this.model);
-            VertexConsumer ivertexbuilder = bufferIn.getBuffer(MBRenderType.energySwirl(LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
+            VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantRenderTypes.energySwirl(LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
             this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
         }

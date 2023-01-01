@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.network.client;
 
-import fuzs.mutantmonsters.entity.CreeperMinionEntity;
+import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.puzzleslib.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +14,7 @@ public class C2SCreeperMinionTrackerMessage implements Message<C2SCreeperMinionT
 
     }
 
-    public C2SCreeperMinionTrackerMessage(CreeperMinionEntity creeperMinion, int optionsId, boolean setOption) {
+    public C2SCreeperMinionTrackerMessage(CreeperMinion creeperMinion, int optionsId, boolean setOption) {
         this.entityId = creeperMinion.getId();
         this.optionsId = (byte)optionsId;
         this.setOption = setOption;
@@ -40,7 +40,7 @@ public class C2SCreeperMinionTrackerMessage implements Message<C2SCreeperMinionT
 
             @Override
             public void handle(C2SCreeperMinionTrackerMessage message, Player player, Object gameInstance) {
-                CreeperMinionEntity creeperMinion = (CreeperMinionEntity) player.level.getEntity(message.entityId);
+                CreeperMinion creeperMinion = (CreeperMinion) player.level.getEntity(message.entityId);
                 if (message.optionsId == 0) {
                     creeperMinion.setDestroyBlocks(message.setOption);
                 } else if (message.optionsId == 1) {

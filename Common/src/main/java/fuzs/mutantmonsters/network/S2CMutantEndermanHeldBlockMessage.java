@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.network;
 
-import fuzs.mutantmonsters.entity.mutant.MutantEndermanEntity;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.puzzleslib.network.Message;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,7 +17,7 @@ public class S2CMutantEndermanHeldBlockMessage implements Message<S2CMutantEnder
 
     }
 
-    public S2CMutantEndermanHeldBlockMessage(MutantEndermanEntity mutantEnderman, int blockId, int index) {
+    public S2CMutantEndermanHeldBlockMessage(MutantEnderman mutantEnderman, int blockId, int index) {
         this.entityId = mutantEnderman.getId();
         this.blockId = blockId;
         this.index = (byte)index;
@@ -45,8 +45,8 @@ public class S2CMutantEndermanHeldBlockMessage implements Message<S2CMutantEnder
             public void handle(S2CMutantEndermanHeldBlockMessage message, Player player, Object gameInstance) {
                 Level level = ((Minecraft) gameInstance).level;
                 Entity entity = level.getEntity(message.entityId);
-                if (entity instanceof MutantEndermanEntity) {
-                    ((MutantEndermanEntity) entity).setHeldBlock(message.index, message.blockId, 0);
+                if (entity instanceof MutantEnderman) {
+                    ((MutantEnderman) entity).setHeldBlock(message.index, message.blockId, 0);
                 }
             }
         };

@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.entity.projectile.ThrowableBlockEntity;
+import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 
-public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlockEntity> {
+public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock> {
     private final BlockRenderDispatcher blockRenderer;
 
     public ThrowableBlockRenderer(EntityRendererProvider.Context context) {
@@ -22,7 +22,7 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlockEntity>
     }
 
     @Override
-    public void render(ThrowableBlockEntity entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+    public void render(ThrowableBlock entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
         matrixStackIn.pushPose();
         matrixStackIn.translate(0.0, 0.5, 0.0);
@@ -42,7 +42,7 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlockEntity>
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ThrowableBlockEntity pEntity) {
+    public ResourceLocation getTextureLocation(ThrowableBlock pEntity) {
         return InventoryMenu.BLOCK_ATLAS;
     }
 }

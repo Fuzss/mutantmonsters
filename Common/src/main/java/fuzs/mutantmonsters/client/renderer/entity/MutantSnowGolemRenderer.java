@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
-import fuzs.mutantmonsters.client.renderer.entity.model.MutantSnowGolemModel;
-import fuzs.mutantmonsters.client.renderer.model.MBRenderType;
-import fuzs.mutantmonsters.entity.mutant.MutantSnowGolemEntity;
+import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
+import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
+import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -22,10 +22,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 
-public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, MutantSnowGolemModel> {
+public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, MutantSnowGolemModel> {
     static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/mutant_snow_golem");
     private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/jack_o_lantern");
-    private static final RenderType GLOW_RENDER_TYPE = MBRenderType.eyes(MutantMonsters.entityTexture("mutant_snow_golem/glow"));
+    private static final RenderType GLOW_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonsters.entityTexture("mutant_snow_golem/glow"));
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);
@@ -34,7 +34,7 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, 
     }
 
     @Override
-    public void render(MutantSnowGolemEntity entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+    public void render(MutantSnowGolem entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
         Player owner = entityIn.getOwner();
         if (owner != null) {
@@ -52,20 +52,20 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, 
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantSnowGolemEntity entity) {
+    public ResourceLocation getTextureLocation(MutantSnowGolem entity) {
         return TEXTURE;
     }
 
-    static class HeldBlockLayer extends RenderLayer<MutantSnowGolemEntity, MutantSnowGolemModel> {
+    static class HeldBlockLayer extends RenderLayer<MutantSnowGolem, MutantSnowGolemModel> {
         private final BlockRenderDispatcher blockRenderer;
 
-        public HeldBlockLayer(RenderLayerParent<MutantSnowGolemEntity, MutantSnowGolemModel> entityRendererIn, BlockRenderDispatcher blockRenderer) {
+        public HeldBlockLayer(RenderLayerParent<MutantSnowGolem, MutantSnowGolemModel> entityRendererIn, BlockRenderDispatcher blockRenderer) {
             super(entityRendererIn);
             this.blockRenderer = blockRenderer;
         }
 
         @Override
-        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantSnowGolemEntity livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantSnowGolem livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
             if (livingEntity.isThrowing() && livingEntity.getThrowingTick() < 7) {
                 matrixStackIn.pushPose();
                 boolean leftHanded = livingEntity.isLeftHanded();
@@ -83,16 +83,16 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolemEntity, 
         }
     }
 
-    static class JackOLanternLayer extends RenderLayer<MutantSnowGolemEntity, MutantSnowGolemModel> {
+    static class JackOLanternLayer extends RenderLayer<MutantSnowGolem, MutantSnowGolemModel> {
         private final MutantSnowGolemModel headModel;
 
-        public JackOLanternLayer(RenderLayerParent<MutantSnowGolemEntity, MutantSnowGolemModel> entityRendererIn, EntityModelSet entityModelSet) {
+        public JackOLanternLayer(RenderLayerParent<MutantSnowGolem, MutantSnowGolemModel> entityRendererIn, EntityModelSet entityModelSet) {
             super(entityRendererIn);
             this.headModel = new MutantSnowGolemModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD)).setRenderHeadOnly();
         }
 
         @Override
-        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantSnowGolemEntity livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantSnowGolem livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
             if (livingEntity.hasJackOLantern()) {
                 if (!livingEntity.isInvisible()) {
                     this.getParentModel().copyPropertiesTo(this.headModel);

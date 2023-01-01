@@ -5,7 +5,6 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class MutantGroundPathNavigation extends GroundPathNavigation {
 
@@ -15,7 +14,7 @@ public class MutantGroundPathNavigation extends GroundPathNavigation {
 
     @Override
     protected PathFinder createPathFinder(int i) {
-        this.nodeEvaluator = new WalkNodeEvaluator();
+        this.nodeEvaluator = new MBWalkNodeProcessor();
         this.nodeEvaluator.setCanPassDoors(true);
         return new PathFinder(this.nodeEvaluator, i);
     }
@@ -37,10 +36,5 @@ public class MutantGroundPathNavigation extends GroundPathNavigation {
             }
         }
 
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
     }
 }

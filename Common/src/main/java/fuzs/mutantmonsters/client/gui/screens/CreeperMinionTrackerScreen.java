@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.gui.screens;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.entity.CreeperMinionEntity;
+import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
 import fuzs.puzzleslib.client.gui.screens.CommonScreens;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -21,12 +21,12 @@ public class CreeperMinionTrackerScreen extends Screen {
     private final int ySize = 166;
     private int guiX;
     private int guiY;
-    private final CreeperMinionEntity creeperMinion;
+    private final CreeperMinion creeperMinion;
     private boolean canRideOnShoulder;
     private boolean canDestroyBlocks;
     private boolean alwaysShowName;
 
-    public CreeperMinionTrackerScreen(CreeperMinionEntity creeperMinion) {
+    public CreeperMinionTrackerScreen(CreeperMinion creeperMinion) {
         super(creeperMinion.getDisplayName());
         this.creeperMinion = creeperMinion;
     }

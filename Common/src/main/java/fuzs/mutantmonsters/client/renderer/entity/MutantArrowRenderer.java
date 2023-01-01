@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
-import fuzs.mutantmonsters.client.renderer.entity.model.MutantArrowModel;
-import fuzs.mutantmonsters.entity.projectile.MutantArrowEntity;
+import fuzs.mutantmonsters.client.model.MutantArrowModel;
+import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class MutantArrowRenderer extends EntityRenderer<MutantArrowEntity> {
+public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
     public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_arrow");
 
     private final MutantArrowModel model;
@@ -25,12 +25,12 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrowEntity> {
     }
 
     @Override
-    public boolean shouldRender(MutantArrowEntity livingEntityIn, Frustum camera, double camX, double camY, double camZ) {
+    public boolean shouldRender(MutantArrow livingEntityIn, Frustum camera, double camX, double camY, double camZ) {
         return true;
     }
 
     @Override
-    public void render(MutantArrowEntity entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+    public void render(MutantArrow entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
 
         for(int i = 0; i < entityIn.getClones(); ++i) {
@@ -51,7 +51,7 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrowEntity> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantArrowEntity entity) {
+    public ResourceLocation getTextureLocation(MutantArrow entity) {
         return TEXTURE;
     }
 }

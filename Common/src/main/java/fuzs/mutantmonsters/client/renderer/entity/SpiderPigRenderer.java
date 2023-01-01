@@ -3,14 +3,14 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
-import fuzs.mutantmonsters.client.renderer.entity.model.SpiderPigModel;
-import fuzs.mutantmonsters.entity.mutant.SpiderPigEntity;
+import fuzs.mutantmonsters.client.model.SpiderPigModel;
+import fuzs.mutantmonsters.world.entity.mutant.SpiderPig;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
 
-public class SpiderPigRenderer extends MobRenderer<SpiderPigEntity, SpiderPigModel> {
+public class SpiderPigRenderer extends MobRenderer<SpiderPig, SpiderPigModel> {
     private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("spider_pig/spider_pig");
 
     public SpiderPigRenderer(EntityRendererProvider.Context context) {
@@ -19,17 +19,17 @@ public class SpiderPigRenderer extends MobRenderer<SpiderPigEntity, SpiderPigMod
     }
 
     @Override
-    protected float getFlipDegrees(SpiderPigEntity entityLivingBaseIn) {
+    protected float getFlipDegrees(SpiderPig entityLivingBaseIn) {
         return 180.0F;
     }
 
     @Override
-    protected void scale(SpiderPigEntity entitylivingbaseIn, PoseStack matrixStackIn, float partialTickTime) {
+    protected void scale(SpiderPig entitylivingbaseIn, PoseStack matrixStackIn, float partialTickTime) {
         matrixStackIn.scale(1.2F, 1.2F, 1.2F);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SpiderPigEntity entity) {
+    public ResourceLocation getTextureLocation(SpiderPig entity) {
         return TEXTURE;
     }
 }

@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.core;
 
 import fuzs.mutantmonsters.mixin.accessor.ExplosionFabricAccessor;
 import fuzs.mutantmonsters.mixin.accessor.MobFabricAccessor;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalEntityTypeTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -98,6 +99,6 @@ public class FabricAbstractions implements CommonAbstractions {
 
     @Override
     public boolean isBossMob(LivingEntity entity) {
-        return !entity.canChangeDimensions();
+        return entity.getType().is(ConventionalEntityTypeTags.BOSSES);
     }
 }
