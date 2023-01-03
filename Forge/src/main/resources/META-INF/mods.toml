@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[${minFMLVersion},)"
-license="MPL-2"
+license="AGPL-3.0-or-later"
 issueTrackerURL="${modIssueUrl}"
 
 [[mods]]

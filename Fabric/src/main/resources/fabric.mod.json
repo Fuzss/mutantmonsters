@@ -14,7 +14,7 @@
     "sources": "${modPageUrl}"
   },
 
-  "license": "MPL-2",
+  "license": "AGPL-3.0-or-later",
   "icon": "mod_logo.png",
 
   "environment": "${modFabricEnvironment}",
