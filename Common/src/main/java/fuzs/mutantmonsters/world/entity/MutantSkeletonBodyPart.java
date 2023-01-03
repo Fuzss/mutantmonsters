@@ -137,9 +137,8 @@ public class MutantSkeletonBodyPart extends Entity {
         if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             this.spawnAtLocation(this.getItemByPart()).setNoPickUpDelay();
         }
-
         this.discard();
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(this.level.isClientSide);
     }
 
     private boolean canHarm(Entity entity) {

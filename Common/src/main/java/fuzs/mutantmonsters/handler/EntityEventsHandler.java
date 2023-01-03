@@ -61,7 +61,7 @@ public class EntityEventsHandler {
                 }
 
                 pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600, 13));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(world.isClientSide);
             }
         }
         return InteractionResult.PASS;

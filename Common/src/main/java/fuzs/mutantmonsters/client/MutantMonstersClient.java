@@ -9,6 +9,7 @@ import fuzs.mutantmonsters.client.renderer.EndersoulHandRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionShoulderLayer;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.puzzleslib.api.client.renderer.item.v1.ItemModelOverrides;
 import fuzs.puzzleslib.client.core.ClientAbstractions;
 import fuzs.puzzleslib.client.core.ClientModConstructor;
 import net.minecraft.client.model.EndermanModel;
@@ -18,6 +19,7 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -119,6 +121,7 @@ public class MutantMonstersClient implements ClientModConstructor {
     @Override
     public void onClientSetup() {
         ClientAbstractions.INSTANCE.getSkullTypeSkins().put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
+        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemTransforms.TransformType.GUI, ItemTransforms.TransformType.GROUND, ItemTransforms.TransformType.FIXED);
     }
 
     @Override

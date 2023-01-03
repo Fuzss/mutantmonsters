@@ -183,9 +183,11 @@ public class CreeperMinionEgg extends Entity {
         if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING)) {
             Entity topPassenger = this.getTopPassenger(player);
             this.startRiding(topPassenger, true);
-            Proxy.INSTANCE.showDismountMessage();
             this.playMountSound(true);
-            return InteractionResult.sidedSuccess(player.level.isClientSide);
+            if (this.level.isClientSide) {
+                Proxy.INSTANCE.showDismountMessage();
+            }
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         return InteractionResult.PASS;
     }

@@ -124,11 +124,11 @@ public class EndersoulFragment extends Entity {
             if (this.owner == null && !player.isSecondaryUseActive()) {
                 this.owner = player;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             } else if (this.owner == player && player.isSecondaryUseActive()) {
                 this.owner = null;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
@@ -139,7 +139,7 @@ public class EndersoulFragment extends Entity {
 
             this.owner = player;
             this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
     }
 

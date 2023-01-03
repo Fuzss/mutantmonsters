@@ -54,31 +54,31 @@ public class EndersoulHandItem extends Item implements Vanishable {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        Level world = context.getLevel();
+        Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        BlockState blockState = world.getBlockState(pos);
+        BlockState blockState = level.getBlockState(pos);
         ItemStack itemStack = context.getItemInHand();
         Player player = context.getPlayer();
         if (context.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (!MutantEnderman.canBlockBeHeld(world, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE)) {
+        } else if (!MutantEnderman.canBlockBeHeld(level, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE)) {
             return InteractionResult.PASS;
-        } else if (!world.mayInteract(player, pos)) {
+        } else if (!level.mayInteract(player, pos)) {
             return InteractionResult.PASS;
         } else if (!player.mayUseItemAt(pos, context.getClickedFace(), itemStack)) {
             return InteractionResult.PASS;
         } else {
-            if (!world.isClientSide) {
-                world.addFreshEntity(new ThrowableBlock(player, blockState, pos));
-                world.removeBlock(pos, false);
+            if (!level.isClientSide) {
+                level.addFreshEntity(new ThrowableBlock(player, blockState, pos));
+                level.removeBlock(pos, false);
             }
 
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player playerIn, InteractionHand handIn) {
         ItemStack stack = playerIn.getItemInHand(handIn);
         if (!playerIn.isSecondaryUseActive()) {
             return InteractionResultHolder.pass(stack);
@@ -88,23 +88,23 @@ public class EndersoulHandItem extends Item implements Vanishable {
                 playerIn.displayClientMessage(Component.translatable(this.getDescriptionId() + ".teleport_failed"), true);
                 return InteractionResultHolder.fail(stack);
             } else {
-                if (!worldIn.isClientSide) {
+                if (!level.isClientSide) {
                     BlockPos startPos = ((BlockHitResult)result).getBlockPos();
                     BlockPos endPos = startPos.relative(((BlockHitResult)result).getDirection());
                     BlockPos posDown = startPos.below();
-                    if (!worldIn.isEmptyBlock(posDown) || !worldIn.getBlockState(posDown).getMaterial().blocksMotion()) {
+                    if (!level.isEmptyBlock(posDown) || !level.getBlockState(posDown).getMaterial().blocksMotion()) {
                         for(int tries = 0; tries < 3; ++tries) {
                             BlockPos checkPos = startPos.above(tries + 1);
-                            if (worldIn.isEmptyBlock(checkPos)) {
+                            if (level.isEmptyBlock(checkPos)) {
                                 endPos = checkPos;
                                 break;
                             }
                         }
                     }
 
-                    worldIn.playSound(null, playerIn.xo, playerIn.yo, playerIn.zo, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
-                    playerIn.teleportTo((double)endPos.getX() + 0.5, (double)endPos.getY(), (double)endPos.getZ() + 0.5);
-                    worldIn.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
+                    level.playSound(null, playerIn.xo, playerIn.yo, playerIn.zo, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
+                    playerIn.teleportTo((double)endPos.getX() + 0.5, endPos.getY(), (double)endPos.getZ() + 0.5);
+                    level.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
                     MutantEnderman.teleportAttack(playerIn);
                     EntityUtil.sendParticlePacket(playerIn, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
                     playerIn.getCooldowns().addCooldown(this, 40);
@@ -116,7 +116,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
                 playerIn.fallDistance = 0.0F;
                 playerIn.swing(handIn);
                 playerIn.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide);
+                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
             }
         }
     }

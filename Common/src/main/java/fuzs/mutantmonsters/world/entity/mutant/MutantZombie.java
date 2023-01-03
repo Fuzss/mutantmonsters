@@ -217,7 +217,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
             });
             player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
             this.level.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else {
             return InteractionResult.PASS;
         }

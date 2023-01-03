@@ -236,7 +236,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 itemStack.hurtAndBreak(1, player, (e) -> {
                     e.broadcastBreakEvent(hand);
                 });
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
@@ -246,7 +246,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 this.setOwner(player);
             }
 
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
     }
 

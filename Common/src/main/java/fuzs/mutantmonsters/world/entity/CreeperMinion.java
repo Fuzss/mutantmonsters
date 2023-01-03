@@ -281,13 +281,12 @@ public class CreeperMinion extends ShoulderRidingEntity {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         Item item = itemstack.getItem();
-        InteractionResult success = InteractionResult.sidedSuccess(player.level.isClientSide);
         if (this.isTame()) {
             if (item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get()) {
-                if (player.level.isClientSide) {
+                if (this.level.isClientSide) {
                     Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
                 }
-                return success;
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             } else {
                 if (this.isOwnedBy(player)) {
                     if (item == Items.GUNPOWDER) {
@@ -301,7 +300,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
                             this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return success;
+                            return InteractionResult.sidedSuccess(this.level.isClientSide);
                         }
 
                         if (this.getMaxHealth() < 20.0F) {
@@ -311,7 +310,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
                             this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return success;
+                            return InteractionResult.sidedSuccess(this.level.isClientSide);
                         }
                     } else {
                         if (item != Items.TNT) {
@@ -321,14 +320,14 @@ public class CreeperMinion extends ShoulderRidingEntity {
                                 this.setTarget(null);
                             }
 
-                            return success;
+                            return InteractionResult.sidedSuccess(this.level.isClientSide);
                         }
 
                         if (!this.canExplodeContinuously()) {
                             this.forcedAgeTimer += 15;
                             this.setCanExplodeContinuously(true);
                             itemstack.shrink(1);
-                            return success;
+                            return InteractionResult.sidedSuccess(this.level.isClientSide);
                         }
 
                         float explosionRadius = this.getExplosionRadius();
@@ -336,7 +335,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.forcedAgeTimer += 10;
                             this.setExplosionRadius(explosionRadius + 0.11F);
                             itemstack.shrink(1);
-                            return success;
+                            return InteractionResult.sidedSuccess(this.level.isClientSide);
                         }
                     }
                 }
@@ -353,7 +352,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 });
             }
 
-            return success;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else if (player.isCreative() && item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get() && this.getOwner() == null) {
             if (!this.level.isClientSide) {
                 this.setTame(true);
@@ -361,7 +360,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
             }
 
-            return success;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else {
             return InteractionResult.PASS;
         }
