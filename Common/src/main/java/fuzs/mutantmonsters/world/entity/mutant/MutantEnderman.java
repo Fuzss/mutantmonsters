@@ -432,7 +432,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
     }
 
     public static boolean canBlockBeHeld(Level level, BlockPos pos, BlockState state, TagKey<Block> tag) {
-        return state.isCollisionShapeFullBlock(level, pos) && (state.is(Blocks.END_STONE) || !state.is(tag));
+        return state.isCollisionShapeFullBlock(level, pos) && !state.hasBlockEntity() && (state.is(Blocks.END_STONE) || !state.is(tag));
     }
 
     private void updateTeleport() {

@@ -1,11 +1,11 @@
 package fuzs.mutantmonsters.handler;
 
+import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.core.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
-import fuzs.mutantmonsters.world.item.HulkHammerItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -26,13 +26,14 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 public class PlayerEventsHandler {
+    private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 6;
 
     public static OptionalInt onItemUseTick(LivingEntity entity, ItemStack item, int duration) {
         if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {
@@ -106,26 +107,34 @@ public class PlayerEventsHandler {
     public static void onPlayerTick$End(Player player) {
         playShoulderEntitySound(player, player.getShoulderEntityLeft());
         playShoulderEntitySound(player, player.getShoulderEntityRight());
-        if (!player.level.isClientSide && !HulkHammerItem.WAVES.isEmpty() && HulkHammerItem.WAVES.containsKey(player.getUUID())) {
-            List<SeismicWave> waveList = HulkHammerItem.WAVES.get(player.getUUID());
-
-            while (waveList.size() > 16) {
-                waveList.remove(0);
-            }
-
-            SeismicWave wave = waveList.remove(0);
-            wave.affectBlocks(player.level, player);
-            AABB box = new AABB(wave.getX(), (double) wave.getY() + 1.0, wave.getZ(), (double) wave.getX() + 1.0, (double) wave.getY() + 2.0, (double) wave.getZ() + 1.0);
-
-            for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
-                if (livingEntity != player && player.getVehicle() != livingEntity) {
-                    livingEntity.hurt(DamageSource.playerAttack(player).bypassMagic(), (float) (6 + player.getRandom().nextInt(3)));
+        if (!player.level.isClientSide) {
+            ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(player).map(SeismicWavesCapability::getSeismicWaves).ifPresent(seismicWaves -> {
+                while (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
+                    seismicWaves.poll();
                 }
-            }
+                if (!seismicWaves.isEmpty()) handleSeismicWave(player, seismicWaves.poll());
+            });
+        }
+    }
 
-            if (waveList.isEmpty()) {
-                HulkHammerItem.WAVES.remove(player.getUUID());
+    private static void handleSeismicWave(Player player, @NotNull SeismicWave seismicWave) {
+        seismicWave.affectBlocks(player.level, player);
+        AABB box = new AABB(seismicWave.getX(), (double) seismicWave.getY() + 1.0, seismicWave.getZ(), (double) seismicWave.getX() + 1.0, (double) seismicWave.getY() + 2.0, (double) seismicWave.getZ() + 1.0);
+
+        for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
+            if (livingEntity != player && player.getVehicle() != livingEntity) {
+                livingEntity.hurt(DamageSource.playerAttack(player).bypassMagic(), (float) (6 + player.getRandom().nextInt(3)));
             }
+        }
+    }
+
+    private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
+        if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
+            EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
+                if (player.level.random.nextInt(500) == 0) {
+                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.2F + 1.5F);
+                }
+            });
         }
     }
 
@@ -159,15 +168,5 @@ public class PlayerEventsHandler {
             }
         }
         return Optional.empty();
-    }
-
-    private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
-        if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
-            EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
-                if (player.level.random.nextInt(500) == 0) {
-                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.2F + 1.5F);
-                }
-            });
-        }
     }
 }

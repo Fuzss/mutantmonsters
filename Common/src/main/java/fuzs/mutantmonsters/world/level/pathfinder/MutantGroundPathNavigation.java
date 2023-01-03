@@ -14,7 +14,7 @@ public class MutantGroundPathNavigation extends GroundPathNavigation {
 
     @Override
     protected PathFinder createPathFinder(int i) {
-        this.nodeEvaluator = new MBWalkNodeProcessor();
+        this.nodeEvaluator = new MutantWalkNodeEvaluator();
         this.nodeEvaluator.setCanPassDoors(true);
         return new PathFinder(this.nodeEvaluator, i);
     }

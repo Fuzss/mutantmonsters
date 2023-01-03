@@ -1,11 +1,13 @@
 package fuzs.mutantmonsters;
 
+import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
-import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
-import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModRegistryForge;
+import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
+import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
+import fuzs.puzzleslib.capability.ForgeCapabilityController;
 import fuzs.puzzleslib.core.CommonFactories;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +15,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.TickEvent;
@@ -36,7 +39,12 @@ public class MutantMonstersForge {
     public static void onConstructMod(final FMLConstructModEvent evt) {
         CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID).accept(new MutantMonsters());
         ModRegistryForge.touch();
+        registerCapabilities();
         registerHandlers();
+    }
+
+    private static void registerCapabilities() {
+        ForgeCapabilityController.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<SeismicWavesCapability>() {});
     }
 
     private static void registerHandlers() {

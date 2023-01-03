@@ -37,5 +37,11 @@
     "puzzleslib": ">=${minPuzzlesVersion}",
     "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
     "java": ">=17"
+  },
+
+  "custom": {
+    "cardinal-components": [
+      "${modId}:seismic_waves"
+    ]
   }
 }

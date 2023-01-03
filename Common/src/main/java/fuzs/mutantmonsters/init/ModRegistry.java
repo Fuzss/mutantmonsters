@@ -1,6 +1,8 @@
 package fuzs.mutantmonsters.init;
 
 import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.capability.SeismicWavesCapability;
+import fuzs.mutantmonsters.capability.SeismicWavesCapabilityImpl;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.entity.*;
 import fuzs.mutantmonsters.world.entity.mutant.*;
@@ -10,6 +12,9 @@ import fuzs.mutantmonsters.world.item.*;
 import fuzs.mutantmonsters.world.level.block.SkullWithItemTagBlock;
 import fuzs.mutantmonsters.world.level.block.WallSkullWithItemTagBlock;
 import fuzs.mutantmonsters.world.level.block.entity.SkullWithItemTagBlockEntity;
+import fuzs.puzzleslib.capability.CapabilityController;
+import fuzs.puzzleslib.capability.data.PlayerCapabilityKey;
+import fuzs.puzzleslib.capability.data.PlayerRespawnStrategy;
 import fuzs.puzzleslib.core.CommonAbstractions;
 import fuzs.puzzleslib.core.CommonFactories;
 import fuzs.puzzleslib.core.ModLoader;
@@ -138,6 +143,9 @@ public class ModRegistry {
     public static final RegistryReference<SoundEvent> ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.spider_pig.ambient");
     public static final RegistryReference<SoundEvent> ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.spider_pig.death");
     public static final RegistryReference<SoundEvent> ENTITY_SPIDER_PIG_HURT_SOUND_EVENT = REGISTRY.registerRawSoundEvent("entity.spider_pig.hurt");
+
+    private static final CapabilityController CAPABILITY = CommonFactories.INSTANCE.capabilities(MutantMonsters.MOD_ID);
+    public static final PlayerCapabilityKey<SeismicWavesCapability> SEISMIC_WAVES_CAPABILITY = CAPABILITY.registerPlayerCapability("seismic_waves", SeismicWavesCapability.class, player -> new SeismicWavesCapabilityImpl(), PlayerRespawnStrategy.NEVER);
 
     public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("mutant_enderman_holdable_immune"));
     public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("endersoul_hand_holdable_immune"));

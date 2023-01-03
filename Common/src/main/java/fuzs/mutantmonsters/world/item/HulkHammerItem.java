@@ -1,9 +1,10 @@
 package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.core.SeismicWave;
+import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -25,11 +26,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HulkHammerItem extends Item implements Vanishable {
-    public static final Map<UUID, List<SeismicWave>> WAVES = new HashMap<>();
-
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
     public HulkHammerItem(Item.Properties properties) {
@@ -76,7 +76,7 @@ public class HulkHammerItem extends Item implements Vanishable {
                 int x1 = Mth.floor(playerEntity.getX() + vec.x * 8.0);
                 int z1 = Mth.floor(playerEntity.getZ() + vec.z * 8.0);
                 SeismicWave.createWaves(world, list, x, z, x1, z1, y);
-                addWave(playerEntity.getUUID(), list);
+                ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(playerEntity).map(SeismicWavesCapability::getSeismicWaves).ifPresent(seismicWaves -> seismicWaves.addAll(list));
             }
 
             world.playSound(playerEntity, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 0.8F, 0.8F + playerEntity.getRandom().nextFloat() * 0.4F);
@@ -92,15 +92,5 @@ public class HulkHammerItem extends Item implements Vanishable {
     @Override
     public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
         return slot == EquipmentSlot.MAINHAND ? this.attributeModifiers : super.getDefaultAttributeModifiers(slot);
-    }
-
-    public static void addWave(UUID uuid, List<SeismicWave> list) {
-        List<SeismicWave> waves = Iterables.getLast(WAVES.values(), null);
-        if (waves == null) {
-            WAVES.put(uuid, list);
-        } else {
-            waves.addAll(list);
-            WAVES.put(uuid, waves);
-        }
     }
 }

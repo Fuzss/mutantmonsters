@@ -79,10 +79,9 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
 
         if (blockstate.is(BlockTags.PORTALS)) return BlockPathTypes.DAMAGE_OTHER;
         if (block.getJumpFactor() < 1.0F) return BlockPathTypes.STICKY_HONEY;
-        if (!(block.getSpeedFactor() < 1.0F) && !blockstate.is(Blocks.COBWEB) && !blockstate.is(BlockTags.PRESSURE_PLATES) && !blockstate.is(Blocks.TRIPWIRE) && !blockstate.is(Blocks.WITHER_ROSE)) {
+        if (block.getSpeedFactor() < 1.0F || blockstate.is(Blocks.COBWEB) || blockstate.is(BlockTags.PRESSURE_PLATES) || blockstate.is(Blocks.TRIPWIRE) || blockstate.is(Blocks.WITHER_ROSE)) {
             return BlockPathTypes.DANGER_OTHER;
         }
-
         return WalkNodeEvaluator.getBlockPathTypeRaw(blockReader, blockPos);
     }
 
