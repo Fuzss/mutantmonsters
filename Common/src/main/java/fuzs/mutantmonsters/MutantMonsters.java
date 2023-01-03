@@ -1,12 +1,10 @@
 package fuzs.mutantmonsters;
 
+import fuzs.mutantmonsters.network.*;
+import fuzs.mutantmonsters.network.client.C2SCreeperMinionNameMessage;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.EndersoulClone;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.network.S2CAnimationMessage;
-import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
-import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
-import fuzs.mutantmonsters.network.S2CSeismicWaveFluidParticlesMessage;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
 import fuzs.mutantmonsters.world.entity.mutant.*;
 import fuzs.puzzleslib.core.CommonFactories;
@@ -27,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MutantMonsters implements ModConstructor {
-    public static final String MOD_ID = "mutantbeasts";
+    public static final String MOD_ID = "mutantmonsters";
     public static final String MOD_NAME = "Mutant Monsters";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
@@ -47,6 +45,7 @@ public class MutantMonsters implements ModConstructor {
     private static void registerMessages() {
         NETWORK.register(C2SCreeperMinionTrackerMessage.class, C2SCreeperMinionTrackerMessage::new, MessageDirection.TO_SERVER);
         NETWORK.register(S2CMutantLevelParticlesMessage.class, S2CMutantLevelParticlesMessage::new, MessageDirection.TO_CLIENT);
+        NETWORK.register(C2SCreeperMinionNameMessage.class, C2SCreeperMinionNameMessage::new, MessageDirection.TO_SERVER);
         NETWORK.register(S2CAnimationMessage.class, S2CAnimationMessage::new, MessageDirection.TO_CLIENT);
         NETWORK.register(S2CSeismicWaveFluidParticlesMessage.class, S2CSeismicWaveFluidParticlesMessage::new, MessageDirection.TO_CLIENT);
         NETWORK.register(S2CMutantEndermanHeldBlockMessage.class, S2CMutantEndermanHeldBlockMessage::new, MessageDirection.TO_CLIENT);

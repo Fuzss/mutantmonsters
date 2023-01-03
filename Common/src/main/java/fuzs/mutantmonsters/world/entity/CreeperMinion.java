@@ -48,9 +48,9 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 public class CreeperMinion extends ShoulderRidingEntity {
-    private static final EntityDataAccessor<Byte> CREEPER_MINION_FLAGS;
-    private static final EntityDataAccessor<Integer> EXPLODE_STATE;
-    private static final EntityDataAccessor<Float> EXPLOSION_RADIUS;
+    private static final EntityDataAccessor<Byte> CREEPER_MINION_FLAGS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Integer> EXPLODE_STATE = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> EXPLOSION_RADIUS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.FLOAT);
 
     private int lastActiveTime;
     private int timeSinceIgnited;
@@ -65,7 +65,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(2, new SwellGoal());
+        this.goalSelector.addGoal(2, new CreeperMinionSwellGoal());
         this.goalSelector.addGoal(3, new AvoidDamageGoal(this, 1.2));
         this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Animal.class, 6.0F, 1.0, 1.2, EntityUtil::isFeline) {
             @Override
@@ -74,7 +74,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
             }
         });
         this.goalSelector.addGoal(4, new MutantMeleeAttackGoal(this, 1.2));
-        this.goalSelector.addGoal(5, new MBFollowOwnerGoal());
+        this.goalSelector.addGoal(5, new CreeperMinionFollowOwnerGoal());
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(7, new LandOnOwnersShoulderGoal(this) {
             @Override
@@ -281,10 +281,13 @@ public class CreeperMinion extends ShoulderRidingEntity {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         Item item = itemstack.getItem();
+        InteractionResult success = InteractionResult.sidedSuccess(player.level.isClientSide);
         if (this.isTame()) {
             if (item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get()) {
-                Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
-                return InteractionResult.SUCCESS;
+                if (player.level.isClientSide) {
+                    Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
+                }
+                return success;
             } else {
                 if (this.isOwnedBy(player)) {
                     if (item == Items.GUNPOWDER) {
@@ -298,7 +301,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
                             this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return InteractionResult.SUCCESS;
+                            return success;
                         }
 
                         if (this.getMaxHealth() < 20.0F) {
@@ -308,7 +311,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
                             this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return InteractionResult.SUCCESS;
+                            return success;
                         }
                     } else {
                         if (item != Items.TNT) {
@@ -318,14 +321,14 @@ public class CreeperMinion extends ShoulderRidingEntity {
                                 this.setTarget(null);
                             }
 
-                            return InteractionResult.SUCCESS;
+                            return success;
                         }
 
                         if (!this.canExplodeContinuously()) {
                             this.forcedAgeTimer += 15;
                             this.setCanExplodeContinuously(true);
                             itemstack.shrink(1);
-                            return InteractionResult.SUCCESS;
+                            return success;
                         }
 
                         float explosionRadius = this.getExplosionRadius();
@@ -333,7 +336,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.forcedAgeTimer += 10;
                             this.setExplosionRadius(explosionRadius + 0.11F);
                             itemstack.shrink(1);
-                            return InteractionResult.SUCCESS;
+                            return success;
                         }
                     }
                 }
@@ -350,7 +353,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 });
             }
 
-            return InteractionResult.SUCCESS;
+            return success;
         } else if (player.isCreative() && item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get() && this.getOwner() == null) {
             if (!this.level.isClientSide) {
                 this.setTame(true);
@@ -358,7 +361,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
             }
 
-            return InteractionResult.SUCCESS;
+            return success;
         } else {
             return InteractionResult.PASS;
         }
@@ -507,14 +510,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     }
 
-    static {
-        CREEPER_MINION_FLAGS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.BYTE);
-        EXPLODE_STATE = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.INT);
-        EXPLOSION_RADIUS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.FLOAT);
-    }
-
-    class MBFollowOwnerGoal extends FollowOwnerGoal {
-        public MBFollowOwnerGoal() {
+    class CreeperMinionFollowOwnerGoal extends FollowOwnerGoal {
+        public CreeperMinionFollowOwnerGoal() {
             super(CreeperMinion.this, 1.2, 10.0F, 5.0F, false);
         }
 
@@ -531,8 +528,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
         }
     }
 
-    class SwellGoal extends Goal {
-        public SwellGoal() {
+    class CreeperMinionSwellGoal extends Goal {
+        public CreeperMinionSwellGoal() {
             this.setFlags(EnumSet.of(Flag.MOVE));
         }
 

@@ -8,4 +8,9 @@ public class ServerProxy implements Proxy {
     public void displayCreeperMinionTrackerGUI(CreeperMinion creeperMinion) {
 
     }
+
+    @Override
+    public void showDismountMessage() {
+
+    }
 }

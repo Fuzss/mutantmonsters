@@ -8,4 +8,6 @@ public interface Proxy {
     Proxy INSTANCE = DistTypeExecutor.getForDistType(() -> () -> new ClientProxy(), () -> () -> new ServerProxy());
 
     void displayCreeperMinionTrackerGUI(CreeperMinion creeperMinion);
+
+    void showDismountMessage();
 }

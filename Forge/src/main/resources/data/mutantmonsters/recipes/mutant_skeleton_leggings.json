@@ -1,0 +1,19 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" P ",
+		"L L",
+		"   "
+	],
+	"key": {
+		"P": {
+			"item": "mutantmonsters:mutant_skeleton_pelvis"
+		},
+		"L": {
+			"item": "mutantmonsters:mutant_skeleton_limb"
+		}
+	},
+	"result": {
+		"item": "mutantmonsters:mutant_skeleton_leggings"
+	}
+}

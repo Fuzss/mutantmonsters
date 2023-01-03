@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.network.client;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.puzzleslib.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 public class C2SCreeperMinionTrackerMessage implements Message<C2SCreeperMinionTrackerMessage> {
@@ -40,13 +41,15 @@ public class C2SCreeperMinionTrackerMessage implements Message<C2SCreeperMinionT
 
             @Override
             public void handle(C2SCreeperMinionTrackerMessage message, Player player, Object gameInstance) {
-                CreeperMinion creeperMinion = (CreeperMinion) player.level.getEntity(message.entityId);
-                if (message.optionsId == 0) {
-                    creeperMinion.setDestroyBlocks(message.setOption);
-                } else if (message.optionsId == 1) {
-                    creeperMinion.setCustomNameVisible(message.setOption);
-                } else if (message.optionsId == 2) {
-                    creeperMinion.setCanRideOnShoulder(message.setOption);
+                Entity entity = player.level.getEntity(message.entityId);
+                if (entity instanceof CreeperMinion creeperMinion) {
+                    if (message.optionsId == 0) {
+                        creeperMinion.setDestroyBlocks(message.setOption);
+                    } else if (message.optionsId == 1) {
+                        creeperMinion.setCustomNameVisible(message.setOption);
+                    } else if (message.optionsId == 2) {
+                        creeperMinion.setCanRideOnShoulder(message.setOption);
+                    }
                 }
             }
         };

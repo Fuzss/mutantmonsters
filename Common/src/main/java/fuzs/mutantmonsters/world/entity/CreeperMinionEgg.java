@@ -1,9 +1,10 @@
 package fuzs.mutantmonsters.world.entity;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.proxy.Proxy;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -38,6 +39,7 @@ public class CreeperMinionEgg extends Entity {
     private double velocityY;
     private double velocityZ;
     private UUID ownerUUID;
+    private int dismountTicks;
 
     public CreeperMinionEgg(EntityType<? extends CreeperMinionEgg> type, Level world) {
         super(type, world);
@@ -98,11 +100,6 @@ public class CreeperMinionEgg extends Entity {
         return this.isAlive();
     }
 
-//    @Override
-//    public boolean canRiderInteract() {
-//        return true;
-//    }
-
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
@@ -156,9 +153,17 @@ public class CreeperMinionEgg extends Entity {
             this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, 0.0, 0.7));
         }
 
-        if (this.isPassenger() && (this.isInWall() || this.getVehicle().getPose() != Pose.STANDING && this.getVehicle().getPose() != Pose.CROUCHING || this.getVehicle().isSpectator())) {
-            this.stopRiding();
-            this.playMountSound(false);
+        if (this.isPassenger()) {
+            if (this.getFirstPassenger() != null) {
+                this.dismountTicks = 10;
+            } else if (this.dismountTicks > 0) {
+                this.dismountTicks--;
+            }
+            Entity rootVehicle = this.getRootVehicle();
+            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) || this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
+                this.stopRiding();
+                this.playMountSound(false);
+            }
         }
 
         if (!this.level.isClientSide) {
@@ -175,17 +180,14 @@ public class CreeperMinionEgg extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.getVehicle() == player) {
-            this.getTopPassenger(player).stopRiding();
-            this.playMountSound(false);
-            return InteractionResult.SUCCESS;
-        } else if (player.getPose() != Pose.STANDING && player.getPose() != Pose.CROUCHING) {
-            return InteractionResult.PASS;
-        } else {
-            this.startRiding(this.getTopPassenger(player), true);
+        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING)) {
+            Entity topPassenger = this.getTopPassenger(player);
+            this.startRiding(topPassenger, true);
+            Proxy.INSTANCE.showDismountMessage();
             this.playMountSound(true);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(player.level.isClientSide);
         }
+        return InteractionResult.PASS;
     }
 
     private Entity getTopPassenger(Entity entity) {
@@ -245,6 +247,7 @@ public class CreeperMinionEgg extends Entity {
         if (this.ownerUUID != null) {
             compound.putUUID("Owner", this.ownerUUID);
         }
+        compound.putByte("DismountTicks", (byte) this.dismountTicks);
 
     }
 
@@ -265,7 +268,7 @@ public class CreeperMinionEgg extends Entity {
         } else if (compound.hasUUID("Owner")) {
             this.ownerUUID = compound.getUUID("Owner");
         }
-
+        this.dismountTicks = compound.getByte("DismountTicks");
     }
 
     @Override
