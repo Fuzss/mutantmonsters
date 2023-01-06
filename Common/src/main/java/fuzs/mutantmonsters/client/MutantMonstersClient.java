@@ -30,6 +30,10 @@ import net.minecraft.world.entity.player.Player;
 
 public class MutantMonstersClient implements ClientModConstructor {
 
+    public static ResourceLocation entityTexture(String name) {
+        return MutantMonsters.id("textures/entity/" + name + ".png");
+    }
+
     @Override
     public void onRegisterEntityRenderers(EntityRenderersContext context) {
         context.registerEntityRenderer(ModRegistry.BODY_PART_ENTITY_TYPE.get(), BodyPartRenderer::new);

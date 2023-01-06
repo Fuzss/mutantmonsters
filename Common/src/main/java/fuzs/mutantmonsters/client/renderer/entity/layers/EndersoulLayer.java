@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 public class EndersoulLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
-    public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("endersoul");
+    public static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("endersoul");
 
     public EndersoulLayer(RenderLayerParent<T, M> entityRendererIn) {
         super(entityRendererIn);

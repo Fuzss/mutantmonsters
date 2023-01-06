@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
@@ -23,9 +23,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 
 public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, MutantSnowGolemModel> {
-    static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/mutant_snow_golem");
-    private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonsters.entityTexture("mutant_snow_golem/jack_o_lantern");
-    private static final RenderType GLOW_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonsters.entityTexture("mutant_snow_golem/glow"));
+    static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_snow_golem/mutant_snow_golem");
+    private static final ResourceLocation JACK_O_LANTERN_TEXTURE = MutantMonstersClient.entityTexture("mutant_snow_golem/jack_o_lantern");
+    private static final RenderType GLOW_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonstersClient.entityTexture("mutant_snow_golem/glow"));
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);

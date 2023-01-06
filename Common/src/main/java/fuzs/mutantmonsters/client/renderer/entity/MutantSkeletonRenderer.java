@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
 import fuzs.mutantmonsters.client.model.MutantSkeletonModel;
@@ -18,8 +18,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSkeletonModel> {
-    public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_skeleton");
-    private static final ResourceLocation CROSSBOW_TEXTURE = MutantMonsters.entityTexture("mutant_crossbow");
+    public static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_skeleton");
+    private static final ResourceLocation CROSSBOW_TEXTURE = MutantMonstersClient.entityTexture("mutant_crossbow");
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON), context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)), 0.6F);

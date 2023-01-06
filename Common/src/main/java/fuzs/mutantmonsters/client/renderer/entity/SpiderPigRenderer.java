@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.SpiderPigModel;
 import fuzs.mutantmonsters.world.entity.mutant.SpiderPig;
@@ -11,11 +11,11 @@ import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public class SpiderPigRenderer extends MobRenderer<SpiderPig, SpiderPigModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("spider_pig/spider_pig");
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("spider_pig/spider_pig");
 
     public SpiderPigRenderer(EntityRendererProvider.Context context) {
         super(context, new SpiderPigModel(context.bakeLayer(ClientModRegistry.SPIDER_PIG)), 0.8F);
-        this.addLayer(new SaddleLayer<>(this, this.model, MutantMonsters.entityTexture("spider_pig/saddle")));
+        this.addLayer(new SaddleLayer<>(this, this.model, MutantMonstersClient.entityTexture("spider_pig/saddle")));
     }
 
     @Override

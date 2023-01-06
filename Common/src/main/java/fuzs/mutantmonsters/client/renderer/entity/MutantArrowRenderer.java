@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
 import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
-    public static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_arrow");
+    public static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_arrow");
 
     private final MutantArrowModel model;
 

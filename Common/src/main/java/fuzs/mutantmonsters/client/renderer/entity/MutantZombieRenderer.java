@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantZombieModel;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, MutantZombieModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_zombie");
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_zombie");
 
     public MutantZombieRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantZombieModel(context.bakeLayer(ClientModRegistry.MUTANT_ZOMBIE)), 1.0F);

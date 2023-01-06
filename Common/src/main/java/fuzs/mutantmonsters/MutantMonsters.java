@@ -1,12 +1,19 @@
 package fuzs.mutantmonsters;
 
-import fuzs.mutantmonsters.network.*;
+import fuzs.mutantmonsters.config.CommonConfig;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.network.S2CAnimationMessage;
+import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
+import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
+import fuzs.mutantmonsters.network.S2CSeismicWaveFluidParticlesMessage;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionNameMessage;
+import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.EndersoulClone;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
 import fuzs.mutantmonsters.world.entity.mutant.*;
+import fuzs.puzzleslib.api.biome.v1.BiomeLoadingPhase;
+import fuzs.puzzleslib.api.biome.v1.MobSpawnSettingsContext;
+import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CommonFactories;
 import fuzs.puzzleslib.core.ModConstructor;
 import fuzs.puzzleslib.core.ModLoaderEnvironment;
@@ -14,12 +21,15 @@ import fuzs.puzzleslib.init.PotionBrewingRegistry;
 import fuzs.puzzleslib.network.MessageDirection;
 import fuzs.puzzleslib.network.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +39,17 @@ public class MutantMonsters implements ModConstructor {
     public static final String MOD_NAME = "Mutant Monsters";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
+    @SuppressWarnings("Convert2MethodRef")
+    public static final ConfigHolder CONFIG = CommonFactories.INSTANCE.commonConfig(CommonConfig.class, () -> new CommonConfig());
     public static final NetworkHandler NETWORK = CommonFactories.INSTANCE.network(MOD_ID);
+
+    public static ResourceLocation id(String name) {
+        return new ResourceLocation(MOD_ID, name);
+    }
 
     @Override
     public void onConstructMod() {
+        CONFIG.bakeConfigs(MOD_ID);
         ModRegistry.touch();
         registerMessages();
     }
@@ -77,11 +94,28 @@ public class MutantMonsters implements ModConstructor {
         context.registerSpawnPlacement(ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING, Animal::checkAnimalSpawnRules);
     }
 
-    public static ResourceLocation id(String name) {
-        return new ResourceLocation(MOD_ID, name);
+    @Override
+    public void onRegisterBiomeModifications(BiomeModificationsContext context) {
+        context.register(BiomeLoadingPhase.ADDITIONS, biomeLoadingContext -> {
+            return true;
+//            return !CONFIG.get(CommonConfig.class).biomeBlacklist.contains(biomeLoadingContext.getBiome());
+        }, biomeModificationContext -> {
+            MobSpawnSettingsContext spawnSettings = biomeModificationContext.mobSpawnSettings();
+            CommonConfig config = CONFIG.get(CommonConfig.class);
+            addMutantSpawn(spawnSettings, config.mutantCreeperSpawnWeight, MobCategory.MONSTER, EntityType.CREEPER, ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantEndermanSpawnWeight, MobCategory.MONSTER, EntityType.ENDERMAN, ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantSkeletonSpawnWeight, MobCategory.MONSTER, EntityType.SKELETON, ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantZombieSpawnWeight, MobCategory.MONSTER, EntityType.ZOMBIE, ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get());
+        });
     }
 
-    public static ResourceLocation entityTexture(String name) {
-        return id("textures/entity/" + name + ".png");
+    private static void addMutantSpawn(MobSpawnSettingsContext spawnSettings, int spawnWeight, MobCategory mobCategory, EntityType<?> entityType, EntityType<?> mutantEntityType) {
+        if (spawnWeight <= 0) return;
+        if (spawnSettings.getSpawnerData(mobCategory).stream().anyMatch(data -> data.type == entityType)) {
+            spawnSettings.addSpawn(mobCategory, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnWeight, 1, 1));
+        }
+        if (spawnSettings.getSpawnCost(entityType) != null) {
+            spawnSettings.setSpawnCost(mutantEntityType, 0.7, 0.15);
+        }
     }
 }

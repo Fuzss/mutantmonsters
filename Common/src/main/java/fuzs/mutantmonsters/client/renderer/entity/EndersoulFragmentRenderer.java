@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.EndersoulFragmentModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class EndersoulFragmentRenderer extends EntityRenderer<EndersoulFragment> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("endersoul_fragment");
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("endersoul_fragment");
     private final EndersoulFragmentModel model;
 
     public EndersoulFragmentRenderer(EntityRendererProvider.Context context) {

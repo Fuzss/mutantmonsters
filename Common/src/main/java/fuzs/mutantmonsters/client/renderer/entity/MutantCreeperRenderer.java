@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
 import fuzs.mutantmonsters.client.model.MutantCreeperModel;
@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeper, MutantCreeperModel> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_creeper");
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_creeper");
 
     public MutantCreeperRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantCreeperModel(context.bakeLayer(ClientModRegistry.MUTANT_CREEPER)), 1.5F);

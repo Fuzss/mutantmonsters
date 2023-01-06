@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
 import fuzs.mutantmonsters.client.model.CreeperMinionEggModel;
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEgg> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("creeper_minion_egg");
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("creeper_minion_egg");
     private final CreeperMinionEggModel eggModel;
     private final CreeperMinionEggModel chargedModel;
 

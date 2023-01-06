@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.renderer.entity.layers.EndersoulLayer;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
@@ -26,9 +26,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman, EntityModel<MutantEnderman>> {
-    private static final ResourceLocation TEXTURE = MutantMonsters.entityTexture("mutant_enderman/mutant_enderman");
-    private static final ResourceLocation DEATH_TEXTURE = MutantMonsters.entityTexture("mutant_enderman/death");
-    private static final RenderType EYES_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonsters.entityTexture("mutant_enderman/eyes"));
+    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_enderman/mutant_enderman");
+    private static final ResourceLocation DEATH_TEXTURE = MutantMonstersClient.entityTexture("mutant_enderman/death");
+    private static final RenderType EYES_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonstersClient.entityTexture("mutant_enderman/eyes"));
     private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(TEXTURE);
     private final MutantEndermanModel endermanModel;
     private final EndermanModel<MutantEnderman> cloneModel;
