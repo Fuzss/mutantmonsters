@@ -130,14 +130,14 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterSkullRenderers(SkullRenderersContext context) {
-        context.register((entityModelSet, context1) -> context1.accept(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, new SkullModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SKELETON_SKULL))));
+        context.registerSkullRenderer((entityModelSet, context1) -> context1.accept(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, new SkullModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SKELETON_SKULL))));
     }
 
     @Override
     public void onRegisterEntitySpectatorShaders(EntitySpectatorShaderContext context) {
-        context.register(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
-        context.register(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
-        context.register(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
-        context.register(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
+        context.registerSpectatorShader(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
+        context.registerSpectatorShader(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
+        context.registerSpectatorShader(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
+        context.registerSpectatorShader(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
     }
 }

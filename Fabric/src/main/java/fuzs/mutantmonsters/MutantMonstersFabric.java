@@ -10,6 +10,7 @@ import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistryFabric;
 import fuzs.puzzleslib.core.CommonFactories;
+import fuzs.puzzleslib.core.ContentRegistrationFlags;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -19,7 +20,7 @@ public class MutantMonstersFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         ModRegistryFabric.touch();
-        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID).accept(new MutantMonsters());
+        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID, ContentRegistrationFlags.BIOMES).accept(new MutantMonsters());
         registerHandlers();
     }
 

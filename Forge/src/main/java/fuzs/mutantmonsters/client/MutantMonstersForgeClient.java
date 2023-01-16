@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.client;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.puzzleslib.client.core.ClientFactories;
+import fuzs.puzzleslib.core.ContentRegistrationFlags;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -12,6 +13,6 @@ public class MutantMonstersForgeClient {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        ClientFactories.INSTANCE.clientModConstructor(MutantMonsters.MOD_ID).accept(new MutantMonstersClient());
+        ClientFactories.INSTANCE.clientModConstructor(MutantMonsters.MOD_ID, ContentRegistrationFlags.BUILT_IN_ITEM_MODEL_RENDERERS).accept(new MutantMonstersClient());
     }
 }

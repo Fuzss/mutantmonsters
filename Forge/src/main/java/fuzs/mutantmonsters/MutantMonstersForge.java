@@ -9,6 +9,7 @@ import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import fuzs.puzzleslib.capability.ForgeCapabilityController;
 import fuzs.puzzleslib.core.CommonFactories;
+import fuzs.puzzleslib.core.ContentRegistrationFlags;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
@@ -37,7 +38,7 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID).accept(new MutantMonsters());
+        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID, ContentRegistrationFlags.BIOMES).accept(new MutantMonsters());
         ModRegistryForge.touch();
         registerCapabilities();
         registerHandlers();
