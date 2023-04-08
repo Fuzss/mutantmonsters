@@ -443,6 +443,11 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         @Override
         public void stop() {
         }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
     }
 
     static class SwimJumpGoal extends Goal {

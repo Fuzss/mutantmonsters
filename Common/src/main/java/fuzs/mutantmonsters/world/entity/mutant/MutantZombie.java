@@ -210,12 +210,18 @@ public class MutantZombie extends Monster implements AnimatedEntity {
     @Override
     public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        if (itemStack.getItem() == Items.FLINT_AND_STEEL && !this.isAlive() && !this.isOnFire() && !this.isInWaterOrRain()) {
-            this.setSecondsOnFire(8);
-            itemStack.hurtAndBreak(1, player, (livingEntity) -> {
-                livingEntity.broadcastBreakEvent(hand);
-            });
-            player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+        if ((itemStack.is(Items.FLINT_AND_STEEL) || itemStack.is(Items.FIRE_CHARGE)) && !this.isAlive() && !this.isOnFire() && !this.isInWaterOrRain()) {
+            if (!this.level.isClientSide) {
+                this.setSecondsOnFire(8);
+                if (!itemStack.isDamageableItem()) {
+                    itemStack.shrink(1);
+                } else {
+                    itemStack.hurtAndBreak(1, player, (livingEntity) -> {
+                        livingEntity.broadcastBreakEvent(hand);
+                    });
+                }
+                player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+            }
             this.level.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else {
@@ -449,14 +455,16 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         return entity.getType() != EntityType.ZOMBIE && entity.getType() != EntityType.ZOMBIE_VILLAGER && entity.getType() != EntityType.HUSK && entity.getType() != EntityType.DROWNED && !(entity instanceof MutantZombie);
     }
 
-    public void killed(ServerLevel serverWorld, LivingEntity livingEntity) {
+    @Override
+    public boolean wasKilled(ServerLevel serverWorld, LivingEntity livingEntity) {
         if ((serverWorld.getDifficulty() == Difficulty.NORMAL && this.random.nextBoolean() || serverWorld.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
             EntityUtil.convertMobWithNBT(livingEntity, EntityType.ZOMBIE_VILLAGER, false);
             if (!livingEntity.isSilent()) {
                 serverWorld.levelEvent(null, 1026, livingEntity.blockPosition(), 0);
             }
+            return false;
         }
-
+        return true;
     }
 
     @Override

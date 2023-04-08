@@ -23,7 +23,7 @@ abstract class ServerPlayerFabricMixin extends Player {
         super(level, blockPos, f, gameProfile, profilePublicKey);
     }
 
-    @Inject(method = "drop(Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "drop(Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void drop(boolean bl, CallbackInfoReturnable<Boolean> callback, Inventory inventory, ItemStack itemStack) {
         callback.setReturnValue(ItemTossCallback.onPlayerTossEvent(this, itemStack, true) != null);
     }
