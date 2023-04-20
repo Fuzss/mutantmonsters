@@ -616,7 +616,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                     this.attackTarget.invulnerableTime = 10;
                     EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
                     EntityUtil.stunRavager(this.attackTarget);
-                    ((MutantZombie)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                    this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
                 }
 
                 if ((this.mob.onGround || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
@@ -726,7 +726,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         public void start() {
             super.start();
             this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
-            ((MutantZombie)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+            this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
         }
 
         @Override
