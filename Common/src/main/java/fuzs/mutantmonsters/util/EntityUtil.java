@@ -48,7 +48,7 @@ public final class EntityUtil {
     }
 
     public static float getHeadAngle(LivingEntity livingEntity, double x, double z) {
-        return Mth.degreesDifferenceAbs((float)(Math.atan2(z, x) * 180.0 / Math.PI) + 90.0F, livingEntity.yHeadRot);
+        return Mth.degreesDifferenceAbs((float) (Math.atan2(z, x) * 180.0 / Math.PI) + 90.0F, livingEntity.yHeadRot);
     }
 
     public static void spawnLingeringCloud(LivingEntity livingEntity) {
@@ -59,7 +59,7 @@ public final class EntityUtil {
             areaeffectcloudentity.setRadiusOnUse(-0.5F);
             areaeffectcloudentity.setWaitTime(10);
             areaeffectcloudentity.setDuration(areaeffectcloudentity.getDuration() / 2);
-            areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / (float)areaeffectcloudentity.getDuration());
+            areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / (float) areaeffectcloudentity.getDuration());
 
             for (MobEffectInstance effectinstance : collection) {
                 areaeffectcloudentity.addEffect(new MobEffectInstance(effectinstance));
@@ -75,7 +75,7 @@ public final class EntityUtil {
             if (((RavagerAccessor) livingEntity).mutantmonsters$getStunnedTick() == 0) {
                 ((RavagerAccessor) livingEntity).mutantmonsters$setStunnedTick(40);
                 livingEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-                livingEntity.level.broadcastEntityEvent(livingEntity, (byte)39);
+                livingEntity.level.broadcastEntityEvent(livingEntity, (byte) 39);
             }
         }
 
@@ -83,23 +83,23 @@ public final class EntityUtil {
 
     public static void disableShield(LivingEntity livingEntity, int ticks) {
         if (livingEntity instanceof Player && livingEntity.isBlocking()) {
-            ((Player)livingEntity).getCooldowns().addCooldown(livingEntity.getUseItem().getItem(), ticks);
+            ((Player) livingEntity).getCooldowns().addCooldown(livingEntity.getUseItem().getItem(), ticks);
             livingEntity.stopUsingItem();
-            livingEntity.level.broadcastEntityEvent(livingEntity, (byte)30);
+            livingEntity.level.broadcastEntityEvent(livingEntity, (byte) 30);
         }
 
     }
 
     public static void sendPlayerVelocityPacket(Entity entity) {
         if (entity instanceof ServerPlayer) {
-            ((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
+            ((ServerPlayer) entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
         }
 
     }
 
     public static void sendMetadataPacket(Entity entity) {
         if (entity.level instanceof ServerLevel) {
-            ((ServerLevel)entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData(), false));
+            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData(), false));
         }
 
     }
@@ -114,13 +114,13 @@ public final class EntityUtil {
         } else if (target instanceof Creeper) {
             return canTargetCreepers;
         } else if (target instanceof TamableAnimal) {
-            return !((TamableAnimal)target).isOwnedBy(owner);
-        } else if (target instanceof Player && !((Player)owner).canHarmPlayer((Player)target)) {
+            return !((TamableAnimal) target).isOwnedBy(owner);
+        } else if (target instanceof Player && !((Player) owner).canHarmPlayer((Player) target)) {
             return false;
         } else if (target instanceof AbstractGolem && !(target instanceof Enemy)) {
             return false;
         } else {
-            return !(target instanceof AbstractHorse) || !((AbstractHorse)target).isTamed();
+            return !(target instanceof AbstractHorse) || !((AbstractHorse) target).isTamed();
         }
     }
 
@@ -139,7 +139,7 @@ public final class EntityUtil {
             if (copiedNBT.contains("ActiveEffects", 9)) {
                 handItems = copiedNBT.getList("ActiveEffects", 10);
 
-                for(int i = 0; i < handItems.size(); ++i) {
+                for (int i = 0; i < handItems.size(); ++i) {
                     CompoundTag compoundnbt = handItems.getCompound(i);
                     MobEffectInstance effectInstance = MobEffectInstance.load(compoundnbt);
                     if (effectInstance != null && !newMob.canBeAffected(effectInstance)) {
@@ -158,7 +158,7 @@ public final class EntityUtil {
                     handItems = copiedNBT.getList("ArmorItems", 10);
                     handDropChances = copiedNBT.getList("ArmorDropChances", 5);
 
-                    for(i = 0; i < handItems.size(); ++i) {
+                    for (i = 0; i < handItems.size(); ++i) {
                         itemStack = ItemStack.of(handItems.getCompound(i));
                         if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
                             mobToConvert.spawnAtLocation(itemStack);
@@ -173,7 +173,7 @@ public final class EntityUtil {
                     handItems = copiedNBT.getList("HandItems", 10);
                     handDropChances = copiedNBT.getList("HandDropChances", 5);
 
-                    for(i = 0; i < handItems.size(); ++i) {
+                    for (i = 0; i < handItems.size(); ++i) {
                         itemStack = ItemStack.of(handItems.getCompound(i));
                         if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
                             mobToConvert.spawnAtLocation(itemStack);
@@ -200,13 +200,13 @@ public final class EntityUtil {
     }
 
     public static void spawnEndersoulParticles(Entity entity, RandomSource random, int amount, float speed) {
-        for(int i = 0; i < amount; ++i) {
+        for (int i = 0; i < amount; ++i) {
             float f = (random.nextFloat() - 0.5F) * speed;
             float f1 = (random.nextFloat() - 0.5F) * speed;
             float f2 = (random.nextFloat() - 0.5F) * speed;
-            double tempX = entity.getX() + (double)((random.nextFloat() - 0.5F) * entity.getBbWidth());
-            double tempY = entity.getY() + (double)((random.nextFloat() - 0.5F) * entity.getBbHeight()) + 0.5;
-            double tempZ = entity.getZ() + (double)((random.nextFloat() - 0.5F) * entity.getBbWidth());
+            double tempX = entity.getX() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
+            double tempY = entity.getY() + (double) ((random.nextFloat() - 0.5F) * entity.getBbHeight()) + 0.5;
+            double tempZ = entity.getZ() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
             entity.level.addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), tempX, tempY, tempZ, f, f1, f2);
         }
 
@@ -228,11 +228,11 @@ public final class EntityUtil {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
         boolean success = false;
         if (mob.level.isLoaded(pos)) {
-            while(true) {
+            while (true) {
                 pos.move(Direction.DOWN);
-                if (pos.getY() <= 0 || mob.level.getBlockState(pos).getMaterial().blocksMotion()) {
+                if (pos.getY() <= mob.level.getMinBuildHeight() || mob.level.getBlockState(pos).getMaterial().blocksMotion()) {
                     pos.move(Direction.UP);
-                    AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
+                    AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5);
                     if (mob.level.noCollision(mob, bb) && !mob.level.containsAnyLiquid(bb)) {
                         success = true;
                     }
@@ -245,7 +245,7 @@ public final class EntityUtil {
             return false;
         } else {
             mob.getNavigation().stop();
-            mob.setPos((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
+            mob.setPos((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5);
             return true;
         }
     }

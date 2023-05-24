@@ -669,7 +669,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
             if (this.level.isLoaded(pos)) {
                 do {
                     pos.move(Direction.DOWN);
-                } while(pos.getY() > 0 && !this.level.getBlockState(pos).getMaterial().blocksMotion());
+                } while(pos.getY() > this.level.getMinBuildHeight() && !this.level.getBlockState(pos).getMaterial().blocksMotion());
 
                 pos.move(Direction.UP);
                 AABB bb = this.getType().getAABB((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
