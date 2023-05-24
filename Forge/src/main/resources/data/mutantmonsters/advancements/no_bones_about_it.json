@@ -31,16 +31,32 @@
 					"source_entity": {
 						"equipment": {
 							"head": {
-								"item": "mutantmonsters:mutant_skeleton_skull"
+								"item": {
+									"items": [
+										"mutantmonsters:mutant_skeleton_skull"
+									]
+								}
 							},
 							"chest": {
-								"item": "mutantmonsters:mutant_skeleton_chestplate"
+								"item": {
+									"items": [
+										"mutantmonsters:mutant_skeleton_chestplate"
+									]
+								}
 							},
 							"legs": {
-								"item": "mutantmonsters:mutant_skeleton_leggings"
+								"item": {
+									"items": [
+										"mutantmonsters:mutant_skeleton_leggings"
+									]
+								}
 							},
 							"feet": {
-								"item": "mutantmonsters:mutant_skeleton_boots"
+								"item": {
+									"items": [
+										"mutantmonsters:mutant_skeleton_boots"
+									]
+								}
 							}
 						}
 					}

@@ -1,6 +1,7 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "mutantmonsters:item/chemical_x"
+		"layer0": "mutantmonsters:item/potion_overlay",
+		"layer1": "mutantmonsters:item/chemical_x"
 	}
 }

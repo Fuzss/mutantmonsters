@@ -20,7 +20,10 @@
 			"trigger": "minecraft:player_interacted_with_entity",
 			"conditions": {
 				"item": {
-					"item": "minecraft:flint_and_steel"
+					"items": [
+						"minecraft:flint_and_steel",
+						"minecraft:fire_charge"
+					]
 				},
 				"entity": [
 					{

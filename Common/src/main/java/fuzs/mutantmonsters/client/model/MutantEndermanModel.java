@@ -81,9 +81,20 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
     public void setupAnim(MutantEnderman entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.setAngles();
         this.animate(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-//        float armScale = entityIn.getArmScale(this.partialTick);
-//        this.lowerRightArm.arm.setScale(armScale);
-//        this.lowerLeftArm.arm.setScale(armScale);
+        float armScale = entityIn.getArmScale(this.partialTick);
+        setModelPartScale(this.lowerRightArm.arm, armScale);
+        setModelPartScale(this.lowerLeftArm.arm, armScale);
+    }
+
+    private static void setModelPartScale(ModelPart modelPart, float scale) {
+        // not sure if setting scale to 0.0 could cause issues, so instead of that simply disable rendering of the model part
+        // the visibility is changed nowhere else, so just enabling again when scale > 0.0 is fine
+        if (scale != 0.0F) {
+            modelPart.visible = true;
+            modelPart.xScale = modelPart.yScale = modelPart.zScale = scale;
+        } else {
+            modelPart.visible = false;
+        }
     }
 
     private void setAngles() {

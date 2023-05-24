@@ -41,6 +41,11 @@ public class HulkHammerItem extends Item implements Vanishable {
     }
 
     @Override
+    public boolean canAttackBlock(BlockState state, Level level, BlockPos pos, Player player) {
+        return !player.isCreative();
+    }
+
+    @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         stack.hurtAndBreak(1, attacker, (e) -> {
             e.broadcastBreakEvent(EquipmentSlot.MAINHAND);

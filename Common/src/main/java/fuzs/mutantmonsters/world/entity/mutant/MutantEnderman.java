@@ -420,7 +420,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                 int index = this.getFavorableHand();
                 BlockPos pos = new BlockPos(this.getX() - 2.5 + this.random.nextDouble() * 5.0, this.getY() - 0.5 + this.random.nextDouble() * 3.0, this.getZ() - 2.5 + this.random.nextDouble() * 5.0);
                 BlockState blockState = this.level.getBlockState(pos);
-                if (index != -1 && canBlockBeHeld(this.level, pos, blockState, ModRegistry.MUTANT_ENDERMAN_HOLDABLE_IMMUNE)) {
+                if (index != -1 && canBlockBeHeld(this.level, pos, blockState, ModRegistry.MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG)) {
                     this.setHeldBlock(index, Block.getId(blockState), 0);
                     if (CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level, this)) {
                         this.level.removeBlock(pos, false);
@@ -1091,7 +1091,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
             });
             if (!this.mob.isSilent()) {
                 this.mob.level.playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, ModRegistry.ENTITY_MUTANT_ENDERMAN_TELEPORT_SOUND_EVENT.get(), this.mob.getSoundSource(), 1.0F, 1.0F);
-                ((MutantEnderman)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
+                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
             }
 
             MutantEnderman.teleportAttack(this.mob);
@@ -1108,7 +1108,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
             this.mob.stopRiding();
             this.mob.fallDistance = 0.0F;
             this.mob.getTeleportPosition().ifPresent((pos) -> {
-                this.mob.teleportToPosition((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
+                this.mob.teleportTo((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
             });
             super.stop();
             this.mob.setTeleportPosition(null);
@@ -1142,7 +1142,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                 this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
                 this.mob.level.getLevelData().setRaining(false);
                 this.mob.level.broadcastEntityEvent(this.mob, (byte)0);
-                ((MutantEnderman)this.mob).playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_SCREAM_SOUND_EVENT.get(), 5.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
+                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ENDERMAN_SCREAM_SOUND_EVENT.get(), 5.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
 
                 for (Entity entity : this.mob.level.getEntities(this.mob, this.mob.getBoundingBox().inflate(20.0, 12.0, 20.0), EndersoulFragment.IS_VALID_TARGET)) {
                     if (this.mob.distanceToSqr(entity) < 400.0) {
@@ -1263,7 +1263,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         }
 
         private void createClone(double x, double y, double z) {
-            EndersoulClone clone = (EndersoulClone)ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get().create(this.mob.level);
+            EndersoulClone clone = ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get().create(this.mob.level);
             clone.setCloner(this.mob);
             this.cloneList.add(clone);
             if (!EntityUtil.teleportTo(clone, x, y, z)) {

@@ -124,77 +124,79 @@ public final class EntityUtil {
         }
     }
 
-    public static <T extends Mob> T convertMobWithNBT(LivingEntity mobToConvert, EntityType<T> newEntityType, boolean dropInventory) {
-        T newMob = newEntityType.create(mobToConvert.level);
+    public static Entity convertMobWithNBT(LivingEntity mobToConvert, EntityType<?> newEntityType, boolean dropInventory) {
+        Entity newEntity = newEntityType.create(mobToConvert.level);
         CompoundTag copiedNBT = mobToConvert.saveWithoutId(new CompoundTag());
-        copiedNBT.putUUID("UUID", newMob.getUUID());
-        copiedNBT.put("Attributes", newMob.getAttributes().save());
-        copiedNBT.putFloat("Health", newMob.getHealth());
-        if (mobToConvert.getTeam() != null) {
-            copiedNBT.putString("Team", mobToConvert.getTeam().getName());
-        }
-
-        ListTag handItems;
-        if (copiedNBT.contains("ActiveEffects", 9)) {
-            handItems = copiedNBT.getList("ActiveEffects", 10);
-
-            for(int i = 0; i < handItems.size(); ++i) {
-                CompoundTag compoundnbt = handItems.getCompound(i);
-                MobEffectInstance effectInstance = MobEffectInstance.load(compoundnbt);
-                if (effectInstance != null && !newMob.canBeAffected(effectInstance)) {
-                    handItems.remove(i);
-                    --i;
-                }
+        copiedNBT.putUUID("UUID", newEntity.getUUID());
+        if (newEntity instanceof Mob newMob) {
+            copiedNBT.put("Attributes", newMob.getAttributes().save());
+            copiedNBT.putFloat("Health", newMob.getHealth());
+            if (mobToConvert.getTeam() != null) {
+                copiedNBT.putString("Team", mobToConvert.getTeam().getName());
             }
-        }
 
-        copiedNBT.putBoolean("CanPickUpLoot", !dropInventory && copiedNBT.getBoolean("CanPickUpLoot"));
-        if (dropInventory && mobToConvert.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            ListTag handDropChances;
-            int i;
-            ItemStack itemStack;
-            if (copiedNBT.contains("ArmorItems", 9)) {
-                handItems = copiedNBT.getList("ArmorItems", 10);
-                handDropChances = copiedNBT.getList("ArmorDropChances", 5);
+            ListTag handItems;
+            if (copiedNBT.contains("ActiveEffects", 9)) {
+                handItems = copiedNBT.getList("ActiveEffects", 10);
 
-                for(i = 0; i < handItems.size(); ++i) {
-                    itemStack = ItemStack.of(handItems.getCompound(i));
-                    if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
-                        mobToConvert.spawnAtLocation(itemStack);
+                for(int i = 0; i < handItems.size(); ++i) {
+                    CompoundTag compoundnbt = handItems.getCompound(i);
+                    MobEffectInstance effectInstance = MobEffectInstance.load(compoundnbt);
+                    if (effectInstance != null && !newMob.canBeAffected(effectInstance)) {
+                        handItems.remove(i);
+                        --i;
                     }
                 }
-
-                handItems.clear();
-                handDropChances.clear();
             }
 
-            if (copiedNBT.contains("HandItems", 9)) {
-                handItems = copiedNBT.getList("HandItems", 10);
-                handDropChances = copiedNBT.getList("HandDropChances", 5);
+            copiedNBT.putBoolean("CanPickUpLoot", !dropInventory && copiedNBT.getBoolean("CanPickUpLoot"));
+            if (dropInventory && mobToConvert.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+                ListTag handDropChances;
+                int i;
+                ItemStack itemStack;
+                if (copiedNBT.contains("ArmorItems", 9)) {
+                    handItems = copiedNBT.getList("ArmorItems", 10);
+                    handDropChances = copiedNBT.getList("ArmorDropChances", 5);
 
-                for(i = 0; i < handItems.size(); ++i) {
-                    itemStack = ItemStack.of(handItems.getCompound(i));
-                    if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
-                        mobToConvert.spawnAtLocation(itemStack);
+                    for(i = 0; i < handItems.size(); ++i) {
+                        itemStack = ItemStack.of(handItems.getCompound(i));
+                        if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
+                            mobToConvert.spawnAtLocation(itemStack);
+                        }
                     }
+
+                    handItems.clear();
+                    handDropChances.clear();
                 }
 
-                handItems.clear();
-                handDropChances.clear();
-            }
+                if (copiedNBT.contains("HandItems", 9)) {
+                    handItems = copiedNBT.getList("HandItems", 10);
+                    handDropChances = copiedNBT.getList("HandDropChances", 5);
 
-            if (mobToConvert.getType() == EntityType.ENDERMAN && copiedNBT.contains("carriedBlockState", 10)) {
-                BlockState blockState = NbtUtils.readBlockState(copiedNBT.getCompound("carriedBlockState"));
-                if (!blockState.isAir()) {
-                    mobToConvert.spawnAtLocation(blockState.getBlock());
+                    for(i = 0; i < handItems.size(); ++i) {
+                        itemStack = ItemStack.of(handItems.getCompound(i));
+                        if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && handDropChances.getFloat(i) > 1.0F) {
+                            mobToConvert.spawnAtLocation(itemStack);
+                        }
+                    }
+
+                    handItems.clear();
+                    handDropChances.clear();
+                }
+
+                if (mobToConvert.getType() == EntityType.ENDERMAN && copiedNBT.contains("carriedBlockState", 10)) {
+                    BlockState blockState = NbtUtils.readBlockState(copiedNBT.getCompound("carriedBlockState"));
+                    if (!blockState.isAir()) {
+                        mobToConvert.spawnAtLocation(blockState.getBlock());
+                    }
                 }
             }
         }
 
-        newMob.load(copiedNBT);
-        mobToConvert.level.addFreshEntity(newMob);
+        newEntity.load(copiedNBT);
+        mobToConvert.level.addFreshEntity(newEntity);
         mobToConvert.discard();
-        return newMob;
+        return newEntity;
     }
 
     public static void spawnEndersoulParticles(Entity entity, RandomSource random, int amount, float speed) {
@@ -249,13 +251,11 @@ public final class EntityUtil {
     }
 
     public static void divertAttackers(Mob targetedMob, LivingEntity newTarget) {
-
         for (Mob attacker : targetedMob.level.getEntitiesOfClass(Mob.class, targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0))) {
             if (attacker != targetedMob && attacker.getTarget() == targetedMob) {
                 attacker.setTarget(newTarget);
             }
         }
-
     }
 
     public static ItemStack getSkullDrop(EntityType<?> entityType) {

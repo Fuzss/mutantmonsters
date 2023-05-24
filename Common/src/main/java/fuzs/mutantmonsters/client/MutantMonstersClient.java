@@ -27,6 +27,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
 
 public class MutantMonstersClient implements ClientModConstructor {
 
@@ -139,5 +141,18 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerSpectatorShader(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
         context.registerSpectatorShader(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
         context.registerSpectatorShader(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
+    }
+
+    @Override
+    public void onRegisterItemModelProperties(ItemModelPropertiesContext context) {
+        context.registerItem(Items.POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
+            return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
+        });
+        context.registerItem(Items.SPLASH_POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
+            return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
+        });
+        context.registerItem(Items.LINGERING_POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
+            return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
+        });
     }
 }

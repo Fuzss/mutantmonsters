@@ -1,0 +1,5 @@
+// 1.19.2	2023-05-24T11:30:22.544465	Tags for minecraft:item
+cf6185c36122d050f4289245d8b0199ea4c81fd4 data/forge/tags/items/armors/boots.json
+18c314b0e975a8d5ce36bb09bcee5ce3567f1d65 data/forge/tags/items/armors/chestplates.json
+6dd07004f9bc609fca2c0eee47766640ea537759 data/forge/tags/items/armors/helmets.json
+7399d1ea4a9ad4ed160a8b18150afd1eda910d7d data/forge/tags/items/armors/leggings.json

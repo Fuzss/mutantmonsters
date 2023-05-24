@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.init;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.capability.SeismicWavesCapabilityImpl;
+import fuzs.mutantmonsters.mixin.accessor.LootContextParamSetsAccessor;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.entity.*;
 import fuzs.mutantmonsters.world.entity.mutant.*;
@@ -24,6 +25,7 @@ import fuzs.puzzleslib.init.builder.ModBlockEntityTypeBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
@@ -40,8 +42,11 @@ import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ModRegistry {
@@ -147,10 +152,31 @@ public class ModRegistry {
     private static final CapabilityController CAPABILITY = CommonFactories.INSTANCE.capabilities(MutantMonsters.MOD_ID);
     public static final PlayerCapabilityKey<SeismicWavesCapability> SEISMIC_WAVES_CAPABILITY = CAPABILITY.registerPlayerCapability("seismic_waves", SeismicWavesCapability.class, player -> new SeismicWavesCapabilityImpl(), PlayerRespawnStrategy.NEVER);
 
-    public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("mutant_enderman_holdable_immune"));
-    public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("endersoul_hand_holdable_immune"));
+    public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("mutant_enderman_holdable_immune"));
+    public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG = TagKey.create(Registry.BLOCK_REGISTRY, MutantMonsters.id("endersoul_hand_holdable_immune"));
+
+    public static final ResourceLocation MUTANT_SKELETON_PELVIS_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/pelvis");
+    public static final ResourceLocation MUTANT_SKELETON_RIB_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/rib");
+    public static final ResourceLocation MUTANT_SKELETON_SKULL_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/skull");
+    public static final ResourceLocation MUTANT_SKELETON_LIMB_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/limb");
+    public static final ResourceLocation MUTANT_SKELETON_SHOULDER_PAD_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/shoulder_pad");
+    public static final LootContextParamSet BODY_PART_LOOT_CONTEXT_PARAM_SET = registerLootContextParamSet(MutantMonsters.id("body_part"), (builder) -> {
+        builder.required(LootContextParams.THIS_ENTITY);
+    });
 
     public static void touch() {
 
+    }
+
+    private static LootContextParamSet registerLootContextParamSet(ResourceLocation id, Consumer<LootContextParamSet.Builder> consumer) {
+        LootContextParamSet.Builder builder = new LootContextParamSet.Builder();
+        consumer.accept(builder);
+        LootContextParamSet set = builder.build();
+        LootContextParamSet other = LootContextParamSetsAccessor.mutantmonsters$getRegistry().put(id, set);
+        if (other != null) {
+            throw new IllegalStateException("Loot table parameter set " + id + " is already registered");
+        } else {
+            return set;
+        }
     }
 }

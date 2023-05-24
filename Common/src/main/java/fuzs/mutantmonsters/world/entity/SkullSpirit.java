@@ -105,11 +105,11 @@ public class SkullSpirit extends Entity {
                 if (!this.level.isClientSide) {
                     this.target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, this.target.getDeltaMovement().y, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
                     if (--this.attachedTick <= 0) {
-                        EntityType<? extends Mob> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
+                        EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
                         if (mutantType != null && this.random.nextFloat() < 0.75F) {
                             MutatedExplosion.create(this, 2.0F, false, Explosion.BlockInteraction.NONE);
-                            Mob mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);
-                            mutant.setPersistenceRequired();
+                            Entity mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);
+                            if (mutant instanceof Mob mob) mob.setPersistenceRequired();
                             AABB bb = mutant.getBoundingBox();
 
                             for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(bb.minX), Mth.floor(mutant.getY()), Mth.floor(bb.minZ), Mth.floor(bb.maxX), Mth.floor(bb.maxY), Mth.floor(bb.maxZ))) {

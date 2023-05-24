@@ -1,0 +1,6 @@
+// 1.19.2	2023-05-24T11:30:22.5453	LootTables
+477a20eea76b78e8adc484479df6a40d2ed89bde data/mutantmonsters/loot_tables/entities/mutant_skeleton/limb.json
+5908adc995006310af30736adbbba126a48c6399 data/mutantmonsters/loot_tables/entities/mutant_skeleton/pelvis.json
+2411acbba7ffc96d97aafa6271a894e3be83261d data/mutantmonsters/loot_tables/entities/mutant_skeleton/rib.json
+92fb650a4de2fe66bc68d62814713f27bc977acb data/mutantmonsters/loot_tables/entities/mutant_skeleton/shoulder_pad.json
+74dfd9f1095b63f16c5d6f42c0bb53a8af852b8d data/mutantmonsters/loot_tables/entities/mutant_skeleton/skull.json

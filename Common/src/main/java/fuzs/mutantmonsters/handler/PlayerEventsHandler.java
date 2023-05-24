@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public class PlayerEventsHandler {
-    private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 6;
+    private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 16;
 
     public static OptionalInt onItemUseTick(LivingEntity entity, ItemStack item, int duration) {
         if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {

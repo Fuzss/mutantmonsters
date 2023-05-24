@@ -61,7 +61,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
         Player player = context.getPlayer();
         if (context.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (!MutantEnderman.canBlockBeHeld(level, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE)) {
+        } else if (!MutantEnderman.canBlockBeHeld(level, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG)) {
             return InteractionResult.PASS;
         } else if (!level.mayInteract(player, pos)) {
             return InteractionResult.PASS;

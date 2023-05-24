@@ -1,6 +1,9 @@
 package fuzs.mutantmonsters;
 
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
+import fuzs.mutantmonsters.data.ModEntityTypeTagsProvider;
+import fuzs.mutantmonsters.data.ModItemTagsProvider;
+import fuzs.mutantmonsters.data.ModLootTableProvider;
 import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistry;
@@ -87,7 +90,10 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onGatherData(final GatherDataEvent evt) {
-        DataGenerator generator = evt.getGenerator();
-        final ExistingFileHelper existingFileHelper = evt.getExistingFileHelper();
+        DataGenerator dataGenerator = evt.getGenerator();
+        final ExistingFileHelper fileHelper = evt.getExistingFileHelper();
+        dataGenerator.addProvider(true, new ModEntityTypeTagsProvider(dataGenerator, MutantMonsters.MOD_ID, fileHelper));
+        dataGenerator.addProvider(true, new ModItemTagsProvider(dataGenerator, MutantMonsters.MOD_ID, fileHelper));
+        dataGenerator.addProvider(true, new ModLootTableProvider(dataGenerator));
     }
 }

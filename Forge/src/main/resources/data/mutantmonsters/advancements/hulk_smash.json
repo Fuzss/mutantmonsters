@@ -43,7 +43,11 @@
 					"direct_entity": {
 						"equipment": {
 							"offhand": {
-								"item": "mutantmonsters:hulk_hammer"
+								"item": {
+									"items": [
+										"mutantmonsters:hulk_hammer"
+									]
+								}
 							}
 						}
 					}

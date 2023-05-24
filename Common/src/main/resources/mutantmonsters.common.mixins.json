@@ -5,6 +5,7 @@
   "package": "fuzs.mutantmonsters.mixin",
   "refmap": "mutantmonsters.refmap.json",
   "mixins": [
+    "accessor.LootContextParamSetsAccessor",
     "accessor.RavagerAccessor"
   ],
   "client": [

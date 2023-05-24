@@ -2,14 +2,14 @@ package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.animation.AnimatedEntity;
 import fuzs.mutantmonsters.animation.Animation;
+import fuzs.mutantmonsters.core.SeismicWave;
+import fuzs.mutantmonsters.core.ZombieResurrection;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.mutantmonsters.core.SeismicWave;
-import fuzs.mutantmonsters.core.ZombieResurrection;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
@@ -49,6 +49,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -209,20 +210,42 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
-        if ((itemStack.is(Items.FLINT_AND_STEEL) || itemStack.is(Items.FIRE_CHARGE)) && !this.isAlive() && !this.isOnFire() && !this.isInWaterOrRain()) {
+        // we cannot use #mobInteract as it does not trigger for dead mobs
+        if (player.isSpectator()) return InteractionResult.PASS;
+        ItemStack itemInHand = player.getItemInHand(hand);
+        ItemStack itemInHandCopy = itemInHand.copy();
+        InteractionResult interactionResult = this.deadMobInteract(player, hand);
+        if (interactionResult.consumesAction()) {
+            if (player.getAbilities().instabuild && itemInHand == player.getItemInHand(hand) && itemInHand.getCount() < itemInHandCopy.getCount()) {
+                itemInHand.setCount(itemInHandCopy.getCount());
+            }
+            if (itemInHand.isEmpty() && !player.getAbilities().instabuild) {
+                player.setItemInHand(hand, ItemStack.EMPTY);
+            }
+            this.gameEvent(GameEvent.ENTITY_INTERACT);
+
+            return interactionResult;
+        }
+
+        return super.interactAt(player, vec, hand);
+    }
+
+    private InteractionResult deadMobInteract(Player player, InteractionHand hand) {
+        ItemStack itemInHand = player.getItemInHand(hand);
+        // TODO migrate to creeper igniters tag for 1.19.3
+        if ((itemInHand.is(Items.FLINT_AND_STEEL) || itemInHand.is(Items.FIRE_CHARGE)) && !this.isAlive() && !this.isOnFire() && !this.isInWaterOrRain()) {
+            this.level.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
             if (!this.level.isClientSide) {
                 this.setSecondsOnFire(8);
-                if (!itemStack.isDamageableItem()) {
-                    itemStack.shrink(1);
+                if (!itemInHand.isDamageableItem()) {
+                    itemInHand.shrink(1);
                 } else {
-                    itemStack.hurtAndBreak(1, player, (livingEntity) -> {
+                    itemInHand.hurtAndBreak(1, player, (livingEntity) -> {
                         livingEntity.broadcastBreakEvent(hand);
                     });
                 }
-                player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+                player.awardStat(Stats.ITEM_USED.get(itemInHand.getItem()));
             }
-            this.level.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else {
             return InteractionResult.PASS;
