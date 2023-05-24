@@ -1,14 +1,14 @@
 package fuzs.mutantmonsters.network;
 
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class S2CMutantEndermanHeldBlockMessage implements Message<S2CMutantEndermanHeldBlockMessage> {
+public class S2CMutantEndermanHeldBlockMessage implements MessageV2<S2CMutantEndermanHeldBlockMessage> {
     private int entityId;
     private int blockId;
     private byte index;

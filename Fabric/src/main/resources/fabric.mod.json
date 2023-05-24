@@ -5,9 +5,11 @@
 
   "name": "${modName}",
   "description": "${modDescription}",
+
   "authors": [
     "${modAuthor}"
   ],
+  
   "contact": {
     "homepage": "${modPageUrl}",
     "issues": "${modIssueUrl}",
@@ -18,14 +20,19 @@
   "icon": "mod_logo.png",
 
   "environment": "${modFabricEnvironment}",
+
   "entrypoints": {
     "main": [
       "${mainEntryPoint}"
     ],
     "client": [
       "${clientEntryPoint}"
+    ],
+    "cardinal-components": [
+      "fuzs.puzzleslib.api.capability.v2.initializer.EntityComponentInitializerImpl"
     ]
   },
+
   "mixins": [
     "${modId}.common.mixins.json",
     "${modId}.fabric.mixins.json"
@@ -35,7 +42,7 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
-    "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
+    "minecraft": "${minecraftVersion}",
     "java": ">=17"
   },
 

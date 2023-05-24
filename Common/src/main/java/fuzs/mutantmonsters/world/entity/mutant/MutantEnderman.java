@@ -4,6 +4,9 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.animation.AnimatedEntity;
 import fuzs.mutantmonsters.animation.Animation;
 import fuzs.mutantmonsters.core.CommonAbstractions;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulClone;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
@@ -11,20 +14,19 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
-import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -64,8 +66,8 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntity {
@@ -893,7 +895,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
 
             for(int i = 0; i < listNBT.size(); ++i) {
                 CompoundTag compoundNBT = listNBT.getCompound(i);
-                BlockState blockState = NbtUtils.readBlockState(compoundNBT);
+                BlockState blockState = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compoundNBT);
                 this.setHeldBlock(compoundNBT.getByte("Index"), Block.getId(blockState), compound.getInt("Tick"));
             }
         }
@@ -965,8 +967,8 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
     }
 
     static class ThrowBlockGoal extends AnimationGoal<MutantEnderman> {

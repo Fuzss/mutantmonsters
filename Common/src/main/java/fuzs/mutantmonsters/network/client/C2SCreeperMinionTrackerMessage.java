@@ -1,12 +1,12 @@
 package fuzs.mutantmonsters.network.client;
 
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
-public class C2SCreeperMinionTrackerMessage implements Message<C2SCreeperMinionTrackerMessage> {
+public class C2SCreeperMinionTrackerMessage implements MessageV2<C2SCreeperMinionTrackerMessage> {
     private int entityId;
     private byte optionsId;
     private boolean setOption;

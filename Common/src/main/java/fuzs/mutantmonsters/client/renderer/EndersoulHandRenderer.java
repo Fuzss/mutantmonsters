@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.EndersoulHandModel;
-import fuzs.puzzleslib.client.renderer.DynamicBuiltinModelItemRenderer;
+import fuzs.puzzleslib.api.client.init.v1.DynamicBuiltinItemRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 
-public class EndersoulHandRenderer implements DynamicBuiltinModelItemRenderer {
+public class EndersoulHandRenderer implements DynamicBuiltinItemRenderer {
     public static final ModelResourceLocation ENDERSOUL_BUILT_IN_MODEL = new ModelResourceLocation(MutantMonsters.id("endersoul_hand_in_hand"), "inventory");
     public static final ModelResourceLocation ENDERSOUL_ITEM_MODEL = new ModelResourceLocation(MutantMonsters.id("endersoul_hand"), "inventory");
     private static final ResourceLocation ENDERSOUL_HAND_TEXTURE = MutantMonsters.id("textures/item/endersoul_hand_model.png");

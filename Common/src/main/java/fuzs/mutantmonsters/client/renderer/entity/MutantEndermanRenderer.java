@@ -2,12 +2,12 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
-import fuzs.mutantmonsters.client.renderer.entity.layers.EndersoulLayer;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
+import fuzs.mutantmonsters.client.renderer.entity.layers.EndersoulLayer;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.EntityModel;
@@ -157,12 +157,12 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                         ((MutantEndermanModel)this.getParentModel()).translateRotateArm(matrixStackIn, i);
                         matrixStackIn.translate(0.0, 1.2, 0.0);
                         float tick = (float)entity.tickCount + (float)(i + 1) * 2.0F * 3.1415927F + partialTicks;
-                        matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(tick * 10.0F));
-                        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(tick * 8.0F));
-                        matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(tick * 6.0F));
+                        matrixStackIn.mulPose(Axis.XP.rotationDegrees(tick * 10.0F));
+                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(tick * 8.0F));
+                        matrixStackIn.mulPose(Axis.ZP.rotationDegrees(tick * 6.0F));
                         matrixStackIn.scale(-0.75F, -0.75F, 0.75F);
                         matrixStackIn.translate(-0.5, -0.5, 0.5);
-                        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
                         this.blockRenderer.renderSingleBlock(Block.stateById(entity.getHeldBlock(i)), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
                         matrixStackIn.popPose();
                     }

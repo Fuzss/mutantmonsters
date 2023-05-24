@@ -5,8 +5,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class FleeRainGoal extends FleeSunGoal {
     public FleeRainGoal(PathfinderMob creatureEntity, double movementSpeedIn) {

@@ -6,11 +6,12 @@ import fuzs.mutantmonsters.core.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
+import fuzs.puzzleslib.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,57 +30,54 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-import java.util.OptionalInt;
-
 public class PlayerEventsHandler {
     private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 16;
 
-    public static OptionalInt onItemUseTick(LivingEntity entity, ItemStack item, int duration) {
+    public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
         if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {
-            if (item.getItem() instanceof BowItem && (item.getUseDuration() - duration) < 20) {
-                return OptionalInt.of(duration - 3);
+            if (useItem.getItem() instanceof BowItem && (useItem.getUseDuration() - useItemRemaining.getAsInt()) < 20) {
+                useItemRemaining.mapInt(i -> i -3);
             }
         }
-        return OptionalInt.empty();
+        return EventResult.PASS;
     }
 
-    public static Optional<Unit> onArrowLoose(Player player, ItemStack bow, Level level, int charge, boolean hasAmmo) {
+    public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
         if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get() && hasAmmo) {
             boolean inAir = !player.isOnGround() && !player.isInWater() && !player.isInLava();
-            ItemStack ammo = player.getProjectile(bow);
+            ItemStack ammo = player.getProjectile(stack);
             if (!ammo.isEmpty() || hasAmmo) {
                 if (ammo.isEmpty()) {
                     ammo = new ItemStack(Items.ARROW);
                 }
 
-                float velocity = BowItem.getPowerForTime(bow.getUseDuration() - charge);
-                boolean infiniteArrows = player.getAbilities().instabuild || ammo.getItem() instanceof ArrowItem && CommonAbstractions.INSTANCE.isArrowInfinite((ArrowItem) ammo.getItem(), ammo, bow, player);
+                float velocity = BowItem.getPowerForTime(stack.getUseDuration() - charge.getAsInt());
+                boolean infiniteArrows = player.getAbilities().instabuild || ammo.getItem() instanceof ArrowItem && CommonAbstractions.INSTANCE.isArrowInfinite((ArrowItem) ammo.getItem(), ammo, stack, player);
                 if (!level.isClientSide) {
                     ArrowItem arrowitem = (ArrowItem) (ammo.getItem() instanceof ArrowItem ? ammo.getItem() : Items.ARROW);
                     AbstractArrow abstractarrowentity = arrowitem.createArrow(level, ammo, player);
-                    abstractarrowentity = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) bow.getItem(), abstractarrowentity);
+                    abstractarrowentity = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) stack.getItem(), abstractarrowentity);
                     abstractarrowentity.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity * 3.0F, 1.0F);
                     if (velocity == 1.0F && inAir) {
                         abstractarrowentity.setCritArrow(true);
                     }
 
-                    int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, bow);
+                    int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, stack);
                     if (j > 0) {
                         abstractarrowentity.setBaseDamage(abstractarrowentity.getBaseDamage() + (double) j * 0.5 + 0.5);
                     }
 
-                    int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, bow);
+                    int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, stack);
                     if (k > 0) {
                         abstractarrowentity.setKnockback(k);
                     }
 
-                    if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, bow) > 0) {
+                    if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, stack) > 0) {
                         abstractarrowentity.setSecondsOnFire(100);
                     }
 
                     abstractarrowentity.setBaseDamage(abstractarrowentity.getBaseDamage() * (inAir ? 2.0 : 0.5));
-                    bow.hurtAndBreak(1, player, (p_220009_1_) -> {
+                    stack.hurtAndBreak(1, player, (p_220009_1_) -> {
                         p_220009_1_.broadcastBreakEvent(player.getUsedItemHand());
                     });
                     if (infiniteArrows || player.getAbilities().instabuild && (ammo.getItem() == Items.SPECTRAL_ARROW || ammo.getItem() == Items.TIPPED_ARROW)) {
@@ -97,18 +95,18 @@ public class PlayerEventsHandler {
                     }
                 }
 
-                player.awardStat(Stats.ITEM_USED.get(bow.getItem()));
+                player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
             }
-            return Optional.of(Unit.INSTANCE);
+            return EventResult.INTERRUPT;
         }
-        return Optional.empty();
+        return EventResult.PASS;
     }
 
     public static void onPlayerTick$End(Player player) {
         playShoulderEntitySound(player, player.getShoulderEntityLeft());
         playShoulderEntitySound(player, player.getShoulderEntityRight());
         if (!player.level.isClientSide) {
-            ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(player).map(SeismicWavesCapability::getSeismicWaves).ifPresent(seismicWaves -> {
+            ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(player).map(SeismicWavesCapability::seismicWaves).ifPresent(seismicWaves -> {
                 while (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
                     seismicWaves.poll();
                 }
@@ -138,7 +136,7 @@ public class PlayerEventsHandler {
         }
     }
 
-    public static Optional<Unit> onItemToss(ItemEntity entityItem, Player player) {
+    public static EventResult onItemToss(ItemEntity entityItem, Player player) {
         Level world = player.level;
         if (!world.isClientSide) {
             ItemStack stack = entityItem.getItem();
@@ -167,6 +165,6 @@ public class PlayerEventsHandler {
                 }
             }
         }
-        return Optional.empty();
+        return EventResult.PASS;
     }
 }

@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantZombieModel;
@@ -26,7 +26,7 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
     @Override
     protected void setupRotations(MutantZombie livingEntity, PoseStack matrixStackIn, float ageInTicks, float rotationYaw, float partialTicks) {
         if (livingEntity.deathTime > 0) {
-            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - rotationYaw));
+            matrixStackIn.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
             int pitch = Math.min(20, livingEntity.deathTime);
             boolean reviving = false;
             if (livingEntity.deathTime > 100) {
@@ -45,7 +45,7 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
                     f = 1.0F;
                 }
 
-                matrixStackIn.mulPose(Vector3f.XN.rotationDegrees(f * this.getFlipDegrees(livingEntity)));
+                matrixStackIn.mulPose(Axis.XN.rotationDegrees(f * this.getFlipDegrees(livingEntity)));
             }
         } else {
             super.setupRotations(livingEntity, matrixStackIn, ageInTicks, rotationYaw, partialTicks);

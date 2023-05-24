@@ -9,10 +9,12 @@ import fuzs.mutantmonsters.client.renderer.EndersoulHandRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionShoulderLayer;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.puzzleslib.api.client.renderer.item.v1.ItemModelOverrides;
-import fuzs.puzzleslib.client.core.ClientAbstractions;
-import fuzs.puzzleslib.client.core.ClientModConstructor;
+import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
+import fuzs.puzzleslib.api.client.core.v1.context.*;
+import fuzs.puzzleslib.api.client.init.v1.ItemModelOverrides;
+import fuzs.puzzleslib.api.core.v1.context.ModLifecycleContext;
 import net.minecraft.client.model.EndermanModel;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -22,7 +24,9 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +38,12 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     public static ResourceLocation entityTexture(String name) {
         return MutantMonsters.id("textures/entity/" + name + ".png");
+    }
+
+    @Override
+    public void onClientSetup(ModLifecycleContext context) {
+        SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
+        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemTransforms.TransformType.GUI, ItemTransforms.TransformType.GROUND, ItemTransforms.TransformType.FIXED);
     }
 
     @Override
@@ -70,8 +80,8 @@ public class MutantMonstersClient implements ClientModConstructor {
     @SuppressWarnings("unchecked")
     @Override
     public void onRegisterLivingEntityRenderLayers(LivingEntityRenderLayersContext context) {
-        context.registerRenderLayer(EntityType.PLAYER, (renderLayerParent, entityRendererProvider) -> {
-            return new CreeperMinionShoulderLayer<>((RenderLayerParent<Player, PlayerModel<Player>>) renderLayerParent, entityRendererProvider.getModelSet());
+        context.registerRenderLayer(EntityType.PLAYER, (RenderLayerParent<Player, EntityModel<Player>> renderLayerParent, EntityRendererProvider.Context entityRendererProvider) -> {
+            return (RenderLayer<Player, EntityModel<Player>>) (RenderLayer<?, ?>) new CreeperMinionShoulderLayer<>((RenderLayerParent<Player, PlayerModel<Player>>) (RenderLayerParent<?, ?>) renderLayerParent, entityRendererProvider.getModelSet());
         });
     }
 
@@ -82,7 +92,7 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterBuiltinModelItemRenderers(BuiltinModelItemRendererContext context) {
-        context.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), new EndersoulHandRenderer());
+        context.registerItemRenderer(new EndersoulHandRenderer(), ModRegistry.ENDERSOUL_HAND_ITEM.get());
     }
 
     @Override
@@ -125,34 +135,20 @@ public class MutantMonstersClient implements ClientModConstructor {
     }
 
     @Override
-    public void onClientSetup() {
-        ClientAbstractions.INSTANCE.getSkullTypeSkins().put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
-        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemTransforms.TransformType.GUI, ItemTransforms.TransformType.GROUND, ItemTransforms.TransformType.FIXED);
-    }
-
-    @Override
     public void onRegisterSkullRenderers(SkullRenderersContext context) {
         context.registerSkullRenderer((entityModelSet, context1) -> context1.accept(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, new SkullModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SKELETON_SKULL))));
     }
 
     @Override
     public void onRegisterEntitySpectatorShaders(EntitySpectatorShaderContext context) {
-        context.registerSpectatorShader(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
-        context.registerSpectatorShader(ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
-        context.registerSpectatorShader(ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/creeper.json"));
-        context.registerSpectatorShader(ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get(), new ResourceLocation("shaders/post/invert.json"));
+        context.registerSpectatorShader(new ResourceLocation("shaders/post/creeper.json"), ModRegistry.CREEPER_MINION_ENTITY_TYPE.get(), ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get());
+        context.registerSpectatorShader(new ResourceLocation("shaders/post/invert.json"), ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get(), ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get());
     }
 
     @Override
     public void onRegisterItemModelProperties(ItemModelPropertiesContext context) {
-        context.registerItem(Items.POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
+        context.registerItemProperty(MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
             return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
-        });
-        context.registerItem(Items.SPLASH_POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
-            return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
-        });
-        context.registerItem(Items.LINGERING_POTION, MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
-            return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
-        });
+        }, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION);
     }
 }

@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -25,7 +26,7 @@ public class ArmorBlockItem extends StandingAndWallBlockItem implements Wearable
     final ArmorMaterial material;
 
     public ArmorBlockItem(ArmorMaterial material, Block floorBlock, Block wallBlockIn, Item.Properties propertiesIn) {
-        super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForSlot(EquipmentSlot.HEAD)));
+        super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForSlot(EquipmentSlot.HEAD)), Direction.DOWN);
         this.material = material;
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
         builder.put(Attributes.ARMOR, new AttributeModifier(ARMOR_MODIFIER, "Armor modifier", material.getDefenseForSlot(EquipmentSlot.HEAD), AttributeModifier.Operation.ADDITION));

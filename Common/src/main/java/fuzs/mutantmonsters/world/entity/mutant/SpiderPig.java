@@ -1,13 +1,13 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -49,8 +49,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -286,7 +286,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public boolean canJump() {
+    public boolean canJump(Player player) {
         return this.isSaddled() && !this.chargeExhausted && !this.horizontalCollision;
     }
 

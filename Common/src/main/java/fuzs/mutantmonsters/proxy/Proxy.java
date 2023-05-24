@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.proxy;
 
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
-import fuzs.puzzleslib.core.DistTypeExecutor;
+import fuzs.puzzleslib.api.core.v1.DistTypeExecutor;
 
 public interface Proxy {
     @SuppressWarnings("Convert2MethodRef")

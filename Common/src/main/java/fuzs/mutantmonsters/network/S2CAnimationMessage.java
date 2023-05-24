@@ -2,14 +2,14 @@ package fuzs.mutantmonsters.network;
 
 import fuzs.mutantmonsters.animation.AnimatedEntity;
 import fuzs.mutantmonsters.animation.Animation;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class S2CAnimationMessage implements Message<S2CAnimationMessage> {
+public class S2CAnimationMessage implements MessageV2<S2CAnimationMessage> {
     private int entityId;
     private int index;
 

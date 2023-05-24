@@ -81,7 +81,7 @@ public class HulkHammerItem extends Item implements Vanishable {
                 int x1 = Mth.floor(playerEntity.getX() + vec.x * 8.0);
                 int z1 = Mth.floor(playerEntity.getZ() + vec.z * 8.0);
                 SeismicWave.createWaves(world, list, x, z, x1, z1, y);
-                ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(playerEntity).map(SeismicWavesCapability::getSeismicWaves).ifPresent(seismicWaves -> seismicWaves.addAll(list));
+                ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(playerEntity).map(SeismicWavesCapability::seismicWaves).ifPresent(seismicWaves -> seismicWaves.addAll(list));
             }
 
             world.playSound(playerEntity, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 0.8F, 0.8F + playerEntity.getRandom().nextFloat() * 0.4F);

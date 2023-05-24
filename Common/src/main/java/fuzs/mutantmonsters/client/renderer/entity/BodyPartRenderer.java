@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantSkeletonPartModel;
 import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
@@ -25,8 +25,8 @@ public class BodyPartRenderer extends EntityRenderer<MutantSkeletonBodyPart> {
     public void render(MutantSkeletonBodyPart entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
         matrixStackIn.pushPose();
-        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(partialTicks, entityIn.yRotO, entityIn.getYRot())));
-        matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(partialTicks, entityIn.xRotO, entityIn.getXRot())));
+        matrixStackIn.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTicks, entityIn.yRotO, entityIn.getYRot())));
+        matrixStackIn.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTicks, entityIn.xRotO, entityIn.getXRot())));
         matrixStackIn.scale(1.2F, -1.2F, -1.2F);
         VertexConsumer ivertexbuilder = bufferIn.getBuffer(this.partModel.renderType(this.getTextureLocation(entityIn)));
         this.partModel.getPart(entityIn.getPart()).render(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY);

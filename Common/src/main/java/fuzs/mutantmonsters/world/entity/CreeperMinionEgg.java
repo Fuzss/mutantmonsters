@@ -9,6 +9,7 @@ import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
@@ -216,7 +216,7 @@ public class CreeperMinionEgg extends Entity {
                 this.setDeltaMovement(0.0, 0.2, 0.0);
                 this.health = (int)((float)this.health - amount);
                 if (this.health <= 0) {
-                    MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, Explosion.BlockInteraction.BREAK);
+                    MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, Level.ExplosionInteraction.TNT);
                     if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for(int i = 5 + this.random.nextInt(6); i > 0; --i) {
@@ -274,7 +274,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
     }
 }

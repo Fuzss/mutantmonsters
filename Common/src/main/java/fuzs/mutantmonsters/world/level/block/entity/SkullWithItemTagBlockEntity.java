@@ -6,8 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class SkullWithItemTagBlockEntity extends SkullBlockEntity {
     private static  final String ITEM_TAG_KEY = "ItemTag";

@@ -19,6 +19,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -568,8 +569,8 @@ public class MutantZombie extends Monster implements AnimatedEntity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
     }
 
     static class ThrowAttackGoal extends AnimationGoal<MutantZombie> {

@@ -1,6 +1,8 @@
 package fuzs.mutantmonsters;
 
 import fuzs.mutantmonsters.config.CommonConfig;
+import fuzs.mutantmonsters.handler.EntityEventsHandler;
+import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.S2CAnimationMessage;
 import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
@@ -13,13 +15,21 @@ import fuzs.mutantmonsters.world.entity.EndersoulClone;
 import fuzs.mutantmonsters.world.entity.mutant.*;
 import fuzs.puzzleslib.api.biome.v1.BiomeLoadingPhase;
 import fuzs.puzzleslib.api.biome.v1.MobSpawnSettingsContext;
-import fuzs.puzzleslib.config.ConfigHolder;
-import fuzs.puzzleslib.core.CommonFactories;
-import fuzs.puzzleslib.core.ModConstructor;
-import fuzs.puzzleslib.core.ModLoaderEnvironment;
-import fuzs.puzzleslib.init.PotionBrewingRegistry;
-import fuzs.puzzleslib.network.MessageDirection;
-import fuzs.puzzleslib.network.NetworkHandler;
+import fuzs.puzzleslib.api.config.v3.ConfigHolder;
+import fuzs.puzzleslib.api.core.v1.ModConstructor;
+import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
+import fuzs.puzzleslib.api.core.v1.context.*;
+import fuzs.puzzleslib.api.event.v1.PlayerTickEvents;
+import fuzs.puzzleslib.api.event.v1.entity.EntityLevelEvents;
+import fuzs.puzzleslib.api.event.v1.entity.living.LivingDropsCallback;
+import fuzs.puzzleslib.api.event.v1.entity.living.LivingHurtCallback;
+import fuzs.puzzleslib.api.event.v1.entity.living.UseItemEvents;
+import fuzs.puzzleslib.api.event.v1.entity.player.ArrowLooseCallback;
+import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
+import fuzs.puzzleslib.api.init.v2.PotionBrewingRegistry;
+import fuzs.puzzleslib.api.item.v2.CreativeModeTabConfigurator;
+import fuzs.puzzleslib.api.network.v2.MessageDirection;
+import fuzs.puzzleslib.api.network.v2.NetworkHandlerV2;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -27,6 +37,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -39,9 +50,8 @@ public class MutantMonsters implements ModConstructor {
     public static final String MOD_NAME = "Mutant Monsters";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
-    @SuppressWarnings("Convert2MethodRef")
-    public static final ConfigHolder CONFIG = CommonFactories.INSTANCE.commonConfig(CommonConfig.class, () -> new CommonConfig());
-    public static final NetworkHandler NETWORK = CommonFactories.INSTANCE.network(MOD_ID);
+    public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID).common(CommonConfig.class);
+    public static final NetworkHandlerV2 NETWORK = NetworkHandlerV2.build(MOD_ID);
 
     public static ResourceLocation id(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -49,14 +59,9 @@ public class MutantMonsters implements ModConstructor {
 
     @Override
     public void onConstructMod() {
-        CONFIG.bakeConfigs(MOD_ID);
         ModRegistry.touch();
         registerMessages();
-    }
-
-    @Override
-    public void onCommonSetup() {
-        PotionBrewingRegistry.INSTANCE.registerPotionRecipe(Potions.THICK, Ingredient.of(ModRegistry.ENDERSOUL_HAND_ITEM.get(), ModRegistry.HULK_HAMMER_ITEM.get(), ModRegistry.CREEPER_SHARD_ITEM.get(), ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()), ModRegistry.CHEMICAL_X_POTION.get());
+        registerHandlers();
     }
 
     private static void registerMessages() {
@@ -66,6 +71,23 @@ public class MutantMonsters implements ModConstructor {
         NETWORK.register(S2CAnimationMessage.class, S2CAnimationMessage::new, MessageDirection.TO_CLIENT);
         NETWORK.register(S2CSeismicWaveFluidParticlesMessage.class, S2CSeismicWaveFluidParticlesMessage::new, MessageDirection.TO_CLIENT);
         NETWORK.register(S2CMutantEndermanHeldBlockMessage.class, S2CMutantEndermanHeldBlockMessage::new, MessageDirection.TO_CLIENT);
+    }
+
+    private static void registerHandlers() {
+        LivingHurtCallback.EVENT.register(EntityEventsHandler::onLivingHurt);
+        UseItemEvents.TICK.register(PlayerEventsHandler::onItemUseTick);
+        ArrowLooseCallback.EVENT.register(PlayerEventsHandler::onArrowLoose);
+        PlayerInteractEvents.USE_ENTITY.register(EntityEventsHandler::onEntityInteract);
+        PlayerTickEvents.END.register(PlayerEventsHandler::onPlayerTick$End);
+        EntityLevelEvents.LOAD.register(EntityEventsHandler::onEntityJoinServerLevel);
+        LivingDropsCallback.EVENT.register(EntityEventsHandler::onLivingDrops);
+    }
+
+    @Override
+    public void onCommonSetup(ModLifecycleContext context) {
+        context.enqueueWork(() -> {
+            PotionBrewingRegistry.INSTANCE.registerPotionRecipe(Potions.THICK, Ingredient.of(ModRegistry.ENDERSOUL_HAND_ITEM.get(), ModRegistry.HULK_HAMMER_ITEM.get(), ModRegistry.CREEPER_SHARD_ITEM.get(), ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()), ModRegistry.CHEMICAL_X_POTION.get());
+        });
     }
 
     @Override
@@ -117,5 +139,32 @@ public class MutantMonsters implements ModConstructor {
         if (spawnSettings.getSpawnCost(entityType) != null) {
             spawnSettings.setSpawnCost(mutantEntityType, 0.7, 0.15);
         }
+    }
+
+    @Override
+    public void onRegisterCreativeModeTabs(CreativeModeTabContext context) {
+        context.registerCreativeModeTab(CreativeModeTabConfigurator.from(MOD_ID).icon(() -> new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get())).displayItems((featureFlagSet, output, bl) -> {
+            output.accept(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get());
+            output.accept(ModRegistry.CREEPER_SHARD_ITEM.get());
+            output.accept(ModRegistry.ENDERSOUL_HAND_ITEM.get());
+            output.accept(ModRegistry.HULK_HAMMER_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_ARMS_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_LIMB_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_RIB_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_RIB_CAGE_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_LEGGINGS_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_BOOTS_ITEM.get());
+            output.accept(ModRegistry.CREEPER_MINION_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_CREEPER_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.SPIDER_PIG_SPAWN_EGG_ITEM.get());
+        }).appendEnchantmentsAndPotions());
     }
 }

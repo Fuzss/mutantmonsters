@@ -42,8 +42,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -250,7 +250,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
             if (this.timeSinceIgnited >= this.fuseTime) {
                 this.timeSinceIgnited = 0;
                 if (!this.level.isClientSide) {
-                    MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
+                    MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
                     if (!this.canExplodeContinuously()) {
                         if (this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
                             this.getOwner().sendSystemMessage(Component.translatable("death.attack.explosion", this.getDisplayName()));

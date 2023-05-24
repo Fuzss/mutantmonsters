@@ -1,19 +1,21 @@
 package fuzs.mutantmonsters.world.entity.projectile;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -35,8 +37,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.OptionalInt;
 
 public class ThrowableBlock extends ThrowableProjectile implements AdditionalAddEntityData {
@@ -331,7 +333,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         compound.put("BlockState", NbtUtils.writeBlockState(this.blockState));
         compound.putBoolean("Held", this.isHeld());
         if (this.ownerType != null) {
-            compound.putString("OwnerType", Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
+            compound.putString("OwnerType", BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
         }
 
     }
@@ -341,7 +343,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         super.readAdditionalSaveData(compound);
         this.setHeld(compound.getBoolean("Held"));
         if (compound.contains("BlockState", 10)) {
-            this.blockState = NbtUtils.readBlockState(compound.getCompound("BlockState"));
+            this.blockState = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compound.getCompound("BlockState"));
         }
 
         if (compound.contains("OwnerType")) {
@@ -353,7 +355,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     @Override
     public void writeAdditionalAddEntityData(FriendlyByteBuf buffer) {
         buffer.writeVarInt(Block.getId(this.blockState));
-        buffer.writeUtf(this.ownerType == null ? "" : Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
+        buffer.writeUtf(this.ownerType == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
     }
 
     @Override
@@ -363,7 +365,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
     }
 }

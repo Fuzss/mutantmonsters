@@ -1,12 +1,12 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.mutantmonsters.world.entity.CreeperMinionEgg;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
+import fuzs.mutantmonsters.world.entity.CreeperMinionEgg;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import net.minecraft.core.BlockPos;
@@ -38,8 +38,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 public class MutantCreeper extends Monster {
@@ -224,7 +224,7 @@ public class MutantCreeper extends Monster {
             ++this.jumpTick;
             this.stuckSpeedMultiplier = Vec3.ZERO;
             if (!this.level.isClientSide && (this.onGround || !this.getFeetBlockState().getFluidState().isEmpty())) {
-                MutatedExplosion.create(this, this.isCharged() ? 6.0F : 4.0F, false, Explosion.BlockInteraction.DESTROY);
+                MutatedExplosion.create(this, this.isCharged() ? 6.0F : 4.0F, false, Level.ExplosionInteraction.MOB);
                 this.setJumpAttacking(false);
             }
         } else if (this.jumpTick > 0) {
@@ -291,7 +291,7 @@ public class MutantCreeper extends Monster {
         this.setPosRaw(this.getX() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612, this.getY(), this.getZ() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612);
         if (this.deathTime >= 100) {
             if (!this.level.isClientSide) {
-                MutatedExplosion.create(this, power, this.isOnFire(), Explosion.BlockInteraction.DESTROY);
+                MutatedExplosion.create(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : DamageSource.GENERIC);
                 if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null) {
                     this.level.addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));

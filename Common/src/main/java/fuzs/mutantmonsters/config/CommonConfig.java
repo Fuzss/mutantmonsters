@@ -2,15 +2,16 @@ package fuzs.mutantmonsters.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import fuzs.puzzleslib.config.ConfigCore;
-import fuzs.puzzleslib.config.ValueCallback;
-import fuzs.puzzleslib.config.annotation.Config;
-import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
-import fuzs.puzzleslib.config.serialization.ConfigDataSet;
-import net.minecraft.core.Registry;
+import fuzs.puzzleslib.api.config.v3.Config;
+import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.api.config.v3.ValueCallback;
+import fuzs.puzzleslib.api.config.v3.serialization.ConfigDataSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraftforge.common.ForgeConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -28,27 +29,31 @@ public class CommonConfig implements ConfigCore {
     public Map<EntityType<?>, EntityType<?>> mutantXConversions;
 
     @Override
-    public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
+    public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
         callback.accept(builder.comment("Mutant Creeper spawn weight.").worldRestart().defineInRange("mutant_creeper_spawn_weight", 5, 0, 100), v -> this.mutantCreeperSpawnWeight = v);
         callback.accept(builder.comment("Mutant Enderman spawn weight.").worldRestart().defineInRange("mutant_enderman_spawn_weight", 5, 0, 100), v -> this.mutantEndermanSpawnWeight = v);
         callback.accept(builder.comment("Mutant Skeleton spawn weight.").worldRestart().defineInRange("mutant_skeleton_spawn_weight", 5, 0, 100), v -> this.mutantSkeletonSpawnWeight = v);
         callback.accept(builder.comment("Mutant Zombie spawn weight.").worldRestart().defineInRange("mutant_zombie_spawn_weight", 5, 0, 100), v -> this.mutantZombieSpawnWeight = v);
 //        callback.accept(builder.comment("Mutants will not spawn in biomes present in this blacklist.", ConfigDataSet.CONFIG_DESCRIPTION).worldRestart().define("biome_blacklist", ConfigDataSet.toString(Registry.BIOME_REGISTRY)), v -> this.biomeBlacklist = ConfigDataSet.of(Registry.BIOME_REGISTRY, v));
+    }
+
+    @Override
+    public void afterConfigReload() {
         record MutantXConversion(EntityType<?> entityType, @Nullable ResourceLocation convertsTo) {
 
             public boolean isValid() {
                 if (this.entityType.getCategory() == MobCategory.MISC) return false;
-                if (this.convertsTo != null && Registry.ENTITY_TYPE.containsKey(this.convertsTo)) {
-                    return Registry.ENTITY_TYPE.get(this.convertsTo).getCategory() != MobCategory.MISC;
+                if (this.convertsTo != null && BuiltInRegistries.ENTITY_TYPE.containsKey(this.convertsTo)) {
+                    return BuiltInRegistries.ENTITY_TYPE.get(this.convertsTo).getCategory() != MobCategory.MISC;
                 }
                 return false;
             }
 
             public EntityType<?> convertsToType() {
-                return Registry.ENTITY_TYPE.get(this.convertsTo);
+                return BuiltInRegistries.ENTITY_TYPE.get(this.convertsTo);
             }
         };
-        ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.of(Registry.ENTITY_TYPE_REGISTRY, this.mutantXConversionsRaw, (integer, o) -> true, String.class);
+        ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.from(Registries.ENTITY_TYPE, this.mutantXConversionsRaw, (integer, o) -> true, String.class);
         this.mutantXConversions = configDataSet.toMap().entrySet().stream()
                 .map(data -> new MutantXConversion(data.getKey(), ResourceLocation.tryParse((String) data.getValue()[0])))
                 .filter(MutantXConversion::isValid)

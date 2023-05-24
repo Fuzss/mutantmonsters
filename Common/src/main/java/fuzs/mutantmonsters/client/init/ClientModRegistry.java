@@ -1,15 +1,14 @@
 package fuzs.mutantmonsters.client.init;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.puzzleslib.client.core.ClientFactories;
-import fuzs.puzzleslib.client.model.geom.ModelLayerRegistry;
+import fuzs.puzzleslib.api.client.init.v1.ModelLayerFactory;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
 public class ClientModRegistry {
-    private static final ModelLayerRegistry REGISTRY = ClientFactories.INSTANCE.modelLayerRegistration(MutantMonsters.MOD_ID);
+    private static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);
     public static final ModelLayerLocation MUTANT_SKELETON_SKULL = REGISTRY.register("mutant_skeleton_skull");
     public static final ModelLayerLocation CREEPER_MINION_EGG = REGISTRY.register("creeper_minion_egg");
     public static final ModelLayerLocation CREEPER_MINION_EGG_ARMOR = REGISTRY.register("creeper_minion_egg", "armor");

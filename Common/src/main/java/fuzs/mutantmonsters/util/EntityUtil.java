@@ -8,6 +8,7 @@ import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -99,7 +100,7 @@ public final class EntityUtil {
 
     public static void sendMetadataPacket(Entity entity) {
         if (entity.level instanceof ServerLevel) {
-            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData(), false));
+            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData().getNonDefaultValues()));
         }
 
     }
@@ -185,7 +186,7 @@ public final class EntityUtil {
                 }
 
                 if (mobToConvert.getType() == EntityType.ENDERMAN && copiedNBT.contains("carriedBlockState", 10)) {
-                    BlockState blockState = NbtUtils.readBlockState(copiedNBT.getCompound("carriedBlockState"));
+                    BlockState blockState = NbtUtils.readBlockState(mobToConvert.level.holderLookup(Registries.BLOCK), copiedNBT.getCompound("carriedBlockState"));
                     if (!blockState.isAir()) {
                         mobToConvert.spawnAtLocation(blockState.getBlock());
                     }

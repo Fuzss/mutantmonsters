@@ -1,15 +1,11 @@
 package fuzs.mutantmonsters.core;
 
 import fuzs.mutantmonsters.mixin.accessor.ExplosionFabricAccessor;
-import fuzs.mutantmonsters.mixin.accessor.MobFabricAccessor;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalEntityTypeTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -56,11 +52,6 @@ public class FabricAbstractions implements CommonAbstractions {
     }
 
     @Override
-    public GoalSelector getGoalSelector(Mob mob) {
-        return ((MobFabricAccessor) mob).mutantmonsters$getGoalSelector();
-    }
-
-    @Override
     public boolean onExplosionStart(Level level, Explosion explosion) {
         return false;
     }
@@ -97,8 +88,4 @@ public class FabricAbstractions implements CommonAbstractions {
         return true;
     }
 
-    @Override
-    public boolean isBossMob(LivingEntity entity) {
-        return entity.getType().is(ConventionalEntityTypeTags.BOSSES);
-    }
 }

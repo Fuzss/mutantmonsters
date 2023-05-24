@@ -4,36 +4,29 @@ import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.data.ModEntityTypeTagsProvider;
 import fuzs.mutantmonsters.data.ModItemTagsProvider;
 import fuzs.mutantmonsters.data.ModLootTableProvider;
-import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModRegistryForge;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
-import fuzs.puzzleslib.capability.ForgeCapabilityController;
-import fuzs.puzzleslib.core.CommonFactories;
-import fuzs.puzzleslib.core.ContentRegistrationFlags;
+import fuzs.puzzleslib.api.capability.v2.ForgeCapabilityHelper;
+import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
+import fuzs.puzzleslib.api.core.v1.ModConstructor;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.ArrowLooseEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
+
+import java.util.concurrent.CompletableFuture;
 
 @Mod(MutantMonsters.MOD_ID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -41,44 +34,21 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        CommonFactories.INSTANCE.modConstructor(MutantMonsters.MOD_ID, ContentRegistrationFlags.BIOMES).accept(new MutantMonsters());
+        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOMES);
         ModRegistryForge.touch();
         registerCapabilities();
         registerHandlers();
     }
 
     private static void registerCapabilities() {
-        ForgeCapabilityController.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<SeismicWavesCapability>() {});
+        ForgeCapabilityHelper.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<SeismicWavesCapability>() {});
     }
 
     private static void registerHandlers() {
-        MinecraftForge.EVENT_BUS.addListener((final LivingHurtEvent evt) -> {
-            EntityEventsHandler.onLivingHurt(evt.getEntity(), evt.getSource(), evt.getAmount());
-        });
-        MinecraftForge.EVENT_BUS.addListener((final LivingEntityUseItemEvent.Tick evt) -> {
-            PlayerEventsHandler.onItemUseTick(evt.getEntity(), evt.getItem(), evt.getDuration()).ifPresent(evt::setDuration);
-        });
-        MinecraftForge.EVENT_BUS.addListener((final ArrowLooseEvent evt) -> {
-            PlayerEventsHandler.onArrowLoose(evt.getEntity(), evt.getBow(), evt.getLevel(), evt.getCharge(), evt.hasAmmo()).ifPresent(unit -> evt.setCanceled(true));
-        });
-        MinecraftForge.EVENT_BUS.addListener((final PlayerInteractEvent.EntityInteractSpecific evt) -> {
-            InteractionResult result = EntityEventsHandler.onEntityInteract(evt.getEntity(), evt.getLevel(), evt.getHand(), evt.getTarget(), new EntityHitResult(evt.getTarget(), evt.getLocalPos().add(evt.getTarget().position())));
-            if (result != InteractionResult.PASS) {
-                evt.setCancellationResult(result);
+        MinecraftForge.EVENT_BUS.addListener((final ItemTossEvent evt) -> {
+            if (PlayerEventsHandler.onItemToss(evt.getEntity(), evt.getPlayer()).isInterrupt()) {
                 evt.setCanceled(true);
             }
-        });
-        MinecraftForge.EVENT_BUS.addListener((final TickEvent.PlayerTickEvent evt) -> {
-            if (evt.phase == TickEvent.Phase.END) PlayerEventsHandler.onPlayerTick$End(evt.player);
-        });
-        MinecraftForge.EVENT_BUS.addListener((final ItemTossEvent evt) -> {
-            PlayerEventsHandler.onItemToss(evt.getEntity(), evt.getPlayer()).ifPresent(unit -> evt.setCanceled(true));
-        });
-        MinecraftForge.EVENT_BUS.addListener((final EntityJoinLevelEvent evt) -> {
-            if (evt.getLevel() instanceof ServerLevel level) EntityEventsHandler.onEntityJoinServerLevel(evt.getEntity(), level);
-        });
-        MinecraftForge.EVENT_BUS.addListener((final LivingDropsEvent evt) -> {
-            EntityEventsHandler.onLivingDrops(evt.getEntity(), evt.getSource(), evt.getDrops(), evt.getLootingLevel(), evt.isRecentlyHit()).ifPresent(unit -> evt.setCanceled(true));
         });
     }
 
@@ -90,10 +60,12 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onGatherData(final GatherDataEvent evt) {
-        DataGenerator dataGenerator = evt.getGenerator();
+        final DataGenerator dataGenerator = evt.getGenerator();
+        final PackOutput packOutput = dataGenerator.getPackOutput();
+        final CompletableFuture<HolderLookup.Provider> lookupProvider = evt.getLookupProvider();
         final ExistingFileHelper fileHelper = evt.getExistingFileHelper();
-        dataGenerator.addProvider(true, new ModEntityTypeTagsProvider(dataGenerator, MutantMonsters.MOD_ID, fileHelper));
-        dataGenerator.addProvider(true, new ModItemTagsProvider(dataGenerator, MutantMonsters.MOD_ID, fileHelper));
-        dataGenerator.addProvider(true, new ModLootTableProvider(dataGenerator));
+        dataGenerator.addProvider(true, new ModEntityTypeTagsProvider(packOutput, lookupProvider, MutantMonsters.MOD_ID, fileHelper));
+        dataGenerator.addProvider(true, new ModItemTagsProvider(packOutput, lookupProvider, MutantMonsters.MOD_ID, fileHelper));
+        dataGenerator.addProvider(true, new ModLootTableProvider(packOutput));
     }
 }

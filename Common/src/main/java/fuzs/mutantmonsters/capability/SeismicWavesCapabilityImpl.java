@@ -2,25 +2,12 @@ package fuzs.mutantmonsters.capability;
 
 import com.google.common.collect.Queues;
 import fuzs.mutantmonsters.core.SeismicWave;
-import net.minecraft.nbt.CompoundTag;
 
 import java.util.Queue;
 
-public class SeismicWavesCapabilityImpl implements SeismicWavesCapability {
-    private final Queue<SeismicWave> seismicWaves = Queues.newArrayDeque();
+public record SeismicWavesCapabilityImpl(Queue<SeismicWave> seismicWaves) implements SeismicWavesCapability {
 
-    @Override
-    public Queue<SeismicWave> getSeismicWaves() {
-        return this.seismicWaves;
-    }
-
-    @Override
-    public void write(CompoundTag tag) {
-
-    }
-
-    @Override
-    public void read(CompoundTag tag) {
-
+    public SeismicWavesCapabilityImpl() {
+        this(Queues.newArrayDeque());
     }
 }

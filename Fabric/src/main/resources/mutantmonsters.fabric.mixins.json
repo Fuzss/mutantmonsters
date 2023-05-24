@@ -4,14 +4,10 @@
   "compatibilityLevel": "JAVA_17",
   "package": "fuzs.mutantmonsters.mixin",
   "refmap": "mutantmonsters.refmap.json",
+  "plugin": "fuzs.mutantmonsters.mixin.ModMixinConfigPlugin",
   "mixins": [
-    "BowItemFabricMixin",
-    "EntityFabricMixin",
-    "LivingEntityFabricMixin",
     "PlayerFabricMixin",
-    "ServerPlayerFabricMixin",
-    "accessor.ExplosionFabricAccessor",
-    "accessor.MobFabricAccessor"
+    "accessor.ExplosionFabricAccessor"
   ],
   "client": [
   ],

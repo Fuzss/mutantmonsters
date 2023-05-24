@@ -1,10 +1,11 @@
 package fuzs.mutantmonsters.world.entity;
 
-import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -207,7 +208,7 @@ public class EndersoulFragment extends Entity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
     }
 }

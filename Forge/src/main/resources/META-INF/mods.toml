@@ -25,7 +25,7 @@ issueTrackerURL="${modIssueUrl}"
 [[dependencies.${modId}]]
     modId="minecraft"
     mandatory=true
-    versionRange="[${minMinecraftVersion},${nextMinecraftVersion})"
+    versionRange="[${minecraftVersion}]"
     ordering="NONE"
     side="BOTH"
 
@@ -38,4 +38,3 @@ issueTrackerURL="${modIssueUrl}"
 
 [modproperties.${modId}]
     catalogueImageIcon="mod_logo.png"
-    configuredBackground="minecraft:textures/block/coarse_dirt.png"

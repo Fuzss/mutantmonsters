@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Vanishable;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -73,7 +72,7 @@ public class CreeperShardItem extends Item implements Vanishable {
                 damage += 2.0F;
             }
 
-            MutatedExplosion.create(worldIn, playerIn, playerIn.getX(), playerIn.getY() + 1.0, playerIn.getZ(), damage, false, playerIn.mayBuild() ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
+            MutatedExplosion.create(worldIn, playerIn, playerIn.getX(), playerIn.getY() + 1.0, playerIn.getZ(), damage, false, playerIn.mayBuild() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
         }
 
         if (!playerIn.getAbilities().instabuild) {

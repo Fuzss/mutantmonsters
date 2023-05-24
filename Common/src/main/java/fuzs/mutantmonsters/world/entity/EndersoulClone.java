@@ -24,8 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class EndersoulClone extends Monster {
     private MutantEnderman cloner;

@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
@@ -59,7 +59,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
                 matrixStackIn.pushPose();
                 this.getParentModel().translateHand(leftHanded, matrixStackIn);
                 matrixStackIn.translate(leftHanded ? 0.2 : -0.2, 0.4, -1.8);
-                matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+                matrixStackIn.mulPose(Axis.XP.rotationDegrees(90.0F));
                 matrixStackIn.scale(1.2F, 1.2F, 1.2F);
                 VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(MutantArrowRenderer.TEXTURE));
                 this.model.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

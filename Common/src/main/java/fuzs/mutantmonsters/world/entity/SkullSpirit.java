@@ -2,12 +2,13 @@ package fuzs.mutantmonsters.world.entity;
 
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
+import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -20,7 +21,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -86,7 +86,7 @@ public class SkullSpirit extends Entity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
     }
 
@@ -107,7 +107,7 @@ public class SkullSpirit extends Entity {
                     if (--this.attachedTick <= 0) {
                         EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
                         if (mutantType != null && this.random.nextFloat() < 0.75F) {
-                            MutatedExplosion.create(this, 2.0F, false, Explosion.BlockInteraction.NONE);
+                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
                             Entity mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);
                             if (mutant instanceof Mob mob) mob.setPersistenceRequired();
                             AABB bb = mutant.getBoundingBox();
@@ -123,7 +123,7 @@ public class SkullSpirit extends Entity {
                             }
                         } else {
                             this.setAttached(false);
-                            MutatedExplosion.create(this, 2.0F, false, Explosion.BlockInteraction.NONE);
+                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
                         }
                         this.discard();
                     }

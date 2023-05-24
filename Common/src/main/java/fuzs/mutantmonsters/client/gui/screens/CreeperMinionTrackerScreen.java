@@ -6,7 +6,6 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionNameMessage;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionTrackerMessage;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
-import fuzs.puzzleslib.client.gui.screens.CommonScreens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -52,23 +51,23 @@ public class CreeperMinionTrackerScreen extends Screen {
         this.name.setValue(this.creeperMinion.getName().getString());
         this.addWidget(this.name);
         int buttonWidth = this.imageWidth / 2 - 10;
-        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 78, buttonWidth * 2 + 4, 20, this.canDestroyBlocks(), (button) -> {
+        this.addRenderableWidget(Button.builder(this.canDestroyBlocks(), (button) -> {
             this.canDestroyBlocks = !this.canDestroyBlocks;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 0, this.canDestroyBlocks));
             button.setMessage(this.canDestroyBlocks());
-        }));
-        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 54, buttonWidth * 2 + 4, 20, this.alwaysShowName(), (button) -> {
+        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 78, buttonWidth * 2 + 4, 20).build());
+        this.addRenderableWidget(Button.builder(this.alwaysShowName(), (button) -> {
             this.alwaysShowName = !this.alwaysShowName;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 1, this.alwaysShowName));
             button.setMessage(this.alwaysShowName());
-        }));
-        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 30, buttonWidth * 2 + 4, 20, this.canRideOnShoulder(), (button) -> {
+        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 54, buttonWidth * 2 + 4, 20).build());
+        this.addRenderableWidget(Button.builder(this.canRideOnShoulder(), (button) -> {
             this.canRideOnShoulder = !this.canRideOnShoulder;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 2, this.canRideOnShoulder));
             button.setMessage(this.canRideOnShoulder());
-        }));
+        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 30, buttonWidth * 2 + 4, 20).build());
         if (!this.creeperMinion.isOwnedBy(this.minecraft.player)) {
-            CommonScreens.INSTANCE.getRenderableButtons(this).stream().filter(widget -> widget instanceof AbstractWidget).forEach(widget -> ((AbstractWidget) widget).active = false);
+            this.renderables.stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).forEach(widget -> widget.active = false);
         }
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
         this.titleLabelY = 6;
@@ -104,12 +103,6 @@ public class CreeperMinionTrackerScreen extends Screen {
         String string = this.name.getValue();
         this.init(minecraft, width, height);
         this.name.setValue(string);
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     private Component alwaysShowName() {

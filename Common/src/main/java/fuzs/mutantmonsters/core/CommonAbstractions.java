@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.core;
 
-import fuzs.puzzleslib.util.PuzzlesUtil;
+import fuzs.puzzleslib.api.core.v1.ServiceProviderHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface CommonAbstractions {
-    CommonAbstractions INSTANCE = PuzzlesUtil.loadServiceProvider(CommonAbstractions.class);
+    CommonAbstractions INSTANCE = ServiceProviderHelper.load(CommonAbstractions.class);
 
     BlockPathTypes getAdjacentBlockPathType(BlockGetter blockReader, BlockPos.MutableBlockPos mutable, BlockPathTypes pathNodeType);
 
@@ -37,8 +37,6 @@ public interface CommonAbstractions {
     boolean onAnimalTame(Animal animal, Player tamer);
 
     BlockParticleOption setBlockParticlePos(BlockParticleOption particleOption, BlockPos pos);
-
-    GoalSelector getGoalSelector(Mob mob);
 
     boolean onExplosionStart(Level level, Explosion explosion);
 
@@ -54,6 +52,4 @@ public interface CommonAbstractions {
     AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow);
 
     boolean shouldRiderSit(Entity vehicle);
-
-    boolean isBossMob(LivingEntity entity);
 }

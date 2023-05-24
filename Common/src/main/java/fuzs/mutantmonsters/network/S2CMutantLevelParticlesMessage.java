@@ -1,17 +1,17 @@
 package fuzs.mutantmonsters.network;
 
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class S2CMutantLevelParticlesMessage implements Message<S2CMutantLevelParticlesMessage> {
+public class S2CMutantLevelParticlesMessage implements MessageV2<S2CMutantLevelParticlesMessage> {
     private ParticleOptions particleData;
     private double posX;
     private double posY;
@@ -38,7 +38,7 @@ public class S2CMutantLevelParticlesMessage implements Message<S2CMutantLevelPar
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeVarInt(Registry.PARTICLE_TYPE.getId(this.particleData.getType()));
+        buf.writeVarInt(BuiltInRegistries.PARTICLE_TYPE.getId(this.particleData.getType()));
         this.particleData.writeToNetwork(buf);
         buf.writeDouble(this.posX);
         buf.writeDouble(this.posY);
@@ -51,7 +51,7 @@ public class S2CMutantLevelParticlesMessage implements Message<S2CMutantLevelPar
 
     @Override
     public void read(FriendlyByteBuf buf) {
-        ParticleType<?> particletype = Registry.PARTICLE_TYPE.byId(buf.readVarInt());
+        ParticleType<?> particletype = BuiltInRegistries.PARTICLE_TYPE.byId(buf.readVarInt());
         this.particleData = this.readParticle(buf, particletype);
         this.posX = buf.readDouble();
         this.posY = buf.readDouble();

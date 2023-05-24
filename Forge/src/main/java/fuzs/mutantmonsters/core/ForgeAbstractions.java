@@ -5,8 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,11 +56,6 @@ public class ForgeAbstractions implements CommonAbstractions {
     }
 
     @Override
-    public GoalSelector getGoalSelector(Mob mob) {
-        return mob.goalSelector;
-    }
-
-    @Override
     public boolean onExplosionStart(Level level, Explosion explosion) {
         return ForgeEventFactory.onExplosionStart(level, explosion);
     }
@@ -98,8 +90,4 @@ public class ForgeAbstractions implements CommonAbstractions {
         return vehicle.shouldRiderSit();
     }
 
-    @Override
-    public boolean isBossMob(LivingEntity entity) {
-        return entity.getType().is(Tags.EntityTypes.BOSSES);
-    }
 }

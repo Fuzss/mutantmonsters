@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.network;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class S2CSeismicWaveFluidParticlesMessage implements Message<S2CSeismicWaveFluidParticlesMessage> {
+public class S2CSeismicWaveFluidParticlesMessage implements MessageV2<S2CSeismicWaveFluidParticlesMessage> {
     private BlockPos blockPos;
 
     public S2CSeismicWaveFluidParticlesMessage() {
