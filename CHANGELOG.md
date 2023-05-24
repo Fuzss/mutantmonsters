@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.0.4-1.19.2] - 2023-05-24
+### Fixed
+- Fixed chemical x conversions being incorrectly read from the config file, resulting in only the default mutations being available always
+
 ## [v4.0.3-1.19.2] - 2023-05-24
 ### Fixed
 - Fixed being in negative y-coordinates breaking the mutant endermans teleport abilities
