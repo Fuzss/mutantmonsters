@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.0.5-1.19.2] - 2023-05-25
+### Fixed
+- Fixed mutant snow golem cannot be created from using chemical x on a snow golem
+- Fixed mutant snow golem being unable to find a new target after killing an existing target
+
 ## [v4.0.4-1.19.2] - 2023-05-24
 ### Fixed
 - Fixed chemical x conversions being incorrectly read from the config file, resulting in only the default mutations being available always

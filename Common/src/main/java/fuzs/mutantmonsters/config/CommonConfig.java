@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.puzzleslib.config.ConfigCore;
 import fuzs.puzzleslib.config.ValueCallback;
 import fuzs.puzzleslib.config.annotation.Config;
@@ -10,7 +11,6 @@ import fuzs.puzzleslib.config.serialization.ConfigDataSet;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,11 +41,12 @@ public class CommonConfig implements ConfigCore {
         record MutantXConversion(EntityType<?> entityType, @Nullable ResourceLocation convertsTo) {
 
             public boolean isValid() {
-                if (this.entityType.getCategory() == MobCategory.MISC) return false;
                 if (this.convertsTo != null && Registry.ENTITY_TYPE.containsKey(this.convertsTo)) {
-                    return Registry.ENTITY_TYPE.get(this.convertsTo).getCategory() != MobCategory.MISC;
+                    return true;
+                } else {
+                    MutantMonsters.LOGGER.warn("Unable to parse mutated variant for entry {}", Registry.ENTITY_TYPE.getKey(this.entityType));
+                    return false;
                 }
-                return false;
             }
 
             public EntityType<?> convertsToType() {

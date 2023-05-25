@@ -137,7 +137,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target instanceof Enemy;
+        return target instanceof Enemy && target.canBeSeenAsEnemy();
     }
 
     @Override
