@@ -122,7 +122,7 @@ public class MutantSkeletonBodyPart extends Entity {
             this.setXRot(this.getXRot() + 15.0F * (float) (this.pitchPositive ? 1 : -1));
 
             for (Entity entity : this.level.getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(DamageSource.thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
+                if (entity.hurt(this.level.damageSources().thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
                     entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
                 }
             }

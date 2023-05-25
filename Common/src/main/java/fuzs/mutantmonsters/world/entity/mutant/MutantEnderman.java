@@ -16,6 +16,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
+import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,6 +35,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -41,7 +43,7 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -107,7 +109,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         this.heldBlock = new int[4];
         this.heldBlockTick = new int[4];
         this.xpReward = 40;
-        this.maxUpStep = 1.4F;
+        this.setMaxUpStep(1.4F);
     }
 
     @Override
@@ -336,7 +338,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
 
             for(int i = 0; i < this.heldBlock.length; ++i) {
                 if (this.heldBlock[i] > 0 && this.heldBlockTick[i] == 0) {
-                    BlockPos startPos = new BlockPos(this.getX() - 1.5 + this.random.nextDouble() * 4.0, this.getY() - 0.5 + this.random.nextDouble() * 2.5, this.getZ() - 1.5 + this.random.nextDouble() * 4.0);
+                    BlockPos startPos = BlockPos.containing(this.getX() - 1.5 + this.random.nextDouble() * 4.0, this.getY() - 0.5 + this.random.nextDouble() * 2.5, this.getZ() - 1.5 + this.random.nextDouble() * 4.0);
                     BlockState heldState = Block.updateFromNeighbourShapes(Block.stateById(this.heldBlock[i]), this.level, startPos);
                     if (mobGriefing && this.canPlaceBlock(this.level, startPos, heldState, startPos.below())) {
                         this.level.setBlockAndUpdate(startPos, heldState);
@@ -414,13 +416,13 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
     private void updateBlockFrenzy() {
         this.blockFrenzy = Math.max(0, this.blockFrenzy - 1);
         if (this.getTarget() != null && !this.isAnimationPlaying()) {
-            if (this.blockFrenzy == 0 && (this.getLastDamageSource() instanceof IndirectEntityDamageSource || this.random.nextInt(!this.isPathFinding() ? 300 : 600) == 0)) {
+            if (this.blockFrenzy == 0 && (this.getLastDamageSource() != null && this.getLastDamageSource().isIndirect() || this.random.nextInt(!this.isPathFinding() ? 300 : 600) == 0)) {
                 this.blockFrenzy = 200 + this.random.nextInt(80);
             }
 
             if (this.blockFrenzy > 0 && this.random.nextInt(8) == 0) {
                 int index = this.getFavorableHand();
-                BlockPos pos = new BlockPos(this.getX() - 2.5 + this.random.nextDouble() * 5.0, this.getY() - 0.5 + this.random.nextDouble() * 3.0, this.getZ() - 2.5 + this.random.nextDouble() * 5.0);
+                BlockPos pos = BlockPos.containing(this.getX() - 2.5 + this.random.nextDouble() * 5.0, this.getY() - 0.5 + this.random.nextDouble() * 3.0, this.getZ() - 2.5 + this.random.nextDouble() * 5.0);
                 BlockState blockState = this.level.getBlockState(pos);
                 if (index != -1 && canBlockBeHeld(this.level, pos, blockState, ModRegistry.MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG)) {
                     this.setHeldBlock(index, Block.getId(blockState), 0);
@@ -537,7 +539,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         }
 
         if (this.isClone()) {
-            boolean flag = entityIn.hurt(DamageSource.mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+            boolean flag = entityIn.hurt(this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
             if (!this.level.isClientSide && this.random.nextInt(2) == 0) {
                 double x = entityIn.getX() + (this.random.nextDouble() - 0.5) * 24.0;
                 double y = entityIn.getY() + (double)this.random.nextInt(5) + 4.0;
@@ -562,7 +564,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         if (this.isInvulnerableTo(source)) {
             return false;
         } else if (!(source.getEntity() instanceof EnderDragon) && !(source.getEntity() instanceof MutantEnderman)) {
-            if ((this.animation == TELEPORT_ANIMATION || this.animation == SCREAM_ANIMATION) && source != DamageSource.OUT_OF_WORLD) {
+            if ((this.animation == TELEPORT_ANIMATION || this.animation == SCREAM_ANIMATION) && !source.is(DamageTypes.OUT_OF_WORLD)) {
                 return false;
             } else {
                 boolean damaged = super.hurt(source, amount);
@@ -573,11 +575,11 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                     if (!this.level.isClientSide && !this.isAnimationPlaying() && this.isAlive()) {
                         Entity entity = source.getEntity();
                         boolean betterDodge = entity == null;
-                        if (source.isProjectile() || source.isExplosion() || source == DamageSource.FALL) {
+                        if (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypes.FALL)) {
                             betterDodge = true;
                         }
 
-                        if (this.teleportByChance(betterDodge ? 3 : 6, entity) && source != DamageSource.OUT_OF_WORLD) {
+                        if (this.teleportByChance(betterDodge ? 3 : 6, entity) && !source.is(DamageTypes.OUT_OF_WORLD)) {
                             if (entity instanceof LivingEntity) {
                                 this.setLastHurtByMob((LivingEntity)entity);
                             }
@@ -585,7 +587,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                             return false;
                         }
 
-                        boolean betterTeleport = source == DamageSource.DROWN || source == DamageSource.IN_WALL;
+                        boolean betterTeleport = source.is(DamageTypes.DROWN) || source.is(DamageTypes.IN_WALL);
                         this.teleportByChance(betterTeleport ? 3 : 5, entity);
                     }
 
@@ -693,11 +695,11 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
     public static void teleportAttack(LivingEntity attacker) {
         double radius = 3.0;
         int duration = 140 + attacker.getRandom().nextInt(60);
-        DamageSource damageSource = DamageSource.mobAttack(attacker);
+        DamageSource damageSource = attacker.damageSources().mobAttack(attacker);
         if (attacker instanceof Player) {
             radius = 2.0;
             duration = 100;
-            damageSource = DamageSource.playerAttack((Player) attacker);
+            damageSource = attacker.damageSources().playerAttack((Player) attacker);
         }
 
         for (Entity entity : attacker.level.getEntities(attacker, attacker.getBoundingBox().inflate(radius), EndersoulFragment.IS_VALID_TARGET)) {
@@ -825,7 +827,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         }
 
         if (!this.level.isClientSide && this.deathTime >= 100 && this.deathTime < 150 && this.deathTime % 6 == 0 && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            super.dropFromLootTable(this.deathCause != null ? this.deathCause : DamageSource.GENERIC, this.lastHurtByPlayerTime > 0);
+            super.dropFromLootTable(this.deathCause != null ? this.deathCause : this.level.damageSources().generic(), this.lastHurtByPlayerTime > 0);
         }
 
         if (this.deathTime >= DEATH_ANIMATION.duration()) {
@@ -1060,7 +1062,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                 EntityUtil.sendParticlePacket(this.attackTarget, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
                 this.attackTarget.teleportTo(x, y, z);
                 this.mob.level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE, this.attackTarget.getSoundSource(), 1.2F, 0.9F + this.attackTarget.getRandom().nextFloat() * 0.2F);
-                this.attackTarget.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), 6.0F);
+                this.attackTarget.hurt(DamageSourcesHelper.source(this.mob.level, ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), 6.0F);
             }
 
         }
@@ -1148,7 +1150,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
 
                 for (Entity entity : this.mob.level.getEntities(this.mob, this.mob.getBoundingBox().inflate(20.0, 12.0, 20.0), EndersoulFragment.IS_VALID_TARGET)) {
                     if (this.mob.distanceToSqr(entity) < 400.0) {
-                        entity.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), 4.0F);
+                        entity.hurt(DamageSourcesHelper.source(this.mob.level, ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), 4.0F);
                         if (entity instanceof Mob mobEntity) {
                             mobEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 3));
                             if (this.mob.random.nextInt(2) != 0) {
@@ -1209,7 +1211,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         public void start() {
             super.start();
             this.mob.invulnerableTime = 20;
-            this.mob.maxUpStep = 1.0F;
+            this.mob.setMaxUpStep(1.0F);
             this.mob.setClone(true);
             this.mob.clearFire();
             this.mob.removeAllEffects();
@@ -1249,7 +1251,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         public void stop() {
             super.stop();
             this.mob.setClone(false);
-            this.mob.maxUpStep = 1.4F;
+            this.mob.setMaxUpStep(1.4F);
 
             for (EndersoulClone clone : this.cloneList) {
                 if (clone.isAlive()) {
@@ -1303,7 +1305,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
                         double x = this.mob.getX() - livingEntity.getX();
                         double z = this.mob.getZ() - livingEntity.getZ();
                         if (this.mob.getBoundingBox().minY <= livingEntity.getBoundingBox().maxY && dist <= 4.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 3.0F + (1.0F - (float) dist / 4.0F) * 40.0F) {
-                            livingEntity.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (lower ? 1.0F : 3.0F) : 0.0F);
+                            livingEntity.hurt(this.mob.damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (lower ? 1.0F : 3.0F) : 0.0F);
                             float power = 0.4F + this.mob.random.nextFloat() * 0.2F;
                             if (!lower) {
                                 power += 0.2F;
@@ -1360,7 +1362,7 @@ public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntit
         public void stop() {
             super.stop();
             this.attackTarget.stopRiding();
-            this.attackTarget.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), 2.0F);
+            this.attackTarget.hurt(DamageSourcesHelper.source(this.mob.level, ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), 2.0F);
             this.attackTarget.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 160 + this.mob.random.nextInt(140)));
             double x = this.mob.getX() - this.attackTarget.getX();
             double z = this.mob.getZ() - this.attackTarget.getZ();

@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.world.entity.projectile;
 
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
+import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -12,16 +13,13 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,19 +184,8 @@ public class MutantArrow extends Entity {
     }
 
     protected void handleEntities() {
-
         for (Entity entity : this.pointedEntities) {
-            DamageSource damageSource = (new IndirectEntityDamageSource("arrow", this, this.shooter) {
-                @Override
-                public Vec3 getSourcePosition() {
-                    return null;
-                }
-            }).setProjectile();
-            if (entity instanceof EnderDragonPart) {
-                damageSource.setExplosion();
-            }
-
-            if (entity.hurt(damageSource, (float) this.damage)) {
+            if (entity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.MUTANT_ARROW_DAMAGE_TYPE, this, this.shooter), (float) this.damage)) {
                 if (!this.isSilent()) {
                     this.level.playSound( null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 }

@@ -277,7 +277,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        boolean flag = entityIn.hurt(DamageSource.mobAttack(this), damage);
+        boolean flag = entityIn.hurt(this.level.damageSources().mobAttack(this), damage);
         if (flag) {
             this.doEnchantDamageEffects(this, entityIn);
         }
@@ -286,7 +286,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public boolean canJump(Player player) {
+    public boolean canJump() {
         return this.isSaddled() && !this.chargeExhausted && !this.horizontalCollision;
     }
 
@@ -362,12 +362,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     @Override
     @Nullable
-    public Entity getControllingPassenger() {
-        return this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
-    }
-
-    public boolean canBeControlledByRider() {
-        return this.getControllingPassenger() instanceof LivingEntity;
+    public LivingEntity getControllingPassenger() {
+        return this.getFirstPassenger() instanceof LivingEntity entity ? entity : null;
     }
 
     @Override
@@ -402,9 +398,9 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     @Override
     public void travel(Vec3 travelVector) {
-        if (this.isVehicle() && this.canBeControlledByRider() && this.isSaddled()) {
+        if (this.isVehicle() && this.getControllingPassenger() != null && this.isSaddled()) {
             LivingEntity passenger = (LivingEntity)this.getControllingPassenger();
-            this.maxUpStep = 1.0F;
+            this.setMaxUpStep(1.0F);
             this.setYRot(passenger.getYRot());
             this.yRotO = this.getYRot();
             this.setXRot(passenger.getXRot() * 0.5F);
@@ -420,7 +416,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 this.chargePower = 0.0F;
             }
 
-            this.flyingSpeed = this.getSpeed() * 0.1F;
             if (this.isControlledByLocalInstance()) {
                 float strafe = passenger.xxa * 0.8F;
                 float forward = passenger.zza * 0.6F;
@@ -429,11 +424,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             } else if (passenger instanceof Player) {
                 this.setDeltaMovement(Vec3.ZERO);
             } else {
-                this.calculateEntityAnimation(this, false);
+                this.calculateEntityAnimation(false);
             }
         } else {
-            this.maxUpStep = 0.6F;
-            this.flyingSpeed = 0.02F;
+            this.setMaxUpStep(0.6F);
             super.travel(travelVector);
         }
 

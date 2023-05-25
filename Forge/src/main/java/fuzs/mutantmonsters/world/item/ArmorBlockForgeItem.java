@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.world.item;
 
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -11,11 +10,6 @@ public class ArmorBlockForgeItem extends ArmorBlockItem {
 
     public ArmorBlockForgeItem(ArmorMaterial material, Block floorBlock, Block wallBlockIn, Properties propertiesIn) {
         super(material, floorBlock, wallBlockIn, propertiesIn);
-    }
-
-    @Override
-    public EquipmentSlot getEquipmentSlot(ItemStack stack) {
-        return EquipmentSlot.HEAD;
     }
 
     @Override

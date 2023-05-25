@@ -19,13 +19,14 @@ import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.puzzleslib.api.core.v1.context.*;
-import fuzs.puzzleslib.api.event.v1.PlayerTickEvents;
-import fuzs.puzzleslib.api.event.v1.entity.EntityLevelEvents;
+import fuzs.puzzleslib.api.event.v1.entity.ServerEntityLevelEvents;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingDropsCallback;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingHurtCallback;
 import fuzs.puzzleslib.api.event.v1.entity.living.UseItemEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.ArrowLooseCallback;
+import fuzs.puzzleslib.api.event.v1.entity.player.ItemTossCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
+import fuzs.puzzleslib.api.event.v1.entity.player.PlayerTickEvents;
 import fuzs.puzzleslib.api.init.v2.PotionBrewingRegistry;
 import fuzs.puzzleslib.api.item.v2.CreativeModeTabConfigurator;
 import fuzs.puzzleslib.api.network.v2.MessageDirection;
@@ -79,8 +80,9 @@ public class MutantMonsters implements ModConstructor {
         ArrowLooseCallback.EVENT.register(PlayerEventsHandler::onArrowLoose);
         PlayerInteractEvents.USE_ENTITY.register(EntityEventsHandler::onEntityInteract);
         PlayerTickEvents.END.register(PlayerEventsHandler::onPlayerTick$End);
-        EntityLevelEvents.LOAD.register(EntityEventsHandler::onEntityJoinServerLevel);
+        ServerEntityLevelEvents.LOAD.register(EntityEventsHandler::onEntityJoinServerLevel);
         LivingDropsCallback.EVENT.register(EntityEventsHandler::onLivingDrops);
+        ItemTossCallback.EVENT.register(PlayerEventsHandler::onItemToss);
     }
 
     @Override
@@ -143,7 +145,7 @@ public class MutantMonsters implements ModConstructor {
 
     @Override
     public void onRegisterCreativeModeTabs(CreativeModeTabContext context) {
-        context.registerCreativeModeTab(CreativeModeTabConfigurator.from(MOD_ID).icon(() -> new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get())).displayItems((featureFlagSet, output, bl) -> {
+        context.registerCreativeModeTab(CreativeModeTabConfigurator.from(MOD_ID).icon(() -> new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get())).displayItems((itemDisplayParameters, output) -> {
             output.accept(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get());
             output.accept(ModRegistry.CREEPER_SHARD_ITEM.get());
             output.accept(ModRegistry.ENDERSOUL_HAND_ITEM.get());

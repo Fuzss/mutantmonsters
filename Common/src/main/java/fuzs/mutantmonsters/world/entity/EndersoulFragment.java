@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -175,7 +176,7 @@ public class EndersoulFragment extends Entity {
                 }
 
                 if (hitChance) {
-                    entity.hurt(DamageSource.thrown(this, this.spawner != null ? this.spawner.get() : this).bypassArmor(), 1.0F);
+                    entity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.ARMOR_BYPASSING_THROWN_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
                 }
             }
         }

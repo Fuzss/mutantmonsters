@@ -131,7 +131,7 @@ public class SkullSpirit extends Entity {
 
                 this.setPos(this.target.getX(), this.target.getY(), this.target.getZ());
                 if (this.random.nextInt(8) == 0) {
-                    this.target.hurt(DamageSource.MAGIC, 0.0F);
+                    this.target.hurt(this.level.damageSources().magic(), 0.0F);
                 }
 
                 for (int i = 0; i < 3; ++i) {

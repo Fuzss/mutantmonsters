@@ -22,7 +22,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -154,7 +153,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         if (entityIn != this.getOwner()) {
             super.push(entityIn);
         }
-
     }
 
     @Override
@@ -170,7 +168,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.blockState), x, y, z, motx, moty, motz);
             }
         }
-
     }
 
     @Override
@@ -208,8 +205,11 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
             }
         } else {
             super.tick();
+            // for some reason Fabric doesn't sync velocity updates to the client anymore since 1.19.4, so set this to force updates every tick while the block is flying
+            // changing FabricEntityTypeBuilder::forceTrackedVelocityUpdates doesn't have any effect, it's on by default anyway which is the desired behavior which was working fine prior to 1.19.4
+            // Forge is without the issue however and doesn't need this, Fabric behavior can be reproduced though by setting EntityType$Builder::setShouldReceiveVelocityUpdates to false
+            this.hasImpulse = true;
         }
-
     }
 
     @Override
@@ -267,13 +267,13 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
             for (Mob mobEntity : this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
-                    mobEntity.hurt(DamageSource.indirectMobAttack(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
+                    mobEntity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
                 }
             }
 
             if (result.getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(DamageSource.thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
             }
@@ -304,7 +304,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 }
             } else if (result.getType() == HitResult.Type.ENTITY && !this.level.isClientSide) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(DamageSource.thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
 
@@ -316,7 +316,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
             for (Entity entity : this.level.getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
                 if (!entity.is(livingEntity) && this.distanceToSqr(entity) <= 4.0) {
-                    entity.hurt(DamageSource.indirectMobAttack(this, livingEntity), (float) (6 + this.random.nextInt(3)));
+                    entity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), (float) (6 + this.random.nextInt(3)));
                 }
             }
 
@@ -324,7 +324,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 this.discard();
             }
         }
-
     }
 
     @Override
@@ -335,7 +334,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         if (this.ownerType != null) {
             compound.putString("OwnerType", BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
         }
-
     }
 
     @Override
@@ -349,7 +347,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         if (compound.contains("OwnerType")) {
             this.ownerType = EntityType.byString(compound.getString("OwnerType")).orElse(null);
         }
-
     }
 
     @Override
@@ -366,6 +363,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
+        return AdditionalAddEntityData.getPacket(this);
     }
 }

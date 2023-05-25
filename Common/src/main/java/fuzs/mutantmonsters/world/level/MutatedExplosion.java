@@ -64,7 +64,7 @@ public class MutatedExplosion extends Explosion {
                             z = position.z;
 
                             for(float attenuation = 0.3F; intensity > 0.0F; intensity -= 0.22500001F) {
-                                BlockPos blockpos = new BlockPos(x, y, z);
+                                BlockPos blockpos = BlockPos.containing(x, y, z);
                                 BlockState blockstate = this.world.getBlockState(blockpos);
                                 Optional<Float> optional = (explosionContext).getBlockExplosionResistance(this, this.world, blockpos, blockstate, Fluids.EMPTY.defaultFluidState());
                                 if (optional.isPresent()) {

@@ -12,6 +12,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
+import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -84,7 +85,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         this.throwFinishTick = -1;
         this.seismicWaveList = new ArrayList<>();
         this.resurrectionList = new ArrayList<>();
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
         this.xpReward = 30;
     }
 
@@ -373,7 +374,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                 box = box.inflate(0.25 + addScale, 0.25 + addScale * 0.5, 0.25 + addScale);
             }
 
-            DamageSource source = DamageSource.mobAttack(this).bypassMagic();
+            DamageSource source = DamageSourcesHelper.source(this.level, ModRegistry.EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this);
 
             for (Entity entity : this.level.getEntities(this, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(this::canHarm))) {
                 if (entity instanceof LivingEntity && entity.hurt(source, wave.isFirst() ? (float) (9 + this.random.nextInt(4)) : (float) (6 + this.random.nextInt(3))) && this.random.nextInt(5) == 0) {
@@ -454,7 +455,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
         if (this.vanishTime >= 100 || this.getLives() <= 0 && this.deathTime > 25) {
             if (!this.level.isClientSide) {
-                super.die(this.deathCause != null ? this.deathCause : DamageSource.GENERIC);
+                super.die(this.deathCause != null ? this.deathCause : this.level.damageSources().generic());
             }
 
             for(int i = 0; i < 30; ++i) {
@@ -629,7 +630,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                 d2 = this.mob.distanceToSqr(this.attackTarget.getX(), this.attackTarget.getBoundingBox().minY, this.attackTarget.getZ());
                 if (d2 < d1 && !this.mob.hasThrowAttackHit()) {
                     this.mob.setThrowAttackHit(true);
-                    if (!this.attackTarget.hurt(DamageSource.mobAttack(this.mob), (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+                    if (!this.attackTarget.hurt(this.mob.level.damageSources().mobAttack(this.mob), (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                         EntityUtil.disableShield(this.attackTarget, 150);
                     }
 
@@ -704,7 +705,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                         double z = entity.getZ() - this.mob.getZ();
                         double d = Math.sqrt(x * x + z * z);
                         entity.setDeltaMovement(x / d * 0.699999988079071, 0.30000001192092896, z / d * 0.699999988079071);
-                        entity.hurt(DamageSource.mobAttack(this.mob).bypassArmor().bypassMagic(), (float) (2 + this.mob.random.nextInt(2)));
+                        entity.hurt(DamageSourcesHelper.source(this.mob.level, ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), (float) (2 + this.mob.random.nextInt(2)));
                         EntityUtil.sendPlayerVelocityPacket(entity);
                     }
                 }

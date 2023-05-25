@@ -1,4 +1,4 @@
-// 1.19.2	2023-05-24T11:30:22.545467	Tags for minecraft:entity_type
+// 1.19.4	2023-05-25T14:15:45.575883	Tags for minecraft:entity_type mod id mutantmonsters
 69804e7d53efc224a7b0fec5e285fcf2e0e7925b data/minecraft/tags/entity_types/freeze_immune_entity_types.json
 6a7a0d483c991e3e2ccc8793c6bea5f67684440a data/minecraft/tags/entity_types/impact_projectiles.json
 1b89c042c04a200a23a8eda70e1507ff3ea39323 data/minecraft/tags/entity_types/skeletons.json

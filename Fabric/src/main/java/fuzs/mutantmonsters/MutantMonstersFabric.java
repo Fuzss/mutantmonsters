@@ -1,7 +1,5 @@
 package fuzs.mutantmonsters;
 
-import fuzs.mutantmonsters.api.event.entity.item.ItemTossCallback;
-import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.init.ModRegistryFabric;
 import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
@@ -12,11 +10,6 @@ public class MutantMonstersFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         ModRegistryFabric.touch();
-        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOMES);
-        registerHandlers();
-    }
-
-    private static void registerHandlers() {
-        ItemTossCallback.EVENT.register(PlayerEventsHandler::onItemToss);
+        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOME_MODIFICATIONS);
     }
 }

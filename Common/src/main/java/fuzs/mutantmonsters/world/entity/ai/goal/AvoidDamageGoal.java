@@ -1,7 +1,9 @@
 package fuzs.mutantmonsters.world.entity.ai.goal;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -60,10 +62,10 @@ public class AvoidDamageGoal extends PanicGoal {
     protected boolean shouldAvoidDamage(DamageSource source) {
         if (source.getEntity() != null) {
             return false;
-        } else if (source.isMagic() && source.getDirectEntity() == null) {
+        } else if (source.is(DamageTypeTags.WITCH_RESISTANT_TO) && source.getDirectEntity() == null) {
             return false;
         } else {
-            return source != DamageSource.DROWN && source != DamageSource.FALL && source != DamageSource.STARVE && source != DamageSource.OUT_OF_WORLD;
+            return !source.is(DamageTypes.DROWN) && !source.is(DamageTypes.FALL) && !source.is(DamageTypes.STARVE) && !source.is(DamageTypes.OUT_OF_WORLD);
         }
     }
 }

@@ -1,10 +1,7 @@
 package fuzs.mutantmonsters;
 
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
-import fuzs.mutantmonsters.data.ModEntityTypeTagsProvider;
-import fuzs.mutantmonsters.data.ModItemTagsProvider;
-import fuzs.mutantmonsters.data.ModLootTableProvider;
-import fuzs.mutantmonsters.handler.PlayerEventsHandler;
+import fuzs.mutantmonsters.data.*;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModRegistryForge;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
@@ -16,12 +13,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
@@ -34,22 +29,13 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOMES);
+        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOME_MODIFICATIONS);
         ModRegistryForge.touch();
         registerCapabilities();
-        registerHandlers();
     }
 
     private static void registerCapabilities() {
         ForgeCapabilityHelper.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<SeismicWavesCapability>() {});
-    }
-
-    private static void registerHandlers() {
-        MinecraftForge.EVENT_BUS.addListener((final ItemTossEvent evt) -> {
-            if (PlayerEventsHandler.onItemToss(evt.getEntity(), evt.getPlayer()).isInterrupt()) {
-                evt.setCanceled(true);
-            }
-        });
     }
 
     @SubscribeEvent
@@ -64,6 +50,8 @@ public class MutantMonstersForge {
         final PackOutput packOutput = dataGenerator.getPackOutput();
         final CompletableFuture<HolderLookup.Provider> lookupProvider = evt.getLookupProvider();
         final ExistingFileHelper fileHelper = evt.getExistingFileHelper();
+        dataGenerator.addProvider(true, new ModDamageTypeProvider(packOutput, MutantMonsters.MOD_ID, fileHelper));
+        dataGenerator.addProvider(true, new ModDamageTypeTagsProvider(packOutput, lookupProvider, MutantMonsters.MOD_ID, fileHelper));
         dataGenerator.addProvider(true, new ModEntityTypeTagsProvider(packOutput, lookupProvider, MutantMonsters.MOD_ID, fileHelper));
         dataGenerator.addProvider(true, new ModItemTagsProvider(packOutput, lookupProvider, MutantMonsters.MOD_ID, fileHelper));
         dataGenerator.addProvider(true, new ModLootTableProvider(packOutput));

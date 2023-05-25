@@ -13,6 +13,6 @@ public class MutantMonstersForgeClient {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        ClientModConstructor.construct(MutantMonsters.MOD_ID, MutantMonstersClient::new, ContentRegistrationFlags.BUILT_IN_ITEM_MODEL_RENDERERS);
+        ClientModConstructor.construct(MutantMonsters.MOD_ID, MutantMonstersClient::new, ContentRegistrationFlags.DYNAMIC_RENDERERS);
     }
 }

@@ -21,7 +21,6 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -31,6 +30,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 
@@ -43,7 +44,7 @@ public class MutantMonstersClient implements ClientModConstructor {
     @Override
     public void onClientSetup(ModLifecycleContext context) {
         SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
-        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemTransforms.TransformType.GUI, ItemTransforms.TransformType.GROUND, ItemTransforms.TransformType.FIXED);
+        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED);
     }
 
     @Override
@@ -150,5 +151,18 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerItemProperty(MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
             return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
         }, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION);
+    }
+
+    @Override
+    public void onBuildCreativeModeTabContents(BuildCreativeModeTabContentsContext context) {
+        context.registerBuildListener(CreativeModeTabs.SPAWN_EGGS, (itemDisplayParameters, output) -> {
+            output.accept(ModRegistry.CREEPER_MINION_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_CREEPER_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SKELETON_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.get());
+            output.accept(ModRegistry.SPIDER_PIG_SPAWN_EGG_ITEM.get());
+        });
     }
 }

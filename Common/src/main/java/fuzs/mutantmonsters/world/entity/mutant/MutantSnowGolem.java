@@ -1,12 +1,12 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.core.CommonAbstractions;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.FleeRainGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
-import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,6 +30,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
@@ -137,12 +139,12 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target instanceof Enemy;
+        return target instanceof Enemy && target.canBeSeenAsEnemy();
     }
 
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader worldIn) {
-        if (worldIn.getBiome(pos).value().shouldSnowGolemBurn(pos)) {
+        if (worldIn.getBiome(pos).is(BiomeTags.SNOW_GOLEM_MELTS)) {
             return -10.0F;
         } else {
             return worldIn.getBlockState(pos).getBlock() == Blocks.SNOW ? 10.0F : 0.0F;
@@ -174,13 +176,13 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             }
         }
 
-        if (this.level.dimensionType().ultraWarm() || this.level.getBiome(this.blockPosition()).value().shouldSnowGolemBurn(this.blockPosition())) {
+        if (this.level.dimensionType().ultraWarm() || this.level.getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
             if (this.random.nextFloat() > Math.min(80.0F, this.getHealth()) * 0.01F) {
                 this.level.addParticle(ParticleTypes.FALLING_WATER, this.getRandomX(0.6), this.getRandomY() - 0.15, this.getRandomZ(0.6), 0.0, 0.0, 0.0);
             }
 
             if (this.tickCount % 60 == 0) {
-                this.hurt(DamageSource.ON_FIRE, 1.0F);
+                this.hurt(this.level.damageSources().onFire(), 1.0F);
             }
         }
 
@@ -233,8 +235,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         } else if (this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, position).getY() > position.getY()) {
             return false;
         } else {
-            Biome biome = this.level.getBiome(position).value();
-            return biome.getPrecipitation() == Biome.Precipitation.SNOW && biome.coldEnoughToSnow(position);
+            return this.level.getBiome(position).value().getPrecipitationAt(position) == Biome.Precipitation.SNOW;
         }
     }
 
@@ -471,7 +472,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         public void start() {
             this.prevPos = new BlockPos.MutableBlockPos(this.golem.getX(), this.golem.getBoundingBox().minY - 1.0, this.golem.getZ());
             this.golem.setDeltaMovement((this.golem.random.nextFloat() - this.golem.random.nextFloat()) * 0.9F, 1.5, (this.golem.random.nextFloat() - this.golem.random.nextFloat()) * 0.9F);
-            this.golem.hurt(DamageSource.DROWN, 16.0F);
+            this.golem.hurt(this.golem.level.damageSources().drown(), 16.0F);
             this.golem.setSwimJump(true);
         }
 

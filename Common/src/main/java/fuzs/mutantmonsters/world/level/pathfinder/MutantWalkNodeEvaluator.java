@@ -21,7 +21,7 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
             BlockPathTypes nodeBelow = getBlockPathTypeRaw(blockReader, mutable.set(posX, posY - 1, posZ));
             rawNode = nodeBelow != BlockPathTypes.WALKABLE && nodeBelow != BlockPathTypes.OPEN && nodeBelow != BlockPathTypes.WATER && nodeBelow != BlockPathTypes.LAVA ? BlockPathTypes.WALKABLE : BlockPathTypes.OPEN;
             rawNode = switch (nodeBelow) {
-                case DAMAGE_FIRE, DAMAGE_CACTUS, DAMAGE_OTHER, DANGER_OTHER, STICKY_HONEY -> nodeBelow;
+                case DAMAGE_FIRE, DAMAGE_OTHER, DANGER_OTHER, STICKY_HONEY -> nodeBelow;
                 case POWDER_SNOW -> BlockPathTypes.DANGER_POWDER_SNOW;
                 default -> rawNode;
             };
@@ -50,9 +50,6 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
                         switch (rawNode) {
                             case DAMAGE_FIRE -> {
                                 return BlockPathTypes.DANGER_FIRE;
-                            }
-                            case DAMAGE_CACTUS -> {
-                                return BlockPathTypes.DANGER_CACTUS;
                             }
                             // includes more danger types
                             case DAMAGE_OTHER, DANGER_OTHER -> {
@@ -86,22 +83,22 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
     }
 
     @Override
-    protected BlockPathTypes evaluateBlockPathType(BlockGetter blockReader, boolean canOpenDoors, boolean canEnterDoors, BlockPos blockPos, BlockPathTypes pathNodeType) {
-        if (pathNodeType == BlockPathTypes.DOOR_WOOD_CLOSED && canOpenDoors && canEnterDoors) {
-            pathNodeType = BlockPathTypes.WALKABLE;
+    protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, BlockPos blockPos, BlockPathTypes blockPathTypes) {
+        if (blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED && this.canOpenDoors() && this.canPassDoors()) {
+            blockPathTypes = BlockPathTypes.WALKABLE;
         }
 
-        if (pathNodeType == BlockPathTypes.DOOR_OPEN && !canEnterDoors) {
-            pathNodeType = BlockPathTypes.BLOCKED;
+        if (blockPathTypes == BlockPathTypes.DOOR_OPEN && !this.canPassDoors()) {
+            blockPathTypes = BlockPathTypes.BLOCKED;
         }
 
         // don't be held back by rails
 
-        if (pathNodeType == BlockPathTypes.LEAVES) {
-            pathNodeType = BlockPathTypes.BLOCKED;
+        if (blockPathTypes == BlockPathTypes.LEAVES) {
+            blockPathTypes = BlockPathTypes.BLOCKED;
         }
 
-        return pathNodeType;
+        return blockPathTypes;
     }
 
     @Override

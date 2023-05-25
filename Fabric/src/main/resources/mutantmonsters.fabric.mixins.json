@@ -6,7 +6,6 @@
   "refmap": "mutantmonsters.refmap.json",
   "plugin": "fuzs.mutantmonsters.mixin.ModMixinConfigPlugin",
   "mixins": [
-    "PlayerFabricMixin",
     "accessor.ExplosionFabricAccessor"
   ],
   "client": [

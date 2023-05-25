@@ -10,6 +10,7 @@ import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.core.EventResultHolder;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -77,7 +78,7 @@ public class EntityEventsHandler {
                 }
 
                 ItemStack itemstack = entity.getItemBySlot(EquipmentSlot.HEAD);
-                if (!source.isFire() || !itemstack.getItem().isFireResistant()) {
+                if (!source.is(DamageTypeTags.IS_FIRE) || !itemstack.getItem().isFireResistant()) {
                     itemstack.hurtAndBreak((int) damage, entity, (livingEntity) -> {
                         livingEntity.broadcastBreakEvent(EquipmentSlot.HEAD);
                     });
@@ -93,7 +94,7 @@ public class EntityEventsHandler {
             return EventResult.INTERRUPT;
         }
 
-        if ((trueSource instanceof MutantCreeper && ((MutantCreeper) trueSource).isCharged() || trueSource instanceof CreeperMinion && ((CreeperMinion) trueSource).isCharged()) && source.isExplosion()) {
+        if ((trueSource instanceof MutantCreeper && ((MutantCreeper) trueSource).isCharged() || trueSource instanceof CreeperMinion && ((CreeperMinion) trueSource).isCharged()) && source.is(DamageTypeTags.IS_EXPLOSION)) {
             ItemStack itemStack = EntityUtil.getSkullDrop(entity.getType());
             if (!itemStack.isEmpty()) {
                 drops.add(new ItemEntity(trueSource.level, entity.getX(), entity.getY(), entity.getZ(), itemStack));

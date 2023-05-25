@@ -1,10 +1,10 @@
 package fuzs.mutantmonsters.world.entity;
 
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
-import fuzs.mutantmonsters.util.EntityUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -31,11 +31,11 @@ public class EndersoulClone extends Monster {
 
     public EndersoulClone(EntityType<? extends EndersoulClone> type, Level worldIn) {
         super(type, worldIn);
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
         this.xpReward = this.random.nextInt(2);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
-        this.setPathfindingMalus(BlockPathTypes.DANGER_CACTUS, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, -1.0F);
     }
 
     @Override

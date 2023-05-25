@@ -4,7 +4,7 @@ import com.google.common.base.Suppliers;
 import fuzs.mutantmonsters.MutantMonsters;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -20,13 +20,13 @@ public final class MutantSkeletonArmorMaterial implements ArmorMaterial {
     }
 
     @Override
-    public int getDurabilityForSlot(EquipmentSlot slotIn) {
-        return DURABILITY_FOR_SLOT_VALUES[slotIn.getIndex()] * 15;
+    public int getDurabilityForType(ArmorItem.Type slotIn) {
+        return DURABILITY_FOR_SLOT_VALUES[slotIn.getSlot().getIndex()] * 15;
     }
 
     @Override
-    public int getDefenseForSlot(EquipmentSlot slotIn) {
-        return DEFENSE_FOR_SLOT_VALUES[slotIn.getIndex()];
+    public int getDefenseForType(ArmorItem.Type slotIn) {
+        return DEFENSE_FOR_SLOT_VALUES[slotIn.getSlot().getIndex()];
     }
 
     @Override

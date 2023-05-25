@@ -6,13 +6,13 @@ import fuzs.mutantmonsters.core.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
+import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -121,7 +121,7 @@ public class PlayerEventsHandler {
 
         for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
-                livingEntity.hurt(DamageSource.playerAttack(player).bypassMagic(), (float) (6 + player.getRandom().nextInt(3)));
+                livingEntity.hurt(DamageSourcesHelper.source(player.level, ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE, player), (float) (6 + player.getRandom().nextInt(3)));
             }
         }
     }

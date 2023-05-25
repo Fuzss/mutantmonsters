@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -91,6 +92,6 @@ public class CreeperShardItem extends Item implements Vanishable {
 
     @Override
     public boolean canBeHurtBy(DamageSource damageSource) {
-        return !damageSource.isExplosion();
+        return !damageSource.is(DamageTypeTags.IS_EXPLOSION);
     }
 }
