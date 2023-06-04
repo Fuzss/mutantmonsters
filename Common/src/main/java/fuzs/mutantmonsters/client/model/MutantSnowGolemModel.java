@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.client.model;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import fuzs.mutantmonsters.client.model.geom.FutureModelPart;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -63,8 +64,9 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
     }
 
     public MutantSnowGolemModel setRenderHeadOnly() {
-        this.parts.forEach(t -> t.skipDraw = true);
-        this.head.skipDraw = this.innerHead.skipDraw = false;
+        this.parts.forEach(t -> FutureModelPart.class.cast(t).mutantmonsters$setSkipDraw(true));
+        FutureModelPart.class.cast(this.head).mutantmonsters$setSkipDraw(false);
+        FutureModelPart.class.cast(this.innerHead).mutantmonsters$setSkipDraw(false);
         return this;
     }
 

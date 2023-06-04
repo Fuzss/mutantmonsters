@@ -10,6 +10,7 @@
     "accessor.RavagerAccessor"
   ],
   "client": [
+    "client.ModelPartMixin"
   ],
   "injectors": {
     "defaultRequire": 1

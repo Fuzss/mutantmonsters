@@ -22,7 +22,6 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +30,7 @@ public class EndersoulClone extends Monster {
 
     public EndersoulClone(EntityType<? extends EndersoulClone> type, Level worldIn) {
         super(type, worldIn);
-        this.setMaxUpStep(1.0F);
+        this.maxUpStep = 1.0F;
         this.xpReward = this.random.nextInt(2);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
@@ -124,7 +123,7 @@ public class EndersoulClone extends Monster {
                 this.dropAllDeathLoot(source);
                 this.dropExperience();
                 this.remove(Entity.RemovalReason.KILLED);
-                this.gameEvent(GameEvent.ENTITY_DIE);
+//                this.gameEvent(GameEvent.ENTITY_DIE);
             }
 
             return remove;

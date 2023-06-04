@@ -2,13 +2,14 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
 import fuzs.mutantmonsters.client.renderer.entity.layers.EndersoulLayer;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -40,7 +41,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         this.cloneModel = new EndermanModel<>(context.bakeLayer(ClientModRegistry.ENDERMAN_CLONE));
         this.addLayer(new EyesLayer(this));
         this.addLayer(new SoulLayer(this));
-        this.addLayer(new HeldBlocksLayer(this, context.getBlockRenderDispatcher()));
+        this.addLayer(new HeldBlocksLayer(this, Minecraft.getInstance().getBlockRenderer()));
     }
 
     @Override
@@ -157,12 +158,12 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                         ((MutantEndermanModel)this.getParentModel()).translateRotateArm(matrixStackIn, i);
                         matrixStackIn.translate(0.0, 1.2, 0.0);
                         float tick = (float)entity.tickCount + (float)(i + 1) * 2.0F * 3.1415927F + partialTicks;
-                        matrixStackIn.mulPose(Axis.XP.rotationDegrees(tick * 10.0F));
-                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(tick * 8.0F));
-                        matrixStackIn.mulPose(Axis.ZP.rotationDegrees(tick * 6.0F));
+                        matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(tick * 10.0F));
+                        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(tick * 8.0F));
+                        matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(tick * 6.0F));
                         matrixStackIn.scale(-0.75F, -0.75F, 0.75F);
                         matrixStackIn.translate(-0.5, -0.5, 0.5);
-                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
+                        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(90.0F));
                         this.blockRenderer.renderSingleBlock(Block.stateById(entity.getHeldBlock(i)), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
                         matrixStackIn.popPose();
                     }

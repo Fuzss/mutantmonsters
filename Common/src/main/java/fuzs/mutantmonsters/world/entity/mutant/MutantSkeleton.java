@@ -11,7 +11,6 @@ import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -53,7 +52,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
     public MutantSkeleton(EntityType<? extends MutantSkeleton> type, Level worldIn) {
         super(type, worldIn);
         this.animation = Animation.NONE;
-        this.setMaxUpStep(1.0F);
+        this.maxUpStep = 1.0F;
         this.xpReward = 30;
     }
 
@@ -189,7 +188,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
         if (!this.level.isClientSide) {
 
             for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
-                livingEntity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this), 7.0F);
+                livingEntity.hurt(DamageSource.mobAttack(this).bypassArmor(), 7.0F);
             }
 
             for (int i = 0; i < 18; ++i) {
@@ -450,7 +449,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
 
             if (this.mob.animationTick == 6) {
                 float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                if (!this.attackTarget.hurt(this.mob.level.damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                if (!this.attackTarget.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
                     EntityUtil.disableShield(this.attackTarget, 100);
                 }
 
@@ -499,7 +498,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
                         double z = this.mob.getZ() - livingEntity.getZ();
                         if (dist <= 3.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 60.0F) {
                             float power = 1.8F + (float) this.mob.random.nextInt(5) * 0.15F;
-                            livingEntity.hurt(this.mob.level.damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
+                            livingEntity.hurt(DamageSource.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
                             livingEntity.setDeltaMovement(-x / dist * (double) power, Math.max(0.2800000011920929, livingEntity.getDeltaMovement().y), -z / dist * (double) power);
                             EntityUtil.sendPlayerVelocityPacket(livingEntity);
                         }

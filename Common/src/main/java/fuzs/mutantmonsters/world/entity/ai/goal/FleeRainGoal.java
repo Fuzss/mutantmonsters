@@ -1,11 +1,12 @@
 package fuzs.mutantmonsters.world.entity.ai.goal;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 public class FleeRainGoal extends FleeSunGoal {
     public FleeRainGoal(PathfinderMob creatureEntity, double movementSpeedIn) {
@@ -22,7 +23,7 @@ public class FleeRainGoal extends FleeSunGoal {
 
     @Nullable
     protected Vec3 getHidePos() {
-        RandomSource random = this.mob.getRandom();
+        Random random = this.mob.getRandom();
         BlockPos blockpos = this.mob.blockPosition();
 
         for(int i = 0; i < 10; ++i) {

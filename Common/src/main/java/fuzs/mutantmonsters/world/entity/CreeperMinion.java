@@ -7,11 +7,12 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
+import fuzs.mutantmonsters.world.level.ExplosionInteraction;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -21,7 +22,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -250,10 +250,10 @@ public class CreeperMinion extends ShoulderRidingEntity {
             if (this.timeSinceIgnited >= this.fuseTime) {
                 this.timeSinceIgnited = 0;
                 if (!this.level.isClientSide) {
-                    MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                    MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? ExplosionInteraction.MOB : ExplosionInteraction.NONE);
                     if (!this.canExplodeContinuously()) {
                         if (this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
-                            this.getOwner().sendSystemMessage(Component.translatable("death.attack.explosion", this.getDisplayName()));
+                            ((ServerPlayer) this.getOwner()).sendMessage(new TranslatableComponent("death.attack.explosion", this.getDisplayName()), this.getOwner().getUUID());
                         }
 
                         this.dead = true;
@@ -357,7 +357,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
             if (!this.level.isClientSide) {
                 this.setTame(true);
                 this.setOwnerUUID(player.getUUID());
-                player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
+                player.sendMessage(new TranslatableComponent(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()), player.getUUID());
             }
 
             return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -381,7 +381,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
         if (this.isInvulnerableTo(source)) {
             return false;
         } else {
-            if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+            if (source.isExplosion()) {
                 if (this.isTame()) {
                     return false;
                 }

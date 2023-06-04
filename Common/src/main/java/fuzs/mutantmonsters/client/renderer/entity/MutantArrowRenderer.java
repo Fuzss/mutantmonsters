@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
@@ -40,8 +40,8 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
             double y = (entityIn.getTargetY() - entityIn.getY()) * (double)((float)entityIn.tickCount + partialTicks) * (double)scale;
             double z = (entityIn.getTargetZ() - entityIn.getZ()) * (double)((float)entityIn.tickCount + partialTicks) * (double)scale;
             matrixStackIn.translate(x, y, z);
-            matrixStackIn.mulPose(Axis.YP.rotationDegrees(entityIn.getYRot()));
-            matrixStackIn.mulPose(Axis.XP.rotationDegrees(entityIn.getXRot()));
+            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(entityIn.getYRot()));
+            matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(entityIn.getXRot()));
             matrixStackIn.scale(1.2F, 1.2F, 1.2F);
             VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(TEXTURE));
             this.model.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F - (float)i * 0.08F);

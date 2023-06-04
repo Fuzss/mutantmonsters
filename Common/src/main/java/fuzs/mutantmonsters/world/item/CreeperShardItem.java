@@ -2,12 +2,12 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import fuzs.mutantmonsters.world.level.ExplosionInteraction;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -73,7 +73,7 @@ public class CreeperShardItem extends Item implements Vanishable {
                 damage += 2.0F;
             }
 
-            MutatedExplosion.create(worldIn, playerIn, playerIn.getX(), playerIn.getY() + 1.0, playerIn.getZ(), damage, false, playerIn.mayBuild() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+            MutatedExplosion.create(worldIn, playerIn, playerIn.getX(), playerIn.getY() + 1.0, playerIn.getZ(), damage, false, playerIn.mayBuild() ? ExplosionInteraction.TNT : ExplosionInteraction.NONE);
         }
 
         if (!playerIn.getAbilities().instabuild) {
@@ -92,6 +92,6 @@ public class CreeperShardItem extends Item implements Vanishable {
 
     @Override
     public boolean canBeHurtBy(DamageSource damageSource) {
-        return !damageSource.is(DamageTypeTags.IS_EXPLOSION);
+        return !damageSource.isExplosion();
     }
 }

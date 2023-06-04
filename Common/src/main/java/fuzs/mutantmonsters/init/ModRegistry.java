@@ -19,19 +19,17 @@ import fuzs.puzzleslib.api.capability.v2.data.PlayerRespawnCopyStrategy;
 import fuzs.puzzleslib.api.core.v1.ModLoader;
 import fuzs.puzzleslib.api.init.v2.RegistryManager;
 import fuzs.puzzleslib.api.init.v2.RegistryReference;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.Potion;
@@ -62,8 +60,8 @@ public class ModRegistry {
     public static final RegistryReference<EntityType<CreeperMinionEgg>> CREEPER_MINION_EGG_ENTITY_TYPE = REGISTRY.registerEntityType("creeper_minion_egg", () -> EntityType.Builder.<CreeperMinionEgg>of(CreeperMinionEgg::new, MobCategory.MISC).clientTrackingRange(10).updateInterval(20).sized(0.5625F, 0.75F));
     public static final RegistryReference<EntityType<EndersoulClone>> ENDERSOUL_CLONE_ENTITY_TYPE = REGISTRY.registerEntityType("endersoul_clone", () -> EntityType.Builder.of(EndersoulClone::new, MobCategory.MONSTER).sized(0.6F, 2.9F));
     public static final RegistryReference<EntityType<EndersoulFragment>> ENDERSOUL_FRAGMENT_ENTITY_TYPE = REGISTRY.registerEntityType("endersoul_fragment", () -> EntityType.Builder.<EndersoulFragment>of(EndersoulFragment::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(0.75F, 0.75F));
-    public static final RegistryReference<EntityType<MutantArrow>> MUTANT_ARROW_ENTITY_TYPE = REGISTRY.placeholder(Registries.ENTITY_TYPE, "mutant_arrow");
-    public static final RegistryReference<EntityType<SkullSpirit>> SKULL_SPIRIT_ENTITY_TYPE = REGISTRY.placeholder(Registries.ENTITY_TYPE, "skull_spirit");
+    public static final RegistryReference<EntityType<MutantArrow>> MUTANT_ARROW_ENTITY_TYPE = REGISTRY.placeholder(Registry.ENTITY_TYPE_REGISTRY, "mutant_arrow");
+    public static final RegistryReference<EntityType<SkullSpirit>> SKULL_SPIRIT_ENTITY_TYPE = REGISTRY.placeholder(Registry.ENTITY_TYPE_REGISTRY, "skull_spirit");
     public static final RegistryReference<EntityType<ThrowableBlock>> THROWABLE_BLOCK_ENTITY_TYPE = REGISTRY.registerEntityType("throwable_block", () -> EntityType.Builder.<ThrowableBlock>of(ThrowableBlock::new, MobCategory.MISC).sized(1.0F, 1.0F).clientTrackingRange(6).updateInterval(Integer.MAX_VALUE));
     public static final RegistryReference<Item> CREEPER_MINION_SPAWN_EGG_ITEM = REGISTRY.registerSpawnEggItem(CREEPER_MINION_ENTITY_TYPE, 894731, 12040119);
     public static final RegistryReference<Item> MUTANT_CREEPER_SPAWN_EGG_ITEM = REGISTRY.registerSpawnEggItem(MUTANT_CREEPER_ENTITY_TYPE, 5349438, 11013646);
@@ -82,15 +80,15 @@ public class ModRegistry {
     public static final RegistryReference<Item> MUTANT_SKELETON_RIB_ITEM = REGISTRY.registerItem("mutant_skeleton_rib", () -> new Item(new Item.Properties()));
     public static final RegistryReference<Item> MUTANT_SKELETON_RIB_CAGE_ITEM = REGISTRY.registerItem("mutant_skeleton_rib_cage", () -> new Item(new Item.Properties()));
     public static final RegistryReference<Item> MUTANT_SKELETON_SHOULDER_PAD_ITEM = REGISTRY.registerItem("mutant_skeleton_shoulder_pad", () -> new Item(new Item.Properties()));
-    public static final RegistryReference<Item> MUTANT_SKELETON_SKULL_ITEM = REGISTRY.whenNotOn(ModLoader.FORGE).registerItem("mutant_skeleton_skull", () -> new ArmorBlockItem(MutantSkeletonArmorMaterial.INSTANCE, ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.get(), ModRegistry.MUTANT_SKELETON_WALL_SKULL_BLOCK.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
-    public static final RegistryReference<Item> MUTANT_SKELETON_CHESTPLATE_ITEM = REGISTRY.registerItem("mutant_skeleton_chestplate", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
-    public static final RegistryReference<Item> MUTANT_SKELETON_LEGGINGS_ITEM = REGISTRY.registerItem("mutant_skeleton_leggings", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.LEGGINGS, new Item.Properties()));
-    public static final RegistryReference<Item> MUTANT_SKELETON_BOOTS_ITEM = REGISTRY.registerItem("mutant_skeleton_boots", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final RegistryReference<Item> MUTANT_SKELETON_SKULL_ITEM = REGISTRY.placeholder(Registry.ITEM_REGISTRY, "mutant_skeleton_skull");
+    public static final RegistryReference<Item> MUTANT_SKELETON_CHESTPLATE_ITEM = REGISTRY.registerItem("mutant_skeleton_chestplate", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, EquipmentSlot.CHEST, new Item.Properties()));
+    public static final RegistryReference<Item> MUTANT_SKELETON_LEGGINGS_ITEM = REGISTRY.registerItem("mutant_skeleton_leggings", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, EquipmentSlot.LEGS, new Item.Properties()));
+    public static final RegistryReference<Item> MUTANT_SKELETON_BOOTS_ITEM = REGISTRY.registerItem("mutant_skeleton_boots", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, EquipmentSlot.FEET, new Item.Properties()));
     public static final RegistryReference<BlockEntityType<SkullWithItemTagBlockEntity>> SKULL_BLOCK_ENTITY_TYPE = REGISTRY.registerBlockEntityType("skull", () -> BlockEntityType.Builder.of(SkullWithItemTagBlockEntity::new, MUTANT_SKELETON_SKULL_BLOCK.get(), MUTANT_SKELETON_WALL_SKULL_BLOCK.get()));
     public static final RegistryReference<MobEffect> CHEMICAL_X_MOB_EFFECT = REGISTRY.registerMobEffect("chemical_x", () -> new ChemicalXMobEffect(MobEffectCategory.HARMFUL, 0x000000));
     public static final RegistryReference<Potion> CHEMICAL_X_POTION = REGISTRY.registerPotion("chemical_x", () -> new Potion(new MobEffectInstance(CHEMICAL_X_MOB_EFFECT.get(), 1)));
-    public static final RegistryReference<SimpleParticleType> ENDERSOUL_PARTICLE_TYPE = REGISTRY.register(Registries.PARTICLE_TYPE, "endersoul", () -> new SimpleParticleType(false));
-    public static final RegistryReference<SimpleParticleType> SKULL_SPIRIT_PARTICLE_TYPE = REGISTRY.register(Registries.PARTICLE_TYPE, "skull_spirit", () -> new SimpleParticleType(true));
+    public static final RegistryReference<SimpleParticleType> ENDERSOUL_PARTICLE_TYPE = REGISTRY.register(Registry.PARTICLE_TYPE_REGISTRY, "endersoul", () -> new SimpleParticleType(false));
+    public static final RegistryReference<SimpleParticleType> SKULL_SPIRIT_PARTICLE_TYPE = REGISTRY.register(Registry.PARTICLE_TYPE_REGISTRY, "skull_spirit", () -> new SimpleParticleType(true));
     public static final RegistryReference<SoundEvent> ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT = REGISTRY.registerSoundEvent("entity.creeper_minion.ambient");
     public static final RegistryReference<SoundEvent> ENTITY_CREEPER_MINION_DEATH_SOUND_EVENT = REGISTRY.registerSoundEvent("entity.creeper_minion.death");
     public static final RegistryReference<SoundEvent> ENTITY_CREEPER_MINION_HURT_SOUND_EVENT = REGISTRY.registerSoundEvent("entity.creeper_minion.hurt");
@@ -132,13 +130,6 @@ public class ModRegistry {
 
     public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG = REGISTRY.registerBlockTag("mutant_enderman_holdable_immune");
     public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG = REGISTRY.registerBlockTag("endersoul_hand_holdable_immune");
-
-    public static final ResourceKey<DamageType> PLAYER_SEISMIC_WAVE_DAMAGE_TYPE = REGISTRY.registerDamageType("player_seismic_wave");
-    public static final ResourceKey<DamageType> ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("armor_bypassing_mob_attack");
-    public static final ResourceKey<DamageType> EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("effects_bypassing_mob_attack");
-    public static final ResourceKey<DamageType> PIERCING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("piercing_mob_attack");
-    public static final ResourceKey<DamageType> MUTANT_ARROW_DAMAGE_TYPE = REGISTRY.registerDamageType("mutant_arrow");
-    public static final ResourceKey<DamageType> ARMOR_BYPASSING_THROWN_DAMAGE_TYPE = REGISTRY.registerDamageType("armor_bypassing_thrown");
 
     public static final ResourceLocation MUTANT_SKELETON_PELVIS_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/pelvis");
     public static final ResourceLocation MUTANT_SKELETON_RIB_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/rib");

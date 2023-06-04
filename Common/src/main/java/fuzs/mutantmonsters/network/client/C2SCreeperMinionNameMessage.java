@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.network.client;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -40,7 +40,7 @@ public class C2SCreeperMinionNameMessage implements MessageV2<C2SCreeperMinionNa
             public void handle(C2SCreeperMinionNameMessage message, Player player, Object gameInstance) {
                 Entity entity = player.level.getEntity(message.entityId);
                 if (entity instanceof CreeperMinion) {
-                    entity.setCustomName(Component.literal(message.name));
+                    entity.setCustomName(new TextComponent(message.name));
                 }
             }
         };

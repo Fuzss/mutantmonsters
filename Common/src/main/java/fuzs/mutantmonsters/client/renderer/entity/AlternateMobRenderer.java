@@ -73,8 +73,8 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
         limbSwingAmount = 0.0F;
         float limbSwing = 0.0F;
         if (!shouldSit) {
-            limbSwingAmount = entityIn.walkAnimation.speed(partialTicks);
-            limbSwing = entityIn.walkAnimation.position(partialTicks);
+            limbSwingAmount = Mth.lerp(partialTicks, entityIn.animationSpeedOld, entityIn.animationSpeed);
+            limbSwing = entityIn.animationPosition - entityIn.animationSpeed * (1.0F - partialTicks);
             if (entityIn.isBaby()) {
                 limbSwing *= 3.0F;
             }

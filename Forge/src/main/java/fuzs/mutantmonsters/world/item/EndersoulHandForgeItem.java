@@ -12,7 +12,7 @@ public class EndersoulHandForgeItem extends EndersoulHandItem {
     }
 
     @Override
-    public int getEnchantmentValue(ItemStack stack) {
+    public int getEnchantmentValue() {
         return 20;
     }
 

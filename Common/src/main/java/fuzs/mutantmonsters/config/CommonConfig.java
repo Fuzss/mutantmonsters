@@ -7,12 +7,9 @@ import fuzs.puzzleslib.api.config.v3.Config;
 import fuzs.puzzleslib.api.config.v3.ConfigCore;
 import fuzs.puzzleslib.api.config.v3.ValueCallback;
 import fuzs.puzzleslib.api.config.v3.serialization.ConfigDataSet;
-import fuzs.puzzleslib.impl.PuzzlesLib;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,19 +41,19 @@ public class CommonConfig implements ConfigCore {
         record MutantXConversion(EntityType<?> entityType, @Nullable ResourceLocation convertsTo) {
 
             public boolean isValid() {
-                if (this.convertsTo != null && BuiltInRegistries.ENTITY_TYPE.containsKey(this.convertsTo)) {
+                if (this.convertsTo != null && Registry.ENTITY_TYPE.containsKey(this.convertsTo)) {
                     return true;
                 } else {
-                    MutantMonsters.LOGGER.warn("Unable to parse mutated variant for entry {}", BuiltInRegistries.ENTITY_TYPE.getKey(this.entityType));
+                    MutantMonsters.LOGGER.warn("Unable to parse mutated variant for entry {}", Registry.ENTITY_TYPE.getKey(this.entityType));
                     return false;
                 }
             }
 
             public EntityType<?> convertsToType() {
-                return BuiltInRegistries.ENTITY_TYPE.get(this.convertsTo);
+                return Registry.ENTITY_TYPE.get(this.convertsTo);
             }
         };
-        ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.from(Registries.ENTITY_TYPE, this.mutantXConversionsRaw, (integer, o) -> true, String.class);
+        ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.from(Registry.ENTITY_TYPE_REGISTRY, this.mutantXConversionsRaw, (integer, o) -> true, String.class);
         this.mutantXConversions = configDataSet.toMap().entrySet().stream()
                 .map(data -> new MutantXConversion(data.getKey(), ResourceLocation.tryParse((String) data.getValue()[0])))
                 .filter(MutantXConversion::isValid)

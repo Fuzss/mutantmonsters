@@ -12,7 +12,7 @@ dependencies {
     minecraft "com.mojang:minecraft:${minecraftVersion}"
     mappings loom.layered() {
         officialMojangMappings()
-//        parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
+        parchment("org.parchmentmc.data:parchment-${parchmentMinecraftVersion}:${parchmentMappingsVersion}@zip")
     }
 
     // Puzzles Lib
@@ -48,23 +48,23 @@ processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 
     // this will ensure that this task is redone when a value changes
-    inputs.property "modDescription", 			"${modDescription}"
-    inputs.property "resourcePackFormat",       "${resourcePackFormat}"
-    inputs.property "dataPackFormat", 			"${dataPackFormat}"
+    inputs.property "modDescription", "${modDescription}"
+    inputs.property "resourcePackFormat", "${resourcePackFormat}"
+    inputs.property "dataPackFormat", "${dataPackFormat}"
 
     // replace stuff in pack.mcmeta
-    filesMatching ('pack.mcmeta') {
-        expand (
-                'modDescription':       "${modDescription}",
-                "resourcePackFormat":   "${resourcePackFormat}",
-                "dataPackFormat":       "${dataPackFormat}"
+    filesMatching('pack.mcmeta') {
+        expand(
+                'modDescription': "${modDescription}",
+                "resourcePackFormat": "${resourcePackFormat}",
+                "dataPackFormat": "${dataPackFormat}"
         )
     }
 }
 
 publishing {
     publications {
-        mavenJava (MavenPublication) {
+        mavenJava(MavenPublication) {
             artifactId = "${modId}-common"
             version = modVersion
             from components.java
@@ -83,7 +83,7 @@ publishing {
                 }
                 licenses {
                     license {
-                        name = 'MPL-2'
+                        name = 'MPL-2.0'
                         url = 'https://www.mozilla.org/en-US/MPL/2.0/'
                     }
                 }

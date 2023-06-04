@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.data;
 
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.data.v1.AbstractLootProvider;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -12,8 +12,8 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 public class ModLootTableProvider extends AbstractLootProvider.Simple {
 
-    public ModLootTableProvider(PackOutput packOutput) {
-        super(packOutput, ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET);
+    public ModLootTableProvider(DataGenerator packOutput) {
+        super(packOutput, "", ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET);
     }
 
     @Override

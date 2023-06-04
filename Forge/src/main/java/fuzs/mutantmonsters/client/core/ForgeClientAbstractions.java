@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderNameTagEvent;
+import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -32,7 +32,7 @@ public class ForgeClientAbstractions implements ClientAbstractions {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public <T extends Entity> Optional<Component> getEntityDisplayName(T entity, EntityRenderer<T> renderer, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight, boolean shouldShowName) {
-        RenderNameTagEvent evt = new RenderNameTagEvent(entity, entity.getDisplayName(), renderer, poseStack, buffer, packedLight, partialTick);
+        RenderNameplateEvent evt = new RenderNameplateEvent(entity, entity.getDisplayName(), renderer, poseStack, buffer, packedLight, partialTick);
         MinecraftForge.EVENT_BUS.post(evt);
         if (evt.getResult() != Event.Result.DENY && (evt.getResult() == Event.Result.ALLOW || shouldShowName)) {
             return Optional.of(evt.getContent());

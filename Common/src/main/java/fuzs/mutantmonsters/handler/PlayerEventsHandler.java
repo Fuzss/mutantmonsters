@@ -6,26 +6,30 @@ import fuzs.mutantmonsters.core.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 public class PlayerEventsHandler {
     private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 16;
@@ -66,12 +70,12 @@ public class PlayerEventsHandler {
         return EventResult.PASS;
     }
 
-    private static float[] getShotPitches(RandomSource random, float velocity) {
+    private static float[] getShotPitches(Random random, float velocity) {
         boolean flag = random.nextBoolean();
         return new float[]{1.0F, getRandomShotPitch(flag, random, velocity), getRandomShotPitch(!flag, random, velocity)};
     }
 
-    private static float getRandomShotPitch(boolean p_150798_, RandomSource random, float velocity) {
+    private static float getRandomShotPitch(boolean p_150798_, Random random, float velocity) {
         float f = p_150798_ ? 0.63F : 0.43F;
         return 1.0F / (random.nextFloat() * 0.5F + 1.8F) + f * velocity;
     }
@@ -122,7 +126,7 @@ public class PlayerEventsHandler {
 
         for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
-                livingEntity.hurt(DamageSourcesHelper.source(player.level, ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE, player), (float) (6 + player.getRandom().nextInt(3)));
+                livingEntity.hurt(DamageSource.playerAttack(player).bypassMagic(), (float) (6 + player.getRandom().nextInt(3)));
             }
         }
     }

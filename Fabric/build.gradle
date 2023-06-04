@@ -18,10 +18,6 @@ repositories {
         url = "https://maven.modmuss50.me/"
     }
     maven {
-        name = 'Terraformers'
-        url = "https://maven.terraformersmc.com/"
-    }
-    maven {
         name = "ladysnake"
         url = 'https://ladysnake.jfrog.io/artifactory/mods'
     }
@@ -41,7 +37,7 @@ dependencies {
     minecraft "com.mojang:minecraft:${minecraftVersion}"
     mappings loom.layered() {
         officialMojangMappings()
-//        parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
+        parchment("org.parchmentmc.data:parchment-${parchmentMinecraftVersion}:${parchmentMappingsVersion}@zip")
     }
 
     // Fabric
@@ -49,11 +45,11 @@ dependencies {
     modApi "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
 
     // Cardinal Components
-    modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.1.0")
-    modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.1.0")
+    modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:4.2.0")
+    modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:4.2.0")
 
     // Quality of Life Mods
-    modLocalRuntime "com.terraformersmc:modmenu:6.2.2"
+    modLocalRuntime "com.terraformersmc:modmenu:3.2.5"
 //    modLocalRuntime "curse.maven:configured-fabric-667378:4441611"
 
     // Puzzles Lib
@@ -95,51 +91,51 @@ processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 
     // this will ensure that this task is redone when a value changes
-    inputs.property "modId", 					"${modId}"
-    inputs.property "modName", 					"${modName}"
-    inputs.property "modVersion", 				"${modVersion}"
-    inputs.property "modDescription", 			"${modDescription}"
-    inputs.property "modGroup", 				project.group
-    inputs.property "modPageUrl", 				"${modSourceUrl}"
-    inputs.property "modIssueUrl", 				"${modIssueUrl}"
-    inputs.property "modAuthor", 				"${modAuthor}"
-    inputs.property "minFabricVersion", 		"${minFabricVersion}"
-    inputs.property "minFabricApiVersion", 		"${minFabricApiVersion}"
-    inputs.property "minecraftVersion", 		"${minecraftVersion}"
-	inputs.property "minPuzzlesVersion", 		"${minPuzzlesVersion}"
-    inputs.property "resourcePackFormat",       "${resourcePackFormat}"
-    inputs.property "dataPackFormat", 			"${dataPackFormat}"
-	inputs.property "mainEntryPoint", 			"${project.group}.${rootProject.name}Fabric"
-	inputs.property "clientEntryPoint", 		"${project.group}.client.${rootProject.name}FabricClient"
-    inputs.property "modFabricEnvironment", 	"${modFabricEnvironment}"
+    inputs.property "modId", "${modId}"
+    inputs.property "modName", "${modName}"
+    inputs.property "modVersion", "${modVersion}"
+    inputs.property "modDescription", "${modDescription}"
+    inputs.property "modGroup", project.group
+    inputs.property "modPageUrl", "${modSourceUrl}"
+    inputs.property "modIssueUrl", "${modIssueUrl}"
+    inputs.property "modAuthor", "${modAuthor}"
+    inputs.property "minFabricVersion", "${minFabricVersion}"
+    inputs.property "minFabricApiVersion", "${minFabricApiVersion}"
+    inputs.property "minecraftVersion", "${minecraftVersion}"
+    inputs.property "minPuzzlesVersion", "${minPuzzlesVersion}"
+    inputs.property "resourcePackFormat", "${resourcePackFormat}"
+    inputs.property "dataPackFormat", "${dataPackFormat}"
+    inputs.property "mainEntryPoint", "${project.group}.${rootProject.name}Fabric"
+    inputs.property "clientEntryPoint", "${project.group}.client.${rootProject.name}FabricClient"
+    inputs.property "modFabricEnvironment", "${modFabricEnvironment}"
 
     // replace stuff in fabric.mod.json
-    filesMatching ('fabric.mod.json') {
-        expand (
-                'modId':                	"${modId}",
-                'modName':              	"${modName}",
-                'modVersion':           	"${modVersion}",
-                'modDescription':       	"${modDescription}",
-                'modGroup':             	project.group,
-                'modPageUrl':           	"${modSourceUrl}",
-                'modIssueUrl':          	"${modIssueUrl}",
-                'modAuthor':            	"${modAuthor}",
-                'minFabricVersion':     	"${minFabricVersion}",
-                'minFabricApiVersion':  	"${minFabricApiVersion}",
-                'minecraftVersion':  	    "${minecraftVersion}",
-				"minPuzzlesVersion":    	"${minPuzzlesVersion}",
-				"mainEntryPoint": 			"${project.group}.${rootProject.name}Fabric",
-				"clientEntryPoint": 		"${project.group}.client.${rootProject.name}FabricClient",
-                "modFabricEnvironment":		"${modFabricEnvironment}"
+    filesMatching('fabric.mod.json') {
+        expand(
+                'modId': "${modId}",
+                'modName': "${modName}",
+                'modVersion': "${modVersion}",
+                'modDescription': "${modDescription}",
+                'modGroup': project.group,
+                'modPageUrl': "${modSourceUrl}",
+                'modIssueUrl': "${modIssueUrl}",
+                'modAuthor': "${modAuthor}",
+                'minFabricVersion': "${minFabricVersion}",
+                'minFabricApiVersion': "${minFabricApiVersion}",
+                'minecraftVersion': "${minecraftVersion}",
+                "minPuzzlesVersion": "${minPuzzlesVersion}",
+                "mainEntryPoint": "${project.group}.${rootProject.name}Fabric",
+                "clientEntryPoint": "${project.group}.client.${rootProject.name}FabricClient",
+                "modFabricEnvironment": "${modFabricEnvironment}"
         )
     }
 
     // replace stuff in pack.mcmeta
-    filesMatching ('pack.mcmeta') {
-        expand (
-                'modDescription':       "${modDescription}",
-                "resourcePackFormat":   "${resourcePackFormat}",
-                "dataPackFormat":       "${dataPackFormat}"
+    filesMatching('pack.mcmeta') {
+        expand(
+                'modDescription': "${modDescription}",
+                "resourcePackFormat": "${resourcePackFormat}",
+                "dataPackFormat": "${dataPackFormat}"
         )
     }
 }
@@ -158,7 +154,7 @@ javadoc {
 
 publishing {
     publications {
-        mavenJava (MavenPublication) {
+        mavenJava(MavenPublication) {
             artifactId = "${modId}-fabric"
             version = modVersion
             from components.java
@@ -177,7 +173,7 @@ publishing {
                 }
                 licenses {
                     license {
-                        name = 'MPL-2'
+                        name = 'MPL-2.0'
                         url = 'https://www.mozilla.org/en-US/MPL/2.0/'
                     }
                 }
@@ -203,7 +199,9 @@ signing {
 }
 
 curseforge {
-    if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
+    if (!file('../CHANGELOG.md').canRead()) {
+        throw new FileNotFoundException("Could not read changelog file")
+    }
     apiKey = project.hasProperty('curseApiToken') ? project.findProperty('curseApiToken') : ''
     project {
         id = projectCurseId
@@ -233,7 +231,9 @@ curseforge {
 }
 
 modrinth {
-    if (!file('../CHANGELOG.md').canRead()) { throw new FileNotFoundException("Could not read changelog file") }
+    if (!file('../CHANGELOG.md').canRead()) {
+        throw new FileNotFoundException("Could not read changelog file")
+    }
     token = project.hasProperty('modrinthApiToken') ? project.findProperty('modrinthApiToken') : ''
     projectId = projectModrinthId
     versionNumber = project.version

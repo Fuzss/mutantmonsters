@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.client.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.animation.Animator;
+import fuzs.mutantmonsters.client.model.geom.FutureModelPart;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -91,7 +92,9 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
         // the visibility is changed nowhere else, so just enabling again when scale > 0.0 is fine
         if (scale != 0.0F) {
             modelPart.visible = true;
-            modelPart.xScale = modelPart.yScale = modelPart.zScale = scale;
+            FutureModelPart.class.cast(modelPart).mutantmonsters$setXScale(scale);
+            FutureModelPart.class.cast(modelPart).mutantmonsters$setYScale(scale);
+            FutureModelPart.class.cast(modelPart).mutantmonsters$setZScale(scale);
         } else {
             modelPart.visible = false;
         }

@@ -14,6 +14,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class CreeperMinionTrackerScreen extends Screen {
@@ -43,7 +45,7 @@ public class CreeperMinionTrackerScreen extends Screen {
         this.canRideOnShoulder = this.creeperMinion.canRideOnShoulder();
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
-        this.name = new EditBox(this.font, this.leftPos + 5, this.topPos - 24, this.imageHeight, 20, Component.empty());
+        this.name = new EditBox(this.font, this.leftPos + 5, this.topPos - 24, this.imageHeight, 20, TextComponent.EMPTY);
         this.name.setTextColor(-1);
         this.name.setTextColorUneditable(-1);
         this.name.setMaxLength(50);
@@ -51,21 +53,21 @@ public class CreeperMinionTrackerScreen extends Screen {
         this.name.setValue(this.creeperMinion.getName().getString());
         this.addWidget(this.name);
         int buttonWidth = this.imageWidth / 2 - 10;
-        this.addRenderableWidget(Button.builder(this.canDestroyBlocks(), (button) -> {
+        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 78, buttonWidth * 2 + 4, 20, this.canDestroyBlocks(), (button) -> {
             this.canDestroyBlocks = !this.canDestroyBlocks;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 0, this.canDestroyBlocks));
             button.setMessage(this.canDestroyBlocks());
-        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 78, buttonWidth * 2 + 4, 20).build());
-        this.addRenderableWidget(Button.builder(this.alwaysShowName(), (button) -> {
+        }));
+        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 54, buttonWidth * 2 + 4, 20, this.alwaysShowName(), (button) -> {
             this.alwaysShowName = !this.alwaysShowName;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 1, this.alwaysShowName));
             button.setMessage(this.alwaysShowName());
-        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 54, buttonWidth * 2 + 4, 20).build());
-        this.addRenderableWidget(Button.builder(this.canRideOnShoulder(), (button) -> {
+        }));
+        this.addRenderableWidget(new Button(this.leftPos + 8, this.topPos + this.imageHeight - 30, buttonWidth * 2 + 4, 20, this.canRideOnShoulder(), (button) -> {
             this.canRideOnShoulder = !this.canRideOnShoulder;
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionTrackerMessage(this.creeperMinion, 2, this.canRideOnShoulder));
             button.setMessage(this.canRideOnShoulder());
-        }).bounds(this.leftPos + 8, this.topPos + this.imageHeight - 30, buttonWidth * 2 + 4, 20).build());
+        }));
         if (!this.creeperMinion.isOwnedBy(this.minecraft.player)) {
             this.renderables.stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).forEach(widget -> widget.active = false);
         }
@@ -93,7 +95,7 @@ public class CreeperMinionTrackerScreen extends Screen {
     private void onNameChanged(String input) {
         input = input.trim();
         if (!input.equals(this.creeperMinion.getName().getString())) {
-            this.creeperMinion.setCustomName(Component.literal(input));
+            this.creeperMinion.setCustomName(new TextComponent(input));
             MutantMonsters.NETWORK.sendToServer(new C2SCreeperMinionNameMessage(this.creeperMinion, input));
         }
     }
@@ -118,7 +120,7 @@ public class CreeperMinionTrackerScreen extends Screen {
     }
 
     private static Component onOffComponent(String translationKey, boolean on) {
-        return Component.translatable("gui.mutantmonsters.creeper_minion_tracker." + translationKey).append(": ").append(on ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+        return new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker." + translationKey).append(": ").append(on ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
     }
 
     @Override
@@ -132,13 +134,13 @@ public class CreeperMinionTrackerScreen extends Screen {
         this.blit(matrixStack, this.leftPos + 13, this.topPos + 16, 0, this.imageHeight, health, 6);
         this.font.draw(matrixStack, this.title, this.leftPos + this.titleLabelX, this.topPos + this.titleLabelY, 4210752);
         this.name.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.font.draw(matrixStack, Component.translatable("gui.mutantmonsters.creeper_minion_tracker.health"), (float)(this.leftPos + 13), (float)(this.topPos + 28), 4210752);
-        this.font.draw(matrixStack, Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion"), (float)(this.leftPos + 13), (float)(this.topPos + 48), 4210752);
-        this.font.draw(matrixStack, Component.translatable("gui.mutantmonsters.creeper_minion_tracker.blast_radius"), (float)(this.leftPos + 13), (float)(this.topPos + 68), 4210752);
+        this.font.draw(matrixStack, new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker.health"), (float)(this.leftPos + 13), (float)(this.topPos + 28), 4210752);
+        this.font.draw(matrixStack, new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker.explosion"), (float)(this.leftPos + 13), (float)(this.topPos + 48), 4210752);
+        this.font.draw(matrixStack, new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker.blast_radius"), (float)(this.leftPos + 13), (float)(this.topPos + 68), 4210752);
         StringBuilder sb = new StringBuilder();
         sb.append(this.creeperMinion.getHealth() / 2.0F).append(" / ").append(this.creeperMinion.getMaxHealth() / 2.0F);
         drawCenteredString(matrixStack, this.font, sb.toString(), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 30, 16777215);
-        drawCenteredString(matrixStack, this.font, this.creeperMinion.canExplodeContinuously() ? Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion.continuous") : Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion.one_time"), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 50, 16777215);
+        drawCenteredString(matrixStack, this.font, this.creeperMinion.canExplodeContinuously() ? new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker.explosion.continuous") : new TranslatableComponent("gui.mutantmonsters.creeper_minion_tracker.explosion.one_time"), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 50, 16777215);
         int temp = (int)(this.creeperMinion.getExplosionRadius() * 10.0F);
         sb = (new StringBuilder()).append((float)temp / 10.0F);
         drawCenteredString(matrixStack, this.font, sb.toString(), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 70, 16777215);

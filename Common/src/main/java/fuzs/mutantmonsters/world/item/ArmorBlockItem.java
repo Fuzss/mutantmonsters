@@ -2,7 +2,6 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,17 +18,17 @@ import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.UUID;
 
-public class ArmorBlockItem extends StandingAndWallBlockItem implements Equipable {
+public class ArmorBlockItem extends StandingAndWallBlockItem implements Wearable {
     private static final UUID ARMOR_MODIFIER = UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150");
 
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
     final ArmorMaterial material;
 
     public ArmorBlockItem(ArmorMaterial material, Block floorBlock, Block wallBlockIn, Item.Properties propertiesIn) {
-        super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForType(ArmorItem.Type.HELMET)), Direction.DOWN);
+        super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForSlot(EquipmentSlot.HEAD)));
         this.material = material;
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ARMOR, new AttributeModifier(ARMOR_MODIFIER, "Armor modifier", material.getDefenseForType(ArmorItem.Type.HELMET), AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ARMOR, new AttributeModifier(ARMOR_MODIFIER, "Armor modifier", material.getDefenseForSlot(EquipmentSlot.HEAD), AttributeModifier.Operation.ADDITION));
         builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(ARMOR_MODIFIER, "Armor toughness", material.getToughness(), AttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
         DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
@@ -61,10 +60,5 @@ public class ArmorBlockItem extends StandingAndWallBlockItem implements Equipabl
         } else {
             return InteractionResultHolder.fail(itemStack);
         }
-    }
-
-    @Override
-    public EquipmentSlot getEquipmentSlot() {
-        return EquipmentSlot.HEAD;
     }
 }

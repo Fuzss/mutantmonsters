@@ -2,12 +2,13 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -30,7 +31,7 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);
         this.addLayer(new JackOLanternLayer(this, context.getModelSet()));
-        this.addLayer(new HeldBlockLayer(this, context.getBlockRenderDispatcher()));
+        this.addLayer(new HeldBlockLayer(this, Minecraft.getInstance().getBlockRenderer()));
     }
 
     @Override
@@ -75,7 +76,7 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
                 matrixStackIn.translate(0.0, 0.9, 0.0);
                 matrixStackIn.scale(-scale, -scale, scale);
                 matrixStackIn.translate(-0.5, -0.5, 0.5);
-                matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
+                matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(90.0F));
                 this.blockRenderer.renderSingleBlock(Blocks.ICE.defaultBlockState(), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
                 matrixStackIn.popPose();
             }

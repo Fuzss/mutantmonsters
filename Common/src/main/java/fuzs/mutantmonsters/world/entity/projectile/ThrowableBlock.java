@@ -7,10 +7,9 @@ import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,6 +21,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -267,13 +267,13 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
             for (Mob mobEntity : this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
-                    mobEntity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
+                    mobEntity.hurt(DamageSource.indirectMobAttack(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
                 }
             }
 
             if (result.getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(DamageSource.thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
             }
@@ -304,7 +304,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 }
             } else if (result.getType() == HitResult.Type.ENTITY && !this.level.isClientSide) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(DamageSource.thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
 
@@ -316,7 +316,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
             for (Entity entity : this.level.getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
                 if (!entity.is(livingEntity) && this.distanceToSqr(entity) <= 4.0) {
-                    entity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), (float) (6 + this.random.nextInt(3)));
+                    entity.hurt(DamageSource.indirectMobAttack(this, livingEntity), (float) (6 + this.random.nextInt(3)));
                 }
             }
 
@@ -332,7 +332,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         compound.put("BlockState", NbtUtils.writeBlockState(this.blockState));
         compound.putBoolean("Held", this.isHeld());
         if (this.ownerType != null) {
-            compound.putString("OwnerType", BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
+            compound.putString("OwnerType", Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
         }
     }
 
@@ -341,7 +341,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         super.readAdditionalSaveData(compound);
         this.setHeld(compound.getBoolean("Held"));
         if (compound.contains("BlockState", 10)) {
-            this.blockState = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compound.getCompound("BlockState"));
+            this.blockState = NbtUtils.readBlockState(compound.getCompound("BlockState"));
         }
 
         if (compound.contains("OwnerType")) {
@@ -352,7 +352,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     @Override
     public void writeAdditionalAddEntityData(FriendlyByteBuf buffer) {
         buffer.writeVarInt(Block.getId(this.blockState));
-        buffer.writeUtf(this.ownerType == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
+        buffer.writeUtf(this.ownerType == null ? "" : Registry.ENTITY_TYPE.getKey(this.ownerType).toString());
     }
 
     @Override

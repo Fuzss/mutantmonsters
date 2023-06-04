@@ -277,7 +277,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        boolean flag = entityIn.hurt(this.level.damageSources().mobAttack(this), damage);
+        boolean flag = entityIn.hurt(DamageSource.mobAttack(this), damage);
         if (flag) {
             this.doEnchantDamageEffects(this, entityIn);
         }
@@ -400,7 +400,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     public void travel(Vec3 travelVector) {
         if (this.isVehicle() && this.getControllingPassenger() != null && this.isSaddled()) {
             LivingEntity passenger = (LivingEntity)this.getControllingPassenger();
-            this.setMaxUpStep(1.0F);
+            this.maxUpStep = 1.0F;
             this.setYRot(passenger.getYRot());
             this.yRotO = this.getYRot();
             this.setXRot(passenger.getXRot() * 0.5F);
@@ -424,24 +424,24 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             } else if (passenger instanceof Player) {
                 this.setDeltaMovement(Vec3.ZERO);
             } else {
-                this.calculateEntityAnimation(false);
+                this.calculateEntityAnimation(this, false);
             }
         } else {
-            this.setMaxUpStep(0.6F);
+            this.maxUpStep = 0.6F;
             super.travel(travelVector);
         }
 
     }
 
     @Override
-    public boolean wasKilled(ServerLevel serverWorld, LivingEntity livingEntity) {
+    public void killed(ServerLevel serverWorld, LivingEntity livingEntity) {
         if (livingEntity instanceof CreeperMinion minion && !this.isTame()) {
             LivingEntity owner = minion.getOwner();
             if (owner instanceof Player && !CommonAbstractions.INSTANCE.onAnimalTame(this, (Player) owner)) {
                 serverWorld.broadcastEntityEvent(this, (byte)7);
                 this.tame((Player) owner);
                 minion.discard();
-                return false;
+//                return false;
             } else {
                 serverWorld.broadcastEntityEvent(this, (byte)6);
             }
@@ -449,9 +449,9 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
         if (isPigOrSpider(livingEntity)) {
             EntityUtil.convertMobWithNBT(livingEntity, ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), false);
-            return false;
+//            return false;
         }
-        return true;
+//        return true;
     }
 
     @Override

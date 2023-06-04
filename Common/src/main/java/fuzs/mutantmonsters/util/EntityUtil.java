@@ -8,7 +8,6 @@ import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -18,7 +17,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.AbstractGolem;
@@ -40,6 +38,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Random;
 
 public final class EntityUtil {
     private static final Map<EntityType<?>, Item> VANILLA_SKULLS_MAP = ImmutableMap.of(EntityType.CREEPER, Items.CREEPER_HEAD, EntityType.ZOMBIE, Items.ZOMBIE_HEAD, EntityType.SKELETON, Items.SKELETON_SKULL, EntityType.WITHER_SKELETON, Items.WITHER_SKELETON_SKULL, EntityType.ENDER_DRAGON, Items.DRAGON_HEAD);
@@ -100,7 +99,7 @@ public final class EntityUtil {
 
     public static void sendMetadataPacket(Entity entity) {
         if (entity.level instanceof ServerLevel) {
-            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData().getNonDefaultValues()));
+            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData(), false));
         }
 
     }
@@ -186,7 +185,7 @@ public final class EntityUtil {
                 }
 
                 if (mobToConvert.getType() == EntityType.ENDERMAN && copiedNBT.contains("carriedBlockState", 10)) {
-                    BlockState blockState = NbtUtils.readBlockState(mobToConvert.level.holderLookup(Registries.BLOCK), copiedNBT.getCompound("carriedBlockState"));
+                    BlockState blockState = NbtUtils.readBlockState(copiedNBT.getCompound("carriedBlockState"));
                     if (!blockState.isAir()) {
                         mobToConvert.spawnAtLocation(blockState.getBlock());
                     }
@@ -200,7 +199,7 @@ public final class EntityUtil {
         return newEntity;
     }
 
-    public static void spawnEndersoulParticles(Entity entity, RandomSource random, int amount, float speed) {
+    public static void spawnEndersoulParticles(Entity entity, Random random, int amount, float speed) {
         for (int i = 0; i < amount; ++i) {
             float f = (random.nextFloat() - 0.5F) * speed;
             float f1 = (random.nextFloat() - 0.5F) * speed;

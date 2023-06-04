@@ -14,7 +14,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -26,11 +25,12 @@ public class ForgeAbstractions implements CommonAbstractions {
 
     @Override
     public BlockPathTypes getAdjacentBlockPathType(BlockGetter blockReader, BlockPos.MutableBlockPos mutable, BlockPathTypes pathNodeType) {
-        BlockState blockstate = blockReader.getBlockState(mutable);
-        BlockPathTypes blockPathType = blockstate.getAdjacentBlockPathType(blockReader, mutable, null, pathNodeType);
-        if (blockPathType != null) return blockPathType;
-        FluidState fluidState = blockstate.getFluidState();
-        return fluidState.getAdjacentBlockPathType(blockReader, mutable, null, pathNodeType);
+//        BlockState blockstate = blockReader.getBlockState(mutable);
+//        BlockPathTypes blockPathType = blockstate.getAdjacentBlockPathType(blockReader, mutable, null, pathNodeType);
+//        if (blockPathType != null) return blockPathType;
+//        FluidState fluidState = blockstate.getFluidState();
+//        return fluidState.getAdjacentBlockPathType(blockReader, mutable, null, pathNodeType);
+        return null;
     }
 
     @Override

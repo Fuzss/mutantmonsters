@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
+import fuzs.mutantmonsters.world.level.ExplosionInteraction;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -107,7 +108,7 @@ public class SkullSpirit extends Entity {
                     if (--this.attachedTick <= 0) {
                         EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
                         if (mutantType != null && this.random.nextFloat() < 0.75F) {
-                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
+                            MutatedExplosion.create(this, 2.0F, false, ExplosionInteraction.NONE);
                             Entity mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);
                             if (mutant instanceof Mob mob) mob.setPersistenceRequired();
                             AABB bb = mutant.getBoundingBox();
@@ -123,7 +124,7 @@ public class SkullSpirit extends Entity {
                             }
                         } else {
                             this.setAttached(false);
-                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
+                            MutatedExplosion.create(this, 2.0F, false, ExplosionInteraction.NONE);
                         }
                         this.discard();
                     }
@@ -131,7 +132,7 @@ public class SkullSpirit extends Entity {
 
                 this.setPos(this.target.getX(), this.target.getY(), this.target.getZ());
                 if (this.random.nextInt(8) == 0) {
-                    this.target.hurt(this.level.damageSources().magic(), 0.0F);
+                    this.target.hurt(DamageSource.MAGIC, 0.0F);
                 }
 
                 for (int i = 0; i < 3; ++i) {

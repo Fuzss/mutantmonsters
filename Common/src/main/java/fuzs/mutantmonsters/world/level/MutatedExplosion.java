@@ -14,7 +14,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.EntityBasedExplosionDamageCalculator;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
@@ -64,7 +67,7 @@ public class MutatedExplosion extends Explosion {
                             z = position.z;
 
                             for(float attenuation = 0.3F; intensity > 0.0F; intensity -= 0.22500001F) {
-                                BlockPos blockpos = BlockPos.containing(x, y, z);
+                                BlockPos blockpos = new BlockPos(x, y, z);
                                 BlockState blockstate = this.world.getBlockState(blockpos);
                                 Optional<Float> optional = (explosionContext).getBlockExplosionResistance(this, this.world, blockpos, blockstate, Fluids.EMPTY.defaultFluidState());
                                 if (optional.isPresent()) {
@@ -169,11 +172,11 @@ public class MutatedExplosion extends Explosion {
         }
     }
 
-    public static MutatedExplosion create(@NotNull Entity exploderIn, float sizeIn, boolean causesFireIn, Level.ExplosionInteraction interaction) {
+    public static MutatedExplosion create(@NotNull Entity exploderIn, float sizeIn, boolean causesFireIn, ExplosionInteraction interaction) {
         return create(exploderIn.level, exploderIn, exploderIn.getX(), exploderIn.getY(), exploderIn.getZ(), sizeIn, causesFireIn, interaction);
     }
 
-    public static MutatedExplosion create(Level worldIn, @Nullable Entity exploderIn, double xIn, double yIn, double zIn, float sizeIn, boolean causesFireIn, Level.ExplosionInteraction interaction) {
+    public static MutatedExplosion create(Level worldIn, @Nullable Entity exploderIn, double xIn, double yIn, double zIn, float sizeIn, boolean causesFireIn, ExplosionInteraction interaction) {
         Explosion.BlockInteraction mode = getExplosionInteraction(worldIn, exploderIn, interaction);
 
         MutatedExplosion explosion = new MutatedExplosion(worldIn, exploderIn, xIn, yIn, zIn, sizeIn, causesFireIn, mode);
@@ -181,7 +184,7 @@ public class MutatedExplosion extends Explosion {
             if (worldIn instanceof ServerLevel) {
                 explosion.explode();
                 explosion.finalizeExplosion(false);
-                if (mode == BlockInteraction.KEEP) {
+                if (mode == BlockInteraction.NONE) {
                     explosion.clearToBlow();
                 }
 
@@ -196,17 +199,13 @@ public class MutatedExplosion extends Explosion {
         return explosion;
     }
 
-    public static Explosion.BlockInteraction getExplosionInteraction(Level level, @Nullable Entity entity, Level.ExplosionInteraction interaction) {
+    public static Explosion.BlockInteraction getExplosionInteraction(Level level, @Nullable Entity entity, ExplosionInteraction interaction) {
         return switch (interaction) {
-            case NONE -> BlockInteraction.KEEP;
-            case BLOCK -> getDestroyType(level, GameRules.RULE_BLOCK_EXPLOSION_DROP_DECAY);
+            case NONE -> BlockInteraction.NONE;
+            case BLOCK -> BlockInteraction.DESTROY;
             case MOB ->
-                    CommonAbstractions.INSTANCE.getMobGriefingEvent(level, entity) ? getDestroyType(level, GameRules.RULE_MOB_EXPLOSION_DROP_DECAY) : BlockInteraction.KEEP;
-            case TNT -> getDestroyType(level, GameRules.RULE_TNT_EXPLOSION_DROP_DECAY);
+                    CommonAbstractions.INSTANCE.getMobGriefingEvent(level, entity) ? BlockInteraction.DESTROY : BlockInteraction.NONE;
+            case TNT -> BlockInteraction.BREAK;
         };
-    }
-
-    private static Explosion.BlockInteraction getDestroyType(Level level, GameRules.Key<GameRules.BooleanValue> gameRule) {
-        return level.getGameRules().getBoolean(gameRule) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
     }
 }

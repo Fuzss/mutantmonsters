@@ -1,9 +1,10 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -17,7 +18,7 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock> {
 
     public ThrowableBlockRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.blockRenderer = context.getBlockRenderDispatcher();
+        this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
         this.shadowRadius = 0.6F;
     }
 
@@ -29,14 +30,14 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock> {
         if (entityIn.getOwnerType() != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
             matrixStackIn.scale(-0.75F, -0.75F, 0.75F);
         } else {
-            matrixStackIn.mulPose(Axis.YP.rotationDegrees(entityIn.getYRot()));
+            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(entityIn.getYRot()));
         }
 
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(45.0F));
-        matrixStackIn.mulPose(Axis.XP.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 20.0F));
-        matrixStackIn.mulPose(Axis.ZN.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 12.0F));
+        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(45.0F));
+        matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 20.0F));
+        matrixStackIn.mulPose(Vector3f.ZN.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 12.0F));
         matrixStackIn.translate(-0.5, -0.5, 0.5);
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
+        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(90.0F));
         this.blockRenderer.renderSingleBlock(entityIn.getBlockState(), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
         matrixStackIn.popPose();
     }

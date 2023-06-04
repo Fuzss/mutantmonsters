@@ -145,7 +145,7 @@ public class MutantMonsters implements ModConstructor {
 
     @Override
     public void onRegisterCreativeModeTabs(CreativeModeTabContext context) {
-        context.registerCreativeModeTab(CreativeModeTabConfigurator.from(MOD_ID).icon(() -> new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get())).displayItems((itemDisplayParameters, output) -> {
+        context.registerCreativeModeTab(CreativeModeTabConfigurator.from(MOD_ID).icon(() -> new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get())).displayItems((output) -> {
             output.accept(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get());
             output.accept(ModRegistry.CREEPER_SHARD_ITEM.get());
             output.accept(ModRegistry.ENDERSOUL_HAND_ITEM.get());

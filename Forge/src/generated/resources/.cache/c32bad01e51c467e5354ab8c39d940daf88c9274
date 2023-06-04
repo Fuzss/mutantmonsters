@@ -1,7 +1,0 @@
-// 1.19.4	2023-05-25T14:15:45.57671	Damage Types
-25d924fdac4392adb88fe3b6aa2c23420f6fb4f9 data/mutantmonsters/damage_type/armor_bypassing_mob_attack.json
-4639a7c410a9a588b5701356bfc454eb0af4af5f data/mutantmonsters/damage_type/armor_bypassing_thrown.json
-25d924fdac4392adb88fe3b6aa2c23420f6fb4f9 data/mutantmonsters/damage_type/effects_bypassing_mob_attack.json
-f95d8c725961dc45cc25a379727ee90899a62af2 data/mutantmonsters/damage_type/mutant_arrow.json
-25d924fdac4392adb88fe3b6aa2c23420f6fb4f9 data/mutantmonsters/damage_type/piercing_mob_attack.json
-4b4b2ff422d23e4cb6282f664d89dad7ac8ff8e6 data/mutantmonsters/damage_type/player_seismic_wave.json

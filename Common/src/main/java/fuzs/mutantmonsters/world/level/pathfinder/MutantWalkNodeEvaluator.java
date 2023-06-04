@@ -44,8 +44,8 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
                 for (int extraZ = -1; extraZ <= 1; ++extraZ) {
                     if (extraX != 0 || extraZ != 0) {
                         mutable.set(x + extraX, y + extraY, z + extraZ);
-                        BlockPathTypes blockPathType = CommonAbstractions.INSTANCE.getAdjacentBlockPathType(blockReader, mutable, pathNodeType);
-                        if (blockPathType != null) return blockPathType;
+//                        BlockPathTypes blockPathType = CommonAbstractions.INSTANCE.getAdjacentBlockPathType(blockReader, mutable, pathNodeType);
+//                        if (blockPathType != null) return blockPathType;
                         BlockPathTypes rawNode = getBlockPathTypeRaw(blockReader, mutable);
                         switch (rawNode) {
                             case DAMAGE_FIRE -> {
@@ -83,22 +83,22 @@ public class MutantWalkNodeEvaluator extends WalkNodeEvaluator {
     }
 
     @Override
-    protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, BlockPos blockPos, BlockPathTypes blockPathTypes) {
-        if (blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED && this.canOpenDoors() && this.canPassDoors()) {
-            blockPathTypes = BlockPathTypes.WALKABLE;
+    protected BlockPathTypes evaluateBlockPathType(BlockGetter blockReader, boolean canOpenDoors, boolean canEnterDoors, BlockPos blockPos, BlockPathTypes pathNodeType) {
+        if (pathNodeType == BlockPathTypes.DOOR_WOOD_CLOSED && canOpenDoors && canEnterDoors) {
+            pathNodeType = BlockPathTypes.WALKABLE;
         }
 
-        if (blockPathTypes == BlockPathTypes.DOOR_OPEN && !this.canPassDoors()) {
-            blockPathTypes = BlockPathTypes.BLOCKED;
+        if (pathNodeType == BlockPathTypes.DOOR_OPEN && !canEnterDoors) {
+            pathNodeType = BlockPathTypes.BLOCKED;
         }
 
         // don't be held back by rails
 
-        if (blockPathTypes == BlockPathTypes.LEAVES) {
-            blockPathTypes = BlockPathTypes.BLOCKED;
+        if (pathNodeType == BlockPathTypes.LEAVES) {
+            pathNodeType = BlockPathTypes.BLOCKED;
         }
 
-        return blockPathTypes;
+        return pathNodeType;
     }
 
     @Override

@@ -4,7 +4,6 @@ import fuzs.mutantmonsters.world.entity.ai.goal.TrackSummonerGoal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
@@ -36,6 +35,7 @@ public class ZombieResurrection extends BlockPos {
         return getSuitableGround(world, x, y, z, 4, true);
     }
 
+    @SuppressWarnings("deprecation")
     public static int getSuitableGround(Level world, int x, int y, int z, int range, boolean checkDay) {
         int i = y;
 
@@ -73,7 +73,7 @@ public class ZombieResurrection extends BlockPos {
 
         if (checkDay && world.isDay()) {
             BlockPos lightPos = new BlockPos(x, y + 1, z);
-            float f = world.getPathfindingCostFromLightLevels(lightPos);
+            float f = world.getBrightness(lightPos) - 0.5F;
             if (f > 0.0F && world.canSeeSkyFromBelowWater(lightPos) && world.random.nextInt(3) != 0) {
                 return -1;
             }
@@ -82,12 +82,13 @@ public class ZombieResurrection extends BlockPos {
         return i;
     }
 
+    @SuppressWarnings("deprecation")
     public static EntityType<? extends Zombie> getZombieByLocation(Level world, BlockPos pos) {
-        Holder<Biome> biome = world.getBiome(pos);
+        Holder<Biome> holder = world.getBiome(pos);
         int chance = world.random.nextInt(100);
-        if (biome.is(BiomeTags.SPAWNS_GOLD_RABBITS)) {
+        if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.DESERT) {
             return chance < 80 && world.canSeeSky(pos) ? EntityType.HUSK : (chance < 1 ? EntityType.ZOMBIE_VILLAGER : EntityType.ZOMBIE);
-        } else if ((biome.is(BiomeTags.REQUIRED_OCEAN_MONUMENT_SURROUNDING)) && world.isWaterAt(pos)) {
+        } else if ((Biome.getBiomeCategory(holder) == Biome.BiomeCategory.OCEAN || Biome.getBiomeCategory(holder) == Biome.BiomeCategory.RIVER) && world.isWaterAt(pos)) {
             return EntityType.DROWNED;
         } else {
             return chance < 95 ? EntityType.ZOMBIE : EntityType.ZOMBIE_VILLAGER;

@@ -2,12 +2,12 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -85,7 +85,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
         } else {
             HitResult result = playerIn.pick(128.0, 1.0F, false);
             if (result.getType() != HitResult.Type.BLOCK) {
-                playerIn.displayClientMessage(Component.translatable(this.getDescriptionId() + ".teleport_failed"), true);
+                playerIn.displayClientMessage(new TranslatableComponent(this.getDescriptionId() + ".teleport_failed"), true);
                 return InteractionResultHolder.fail(stack);
             } else {
                 if (!level.isClientSide) {

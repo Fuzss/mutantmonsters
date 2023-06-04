@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.animation;
 
+import com.mojang.math.Vector3f;
 import net.minecraft.client.model.geom.ModelPart;
-import org.joml.Vector3f;
 
 public class Transform {
     private final Vector3f rotation = new Vector3f();

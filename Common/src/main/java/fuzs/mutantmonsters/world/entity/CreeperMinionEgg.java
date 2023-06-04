@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.proxy.Proxy;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
+import fuzs.mutantmonsters.world.level.ExplosionInteraction;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +17,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -161,7 +161,7 @@ public class CreeperMinionEgg extends Entity {
                 this.dismountTicks--;
             }
             Entity rootVehicle = this.getRootVehicle();
-            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) || this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
+            if (this.isInWall() || !(rootVehicle.getPose() == Pose.STANDING || rootVehicle.getPose() == Pose.CROUCHING) || this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
                 this.stopRiding();
                 this.playMountSound(false);
             }
@@ -181,7 +181,7 @@ public class CreeperMinionEgg extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING)) {
+        if (!player.isSecondaryUseActive() && player.getPose() == Pose.STANDING) {
             Entity topPassenger = this.getTopPassenger(player);
             this.startRiding(topPassenger, true);
             this.playMountSound(true);
@@ -208,7 +208,7 @@ public class CreeperMinionEgg extends Entity {
             return false;
         } else if (!this.level.isClientSide && this.isAlive()) {
             this.markHurt();
-            if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+            if (source.isExplosion()) {
                 this.age = (int)((float)this.age - amount * 80.0F);
                 EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int)(amount / 2.0F));
                 return false;
@@ -217,7 +217,7 @@ public class CreeperMinionEgg extends Entity {
                 this.setDeltaMovement(0.0, 0.2, 0.0);
                 this.health = (int)((float)this.health - amount);
                 if (this.health <= 0) {
-                    MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, Level.ExplosionInteraction.TNT);
+                    MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, ExplosionInteraction.TNT);
                     if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for(int i = 5 + this.random.nextInt(6); i > 0; --i) {

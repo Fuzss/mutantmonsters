@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -122,7 +123,7 @@ public class MutantSkeletonBodyPart extends Entity {
             this.setXRot(this.getXRot() + 15.0F * (float) (this.pitchPositive ? 1 : -1));
 
             for (Entity entity : this.level.getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(this.level.damageSources().thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
+                if (entity.hurt(DamageSource.thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
                     entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
                 }
             }
@@ -164,7 +165,7 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     protected Component getTypeName() {
-        return Component.translatable(this.getLegacyItemByPart().getDescriptionId());
+        return new TranslatableComponent(this.getLegacyItemByPart().getDescriptionId());
     }
 
     @Override

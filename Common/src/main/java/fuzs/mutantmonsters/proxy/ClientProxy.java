@@ -4,6 +4,7 @@ import fuzs.mutantmonsters.client.gui.screens.CreeperMinionTrackerScreen;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class ClientProxy extends ServerProxy {
 
@@ -15,8 +16,8 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void showDismountMessage() {
         Minecraft minecraft = Minecraft.getInstance();
-        Component component = Component.translatable("mount.onboard", minecraft.options.keyShift.getTranslatedKeyMessage());
+        Component component = new TranslatableComponent("mount.onboard", minecraft.options.keyShift.getTranslatedKeyMessage());
         minecraft.gui.setOverlayMessage(component, false);
-        minecraft.getNarrator().sayNow(component);
+//        minecraft.getNarrator().sayNow(component);
     }
 }

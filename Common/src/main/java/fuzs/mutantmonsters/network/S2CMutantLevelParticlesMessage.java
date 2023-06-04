@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -38,7 +37,7 @@ public class S2CMutantLevelParticlesMessage implements MessageV2<S2CMutantLevelP
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeVarInt(BuiltInRegistries.PARTICLE_TYPE.getId(this.particleData.getType()));
+        buf.writeVarInt(Registry.PARTICLE_TYPE.getId(this.particleData.getType()));
         this.particleData.writeToNetwork(buf);
         buf.writeDouble(this.posX);
         buf.writeDouble(this.posY);
@@ -51,7 +50,7 @@ public class S2CMutantLevelParticlesMessage implements MessageV2<S2CMutantLevelP
 
     @Override
     public void read(FriendlyByteBuf buf) {
-        ParticleType<?> particletype = BuiltInRegistries.PARTICLE_TYPE.byId(buf.readVarInt());
+        ParticleType<?> particletype = Registry.PARTICLE_TYPE.byId(buf.readVarInt());
         this.particleData = this.readParticle(buf, particletype);
         this.posX = buf.readDouble();
         this.posY = buf.readDouble();
