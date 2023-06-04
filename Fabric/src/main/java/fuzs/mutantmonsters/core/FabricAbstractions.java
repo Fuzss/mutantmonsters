@@ -9,12 +9,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,7 +36,7 @@ public class FabricAbstractions implements CommonAbstractions {
 
     @Override
     public boolean getMobGriefingEvent(Level level, Entity entity) {
-        return true;
+        return level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 
     @Override
@@ -70,12 +68,6 @@ public class FabricAbstractions implements CommonAbstractions {
     public Vec3 getExplosionPosition(Explosion explosion) {
         ExplosionFabricAccessor accessor = (ExplosionFabricAccessor) explosion;
         return new Vec3(accessor.mutantmonsters$getX(), accessor.mutantmonsters$getY(), accessor.mutantmonsters$getZ());
-    }
-
-    @Override
-    public boolean isArrowInfinite(ArrowItem arrow, ItemStack projectile, ItemStack bow, Player player) {
-        int enchant = EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, bow);
-        return enchant > 0 && arrow.getClass() == ArrowItem.class;
     }
 
     @Override

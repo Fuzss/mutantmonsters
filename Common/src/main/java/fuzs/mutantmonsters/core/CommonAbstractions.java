@@ -47,8 +47,6 @@ public interface CommonAbstractions {
 
     Vec3 getExplosionPosition(Explosion explosion);
 
-    boolean isArrowInfinite(ArrowItem arrow, ItemStack projectile, ItemStack bow, Player player);
-
     AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow);
 
     boolean shouldRiderSit(Entity vehicle);

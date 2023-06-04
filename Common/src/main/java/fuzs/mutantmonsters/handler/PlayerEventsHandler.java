@@ -12,17 +12,14 @@ import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ArrowItem;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -34,72 +31,76 @@ public class PlayerEventsHandler {
     private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 16;
 
     public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
+        // quick charge for bows
         if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {
-            if (useItem.getItem() instanceof BowItem && (useItem.getUseDuration() - useItemRemaining.getAsInt()) < 20) {
-                useItemRemaining.mapInt(i -> i -3);
+            if (useItem.getItem() instanceof BowItem && BowItem.getPowerForTime(useItem.getUseDuration() - useItemRemaining.getAsInt()) < 1.0F) {
+                useItemRemaining.mapInt(i -> i - 2);
             }
         }
         return EventResult.PASS;
     }
 
     public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
-        if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get() && hasAmmo) {
-            boolean inAir = !player.isOnGround() && !player.isInWater() && !player.isInLava();
-            ItemStack ammo = player.getProjectile(stack);
-            if (!ammo.isEmpty() || hasAmmo) {
-                if (ammo.isEmpty()) {
-                    ammo = new ItemStack(Items.ARROW);
+        // multi-shot for bows
+        if (!(stack.getItem() instanceof BowItem)) return EventResult.PASS;
+        if (hasAmmo && player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()) {
+            float velocity = BowItem.getPowerForTime(charge.getAsInt());
+            if (!level.isClientSide && velocity >= 0.1F) {
+                ItemStack itemstack = player.getProjectile(stack);
+                ArrowItem arrowitem = (ArrowItem) (itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
+                float[] shotPitches = getShotPitches(level.random, velocity);
+                for (int i = 0; i < 2; i++) {
+                    AbstractArrow abstractarrow = arrowitem.createArrow(level, itemstack, player);
+                    abstractarrow = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) stack.getItem(), abstractarrow);
+                    abstractarrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity * 3.0F, 1.5F);
+                    applyPowerEnchantment(abstractarrow, stack);
+                    applyPunchEnchantment(abstractarrow, stack);
+                    applyFlameEnchantment(abstractarrow, stack);
+                    applyPiercingEnchantment(abstractarrow, stack);
+                    abstractarrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+                    level.addFreshEntity(abstractarrow);
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, shotPitches[i + 1]);
                 }
-
-                float velocity = BowItem.getPowerForTime(stack.getUseDuration() - charge.getAsInt());
-                boolean infiniteArrows = player.getAbilities().instabuild || ammo.getItem() instanceof ArrowItem && CommonAbstractions.INSTANCE.isArrowInfinite((ArrowItem) ammo.getItem(), ammo, stack, player);
-                if (!level.isClientSide) {
-                    ArrowItem arrowitem = (ArrowItem) (ammo.getItem() instanceof ArrowItem ? ammo.getItem() : Items.ARROW);
-                    AbstractArrow abstractarrowentity = arrowitem.createArrow(level, ammo, player);
-                    abstractarrowentity = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) stack.getItem(), abstractarrowentity);
-                    abstractarrowentity.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity * 3.0F, 1.0F);
-                    if (velocity == 1.0F && inAir) {
-                        abstractarrowentity.setCritArrow(true);
-                    }
-
-                    int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, stack);
-                    if (j > 0) {
-                        abstractarrowentity.setBaseDamage(abstractarrowentity.getBaseDamage() + (double) j * 0.5 + 0.5);
-                    }
-
-                    int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, stack);
-                    if (k > 0) {
-                        abstractarrowentity.setKnockback(k);
-                    }
-
-                    if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, stack) > 0) {
-                        abstractarrowentity.setSecondsOnFire(100);
-                    }
-
-                    abstractarrowentity.setBaseDamage(abstractarrowentity.getBaseDamage() * (inAir ? 2.0 : 0.5));
-                    stack.hurtAndBreak(1, player, (p_220009_1_) -> {
-                        p_220009_1_.broadcastBreakEvent(player.getUsedItemHand());
-                    });
-                    if (infiniteArrows || player.getAbilities().instabuild && (ammo.getItem() == Items.SPECTRAL_ARROW || ammo.getItem() == Items.TIPPED_ARROW)) {
-                        abstractarrowentity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-                    }
-
-                    level.addFreshEntity(abstractarrowentity);
-                }
-
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 1.2F) + velocity * 0.5F);
-                if (!infiniteArrows && !player.getAbilities().instabuild) {
-                    ammo.shrink(1);
-                    if (ammo.isEmpty()) {
-                        player.getInventory().removeItem(ammo);
-                    }
-                }
-
-                player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
             }
-            return EventResult.INTERRUPT;
         }
         return EventResult.PASS;
+    }
+
+    private static float[] getShotPitches(RandomSource random, float velocity) {
+        boolean flag = random.nextBoolean();
+        return new float[]{1.0F, getRandomShotPitch(flag, random, velocity), getRandomShotPitch(!flag, random, velocity)};
+    }
+
+    private static float getRandomShotPitch(boolean p_150798_, RandomSource random, float velocity) {
+        float f = p_150798_ ? 0.63F : 0.43F;
+        return 1.0F / (random.nextFloat() * 0.5F + 1.8F) + f * velocity;
+    }
+
+    public static void applyPowerEnchantment(AbstractArrow arrow, ItemStack stack) {
+        int powerLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, stack);
+        if (powerLevel > 0) {
+            arrow.setBaseDamage(arrow.getBaseDamage() + (double) powerLevel * 0.5 + 0.5);
+        }
+    }
+
+    public static void applyPunchEnchantment(AbstractArrow arrow, ItemStack stack) {
+        int punchLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, stack);
+        if (punchLevel > 0) {
+            arrow.setKnockback(punchLevel);
+        }
+    }
+
+    public static void applyFlameEnchantment(AbstractArrow arrow, ItemStack stack) {
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, stack) > 0) {
+            arrow.setSecondsOnFire(100);
+        }
+    }
+
+    public static void applyPiercingEnchantment(AbstractArrow arrow, ItemStack stack) {
+        int pierceLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, stack);
+        if (pierceLevel > 0) {
+            arrow.setPierceLevel((byte) pierceLevel);
+        }
     }
 
     public static void onPlayerTick$End(Player player) {
@@ -137,14 +138,13 @@ public class PlayerEventsHandler {
     }
 
     public static EventResult onItemToss(ItemEntity entityItem, Player player) {
-        Level world = player.level;
-        if (!world.isClientSide) {
+        if (!player.level.isClientSide) {
             ItemStack stack = entityItem.getItem();
             boolean isHand = stack.getItem() == ModRegistry.ENDERSOUL_HAND_ITEM.get() && stack.isDamaged();
             if (stack.getItem() == Items.ENDER_EYE || isHand) {
                 int count = 0;
 
-                for (EndersoulFragment orb : world.getEntitiesOfClass(EndersoulFragment.class, player.getBoundingBox().inflate(8.0))) {
+                for (EndersoulFragment orb : player.level.getEntitiesOfClass(EndersoulFragment.class, player.getBoundingBox().inflate(8.0))) {
                     if (orb.getOwner() == player) {
                         ++count;
                         orb.discard();
