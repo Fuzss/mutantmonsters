@@ -38,10 +38,6 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 
 public class MutantMonstersClient implements ClientModConstructor {
 
-    public static ResourceLocation entityTexture(String name) {
-        return MutantMonsters.id("textures/entity/" + name + ".png");
-    }
-
     @Override
     public void onConstructMod() {
         registerHandlers();
@@ -171,5 +167,9 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerItemProperty(MutantMonsters.id("chemical_x"), (itemStack, clientLevel, livingEntity, i) -> {
             return PotionUtils.getPotion(itemStack) == ModRegistry.CHEMICAL_X_POTION.get() ? 1.0F : 0.0F;
         }, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION);
+    }
+
+    public static ResourceLocation entityTexture(String name) {
+        return MutantMonsters.id("textures/entity/" + name + ".png");
     }
 }
