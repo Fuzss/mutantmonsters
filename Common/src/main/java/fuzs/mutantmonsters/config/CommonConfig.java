@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 public class CommonConfig implements ConfigCore {
-    public int mutantCreeperSpawnWeight;
-    public int mutantEndermanSpawnWeight;
-    public int mutantSkeletonSpawnWeight;
-    public int mutantZombieSpawnWeight;
+    public double mutantCreeperSpawnWeight;
+    public double mutantEndermanSpawnWeight;
+    public double mutantSkeletonSpawnWeight;
+    public double mutantZombieSpawnWeight;
 //    public ConfigDataSet<Biome> biomeBlacklist;
     @Config(name = "mutant_x_conversions", description = {"When infested with a Mutant X potion, what mutant mob should the target transform into. Otherwise the target will ony explode and take damage.", "Format for every entry is \"<namespace>:<path>,<namespace>:<path>\" with the second id representing the mutant. Namespace may be omitted to use \"minecraft\" by default."})
     List<String> mutantXConversionsRaw = Lists.newArrayList("minecraft:creeper,mutantmonsters:mutant_creeper", "minecraft:enderman,mutantmonsters:mutant_enderman", "minecraft:skeleton,mutantmonsters:mutant_skeleton", "minecraft:snow_golem,mutantmonsters:mutant_snow_golem", "minecraft:zombie,mutantmonsters:mutant_zombie", "minecraft:pig,mutantmonsters:spider_pig");
@@ -32,10 +32,10 @@ public class CommonConfig implements ConfigCore {
 
     @Override
     public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
-        callback.accept(builder.comment("Mutant Creeper spawn weight.").worldRestart().defineInRange("mutant_creeper_spawn_weight", 5, 0, 100), v -> this.mutantCreeperSpawnWeight = v);
-        callback.accept(builder.comment("Mutant Enderman spawn weight.").worldRestart().defineInRange("mutant_enderman_spawn_weight", 5, 0, 100), v -> this.mutantEndermanSpawnWeight = v);
-        callback.accept(builder.comment("Mutant Skeleton spawn weight.").worldRestart().defineInRange("mutant_skeleton_spawn_weight", 5, 0, 100), v -> this.mutantSkeletonSpawnWeight = v);
-        callback.accept(builder.comment("Mutant Zombie spawn weight.").worldRestart().defineInRange("mutant_zombie_spawn_weight", 5, 0, 100), v -> this.mutantZombieSpawnWeight = v);
+        callback.accept(builder.comment("Weight for mutant creeper spawns as a percentage of the vanilla creeper spawn weight. Mutants can spawn in every biome and dimension where their vanilla counterparts can be found.").worldRestart().defineInRange("mutant_creeper_spawn_weight", 0.05, 0.0, 1.0), v -> this.mutantCreeperSpawnWeight = v);
+        callback.accept(builder.comment("Weight for mutant enderman spawns as a percentage of the vanilla enderman spawn weight. Mutants can spawn in every biome and dimension where their vanilla counterparts can be found.").worldRestart().defineInRange("mutant_enderman_spawn_weight", 0.05, 0.0, 1.0), v -> this.mutantEndermanSpawnWeight = v);
+        callback.accept(builder.comment("Weight for mutant skeleton spawns as a percentage of the vanilla skeleton spawn weight. Mutants can spawn in every biome and dimension where their vanilla counterparts can be found.").worldRestart().defineInRange("mutant_skeleton_spawn_weight", 0.05, 0.0, 1.0), v -> this.mutantSkeletonSpawnWeight = v);
+        callback.accept(builder.comment("Weight for mutant zombie spawns as a percentage of the vanilla zombie spawn weight. Mutants can spawn in every biome and dimension where their vanilla counterparts can be found.").worldRestart().defineInRange("mutant_zombie_spawn_weight", 0.05, 0.0, 1.0), v -> this.mutantZombieSpawnWeight = v);
 //        callback.accept(builder.comment("Mutants will not spawn in biomes present in this blacklist.", ConfigDataSet.CONFIG_DESCRIPTION).worldRestart().define("biome_blacklist", ConfigDataSet.toString(Registry.BIOME_REGISTRY)), v -> this.biomeBlacklist = ConfigDataSet.of(Registry.BIOME_REGISTRY, v));
     }
 

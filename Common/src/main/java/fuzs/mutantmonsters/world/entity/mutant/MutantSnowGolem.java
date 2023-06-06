@@ -30,7 +30,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
@@ -139,7 +138,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target instanceof Enemy && target.canBeSeenAsEnemy();
+        return super.canAttack(target) && target instanceof Enemy;
     }
 
     @Override
