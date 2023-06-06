@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.0.6-1.19.2] - 2023-06-06
+### Fixed
+- Fixed mutant creatures over-spawning in modded biomes using vanilla's spawn costs system
+
 ## [v4.0.5-1.19.2] - 2023-05-25
 ### Fixed
 - Fixed mutant snow golem cannot be created from using chemical x on a snow golem
