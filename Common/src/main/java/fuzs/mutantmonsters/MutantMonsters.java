@@ -133,13 +133,14 @@ public class MutantMonsters implements ModConstructor {
         });
     }
 
-    private static void addMutantSpawn(MobSpawnSettingsContext spawnSettings, int spawnWeight, MobCategory mobCategory, EntityType<?> entityType, EntityType<?> mutantEntityType) {
-        if (spawnWeight <= 0) return;
-        if (spawnSettings.getSpawnerData(mobCategory).stream().anyMatch(data -> data.type == entityType)) {
-            spawnSettings.addSpawn(mobCategory, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnWeight, 1, 1));
-        }
-        if (spawnSettings.getSpawnCost(entityType) != null) {
-            spawnSettings.setSpawnCost(mutantEntityType, 0.7, 0.15);
+    private static void addMutantSpawn(MobSpawnSettingsContext spawnSettings, double spawnWeight, MobCategory mobCategory, EntityType<?> entityType, EntityType<?> mutantEntityType) {
+        if (spawnWeight == 0.0) return;
+        spawnSettings.getSpawnerData(mobCategory).stream().filter(data -> data.type == entityType).findAny().ifPresent(spawnerData -> {
+            spawnSettings.addSpawn(mobCategory, new MobSpawnSettings.SpawnerData(mutantEntityType, Math.max(1, (int) (spawnerData.getWeight().asInt() * spawnWeight)), 1, 1));
+        });
+        MobSpawnSettings.MobSpawnCost mobSpawnCost = spawnSettings.getSpawnCost(entityType);
+        if (mobSpawnCost != null) {
+            spawnSettings.setSpawnCost(mutantEntityType, mobSpawnCost.getCharge() / spawnWeight, mobSpawnCost.getEnergyBudget() * spawnWeight);
         }
     }
 
