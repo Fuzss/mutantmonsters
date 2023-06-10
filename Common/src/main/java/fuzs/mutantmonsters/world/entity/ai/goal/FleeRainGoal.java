@@ -16,7 +16,7 @@ public class FleeRainGoal extends FleeSunGoal {
         if (this.mob.getTarget() != null) {
             return false;
         } else {
-            return this.mob.level.isRainingAt(this.mob.blockPosition()) && this.setWantedPos();
+            return this.mob.level().isRainingAt(this.mob.blockPosition()) && this.setWantedPos();
         }
     }
 
@@ -27,7 +27,7 @@ public class FleeRainGoal extends FleeSunGoal {
 
         for(int i = 0; i < 10; ++i) {
             BlockPos blockpos1 = blockpos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
-            if (!this.mob.level.isRainingAt(blockpos1) && this.mob.getWalkTargetValue(blockpos1) >= 0.0F) {
+            if (!this.mob.level().isRainingAt(blockpos1) && this.mob.getWalkTargetValue(blockpos1) >= 0.0F) {
                 return Vec3.atBottomCenterOf(blockpos1);
             }
         }

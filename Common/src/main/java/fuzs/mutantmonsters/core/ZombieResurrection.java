@@ -99,17 +99,17 @@ public class ZombieResurrection extends BlockPos {
     }
 
     public boolean update(MutantZombie mutantZombie) {
-        Level world = mutantZombie.level;
+        Level level = mutantZombie.level();
         BlockPos abovePos = this.above();
-        if (!world.isEmptyBlock(this) && world.isEmptyBlock(abovePos)) {
+        if (!level.isEmptyBlock(this) && level.isEmptyBlock(abovePos)) {
             if (mutantZombie.getRandom().nextInt(15) == 0) {
-                world.levelEvent(2001, abovePos, Block.getId(world.getBlockState(this)));
+                level.levelEvent(2001, abovePos, Block.getId(level.getBlockState(this)));
             }
 
             if (--this.tick <= 0) {
-                Zombie zombieEntity = (Zombie) getZombieByLocation(world, abovePos).create(world);
-                if (world instanceof ServerLevelAccessor) {
-                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(this), MobSpawnType.MOB_SUMMONED, null, null);
+                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level);
+                if (level instanceof ServerLevelAccessor) {
+                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), MobSpawnType.MOB_SUMMONED, null, null);
                     if (ilivingentitydata instanceof Zombie.ZombieGroupData) {
                         new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) ilivingentitydata).isBaby, false);
                     }
@@ -117,16 +117,16 @@ public class ZombieResurrection extends BlockPos {
 
                 zombieEntity.setHealth(zombieEntity.getMaxHealth() * (0.6F + 0.4F * zombieEntity.getRandom().nextFloat()));
                 zombieEntity.playAmbientSound();
-                world.levelEvent(2001, abovePos, Block.getId(world.getBlockState(this)));
-                if (!world.isClientSide) {
+                level.levelEvent(2001, abovePos, Block.getId(level.getBlockState(this)));
+                if (!level.isClientSide) {
                     zombieEntity.moveTo(abovePos, mutantZombie.getYRot(), 0.0F);
                     zombieEntity.goalSelector.addGoal(0, new TrackSummonerGoal(zombieEntity, mutantZombie));
                     zombieEntity.goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(zombieEntity, 1.0));
-                    world.addFreshEntity(zombieEntity);
+                    level.addFreshEntity(zombieEntity);
                 }
 
                 if (mutantZombie.getTeam() != null) {
-                    Scoreboard scoreboard = world.getScoreboard();
+                    Scoreboard scoreboard = level.getScoreboard();
                     scoreboard.addPlayerToTeam(zombieEntity.getScoreboardName(), scoreboard.getPlayerTeam(mutantZombie.getTeam().getName()));
                 }
 

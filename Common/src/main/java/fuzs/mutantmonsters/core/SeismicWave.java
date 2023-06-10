@@ -9,7 +9,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -118,9 +117,9 @@ public class SeismicWave extends BlockPos {
 
                 if (block instanceof DoorBlock) {
                     if (DoorBlock.isWoodenDoor(blockstate)) {
-                        world.levelEvent(1019, this, 0);
-                    } else if (blockstate.getMaterial() == Material.METAL) {
-                        world.levelEvent(1020, this, 0);
+                        world.levelEvent(LevelEvent.SOUND_ZOMBIE_WOODEN_DOOR, this, 0);
+                    } else {
+                        world.levelEvent(LevelEvent.SOUND_ZOMBIE_IRON_DOOR, this, 0);
                     }
                 }
 
@@ -139,9 +138,9 @@ public class SeismicWave extends BlockPos {
             }
 
             if (blockstate.getFluidState().isEmpty()) {
-                world.levelEvent(2001, posAbove, Block.getId(blockstate));
+                world.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, posAbove, Block.getId(blockstate));
             } else {
-                MutantMonsters.NETWORK.sendToAllNearExcept(new S2CSeismicWaveFluidParticlesMessage(this), null, this.getX() + 0.5, this.getY(), this.getZ() + 0.5, 1024.0, entity.level);
+                MutantMonsters.NETWORK.sendToAllNearExcept(new S2CSeismicWaveFluidParticlesMessage(this), null, this.getX() + 0.5, this.getY(), this.getZ() + 0.5, 1024.0, entity.level());
             }
         }
     }

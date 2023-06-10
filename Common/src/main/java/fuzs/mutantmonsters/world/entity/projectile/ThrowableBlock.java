@@ -52,11 +52,11 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
     }
 
-    public ThrowableBlock(double x, double y, double z, LivingEntity livingEntityIn) {
-        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), x, y, z, livingEntityIn.level);
+    public ThrowableBlock(double x, double y, double z, LivingEntity entity) {
+        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), x, y, z, entity.level());
         this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
-        this.setOwner(livingEntityIn);
-        this.ownerType = livingEntityIn.getType();
+        this.setOwner(entity);
+        this.ownerType = entity.getType();
     }
 
     public ThrowableBlock(MutantEnderman enderman, int id) {
@@ -165,7 +165,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 double motx = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
                 double moty = 0.5F + this.random.nextFloat() * 2.0F;
                 double motz = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
-                this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.blockState), x, y, z, motx, moty, motz);
+                this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.blockState), x, y, z, motx, moty, motz);
             }
         }
     }
@@ -173,7 +173,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     @Override
     public void tick() {
         if (this.isHeld()) {
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 this.setSharedFlag(6, this.hasGlowingTag());
             }
 
@@ -182,7 +182,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
             if (thrower == null) {
                 OptionalInt optionalInt = this.entityData.get(OWNER_ENTITY_ID);
                 if (optionalInt.isPresent()) {
-                    Entity entity = this.level.getEntity(optionalInt.getAsInt());
+                    Entity entity = this.level().getEntity(optionalInt.getAsInt());
                     if (entity instanceof LivingEntity) {
                         thrower = entity;
                     }
@@ -199,7 +199,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 float offset = 0.6F;
                 this.setDeltaMovement(x * (double)offset, y * (double)offset, z * (double)offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level.isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity)thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity)thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
                     this.setHeld(false);
                 }
             }
@@ -230,7 +230,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
             return InteractionResult.PASS;
         } else if (this.isHeld()) {
             if (this.getOwner() == player) {
-                if (!this.level.isClientSide) {
+                if (!this.level().isClientSide) {
                     this.setHeld(false);
                     this.throwBlock(player);
                 }
@@ -238,17 +238,17 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 itemStack.hurtAndBreak(1, player, (e) -> {
                     e.broadcastBreakEvent(hand);
                 });
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
         } else {
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 this.setHeld(true);
                 this.setOwner(player);
             }
 
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
     }
 
@@ -265,62 +265,62 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity)thrower : null;
         if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
 
-            for (Mob mobEntity : this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
+            for (Mob mobEntity : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
-                    mobEntity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
+                    mobEntity.hurt(this.level().damageSources().mobProjectile(this, livingEntity), 4.0F + (float) this.random.nextInt(3));
                 }
             }
 
             if (result.getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(this.level().damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
             }
 
-            if (!this.level.isClientSide) {
-                this.level.broadcastEntityEvent(this, (byte)3);
+            if (!this.level().isClientSide) {
+                this.level().broadcastEntityEvent(this, (byte)3);
                 this.discard();
             }
 
             this.playSound(this.blockState.getSoundType().getBreakSound(), 0.8F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.8F);
         } else {
-            boolean canOwnerPlace = livingEntity instanceof Player && ((Player)livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level, livingEntity);
+            boolean canOwnerPlace = livingEntity instanceof Player && ((Player)livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), livingEntity);
             if (result.getType() == HitResult.Type.BLOCK) {
                 BlockHitResult blockRayTraceResult = (BlockHitResult)result;
                 this.onHitBlock(blockRayTraceResult);
-                if (!this.level.isClientSide) {
-                    if (canOwnerPlace && this.blockState.canSurvive(this.level, this.blockPosition())) {
-                        this.level.setBlockAndUpdate(this.blockPosition(), this.blockState);
-                        this.blockState.getBlock().setPlacedBy(this.level, this.blockPosition(), this.blockState, livingEntity, ItemStack.EMPTY);
+                if (!this.level().isClientSide) {
+                    if (canOwnerPlace && this.blockState.canSurvive(this.level(), this.blockPosition())) {
+                        this.level().setBlockAndUpdate(this.blockPosition(), this.blockState);
+                        this.blockState.getBlock().setPlacedBy(this.level(), this.blockPosition(), this.blockState, livingEntity, ItemStack.EMPTY);
                         SoundType soundType = this.blockState.getSoundType();
                         this.playSound(soundType.getPlaceSound(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
                     } else {
-                        this.level.levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
-                        if (canOwnerPlace && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                        this.level().levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
+                        if (canOwnerPlace && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                             this.spawnAtLocation(this.blockState.getBlock());
                         }
                     }
                 }
-            } else if (result.getType() == HitResult.Type.ENTITY && !this.level.isClientSide) {
+            } else if (result.getType() == HitResult.Type.ENTITY && !this.level().isClientSide) {
                 Entity entity = ((EntityHitResult)result).getEntity();
-                if (entity.hurt(this.level.damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
+                if (entity.hurt(this.level().damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
 
-                this.level.levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
-                if (canOwnerPlace && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                this.level().levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
+                if (canOwnerPlace && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                     this.spawnAtLocation(this.blockState.getBlock());
                 }
             }
 
-            for (Entity entity : this.level.getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
+            for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
                 if (!entity.is(livingEntity) && this.distanceToSqr(entity) <= 4.0) {
-                    entity.hurt(this.level.damageSources().mobProjectile(this, livingEntity), (float) (6 + this.random.nextInt(3)));
+                    entity.hurt(this.level().damageSources().mobProjectile(this, livingEntity), (float) (6 + this.random.nextInt(3)));
                 }
             }
 
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 this.discard();
             }
         }
@@ -341,7 +341,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         super.readAdditionalSaveData(compound);
         this.setHeld(compound.getBoolean("Held"));
         if (compound.contains("BlockState", 10)) {
-            this.blockState = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compound.getCompound("BlockState"));
+            this.blockState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), compound.getCompound("BlockState"));
         }
 
         if (compound.contains("OwnerType")) {

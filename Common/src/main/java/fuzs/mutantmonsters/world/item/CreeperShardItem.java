@@ -58,7 +58,7 @@ public class CreeperShardItem extends Item implements Vanishable {
         }
 
         target.knockback(0.9F, player.getX() - target.getX(), player.getZ() - target.getZ());
-        player.level.playSound(null, target.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.NEUTRAL, 0.3F, 0.8F + player.getRandom().nextFloat() * 0.4F);
+        player.level().playSound(null, target.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.NEUTRAL, 0.3F, 0.8F + player.getRandom().nextFloat() * 0.4F);
         return true;
     }
 

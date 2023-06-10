@@ -119,7 +119,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
             ++this.animationTick;
         }
 
-        if (this.level.isNight() && this.tickCount % 100 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()) {
+        if (this.level().isNight() && this.tickCount % 100 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()) {
             this.heal(2.0F);
         }
 
@@ -186,10 +186,10 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
     @Override
     public void die(DamageSource cause) {
         super.die(cause);
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
 
-            for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
-                livingEntity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this), 7.0F);
+            for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
+                livingEntity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this), 7.0F);
             }
 
             for (int i = 0; i < 18; ++i) {
@@ -246,9 +246,9 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
                     ++j;
                 }
 
-                MutantSkeletonBodyPart part = new MutantSkeletonBodyPart(this.level, this, j);
+                MutantSkeletonBodyPart part = new MutantSkeletonBodyPart(this.level(), this, j);
                 part.setDeltaMovement(part.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
-                this.level.addFreshEntity(part);
+                this.level().addFreshEntity(part);
             }
         }
 
@@ -292,7 +292,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
         @Override
         public boolean canUse() {
             this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(this.attackTarget) || this.mob.getVehicle() == this.attackTarget);
+            return this.attackTarget != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround() && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(this.attackTarget) || this.mob.getVehicle() == this.attackTarget);
         }
 
         @Override
@@ -326,14 +326,14 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
                 if (!this.shots.isEmpty()) {
 
                     for (MutantArrow arrowEntity : this.shots) {
-                        this.mob.level.addFreshEntity(arrowEntity);
+                        this.mob.level().addFreshEntity(arrowEntity);
                     }
 
                     this.shots.clear();
                 }
 
                 for (int i = 0; i < 6; ++i) {
-                    MutantArrow shot = new MutantArrow(this.mob.level, this.mob, this.attackTarget);
+                    MutantArrow shot = new MutantArrow(this.mob.level(), this.mob, this.attackTarget);
                     shot.setSpeed(1.2F - this.mob.random.nextFloat() * 0.1F);
                     shot.setClones(2);
                     shot.randomize(3.0F);
@@ -386,7 +386,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
             }
 
             if (this.mob.animationTick == 26 && this.attackTarget.isAlive()) {
-                MutantArrow arrowEntity = new MutantArrow(this.mob.level, this.mob, this.attackTarget);
+                MutantArrow arrowEntity = new MutantArrow(this.mob.level(), this.mob, this.attackTarget);
                 if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() != null && this.mob.getLastDamageSource().getEntity() != null) {
                     arrowEntity.randomize((float) this.mob.hurtTime / 2.0F);
                 } else if (!this.mob.hasLineOfSight(this.attackTarget)) {
@@ -405,7 +405,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
                     arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
                 }
 
-                this.mob.level.addFreshEntity(arrowEntity);
+                this.mob.level().addFreshEntity(arrowEntity);
                 this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
             }
 
@@ -450,7 +450,7 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
 
             if (this.mob.animationTick == 6) {
                 float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                if (!this.attackTarget.hurt(this.mob.level.damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                if (!this.attackTarget.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
                     EntityUtil.disableShield(this.attackTarget, 100);
                 }
 
@@ -492,14 +492,14 @@ public class MutantSkeleton extends Monster implements AnimatedEntity {
             if (this.mob.animationTick == 3) {
                 float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
 
-                for (LivingEntity livingEntity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
+                for (LivingEntity livingEntity : this.mob.level().getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
                     if (!(livingEntity instanceof MutantSkeleton)) {
                         double dist = this.mob.distanceTo(livingEntity);
                         double x = this.mob.getX() - livingEntity.getX();
                         double z = this.mob.getZ() - livingEntity.getZ();
                         if (dist <= 3.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 60.0F) {
                             float power = 1.8F + (float) this.mob.random.nextInt(5) * 0.15F;
-                            livingEntity.hurt(this.mob.level.damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
+                            livingEntity.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
                             livingEntity.setDeltaMovement(-x / dist * (double) power, Math.max(0.2800000011920929, livingEntity.getDeltaMovement().y), -z / dist * (double) power);
                             EntityUtil.sendPlayerVelocityPacket(livingEntity);
                         }

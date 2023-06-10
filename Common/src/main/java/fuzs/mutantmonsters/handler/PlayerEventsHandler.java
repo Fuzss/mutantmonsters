@@ -19,7 +19,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -106,7 +109,7 @@ public class PlayerEventsHandler {
     public static void onPlayerTick$End(Player player) {
         playShoulderEntitySound(player, player.getShoulderEntityLeft());
         playShoulderEntitySound(player, player.getShoulderEntityRight());
-        if (!player.level.isClientSide) {
+        if (!player.level().isClientSide) {
             ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(player).map(SeismicWavesCapability::seismicWaves).ifPresent(seismicWaves -> {
                 while (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
                     seismicWaves.poll();
@@ -117,12 +120,12 @@ public class PlayerEventsHandler {
     }
 
     private static void handleSeismicWave(Player player, @NotNull SeismicWave seismicWave) {
-        seismicWave.affectBlocks(player.level, player);
+        seismicWave.affectBlocks(player.level(), player);
         AABB box = new AABB(seismicWave.getX(), (double) seismicWave.getY() + 1.0, seismicWave.getZ(), (double) seismicWave.getX() + 1.0, (double) seismicWave.getY() + 2.0, (double) seismicWave.getZ() + 1.0);
 
-        for (LivingEntity livingEntity : player.level.getEntitiesOfClass(LivingEntity.class, box)) {
+        for (LivingEntity livingEntity : player.level().getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
-                livingEntity.hurt(DamageSourcesHelper.source(player.level, ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE, player), (float) (6 + player.getRandom().nextInt(3)));
+                livingEntity.hurt(DamageSourcesHelper.source(player.level(), ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE, player), (float) (6 + player.getRandom().nextInt(3)));
             }
         }
     }
@@ -130,21 +133,21 @@ public class PlayerEventsHandler {
     private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
         if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
             EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
-                if (player.level.random.nextInt(500) == 0) {
-                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.2F + 1.5F);
+                if (player.level().random.nextInt(500) == 0) {
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F + 1.5F);
                 }
             });
         }
     }
 
     public static EventResult onItemToss(ItemEntity entityItem, Player player) {
-        if (!player.level.isClientSide) {
+        if (!player.level().isClientSide) {
             ItemStack stack = entityItem.getItem();
             boolean isHand = stack.getItem() == ModRegistry.ENDERSOUL_HAND_ITEM.get() && stack.isDamaged();
             if (stack.getItem() == Items.ENDER_EYE || isHand) {
                 int count = 0;
 
-                for (EndersoulFragment orb : player.level.getEntitiesOfClass(EndersoulFragment.class, player.getBoundingBox().inflate(8.0))) {
+                for (EndersoulFragment orb : player.level().getEntitiesOfClass(EndersoulFragment.class, player.getBoundingBox().inflate(8.0))) {
                     if (orb.getOwner() == player) {
                         ++count;
                         orb.discard();

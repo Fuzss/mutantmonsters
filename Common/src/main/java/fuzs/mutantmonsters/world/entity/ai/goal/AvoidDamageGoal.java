@@ -27,16 +27,16 @@ public class AvoidDamageGoal extends PanicGoal {
 
     public boolean canUse() {
         if (this.mob.isOnFire() && !this.mob.isSensitiveToWater()) {
-            if (this.mob.level.isRaining()) {
+            if (this.mob.level().isRaining()) {
                 for(int i = 0; i < 10; ++i) {
                     BlockPos blockpos1 = this.mob.blockPosition().offset(this.mob.getRandom().nextInt(20) - 10, this.mob.getRandom().nextInt(6) - 3, this.mob.getRandom().nextInt(20) - 10);
-                    if (this.mob.level.isRainingAt(blockpos1) && this.mob.getWalkTargetValue(blockpos1) >= 0.0F) {
+                    if (this.mob.level().isRainingAt(blockpos1) && this.mob.getWalkTargetValue(blockpos1) >= 0.0F) {
                         return this.hasPosition(Vec3.atBottomCenterOf(blockpos1));
                     }
                 }
             }
 
-            BlockPos blockpos = this.lookForWater(this.mob.level, this.mob, 15);
+            BlockPos blockpos = this.lookForWater(this.mob.level(), this.mob, 15);
             return blockpos != null && this.mob.getNavigation().createPath(blockpos, 0) != null && this.hasPosition(Vec3.atLowerCornerOf(blockpos)) || this.findRandomPosition();
         } else if (this.avoidsAttacker.getAsBoolean() && this.mob.getLastHurtByMob() != null) {
             return this.hasPosition(DefaultRandomPos.getPosAway(this.mob, 10, 9, this.mob.getLastHurtByMob().position()));
@@ -65,7 +65,7 @@ public class AvoidDamageGoal extends PanicGoal {
         } else if (source.is(DamageTypeTags.WITCH_RESISTANT_TO) && source.getDirectEntity() == null) {
             return false;
         } else {
-            return !source.is(DamageTypes.DROWN) && !source.is(DamageTypes.FALL) && !source.is(DamageTypes.STARVE) && !source.is(DamageTypes.OUT_OF_WORLD);
+            return !source.is(DamageTypes.DROWN) && !source.is(DamageTypes.FALL) && !source.is(DamageTypes.STARVE) && !source.is(DamageTypes.FELL_OUT_OF_WORLD);
         }
     }
 }

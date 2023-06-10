@@ -16,7 +16,7 @@
     "sources": "${modPageUrl}"
   },
 
-  "license": "AGPL-3.0-or-later",
+  "license": "${modLicense}",
   "icon": "mod_logo.png",
 
   "environment": "${modFabricEnvironment}",
@@ -42,6 +42,8 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
+    "cardinal-components-base": "*",
+    "cardinal-components-entity": "*",
     "minecraft": "${minecraftVersion}",
     "java": ">=17"
   },

@@ -97,7 +97,7 @@ public class EntityEventsHandler {
         if ((trueSource instanceof MutantCreeper && ((MutantCreeper) trueSource).isCharged() || trueSource instanceof CreeperMinion && ((CreeperMinion) trueSource).isCharged()) && source.is(DamageTypeTags.IS_EXPLOSION)) {
             ItemStack itemStack = EntityUtil.getSkullDrop(entity.getType());
             if (!itemStack.isEmpty()) {
-                drops.add(new ItemEntity(trueSource.level, entity.getX(), entity.getY(), entity.getZ(), itemStack));
+                drops.add(new ItemEntity(trueSource.level(), entity.getX(), entity.getY(), entity.getZ(), itemStack));
             }
         }
         return EventResult.PASS;

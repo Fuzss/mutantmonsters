@@ -107,7 +107,7 @@ public class EndersoulFragment extends Entity {
             this.owner = null;
         }
 
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             if (!this.isTamed() && --this.explodeTick == 0) {
                 this.explode();
             }
@@ -126,22 +126,22 @@ public class EndersoulFragment extends Entity {
             if (this.owner == null && !player.isSecondaryUseActive()) {
                 this.owner = player;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else if (this.owner == player && player.isSecondaryUseActive()) {
                 this.owner = null;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
         } else {
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 this.setTamed(true);
             }
 
             this.owner = player;
             this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
     }
 
@@ -150,7 +150,7 @@ public class EndersoulFragment extends Entity {
         if (this.isInvulnerableTo(source)) {
             return false;
         } else {
-            if (!this.level.isClientSide && this.isAlive() && this.tickCount > 0) {
+            if (!this.level().isClientSide && this.isAlive() && this.tickCount > 0) {
                 this.explode();
             }
 
@@ -160,9 +160,9 @@ public class EndersoulFragment extends Entity {
 
     private void explode() {
         this.playSound(ModRegistry.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-        this.level.broadcastEntityEvent(this, (byte)3);
+        this.level().broadcastEntityEvent(this, (byte)3);
 
-        for (Entity entity : this.level.getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
+        for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
             if (this.distanceToSqr(entity) <= 25.0) {
                 boolean hitChance = this.random.nextInt(3) != 0;
                 if (isProtected(entity)) {
@@ -176,7 +176,7 @@ public class EndersoulFragment extends Entity {
                 }
 
                 if (hitChance) {
-                    entity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.ARMOR_BYPASSING_THROWN_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
+                    entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ARMOR_BYPASSING_THROWN_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
                 }
             }
         }

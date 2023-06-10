@@ -45,8 +45,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WebBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -157,10 +157,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         }
 
         this.chargeExhaustion = Math.max(0, this.chargeExhaustion - 1);
-        if (!this.level.isClientSide) {
-            this.updatePersistentAnger((ServerLevel) this.level, true);
+        if (!this.level().isClientSide) {
+            this.updatePersistentAnger((ServerLevel) this.level(), true);
             this.leapCooldown = Math.max(0, this.leapCooldown - 1);
-            if (this.leapTick > 10 && this.onGround) {
+            if (this.leapTick > 10 && this.onGround()) {
                 this.isLeaping = false;
             }
 
@@ -178,7 +178,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (!onlyCheckSize) {
             for(int i = 0; i < this.webList.size(); ++i) {
                 WebPos coord = this.webList.get(i);
-                if (this.level.getBlockState(coord) != Blocks.COBWEB.defaultBlockState()) {
+                if (this.level().getBlockState(coord) != Blocks.COBWEB.defaultBlockState()) {
                     this.webList.remove(i);
                     --i;
                 } else {
@@ -203,8 +203,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     private void removeWeb(BlockPos pos) {
-        if (this.level.getBlockState(pos).is(Blocks.COBWEB) && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level, this)) {
-            this.level.destroyBlock(pos, false, this);
+        if (this.level().getBlockState(pos).is(Blocks.COBWEB) && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+            this.level().destroyBlock(pos, false, this);
         }
 
     }
@@ -212,7 +212,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     private void updateChargeState() {
         if (this.chargingTick > 0) {
 
-            for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox(), EntitySelector.notRiding(this))) {
+            for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox(), EntitySelector.notRiding(this))) {
                 if (livingEntity != this && livingEntity != this.getOwner() && livingEntity.attackable()) {
                     this.doHurtTarget(livingEntity);
                 }
@@ -229,11 +229,11 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             ItemStack itemstack = playerEntity.getItemInHand(hand);
             boolean isBreedingItem = this.isFood(itemstack);
             if (!isBreedingItem && this.isSaddled() && !this.isVehicle() && !playerEntity.isSecondaryUseActive()) {
-                if (!this.level.isClientSide) {
+                if (!this.level().isClientSide) {
                     playerEntity.startRiding(this);
                 }
 
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else if (itemstack.getItem() == Items.SADDLE) {
                 return itemstack.interactLivingEntity(playerEntity, this, hand);
             } else if (itemstack.isEdible() && isBreedingItem && this.getHealth() < this.getMaxHealth()) {
@@ -256,13 +256,13 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public boolean doHurtTarget(Entity entityIn) {
         this.isLeaping = false;
-        if (this.random.nextInt(2) == 0 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level, this)) {
+        if (this.random.nextInt(2) == 0 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
             double dx = entityIn.getX() - entityIn.xo;
             double dz = entityIn.getZ() - entityIn.zo;
             BlockPos pos = new BlockPos((int)(entityIn.getX() + dx * 0.5), Mth.floor(this.getBoundingBox().minY), (int)(entityIn.getZ() + dz * 0.5));
-            Material material = this.level.getBlockState(pos).getMaterial();
-            if (!material.isSolid() && !material.isLiquid() && material != Material.WEB) {
-                this.level.setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.isSolid() && !state.liquid() && !(state.getBlock() instanceof WebBlock)) {
+                this.level().setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
                 this.webList.add(new WebPos(pos, this.chargingTick > 0 ? 600 : 1200));
                 this.updateWebList(true);
                 this.setDeltaMovement(0.0, Math.max(0.25, this.getDeltaMovement().y), 0.0);
@@ -272,12 +272,12 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
         float damage = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         if (!(entityIn instanceof Spider) && !(entityIn instanceof SpiderPig)) {
-            if (this.level.getBlockStates(entityIn.getBoundingBox()).anyMatch(Blocks.COBWEB.defaultBlockState()::equals)) {
+            if (this.level().getBlockStates(entityIn.getBoundingBox()).anyMatch(Blocks.COBWEB.defaultBlockState()::equals)) {
                 damage += 4.0F;
             }
         }
 
-        boolean flag = entityIn.hurt(this.level.damageSources().mobAttack(this), damage);
+        boolean flag = entityIn.hurt(this.level().damageSources().mobAttack(this), damage);
         if (flag) {
             this.doEnchantDamageEffects(this, entityIn);
         }
@@ -314,7 +314,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     public void equipSaddle(@Nullable SoundSource soundCategory) {
         this.setSaddled(true);
         if (soundCategory != null) {
-            this.level.playSound(null, this, SoundEvents.PIG_SADDLE, soundCategory, 0.5F, 1.0F);
+            this.level().playSound(null, this, SoundEvents.PIG_SADDLE, soundCategory, 0.5F, 1.0F);
         }
 
     }
@@ -381,10 +381,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
                 for (int[] aint1 : aint) {
                     blockpos$mutable.set(blockpos.getX() + aint1[0], blockpos.getY(), blockpos.getZ() + aint1[1]);
-                    double d0 = this.level.getBlockFloorHeight(blockpos$mutable);
+                    double d0 = this.level().getBlockFloorHeight(blockpos$mutable);
                     if (DismountHelper.isBlockFloorValid(d0)) {
                         Vec3 vector3d = Vec3.upFromBottomCenterOf(blockpos$mutable, d0);
-                        if (DismountHelper.canDismountTo(this.level, livingEntity, axisalignedbb.move(vector3d))) {
+                        if (DismountHelper.canDismountTo(this.level(), livingEntity, axisalignedbb.move(vector3d))) {
                             livingEntity.setPose(pose);
                             return vector3d;
                         }
@@ -407,7 +407,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             this.setRot(this.getYRot(), this.getXRot());
             this.yBodyRot = this.getYRot();
             this.yHeadRot = this.yBodyRot;
-            if (this.chargeExhausted || !(this.chargePower > 0.0F) || !this.onGround && this.getFeetBlockState().getFluidState().isEmpty()) {
+            if (this.chargeExhausted || !(this.chargePower > 0.0F) || !this.onGround() && this.getFeetBlockState().getFluidState().isEmpty()) {
                 this.chargePower = 0.0F;
             } else {
                 double power = 1.600000023841858 * (double)this.chargePower;
@@ -434,7 +434,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public boolean wasKilled(ServerLevel serverWorld, LivingEntity livingEntity) {
+    public boolean killedEntity(ServerLevel serverWorld, LivingEntity livingEntity) {
         if (livingEntity instanceof CreeperMinion minion && !this.isTame()) {
             LivingEntity owner = minion.getOwner();
             if (owner instanceof Player && !CommonAbstractions.INSTANCE.onAnimalTame(this, (Player) owner)) {
@@ -500,7 +500,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public void die(DamageSource damageSource) {
         super.die(damageSource);
-        if (this.dead && !this.level.isClientSide && !this.webList.isEmpty()) {
+        if (this.dead && !this.level().isClientSide && !this.webList.isEmpty()) {
             for (WebPos webPos : this.webList) {
                 this.removeWeb(webPos);
             }
@@ -530,8 +530,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        if (this.level instanceof ServerLevel) {
-            this.readPersistentAngerSaveData(this.level, compound);
+        if (this.level() instanceof ServerLevel) {
+            this.readPersistentAngerSaveData(this.level(), compound);
         }
 
         this.setSaddled(compound.getBoolean("Saddle") || compound.getBoolean("Saddled"));
@@ -584,7 +584,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         @Override
         public boolean canUse() {
             LivingEntity target = SpiderPig.this.getTarget();
-            return target != null && SpiderPig.this.leapCooldown <= 0 && (SpiderPig.this.onGround || !SpiderPig.this.getFeetBlockState().getFluidState().isEmpty()) && (SpiderPig.this.distanceToSqr(target) < 64.0 && SpiderPig.this.random.nextInt(8) == 0 || SpiderPig.this.distanceToSqr(target) < 6.25);
+            return target != null && SpiderPig.this.leapCooldown <= 0 && (SpiderPig.this.onGround() || !SpiderPig.this.getFeetBlockState().getFluidState().isEmpty()) && (SpiderPig.this.distanceToSqr(target) < 64.0 && SpiderPig.this.random.nextInt(8) == 0 || SpiderPig.this.distanceToSqr(target) < 6.25);
         }
 
         @Override

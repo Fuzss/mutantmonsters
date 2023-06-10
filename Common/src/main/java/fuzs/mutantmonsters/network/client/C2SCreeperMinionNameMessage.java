@@ -38,7 +38,7 @@ public class C2SCreeperMinionNameMessage implements MessageV2<C2SCreeperMinionNa
 
             @Override
             public void handle(C2SCreeperMinionNameMessage message, Player player, Object gameInstance) {
-                Entity entity = player.level.getEntity(message.entityId);
+                Entity entity = player.level().getEntity(message.entityId);
                 if (entity instanceof CreeperMinion) {
                     entity.setCustomName(Component.literal(message.name));
                 }

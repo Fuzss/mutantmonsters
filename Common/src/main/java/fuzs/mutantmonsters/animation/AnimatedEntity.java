@@ -37,7 +37,7 @@ public interface AnimatedEntity extends AdditionalAddEntityData {
     }
 
     static <T extends Entity & AnimatedEntity> void sendAnimationPacket(T entity, Animation animation) {
-        if (!entity.level.isClientSide) {
+        if (!entity.level().isClientSide) {
             entity.setAnimation(animation);
             entity.setAnimationTick(0);
             MutantMonsters.NETWORK.sendToAllTracking(new S2CAnimationMessage(entity.getId(), ArrayUtils.indexOf(entity.getAnimations(), animation)), entity);

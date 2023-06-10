@@ -50,7 +50,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     public CreeperMinionEgg(MutantCreeper spawner, Entity owner) {
-        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), spawner.level);
+        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), spawner.level());
         this.ownerUUID = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
         if (spawner.isCharged()) {
@@ -116,9 +116,9 @@ public class CreeperMinionEgg extends Entity {
     }
 
     private void hatch() {
-        CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(this.level);
+        CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(this.level());
         if (this.ownerUUID != null) {
-            Player playerEntity = this.level.getPlayerByUUID(this.ownerUUID);
+            Player playerEntity = this.level().getPlayerByUUID(this.ownerUUID);
             if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
                 minion.tame(playerEntity);
                 minion.setOrderedToSit(true);
@@ -130,7 +130,7 @@ public class CreeperMinionEgg extends Entity {
         }
 
         minion.setPos(this.getX(), this.getY(), this.getZ());
-        this.level.addFreshEntity(minion);
+        this.level().addFreshEntity(minion);
         this.playSound(ModRegistry.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.get(), 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
         this.discard();
     }
@@ -150,7 +150,7 @@ public class CreeperMinionEgg extends Entity {
 
         this.move(MoverType.SELF, this.getDeltaMovement());
         this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
-        if (this.onGround) {
+        if (this.onGround()) {
             this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, 0.0, 0.7));
         }
 
@@ -167,7 +167,7 @@ public class CreeperMinionEgg extends Entity {
             }
         }
 
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             if (this.health < 8 && this.tickCount - this.recentlyHit > 80 && this.tickCount % 20 == 0) {
                 ++this.health;
             }
@@ -185,10 +185,10 @@ public class CreeperMinionEgg extends Entity {
             Entity topPassenger = this.getTopPassenger(player);
             this.startRiding(topPassenger, true);
             this.playMountSound(true);
-            if (this.level.isClientSide) {
+            if (this.level().isClientSide) {
                 Proxy.INSTANCE.showDismountMessage();
             }
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         return InteractionResult.PASS;
     }
@@ -206,7 +206,7 @@ public class CreeperMinionEgg extends Entity {
     public boolean hurt(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) {
             return false;
-        } else if (!this.level.isClientSide && this.isAlive()) {
+        } else if (!this.level().isClientSide && this.isAlive()) {
             this.markHurt();
             if (source.is(DamageTypeTags.IS_EXPLOSION)) {
                 this.age = (int)((float)this.age - amount * 80.0F);
@@ -218,7 +218,7 @@ public class CreeperMinionEgg extends Entity {
                 this.health = (int)((float)this.health - amount);
                 if (this.health <= 0) {
                     MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, Level.ExplosionInteraction.TNT);
-                    if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for(int i = 5 + this.random.nextInt(6); i > 0; --i) {
                                 this.spawnAtLocation(Items.GUNPOWDER);

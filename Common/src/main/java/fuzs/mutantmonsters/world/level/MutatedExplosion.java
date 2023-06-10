@@ -169,8 +169,8 @@ public class MutatedExplosion extends Explosion {
         }
     }
 
-    public static MutatedExplosion create(@NotNull Entity exploderIn, float sizeIn, boolean causesFireIn, Level.ExplosionInteraction interaction) {
-        return create(exploderIn.level, exploderIn, exploderIn.getX(), exploderIn.getY(), exploderIn.getZ(), sizeIn, causesFireIn, interaction);
+    public static MutatedExplosion create(@NotNull Entity exploder, float sizeIn, boolean causesFireIn, Level.ExplosionInteraction interaction) {
+        return create(exploder.level(), exploder, exploder.getX(), exploder.getY(), exploder.getZ(), sizeIn, causesFireIn, interaction);
     }
 
     public static MutatedExplosion create(Level worldIn, @Nullable Entity exploderIn, double xIn, double yIn, double zIn, float sizeIn, boolean causesFireIn, Level.ExplosionInteraction interaction) {

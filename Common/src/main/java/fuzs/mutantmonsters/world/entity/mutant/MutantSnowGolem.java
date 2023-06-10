@@ -97,7 +97,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Nullable
     public Player getOwner() {
-        return this.getOwnerId().map(this.level::getPlayerByUUID).orElse(null);
+        return this.getOwnerId().map(this.level()::getPlayerByUUID).orElse(null);
     }
 
     public Optional<UUID> getOwnerId() {
@@ -154,16 +154,16 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     public void tick() {
         super.tick();
         int x;
-        if (this.level.isClientSide && this.getSwimJump()) {
+        if (this.level().isClientSide && this.getSwimJump()) {
             for(x = 0; x < 6; ++x) {
                 double d0 = this.random.nextGaussian() * 0.02;
                 double d1 = this.random.nextGaussian() * 0.02;
                 double d2 = this.random.nextGaussian() * 0.02;
-                this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SNOW.defaultBlockState()), this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+                this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SNOW.defaultBlockState()), this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
                 d0 = this.random.nextGaussian() * 0.02;
                 d1 = this.random.nextGaussian() * 0.02;
                 d2 = this.random.nextGaussian() * 0.02;
-                this.level.addParticle(ParticleTypes.SPLASH, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+                this.level().addParticle(ParticleTypes.SPLASH, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
             }
         }
 
@@ -175,13 +175,13 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             }
         }
 
-        if (this.level.dimensionType().ultraWarm() || this.level.getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
+        if (this.level().dimensionType().ultraWarm() || this.level().getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
             if (this.random.nextFloat() > Math.min(80.0F, this.getHealth()) * 0.01F) {
-                this.level.addParticle(ParticleTypes.FALLING_WATER, this.getRandomX(0.6), this.getRandomY() - 0.15, this.getRandomZ(0.6), 0.0, 0.0, 0.0);
+                this.level().addParticle(ParticleTypes.FALLING_WATER, this.getRandomX(0.6), this.getRandomY() - 0.15, this.getRandomZ(0.6), 0.0, 0.0, 0.0);
             }
 
             if (this.tickCount % 60 == 0) {
-                this.hurt(this.level.damageSources().onFire(), 1.0F);
+                this.hurt(this.level().damageSources().onFire(), 1.0F);
             }
         }
 
@@ -189,7 +189,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             this.heal(1.0F);
         }
 
-        if (!this.level.isClientSide && this.onGround && !this.level.dimensionType().ultraWarm() && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level, this)) {
+        if (!this.level().isClientSide && this.onGround() && !this.level().dimensionType().ultraWarm() && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
             x = Mth.floor(this.getX());
             int y = Mth.floor(this.getBoundingBox().minY);
             int z = Mth.floor(this.getZ());
@@ -200,23 +200,23 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                         BlockPos pos = new BlockPos(x + i, y, z + j);
                         BlockPos posDown = pos.below();
                         BlockPos posAbove = pos.above();
-                        boolean placeSnow = this.level.isEmptyBlock(pos) && Blocks.SNOW.defaultBlockState().canSurvive(this.level, pos);
-                        boolean placeIce = this.level.isWaterAt(posDown);
-                        if (this.level.getFluidState(pos).getType() == Fluids.FLOWING_WATER) {
-                            this.level.setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
+                        boolean placeSnow = this.level().isEmptyBlock(pos) && Blocks.SNOW.defaultBlockState().canSurvive(this.level(), pos);
+                        boolean placeIce = this.level().isWaterAt(posDown);
+                        if (this.level().getFluidState(pos).getType() == Fluids.FLOWING_WATER) {
+                            this.level().setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
                         }
 
-                        if (this.level.getFluidState(posAbove).getType() == Fluids.FLOWING_WATER) {
-                            this.level.setBlockAndUpdate(posAbove, Blocks.ICE.defaultBlockState());
+                        if (this.level().getFluidState(posAbove).getType() == Fluids.FLOWING_WATER) {
+                            this.level().setBlockAndUpdate(posAbove, Blocks.ICE.defaultBlockState());
                         }
 
                         if ((!placeSnow || (Math.abs(i) != 2 && Math.abs(j) != 2 || this.random.nextInt(20) == 0) && (Math.abs(i) != 1 && Math.abs(j) != 1 || this.random.nextInt(10) == 0)) && (!placeIce || (Math.abs(i) != 2 && Math.abs(j) != 2 || this.random.nextInt(14) == 0) && (Math.abs(i) != 1 && Math.abs(j) != 1 || this.random.nextInt(6) == 0))) {
                             if (placeSnow) {
-                                this.level.setBlockAndUpdate(pos, Blocks.SNOW.defaultBlockState());
+                                this.level().setBlockAndUpdate(pos, Blocks.SNOW.defaultBlockState());
                             }
 
                             if (placeIce) {
-                                this.level.setBlockAndUpdate(posDown, Blocks.ICE.defaultBlockState());
+                                this.level().setBlockAndUpdate(posDown, Blocks.ICE.defaultBlockState());
                             }
                         }
                     }
@@ -227,14 +227,14 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     }
 
     private boolean isSnowingAt(BlockPos position) {
-        if (!this.level.isRaining()) {
+        if (!this.level().isRaining()) {
             return false;
-        } else if (!this.level.canSeeSky(position)) {
+        } else if (!this.level().canSeeSky(position)) {
             return false;
-        } else if (this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, position).getY() > position.getY()) {
+        } else if (this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, position).getY() > position.getY()) {
             return false;
         } else {
-            return this.level.getBiome(position).value().getPrecipitationAt(position) == Biome.Precipitation.SNOW;
+            return this.level().getBiome(position).value().getPrecipitationAt(position) == Biome.Precipitation.SNOW;
         }
     }
 
@@ -250,8 +250,8 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public void shear(SoundSource source) {
-        this.level.playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, source, 1.0F, 1.0F);
-        if (!this.level.isClientSide()) {
+        this.level().playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, source, 1.0F, 1.0F);
+        if (!this.level().isClientSide()) {
             this.setJackOLantern(false);
             this.spawnAtLocation(new ItemStack(Items.JACK_O_LANTERN), 1.7F);
         }
@@ -281,7 +281,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     private void setThrowing(boolean isThrowing) {
         this.isThrowing = isThrowing;
         this.throwingTick = 0;
-        this.level.broadcastEntityEvent(this, (byte)(isThrowing ? 1 : 0));
+        this.level().broadcastEntityEvent(this, (byte)(isThrowing ? 1 : 0));
     }
 
     @Override
@@ -293,7 +293,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                     double d0 = this.random.nextGaussian() * 0.02;
                     double d1 = this.random.nextGaussian() * 0.02;
                     double d2 = this.random.nextGaussian() * 0.02;
-                    this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SNOW.defaultBlockState()), this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+                    this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SNOW.defaultBlockState()), this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
                 }
             }
         } else {
@@ -313,7 +313,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                 double d0 = this.random.nextGaussian() * 0.02;
                 double d1 = this.random.nextGaussian() * 0.02;
                 double d2 = this.random.nextGaussian() * 0.02;
-                this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
+                this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
             }
 
             return false;
@@ -347,11 +347,11 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         if (actionresulttype.consumesAction()) {
             return actionresulttype;
         } else if ((!this.getOwnerId().isPresent() || player == this.getOwner()) && itemStack.getItem() != Items.SNOWBALL) {
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 this.setOwnerId(!this.getOwnerId().isPresent() ? player.getUUID() : null);
             }
 
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         } else {
             return InteractionResult.PASS;
         }
@@ -364,7 +364,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public void die(DamageSource cause) {
-        if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
+        if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
             this.getOwner().sendSystemMessage(this.getCombatTracker().getDeathMessage());
         }
 
@@ -435,7 +435,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                 double z = this.attackTarget.getZ() - block.getZ();
                 double xz = Math.sqrt(x * x + z * z);
                 block.shoot(x, y + xz * 0.4000000059604645, z, 0.9F, 1.0F);
-                MutantSnowGolem.this.level.addFreshEntity(block);
+                MutantSnowGolem.this.level().addFreshEntity(block);
             }
 
         }
@@ -471,7 +471,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         public void start() {
             this.prevPos = new BlockPos.MutableBlockPos(this.golem.getX(), this.golem.getBoundingBox().minY - 1.0, this.golem.getZ());
             this.golem.setDeltaMovement((this.golem.random.nextFloat() - this.golem.random.nextFloat()) * 0.9F, 1.5, (this.golem.random.nextFloat() - this.golem.random.nextFloat()) * 0.9F);
-            this.golem.hurt(this.golem.level.damageSources().drown(), 16.0F);
+            this.golem.hurt(this.golem.level().damageSources().drown(), 16.0F);
             this.golem.setSwimJump(true);
         }
 
@@ -483,8 +483,8 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         @Override
         public void tick() {
             --this.jumpTick;
-            if (!this.waterReplaced && !this.golem.isInWater() && this.jumpTick < 17 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.golem.level, this.golem)) {
-                this.prevPos.setY(this.getWaterSurfaceHeight(this.golem.level, this.prevPos));
+            if (!this.waterReplaced && !this.golem.isInWater() && this.jumpTick < 17 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.golem.level(), this.golem)) {
+                this.prevPos.setY(this.getWaterSurfaceHeight(this.golem.level(), this.prevPos));
                 if ((double)this.prevPos.getY() > this.golem.getY()) {
                     return;
                 }
@@ -494,7 +494,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                         for(int z = -2; z <= 2; ++z) {
                             if (y == 0 || Math.abs(x) != 2 && Math.abs(z) != 2) {
                                 BlockPos pos = this.prevPos.offset(x, y, z);
-                                if (this.golem.level.isEmptyBlock(pos) || this.golem.level.isWaterAt(pos)) {
+                                if (this.golem.level().isEmptyBlock(pos) || this.golem.level().isWaterAt(pos)) {
                                     if (y != 0) {
                                         if ((Math.abs(x) == 1 || Math.abs(z) == 1) && this.golem.random.nextInt(4) == 0) {
                                             continue;
@@ -503,7 +503,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                                         continue;
                                     }
 
-                                    this.golem.level.setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
+                                    this.golem.level().setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
                                 }
                             }
                         }
@@ -511,8 +511,8 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                 }
 
                 BlockPos topPos = this.prevPos.above(2);
-                if (this.golem.level.isEmptyBlock(topPos)) {
-                    this.golem.level.setBlockAndUpdate(topPos, Blocks.ICE.defaultBlockState());
+                if (this.golem.level().isEmptyBlock(topPos)) {
+                    this.golem.level().setBlockAndUpdate(topPos, Blocks.ICE.defaultBlockState());
                 }
 
                 this.waterReplaced = true;

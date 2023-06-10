@@ -41,7 +41,7 @@ public class C2SCreeperMinionTrackerMessage implements MessageV2<C2SCreeperMinio
 
             @Override
             public void handle(C2SCreeperMinionTrackerMessage message, Player player, Object gameInstance) {
-                Entity entity = player.level.getEntity(message.entityId);
+                Entity entity = player.level().getEntity(message.entityId);
                 if (entity instanceof CreeperMinion creeperMinion) {
                     if (message.optionsId == 0) {
                         creeperMinion.setDestroyBlocks(message.setOption);

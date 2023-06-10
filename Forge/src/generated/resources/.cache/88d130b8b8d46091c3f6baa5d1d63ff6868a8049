@@ -1,4 +1,4 @@
-// 1.19.4	2023-05-25T14:15:45.577092	Tags for minecraft:damage_type mod id mutantmonsters
+// 1.20	2023-06-10T23:19:07.452723	Tags for minecraft:damage_type mod id mutantmonsters
 09073edb411122244a2a36aa4700dd5d3cded777 data/minecraft/tags/damage_type/always_hurts_ender_dragons.json
 f69ff05e1b71a69d39ba109110b44195ce7bb65e data/minecraft/tags/damage_type/bypasses_armor.json
 39cc79737597b08f84426ca467d2e2a704ee7284 data/minecraft/tags/damage_type/bypasses_effects.json

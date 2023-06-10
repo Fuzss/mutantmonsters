@@ -12,7 +12,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -141,7 +140,7 @@ public class MutantArrow extends Entity {
         }
 
         this.setXRot((float)Math.toDegrees(Math.atan2(y, d)));
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             if (this.tickCount == 2) {
                 this.hitEntities(0);
             }
@@ -178,16 +177,16 @@ public class MutantArrow extends Entity {
             double y = this.getY() + dy * (double)i * 0.5;
             double z = this.getZ() + dz * (double)i * 0.5;
             AABB box = (new AABB(x, y, z, x, y, z)).inflate(0.3);
-            this.pointedEntities.addAll(this.level.getEntities(this.shooter, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(Entity::isPickable)));
+            this.pointedEntities.addAll(this.level().getEntities(this.shooter, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(Entity::isPickable)));
         }
 
     }
 
     protected void handleEntities() {
         for (Entity entity : this.pointedEntities) {
-            if (entity.hurt(DamageSourcesHelper.source(this.level, ModRegistry.MUTANT_ARROW_DAMAGE_TYPE, this, this.shooter), (float) this.damage)) {
+            if (entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.MUTANT_ARROW_DAMAGE_TYPE, this, this.shooter), (float) this.damage)) {
                 if (!this.isSilent()) {
-                    this.level.playSound( null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+                    this.level().playSound( null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 }
 
                 if (this.effectInstance != null && entity instanceof LivingEntity) {

@@ -92,7 +92,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
                     BlockPos startPos = ((BlockHitResult)result).getBlockPos();
                     BlockPos endPos = startPos.relative(((BlockHitResult)result).getDirection());
                     BlockPos posDown = startPos.below();
-                    if (!level.isEmptyBlock(posDown) || !level.getBlockState(posDown).getMaterial().blocksMotion()) {
+                    if (!level.isEmptyBlock(posDown) || !level.getBlockState(posDown).blocksMotion()) {
                         for(int tries = 0; tries < 3; ++tries) {
                             BlockPos checkPos = startPos.above(tries + 1);
                             if (level.isEmptyBlock(checkPos)) {

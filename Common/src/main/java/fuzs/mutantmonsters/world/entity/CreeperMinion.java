@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -108,9 +109,9 @@ public class CreeperMinion extends ShoulderRidingEntity {
         if (uuid == null) {
             return null;
         } else {
-            Entity entity = this.level.getPlayerByUUID(uuid);
-            if (entity == null && this.level instanceof ServerLevel) {
-                entity = ((ServerLevel)this.level).getEntity(uuid);
+            Entity entity = this.level().getPlayerByUUID(uuid);
+            if (entity == null && this.level() instanceof ServerLevel) {
+                entity = ((ServerLevel)this.level()).getEntity(uuid);
             }
 
             return entity instanceof LivingEntity ? (LivingEntity)entity : null;
@@ -249,10 +250,10 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
             if (this.timeSinceIgnited >= this.fuseTime) {
                 this.timeSinceIgnited = 0;
-                if (!this.level.isClientSide) {
+                if (!this.level().isClientSide) {
                     MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
                     if (!this.canExplodeContinuously()) {
-                        if (this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
+                        if (this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
                             this.getOwner().sendSystemMessage(Component.translatable("death.attack.explosion", this.getDisplayName()));
                         }
 
@@ -279,88 +280,91 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        ItemStack itemstack = player.getItemInHand(hand);
-        Item item = itemstack.getItem();
+        ItemStack itemInHand = player.getItemInHand(hand);
         if (this.isTame()) {
-            if (item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get()) {
-                if (this.level.isClientSide) {
+            if (itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get())) {
+                if (this.level().isClientSide) {
                     Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
                 }
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else {
                 if (this.isOwnedBy(player)) {
-                    if (item == Items.GUNPOWDER) {
+                    if (itemInHand.is(Items.GUNPOWDER)) {
                         double d0;
                         double d1;
                         double d2;
                         if (this.getHealth() < this.getMaxHealth()) {
                             this.heal(1.0F);
-                            itemstack.shrink(1);
+                            itemInHand.shrink(1);
                             d0 = this.random.nextGaussian() * 0.02;
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
-                            this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return InteractionResult.sidedSuccess(this.level.isClientSide);
+                            this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
+                            return InteractionResult.sidedSuccess(this.level().isClientSide);
                         }
 
                         if (this.getMaxHealth() < 20.0F) {
                             this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.getMaxHealth() + 1.0F);
-                            itemstack.shrink(1);
+                            itemInHand.shrink(1);
                             d0 = this.random.nextGaussian() * 0.02;
                             d1 = this.random.nextGaussian() * 0.02;
                             d2 = this.random.nextGaussian() * 0.02;
-                            this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
-                            return InteractionResult.sidedSuccess(this.level.isClientSide);
+                            this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d0, d1, d2);
+                            return InteractionResult.sidedSuccess(this.level().isClientSide);
                         }
                     } else {
-                        if (item != Items.TNT) {
-                            if (!this.level.isClientSide) {
+                        if (!itemInHand.is(Items.TNT)) {
+                            if (!this.level().isClientSide) {
                                 this.setOrderedToSit(!this.isOrderedToSit());
                                 this.setLastHurtByMob(null);
                                 this.setTarget(null);
                             }
 
-                            return InteractionResult.sidedSuccess(this.level.isClientSide);
+                            return InteractionResult.sidedSuccess(this.level().isClientSide);
                         }
 
                         if (!this.canExplodeContinuously()) {
                             this.forcedAgeTimer += 15;
                             this.setCanExplodeContinuously(true);
-                            itemstack.shrink(1);
-                            return InteractionResult.sidedSuccess(this.level.isClientSide);
+                            itemInHand.shrink(1);
+                            return InteractionResult.sidedSuccess(this.level().isClientSide);
                         }
 
                         float explosionRadius = this.getExplosionRadius();
                         if (explosionRadius < 4.0F) {
                             this.forcedAgeTimer += 10;
                             this.setExplosionRadius(explosionRadius + 0.11F);
-                            itemstack.shrink(1);
-                            return InteractionResult.sidedSuccess(this.level.isClientSide);
+                            itemInHand.shrink(1);
+                            return InteractionResult.sidedSuccess(this.level().isClientSide);
                         }
                     }
                 }
 
                 return InteractionResult.PASS;
             }
-        } else if (item == Items.FLINT_AND_STEEL && !this.hasIgnited()) {
-            player.awardStat(Stats.ITEM_USED.get(item));
-            this.level.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
-            if (!this.level.isClientSide) {
+        } else if (itemInHand.is(ItemTags.CREEPER_IGNITERS) && !this.hasIgnited()) {
+            player.awardStat(Stats.ITEM_USED.get(itemInHand.getItem()));
+            this.level().playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
+            if (!this.level().isClientSide) {
                 this.ignite();
-                itemstack.hurtAndBreak(1, player, (livingEntity) -> {
-                    livingEntity.broadcastBreakEvent(hand);
-                });
+                if (!itemInHand.isDamageableItem()) {
+                    itemInHand.shrink(1);
+                } else {
+                    itemInHand.hurtAndBreak(1, player, (livingEntity) -> {
+                        livingEntity.broadcastBreakEvent(hand);
+                    });
+                }
             }
 
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
-        } else if (player.isCreative() && item == ModRegistry.CREEPER_MINION_TRACKER_ITEM.get() && this.getOwner() == null) {
-            if (!this.level.isClientSide) {
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        } else if (player.isCreative() && itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get()) && this.getOwner() == null) {
+            if (!this.level().isClientSide) {
                 this.setTame(true);
                 this.setOwnerUUID(player.getUUID());
                 player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
             }
 
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         } else {
             return InteractionResult.PASS;
         }

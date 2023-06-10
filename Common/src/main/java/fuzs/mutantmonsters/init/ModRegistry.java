@@ -39,7 +39,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
@@ -49,7 +50,7 @@ public class ModRegistry {
     public static final SkullBlock.Type MUTANT_SKELETON_SKULL_TYPE = new SkullBlock.Type() {};
     
     static final RegistryManager REGISTRY = RegistryManager.instant(MutantMonsters.MOD_ID);
-    public static final RegistryReference<Block> MUTANT_SKELETON_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_skull", () -> new SkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.of(Material.DECORATION).strength(1.0F)));
+    public static final RegistryReference<Block> MUTANT_SKELETON_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_skull", () -> new SkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)));
     public static final RegistryReference<Block> MUTANT_SKELETON_WALL_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_wall_skull", () -> new WallSkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.copy(MUTANT_SKELETON_SKULL_BLOCK.get()).dropsLike(MUTANT_SKELETON_SKULL_BLOCK.get())));
     public static final RegistryReference<EntityType<CreeperMinion>> CREEPER_MINION_ENTITY_TYPE = REGISTRY.registerEntityType("creeper_minion", () -> EntityType.Builder.of(CreeperMinion::new, MobCategory.MISC).sized(0.3F, 0.85F));
     public static final RegistryReference<EntityType<MutantCreeper>> MUTANT_CREEPER_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_creeper", () -> EntityType.Builder.of(MutantCreeper::new, MobCategory.MONSTER).sized(1.99F, 2.8F));

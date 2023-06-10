@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -24,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
@@ -113,16 +112,16 @@ public class MutantSkeletonBodyPart extends Entity {
 
         this.move(MoverType.SELF, this.getDeltaMovement());
         this.setDeltaMovement(this.getDeltaMovement().scale(0.96));
-        if (this.onGround) {
+        if (this.onGround()) {
             this.setDeltaMovement(this.getDeltaMovement().scale(0.7));
         }
 
-        if (!this.onGround && this.stuckSpeedMultiplier == Vec3.ZERO) {
+        if (!this.onGround() && this.stuckSpeedMultiplier == Vec3.ZERO) {
             this.setYRot(this.getYRot() + 10.0F * (float) (this.yawPositive ? 1 : -1));
             this.setXRot(this.getXRot() + 15.0F * (float) (this.pitchPositive ? 1 : -1));
 
-            for (Entity entity : this.level.getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(this.level.damageSources().thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
+            for (Entity entity : this.level().getEntities(this, this.getBoundingBox(), this::canHarm)) {
+                if (entity.hurt(this.level().damageSources().thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
                     entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
                 }
             }
@@ -134,7 +133,7 @@ public class MutantSkeletonBodyPart extends Entity {
             ++this.despawnTimer;
         }
 
-        if (!this.level.isClientSide && this.despawnTimer >= this.getMaxAge()) {
+        if (!this.level().isClientSide && this.despawnTimer >= this.getMaxAge()) {
             this.discard();
         }
 
@@ -142,11 +141,11 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ResourceLocation location = this.getItemPartLootTableId();
             if (location != null) {
-                LootTable lootTable = this.level.getServer().getLootTables().get(location);
-                List<ItemStack> list = lootTable.getRandomItems((new LootContext.Builder((ServerLevel) this.level)).withParameter(LootContextParams.THIS_ENTITY, this).withRandom(this.level.random).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET));
+                LootTable lootTable = this.level().getServer().getLootData().getLootTable(location);
+                List<ItemStack> list = lootTable.getRandomItems((new LootParams.Builder((ServerLevel) this.level())).withParameter(LootContextParams.THIS_ENTITY, this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET));
                 for (ItemStack item : list) {
                     if (!item.isEmpty()) {
                         this.spawnAtLocation(item).setNoPickUpDelay();
@@ -155,7 +154,7 @@ public class MutantSkeletonBodyPart extends Entity {
             }
         }
         this.discard();
-        return InteractionResult.sidedSuccess(this.level.isClientSide);
+        return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
     private boolean canHarm(Entity entity) {

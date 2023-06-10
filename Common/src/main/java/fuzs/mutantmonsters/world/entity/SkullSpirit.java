@@ -16,7 +16,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -77,7 +76,7 @@ public class SkullSpirit extends Entity {
         super.onSyncedDataUpdated(key);
         if (TARGET_ENTITY_ID.equals(key)) {
             this.entityData.get(TARGET_ENTITY_ID).ifPresent((id) -> {
-                Entity entity = this.level.getEntity(id);
+                Entity entity = this.level().getEntity(id);
                 if (entity instanceof Mob) {
                     this.target = (Mob) entity;
                 }
@@ -92,8 +91,8 @@ public class SkullSpirit extends Entity {
 
     @Override
     public void tick() {
-        if (this.targetUUID != null && this.level instanceof ServerLevel) {
-            Entity entity = ((ServerLevel) this.level).getEntity(this.targetUUID);
+        if (this.targetUUID != null && this.level() instanceof ServerLevel) {
+            Entity entity = ((ServerLevel) this.level()).getEntity(this.targetUUID);
             if (entity instanceof Mob) {
                 this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(entity.getId()));
                 this.targetUUID = null;
@@ -102,7 +101,7 @@ public class SkullSpirit extends Entity {
 
         if (this.target != null && this.target.isAlive()) {
             if (this.isAttached()) {
-                if (!this.level.isClientSide) {
+                if (!this.level().isClientSide) {
                     this.target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, this.target.getDeltaMovement().y, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
                     if (--this.attachedTick <= 0) {
                         EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
@@ -113,12 +112,12 @@ public class SkullSpirit extends Entity {
                             AABB bb = mutant.getBoundingBox();
 
                             for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(bb.minX), Mth.floor(mutant.getY()), Mth.floor(bb.minZ), Mth.floor(bb.maxX), Mth.floor(bb.maxY), Mth.floor(bb.maxZ))) {
-                                if (this.level.getBlockState(pos).getDestroySpeed(this.level, pos) > -1.0F) {
-                                    this.level.destroyBlock(pos, true);
+                                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) > -1.0F) {
+                                    this.level().destroyBlock(pos, true);
                                 }
                             }
 
-                            for (ServerPlayer serverplayerentity : this.level.getEntitiesOfClass(ServerPlayer.class, bb.inflate(5.0))) {
+                            for (ServerPlayer serverplayerentity : this.level().getEntitiesOfClass(ServerPlayer.class, bb.inflate(5.0))) {
                                 CriteriaTriggers.SUMMONED_ENTITY.trigger(serverplayerentity, mutant);
                             }
                         } else {
@@ -131,7 +130,7 @@ public class SkullSpirit extends Entity {
 
                 this.setPos(this.target.getX(), this.target.getY(), this.target.getZ());
                 if (this.random.nextInt(8) == 0) {
-                    this.target.hurt(this.level.damageSources().magic(), 0.0F);
+                    this.target.hurt(this.level().damageSources().magic(), 0.0F);
                 }
 
                 for (int i = 0; i < 3; ++i) {
@@ -141,7 +140,7 @@ public class SkullSpirit extends Entity {
                     double x = this.random.nextGaussian() * 0.02;
                     double y = this.random.nextGaussian() * 0.02;
                     double z = this.random.nextGaussian() * 0.02;
-                    this.level.addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), posX, posY, posZ, x, y, z);
+                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), posX, posY, posZ, x, y, z);
                 }
             } else {
                 this.xo = this.getX();
@@ -160,7 +159,7 @@ public class SkullSpirit extends Entity {
                     this.setDeltaMovement(this.getDeltaMovement().add(x / d * 0.20000000298023224, y / d * 0.20000000298023224, z / d * 0.20000000298023224));
                     this.move(MoverType.SELF, this.getDeltaMovement());
                 }
-                if (!this.level.isClientSide && this.distanceToSqr(this.target) < 1.0) {
+                if (!this.level().isClientSide && this.distanceToSqr(this.target) < 1.0) {
                     this.setAttached(true);
                 }
 
@@ -168,7 +167,7 @@ public class SkullSpirit extends Entity {
                     float xx = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float yy = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float zz = (this.random.nextFloat() - 0.5F) * 1.2F;
-                    this.level.addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
+                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
                 }
             }
         } else {

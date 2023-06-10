@@ -30,7 +30,7 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
 
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
-        Level level = livingEntity.level;
+        Level level = livingEntity.level();
         if (!level.isClientSide && livingEntity instanceof Mob target && PREDICATE.test(null, target)) {
             SkullSpirit spirit = new SkullSpirit(level, target);
             spirit.moveTo(target.getX(), target.getY(), target.getZ());

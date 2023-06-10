@@ -21,7 +21,6 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -138,7 +137,7 @@ public class MutantCreeper extends Monster {
 
     @Override
     public boolean doHurtTarget(Entity entityIn) {
-        boolean flag = entityIn.hurt(this.level.damageSources().mobAttack(this), (float)this.getAttribute(Attributes.ATTACK_DAMAGE).getValue());
+        boolean flag = entityIn.hurt(this.level().damageSources().mobAttack(this), (float)this.getAttribute(Attributes.ATTACK_DAMAGE).getValue());
         if (flag) {
             this.doEnchantDamageEffects(this, entityIn);
         }
@@ -206,7 +205,7 @@ public class MutantCreeper extends Monster {
                 double d0 = this.random.nextGaussian() * 0.02;
                 double d1 = this.random.nextGaussian() * 0.02;
                 double d2 = this.random.nextGaussian() * 0.02;
-                this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+                this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
             }
         } else {
             super.handleEntityEvent(id);
@@ -220,12 +219,12 @@ public class MutantCreeper extends Monster {
         this.lastJumpTick = this.jumpTick;
         if (this.isJumpAttacking()) {
             if (this.jumpTick == 0) {
-                this.level.playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_PRIMED_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, this.getVoicePitch());
+                this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_PRIMED_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, this.getVoicePitch());
             }
 
             ++this.jumpTick;
             this.stuckSpeedMultiplier = Vec3.ZERO;
-            if (!this.level.isClientSide && (this.onGround || !this.getFeetBlockState().getFluidState().isEmpty())) {
+            if (!this.level().isClientSide && (this.onGround() || !this.getFeetBlockState().getFluidState().isEmpty())) {
                 MutatedExplosion.create(this, this.isCharged() ? 6.0F : 4.0F, false, Level.ExplosionInteraction.MOB);
                 this.setJumpAttacking(false);
             }
@@ -262,11 +261,11 @@ public class MutantCreeper extends Monster {
 
     @Override
     public void die(DamageSource cause) {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.deathCause = cause;
             this.setCharging(false);
-            this.level.broadcastEntityEvent(this, (byte)3);
-            this.level.playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, 1.0F);
+            this.level().broadcastEntityEvent(this, (byte)3);
+            this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, 1.0F);
             if (this.lastHurtByPlayerTime > 0) {
                 this.lastHurtByPlayerTime += 100;
             }
@@ -281,7 +280,7 @@ public class MutantCreeper extends Monster {
         float power = this.isCharged() ? 12.0F : 8.0F;
         float radius = power * 1.5F;
 
-        for (Entity entity : this.level.getEntities(this, this.getBoundingBox().inflate(radius), EntitySelector.NO_CREATIVE_OR_SPECTATOR)) {
+        for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(radius), EntitySelector.NO_CREATIVE_OR_SPECTATOR)) {
             double x = this.getX() - entity.getX();
             double y = this.getY() - entity.getY();
             double z = this.getZ() - entity.getZ();
@@ -292,11 +291,11 @@ public class MutantCreeper extends Monster {
 
         this.setPosRaw(this.getX() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612, this.getY(), this.getZ() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612);
         if (this.deathTime >= 100) {
-            if (!this.level.isClientSide) {
+            if (!this.level().isClientSide) {
                 MutatedExplosion.create(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
-                if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null) {
-                    this.level.addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
+                if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null) {
+                    this.level().addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
                 }
             }
 
@@ -368,7 +367,7 @@ public class MutantCreeper extends Monster {
 
         @Override
         public boolean canUse() {
-            return MutantCreeper.this.getTarget() != null && MutantCreeper.this.onGround && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) <= 1024.0 && !MutantCreeper.this.isJumpAttacking() && !MutantCreeper.this.isCharging() && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
+            return MutantCreeper.this.getTarget() != null && MutantCreeper.this.onGround() && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) <= 1024.0 && !MutantCreeper.this.isJumpAttacking() && !MutantCreeper.this.isCharging() && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
         }
 
         @Override
@@ -406,7 +405,7 @@ public class MutantCreeper extends Monster {
         @Override
         public void start() {
             MutantCreeper.this.setCharging(true);
-            if (MutantCreeper.this.random.nextInt(MutantCreeper.this.level.isThundering() ? 2 : 6) == 0 && !MutantCreeper.this.isCharged()) {
+            if (MutantCreeper.this.random.nextInt(MutantCreeper.this.level().isThundering() ? 2 : 6) == 0 && !MutantCreeper.this.isCharged()) {
                 MutantCreeper.this.summonLightning = true;
             }
 
@@ -425,13 +424,13 @@ public class MutantCreeper extends Monster {
 
         @Override
         public void stop() {
-            if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0 && MutantCreeper.this.level.canSeeSky(MutantCreeper.this.blockPosition())) {
-                LightningBolt lightningBoltEntity = EntityType.LIGHTNING_BOLT.create(MutantCreeper.this.level);
+            if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0 && MutantCreeper.this.level().canSeeSky(MutantCreeper.this.blockPosition())) {
+                LightningBolt lightningBoltEntity = EntityType.LIGHTNING_BOLT.create(MutantCreeper.this.level());
                 lightningBoltEntity.moveTo(MutantCreeper.this.getX(), MutantCreeper.this.getY(), MutantCreeper.this.getZ());
-                MutantCreeper.this.level.addFreshEntity(lightningBoltEntity);
+                MutantCreeper.this.level().addFreshEntity(lightningBoltEntity);
             } else if (MutantCreeper.this.chargeTime >= 100) {
                 MutantCreeper.this.heal(30.0F);
-                MutantCreeper.this.level.broadcastEntityEvent(MutantCreeper.this, (byte)6);
+                MutantCreeper.this.level().broadcastEntityEvent(MutantCreeper.this, (byte)6);
             }
 
             MutantCreeper.this.chargeTime = 0;
@@ -459,7 +458,7 @@ public class MutantCreeper extends Monster {
         @Override
         public void start() {
             for(int i = (int)Math.ceil((double)(MutantCreeper.this.getHealth() / MutantCreeper.this.getMaxHealth()) * 4.0); i > 0; --i) {
-                CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(MutantCreeper.this.level);
+                CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(MutantCreeper.this.level());
                 double x = MutantCreeper.this.getX() + (double) MutantCreeper.this.random.nextFloat() - (double) MutantCreeper.this.random.nextFloat();
                 double y = MutantCreeper.this.getY() + (double)(MutantCreeper.this.random.nextFloat() * 0.5F);
                 double z = MutantCreeper.this.getZ() + (double) MutantCreeper.this.random.nextFloat() - (double) MutantCreeper.this.random.nextFloat();
@@ -474,7 +473,7 @@ public class MutantCreeper extends Monster {
                     minion.setCharged(true);
                 }
 
-                MutantCreeper.this.level.addFreshEntity(minion);
+                MutantCreeper.this.level().addFreshEntity(minion);
             }
 
         }

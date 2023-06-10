@@ -55,7 +55,7 @@ public final class EntityUtil {
     public static void spawnLingeringCloud(LivingEntity livingEntity) {
         Collection<MobEffectInstance> collection = livingEntity.getActiveEffects();
         if (!collection.isEmpty()) {
-            AreaEffectCloud areaeffectcloudentity = new AreaEffectCloud(livingEntity.level, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            AreaEffectCloud areaeffectcloudentity = new AreaEffectCloud(livingEntity.level(), livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             areaeffectcloudentity.setRadius(1.5F);
             areaeffectcloudentity.setRadiusOnUse(-0.5F);
             areaeffectcloudentity.setWaitTime(10);
@@ -66,9 +66,8 @@ public final class EntityUtil {
                 areaeffectcloudentity.addEffect(new MobEffectInstance(effectinstance));
             }
 
-            livingEntity.level.addFreshEntity(areaeffectcloudentity);
+            livingEntity.level().addFreshEntity(areaeffectcloudentity);
         }
-
     }
 
     public static void stunRavager(LivingEntity livingEntity) {
@@ -76,33 +75,29 @@ public final class EntityUtil {
             if (((RavagerAccessor) livingEntity).mutantmonsters$getStunnedTick() == 0) {
                 ((RavagerAccessor) livingEntity).mutantmonsters$setStunnedTick(40);
                 livingEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-                livingEntity.level.broadcastEntityEvent(livingEntity, (byte) 39);
+                livingEntity.level().broadcastEntityEvent(livingEntity, (byte) 39);
             }
         }
-
     }
 
     public static void disableShield(LivingEntity livingEntity, int ticks) {
         if (livingEntity instanceof Player && livingEntity.isBlocking()) {
             ((Player) livingEntity).getCooldowns().addCooldown(livingEntity.getUseItem().getItem(), ticks);
             livingEntity.stopUsingItem();
-            livingEntity.level.broadcastEntityEvent(livingEntity, (byte) 30);
+            livingEntity.level().broadcastEntityEvent(livingEntity, (byte) 30);
         }
-
     }
 
     public static void sendPlayerVelocityPacket(Entity entity) {
         if (entity instanceof ServerPlayer) {
             ((ServerPlayer) entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
         }
-
     }
 
     public static void sendMetadataPacket(Entity entity) {
-        if (entity.level instanceof ServerLevel) {
-            ((ServerLevel) entity.level).getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData().getNonDefaultValues()));
+        if (entity.level() instanceof ServerLevel level) {
+            level.getChunkSource().broadcast(entity, new ClientboundSetEntityDataPacket(entity.getId(), entity.getEntityData().getNonDefaultValues()));
         }
-
     }
 
     public static boolean isFeline(LivingEntity livingEntity) {
@@ -126,7 +121,7 @@ public final class EntityUtil {
     }
 
     public static Entity convertMobWithNBT(LivingEntity mobToConvert, EntityType<?> newEntityType, boolean dropInventory) {
-        Entity newEntity = newEntityType.create(mobToConvert.level);
+        Entity newEntity = newEntityType.create(mobToConvert.level());
         CompoundTag copiedNBT = mobToConvert.saveWithoutId(new CompoundTag());
         copiedNBT.putUUID("UUID", newEntity.getUUID());
         if (newEntity instanceof Mob newMob) {
@@ -151,7 +146,7 @@ public final class EntityUtil {
             }
 
             copiedNBT.putBoolean("CanPickUpLoot", !dropInventory && copiedNBT.getBoolean("CanPickUpLoot"));
-            if (dropInventory && mobToConvert.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            if (dropInventory && mobToConvert.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
                 ListTag handDropChances;
                 int i;
                 ItemStack itemStack;
@@ -186,7 +181,7 @@ public final class EntityUtil {
                 }
 
                 if (mobToConvert.getType() == EntityType.ENDERMAN && copiedNBT.contains("carriedBlockState", 10)) {
-                    BlockState blockState = NbtUtils.readBlockState(mobToConvert.level.holderLookup(Registries.BLOCK), copiedNBT.getCompound("carriedBlockState"));
+                    BlockState blockState = NbtUtils.readBlockState(mobToConvert.level().holderLookup(Registries.BLOCK), copiedNBT.getCompound("carriedBlockState"));
                     if (!blockState.isAir()) {
                         mobToConvert.spawnAtLocation(blockState.getBlock());
                     }
@@ -195,7 +190,7 @@ public final class EntityUtil {
         }
 
         newEntity.load(copiedNBT);
-        mobToConvert.level.addFreshEntity(newEntity);
+        mobToConvert.level().addFreshEntity(newEntity);
         mobToConvert.discard();
         return newEntity;
     }
@@ -208,7 +203,7 @@ public final class EntityUtil {
             double tempX = entity.getX() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
             double tempY = entity.getY() + (double) ((random.nextFloat() - 0.5F) * entity.getBbHeight()) + 0.5;
             double tempZ = entity.getZ() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
-            entity.level.addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), tempX, tempY, tempZ, f, f1, f2);
+            entity.level().addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), tempX, tempY, tempZ, f, f1, f2);
         }
 
     }
@@ -217,7 +212,7 @@ public final class EntityUtil {
         double x = entity.getX();
         double y = entity.getY();
         double z = entity.getZ();
-        MutantMonsters.NETWORK.sendToAllNearExcept(new S2CMutantLevelParticlesMessage(particleData, x, y, z, entity.getBbWidth(), entity.getBbHeight(), entity.getBbWidth(), amount), null, x, y, z, 1024.0, entity.level);
+        MutantMonsters.NETWORK.sendToAllNearExcept(new S2CMutantLevelParticlesMessage(particleData, x, y, z, entity.getBbWidth(), entity.getBbHeight(), entity.getBbWidth(), amount), null, x, y, z, 1024.0, entity.level());
     }
 
     public static Vec3 getDirVector(float rotation, float scale) {
@@ -228,13 +223,13 @@ public final class EntityUtil {
     public static boolean teleportTo(Mob mob, double x, double y, double z) {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
         boolean success = false;
-        if (mob.level.isLoaded(pos)) {
+        if (mob.level().isLoaded(pos)) {
             while (true) {
                 pos.move(Direction.DOWN);
-                if (pos.getY() <= mob.level.getMinBuildHeight() || mob.level.getBlockState(pos).getMaterial().blocksMotion()) {
+                if (pos.getY() <= mob.level().getMinBuildHeight() || mob.level().getBlockState(pos).blocksMotion()) {
                     pos.move(Direction.UP);
                     AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5);
-                    if (mob.level.noCollision(mob, bb) && !mob.level.containsAnyLiquid(bb)) {
+                    if (mob.level().noCollision(mob, bb) && !mob.level().containsAnyLiquid(bb)) {
                         success = true;
                     }
                     break;
@@ -252,7 +247,7 @@ public final class EntityUtil {
     }
 
     public static void divertAttackers(Mob targetedMob, LivingEntity newTarget) {
-        for (Mob attacker : targetedMob.level.getEntitiesOfClass(Mob.class, targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0))) {
+        for (Mob attacker : targetedMob.level().getEntitiesOfClass(Mob.class, targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0))) {
             if (attacker != targetedMob && attacker.getTarget() == targetedMob) {
                 attacker.setTarget(newTarget);
             }

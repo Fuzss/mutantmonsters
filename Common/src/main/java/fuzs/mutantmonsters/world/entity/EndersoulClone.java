@@ -87,7 +87,7 @@ public class EndersoulClone extends Monster {
     public void aiStep() {
         this.jumping = false;
         super.aiStep();
-        if (this.cloner != null && (this.cloner.isNoAi() || !this.cloner.isAlive() || this.cloner.level != this.level)) {
+        if (this.cloner != null && (this.cloner.isNoAi() || !this.cloner.isAlive() || this.cloner.level() != this.level())) {
             this.discard();
         }
 
@@ -96,7 +96,7 @@ public class EndersoulClone extends Monster {
     @Override
     public boolean doHurtTarget(Entity entityIn) {
         boolean flag = super.doHurtTarget(entityIn);
-        if (!this.level.isClientSide && this.random.nextInt(3) != 0) {
+        if (!this.level().isClientSide && this.random.nextInt(3) != 0) {
             this.teleportToEntity(entityIn);
         }
 
@@ -115,7 +115,7 @@ public class EndersoulClone extends Monster {
         } else if (source.getEntity() instanceof EnderDragon) {
             return false;
         } else {
-            boolean remove = !this.level.isClientSide && this.isAlive() && this.tickCount > 10;
+            boolean remove = !this.level().isClientSide && this.isAlive() && this.tickCount > 10;
             if (remove) {
                 if (source.getEntity() instanceof Player) {
                     this.setLastHurtByPlayer((Player) source.getEntity());
@@ -150,7 +150,7 @@ public class EndersoulClone extends Monster {
         double z = entity.getZ() + (this.random.nextDouble() - 0.5) * 24.0;
         boolean teleport = EntityUtil.teleportTo(this, x, y, z);
         if (teleport) {
-            this.level.playSound(null, this.xo, this.yo, this.zo, ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), this.getSoundSource(), 1.0F, 1.0F);
+            this.level().playSound(null, this.xo, this.yo, this.zo, ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), this.getSoundSource(), 1.0F, 1.0F);
             this.playSound(ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
             this.stopRiding();
         }
@@ -180,7 +180,7 @@ public class EndersoulClone extends Monster {
     @Override
     public void kill() {
         super.kill();
-        this.level.broadcastEntityEvent(this, (byte)0);
+        this.level().broadcastEntityEvent(this, (byte)0);
         this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
     }
 
