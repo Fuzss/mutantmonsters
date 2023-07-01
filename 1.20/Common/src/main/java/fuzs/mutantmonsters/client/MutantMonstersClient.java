@@ -6,13 +6,14 @@ import fuzs.mutantmonsters.client.model.*;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
 import fuzs.mutantmonsters.client.renderer.EndersoulHandRenderer;
+import fuzs.mutantmonsters.client.renderer.HulkHammerModels;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionShoulderLayer;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.*;
+import fuzs.puzzleslib.api.client.init.v1.ItemModelDisplayOverrides;
 import fuzs.puzzleslib.api.client.init.v1.ItemModelOverrides;
-import fuzs.puzzleslib.api.core.v1.context.ModLifecycleContext;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -41,9 +42,10 @@ public class MutantMonstersClient implements ClientModConstructor {
     }
 
     @Override
-    public void onClientSetup(ModLifecycleContext context) {
+    public void onClientSetup() {
         SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, MutantMonsters.id("textures/entity/mutant_skeleton.png"));
-        ItemModelOverrides.INSTANCE.register(ModRegistry.ENDERSOUL_HAND_ITEM.get(), EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED);
+        ItemModelDisplayOverrides.INSTANCE.register(EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL, EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED);
+        ItemModelDisplayOverrides.INSTANCE.register(HulkHammerModels.HULK_HAMMER_ITEM_MODEL, HulkHammerModels.HULK_HAMMER_IN_HAND_MODEL, ItemDisplayContext.GUI, ItemDisplayContext.GROUND, ItemDisplayContext.FIXED);
     }
 
     @Override
@@ -87,7 +89,7 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterAdditionalModels(AdditionalModelsContext context) {
-        context.registerAdditionalModel(EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL);
+        context.registerAdditionalModel(EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL, HulkHammerModels.HULK_HAMMER_IN_HAND_MODEL);
     }
 
     @Override

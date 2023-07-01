@@ -22,7 +22,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman, EntityModel<MutantEnderman>> {
@@ -30,6 +29,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
     private static final ResourceLocation DEATH_TEXTURE = MutantMonstersClient.entityTexture("mutant_enderman/death");
     private static final RenderType EYES_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonstersClient.entityTexture("mutant_enderman/eyes"));
     private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(TEXTURE);
+
     private final MutantEndermanModel endermanModel;
     private final EndermanModel<MutantEnderman> cloneModel;
     private boolean teleportAttack;
@@ -48,8 +48,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         if (super.shouldRender(livingEntityIn, camera, camX, camY, camZ)) {
             return true;
         } else if (livingEntityIn.getAnimation() == MutantEnderman.TELEPORT_ANIMATION) {
-            AABB teleportBoundingBox = livingEntityIn.getTeleportPosition().map(Vec3::atBottomCenterOf).map(livingEntityIn.getType().getDimensions()::makeBoundingBox).orElseThrow();
-            return camera.isVisible(teleportBoundingBox);
+            return livingEntityIn.getTeleportPosition().map(Vec3::atBottomCenterOf).map(livingEntityIn.getType().getDimensions()::makeBoundingBox).filter(camera::isVisible).isPresent();
         } else {
             return false;
         }
@@ -112,7 +111,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
             if (clone) {
                 shake = 0.02;
             } else if (death) {
-                shake = entityIn.getAnimationTick() < 80 ? 0.019999999552965164 : 0.05000000074505806;
+                shake = entityIn.getAnimationTick() < 80 ? 0.02 : 0.05;
             } else if (entityIn.getAnimationTick() >= 40) {
                 shake *= 0.5;
             }
@@ -156,7 +155,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                         matrixStackIn.pushPose();
                         ((MutantEndermanModel)this.getParentModel()).translateRotateArm(matrixStackIn, i);
                         matrixStackIn.translate(0.0, 1.2, 0.0);
-                        float tick = (float)entity.tickCount + (float)(i + 1) * 2.0F * 3.1415927F + partialTicks;
+                        float tick = (float)entity.tickCount + (float)(i + 1) * 2.0F * (float) Math.PI + partialTicks;
                         matrixStackIn.mulPose(Axis.XP.rotationDegrees(tick * 10.0F));
                         matrixStackIn.mulPose(Axis.YP.rotationDegrees(tick * 8.0F));
                         matrixStackIn.mulPose(Axis.ZP.rotationDegrees(tick * 6.0F));
@@ -246,7 +245,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantEnderman entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
             if (!entity.isClone()) {
                 VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantEndermanRenderer.EYES_RENDER_TYPE);
-                this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, entity.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(entity) : 1.0F);
+                this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, entity.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(entity) : 1.0F);
             }
 
         }

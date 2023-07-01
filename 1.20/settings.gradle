@@ -30,6 +30,18 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             from("fuzs.sharedcatalogs:sharedcatalogs:${dependenciesVersionCatalog}")
+            if (settings.ext.has("dependenciesPuzzlesLibVersion")) {
+                version("puzzleslib-version", settings.ext.find("dependenciesPuzzlesLibVersion"))
+            }
+            if (settings.ext.has("dependenciesMinPuzzlesLibVersion")) {
+                version("puzzleslib-min", settings.ext.find("dependenciesMinPuzzlesLibVersion"))
+            }
+            if (settings.ext.has("dependenciesPuzzlesApiVersion")) {
+                version("puzzleslib-version", settings.ext.find("dependenciesPuzzlesApiVersion"))
+            }
+            if (settings.ext.has("dependenciesMinPuzzlesApiVersion")) {
+                version("puzzleslib-min", settings.ext.find("dependenciesMinPuzzlesApiVersion"))
+            }
         }
     }
 }

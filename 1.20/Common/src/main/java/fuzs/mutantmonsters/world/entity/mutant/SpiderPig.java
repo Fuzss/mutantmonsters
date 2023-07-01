@@ -58,7 +58,8 @@ import java.util.UUID;
 public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, Saddleable, NeutralMob {
     private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(SpiderPig.class, EntityDataSerializers.BOOLEAN);
     private static final Ingredient TEMPTATION_ITEMS = Ingredient.of(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.PORKCHOP, Items.SPIDER_EYE);
-
+    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    private final List<WebPos> webList = new ArrayList<>(12);
     private int leapCooldown;
     private int leapTick;
     private boolean isLeaping;
@@ -66,13 +67,19 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     private int chargingTick;
     private int chargeExhaustion;
     private boolean chargeExhausted;
-    private final List<WebPos> webList = new ArrayList<>(12);
-    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     private int angerTime;
     private UUID angerTarget;
 
     public SpiderPig(EntityType<? extends SpiderPig> type, Level worldIn) {
         super(type, worldIn);
+    }
+
+    public static AttributeSupplier.Builder registerAttributes() {
+        return createMobAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.MOVEMENT_SPEED, 0.25);
+    }
+
+    public static boolean isPigOrSpider(LivingEntity livingEntity) {
+        return livingEntity.getType() == EntityType.PIG || livingEntity.getType() == EntityType.SPIDER;
     }
 
     @Override
@@ -94,10 +101,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
         this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Mob.class, true, SpiderPig::isPigOrSpider));
         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, true));
-    }
-
-    public static AttributeSupplier.Builder registerAttributes() {
-        return createMobAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
     @Override
@@ -176,7 +179,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     private void updateWebList(boolean onlyCheckSize) {
         WebPos first;
         if (!onlyCheckSize) {
-            for(int i = 0; i < this.webList.size(); ++i) {
+            for (int i = 0; i < this.webList.size(); ++i) {
                 WebPos coord = this.webList.get(i);
                 if (this.level().getBlockState(coord) != Blocks.COBWEB.defaultBlockState()) {
                     this.webList.remove(i);
@@ -195,7 +198,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        while(this.webList.size() > 12) {
+        while (this.webList.size() > 12) {
             first = this.webList.remove(0);
             this.removeWeb(first);
         }
@@ -224,8 +227,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     @Override
     public InteractionResult mobInteract(Player playerEntity, InteractionHand hand) {
-        InteractionResult actionresulttype = super.mobInteract(playerEntity, hand);
-        if (!actionresulttype.consumesAction() && this.isOwnedBy(playerEntity)) {
+        InteractionResult interactionResult = super.mobInteract(playerEntity, hand);
+        if (!interactionResult.consumesAction() && this.isOwnedBy(playerEntity)) {
             ItemStack itemstack = playerEntity.getItemInHand(hand);
             boolean isBreedingItem = this.isFood(itemstack);
             if (!isBreedingItem && this.isSaddled() && !this.isVehicle() && !playerEntity.isSecondaryUseActive()) {
@@ -238,13 +241,13 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 return itemstack.interactLivingEntity(playerEntity, this, hand);
             } else if (itemstack.isEdible() && isBreedingItem && this.getHealth() < this.getMaxHealth()) {
                 this.usePlayerItem(playerEntity, hand, itemstack);
-                this.heal((float)itemstack.getItem().getFoodProperties().getNutrition());
-                return InteractionResult.CONSUME;
+                this.heal((float) itemstack.getItem().getFoodProperties().getNutrition());
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
         } else {
-            return actionresulttype;
+            return interactionResult;
         }
     }
 
@@ -259,7 +262,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (this.random.nextInt(2) == 0 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
             double dx = entityIn.getX() - entityIn.xo;
             double dz = entityIn.getZ() - entityIn.zo;
-            BlockPos pos = new BlockPos((int)(entityIn.getX() + dx * 0.5), Mth.floor(this.getBoundingBox().minY), (int)(entityIn.getZ() + dz * 0.5));
+            BlockPos pos = new BlockPos((int) (entityIn.getX() + dx * 0.5), Mth.floor(this.getBoundingBox().minY), (int) (entityIn.getZ() + dz * 0.5));
             BlockState state = this.level().getBlockState(pos);
             if (!state.isSolid() && !state.liquid() && !(state.getBlock() instanceof WebBlock)) {
                 this.level().setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
@@ -270,7 +273,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        float damage = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         if (!(entityIn instanceof Spider) && !(entityIn instanceof SpiderPig)) {
             if (this.level().getBlockStates(entityIn.getBoundingBox()).anyMatch(Blocks.COBWEB.defaultBlockState()::equals)) {
                 damage += 4.0F;
@@ -326,7 +329,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     private void setSaddled(boolean saddled) {
         byte b0 = this.entityData.get(DATA_FLAGS_ID);
-        this.entityData.set(DATA_FLAGS_ID, saddled ? (byte)(b0 | 2) : (byte)(b0 & -3));
+        this.entityData.set(DATA_FLAGS_ID, saddled ? (byte) (b0 | 2) : (byte) (b0 & -3));
     }
 
     @Override
@@ -399,7 +402,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public void travel(Vec3 travelVector) {
         if (this.isVehicle() && this.getControllingPassenger() != null && this.isSaddled()) {
-            LivingEntity passenger = (LivingEntity)this.getControllingPassenger();
+            LivingEntity passenger = (LivingEntity) this.getControllingPassenger();
             this.setMaxUpStep(1.0F);
             this.setYRot(passenger.getYRot());
             this.yRotO = this.getYRot();
@@ -410,16 +413,16 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             if (this.chargeExhausted || !(this.chargePower > 0.0F) || !this.onGround() && this.getFeetBlockState().getFluidState().isEmpty()) {
                 this.chargePower = 0.0F;
             } else {
-                double power = 1.600000023841858 * (double)this.chargePower;
+                double power = 1.600000023841858 * (double) this.chargePower;
                 Vec3 lookVector = this.getLookAngle();
-                this.setDeltaMovement(lookVector.x * power, 0.30000001192092896 * (double)this.getBlockJumpFactor(), lookVector.z * power);
+                this.setDeltaMovement(lookVector.x * power, 0.30000001192092896 * (double) this.getBlockJumpFactor(), lookVector.z * power);
                 this.chargePower = 0.0F;
             }
 
             if (this.isControlledByLocalInstance()) {
                 float strafe = passenger.xxa * 0.8F;
                 float forward = passenger.zza * 0.6F;
-                this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
                 super.travel(new Vec3(strafe, travelVector.y, forward));
             } else if (passenger instanceof Player) {
                 this.setDeltaMovement(Vec3.ZERO);
@@ -438,12 +441,12 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (livingEntity instanceof CreeperMinion minion && !this.isTame()) {
             LivingEntity owner = minion.getOwner();
             if (owner instanceof Player && !CommonAbstractions.INSTANCE.onAnimalTame(this, (Player) owner)) {
-                serverWorld.broadcastEntityEvent(this, (byte)7);
+                serverWorld.broadcastEntityEvent(this, (byte) 7);
                 this.tame((Player) owner);
                 minion.discard();
                 return false;
             } else {
-                serverWorld.broadcastEntityEvent(this, (byte)6);
+                serverWorld.broadcastEntityEvent(this, (byte) 6);
             }
         }
 
@@ -537,7 +540,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         this.setSaddled(compound.getBoolean("Saddle") || compound.getBoolean("Saddled"));
         ListTag listnbt = compound.getList("Webs", 10);
 
-        for(int i = 0; i < listnbt.size(); ++i) {
+        for (int i = 0; i < listnbt.size(); ++i) {
             CompoundTag compound1 = listnbt.getCompound(i);
             this.webList.add(i, new WebPos(NbtUtils.readBlockPos(compound1), compound1.getInt("TimeLeft")));
         }
@@ -562,10 +565,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockIn) {
         this.playSound(SoundEvents.SPIDER_STEP, 0.15F, 1.0F);
-    }
-
-    public static boolean isPigOrSpider(LivingEntity livingEntity) {
-        return livingEntity.getType() == EntityType.PIG || livingEntity.getType() == EntityType.SPIDER;
     }
 
     static class WebPos extends BlockPos {
