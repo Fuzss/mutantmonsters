@@ -44,7 +44,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -59,23 +58,22 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public class MutantZombie extends Monster implements AnimatedEntity {
-    private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Byte> THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.BYTE);
+public class MutantZombie extends AbstractMutantMonster implements AnimatedEntity {
     public static final int MAX_VANISH_TIME = 100;
     public static final int MAX_DEATH_TIME = 140;
     public static final Animation SLAM_GROUND_ANIMATION = new Animation(25);
     public static final Animation THROW_ANIMATION = new Animation(15);
     public static final Animation ROAR_ANIMATION = new Animation(120);
+    private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Byte> THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.BYTE);
     private static final Animation[] ANIMATIONS = new Animation[]{SLAM_GROUND_ANIMATION, THROW_ANIMATION, ROAR_ANIMATION};
-
-    private Animation animation;
-    private int animationTick;
+    private final List<SeismicWave> seismicWaveList;
+    private final List<ZombieResurrection> resurrectionList;
     public int throwHitTick;
     public int throwFinishTick;
     public int vanishTime;
-    private final List<SeismicWave> seismicWaveList;
-    private final List<ZombieResurrection> resurrectionList;
+    private Animation animation;
+    private int animationTick;
     private DamageSource deathCause;
 
     public MutantZombie(EntityType<? extends MutantZombie> type, Level worldIn) {
@@ -87,6 +85,10 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         this.resurrectionList = new ArrayList<>();
         this.setMaxUpStep(1.0F);
         this.xpReward = 30;
+    }
+
+    public static AttributeSupplier.Builder registerAttributes() {
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 12.0).add(Attributes.FOLLOW_RANGE, 35.0).add(Attributes.MOVEMENT_SPEED, 0.26).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
     @Override
@@ -108,15 +110,11 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 12.0).add(Attributes.FOLLOW_RANGE, 35.0).add(Attributes.MOVEMENT_SPEED, 0.26).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
-    }
-
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(LIVES, 3);
-        this.entityData.define(THROW_ATTACK_STATE, (byte)0);
+        this.entityData.define(THROW_ATTACK_STATE, (byte) 0);
     }
 
     public int getLives() {
@@ -133,7 +131,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
     private void setThrowAttackHit(boolean hit) {
         byte b0 = this.entityData.get(THROW_ATTACK_STATE);
-        this.entityData.set(THROW_ATTACK_STATE, hit ? (byte)(b0 | 1) : (byte)(b0 & -2));
+        this.entityData.set(THROW_ATTACK_STATE, hit ? (byte) (b0 | 1) : (byte) (b0 & -2));
     }
 
     public boolean isThrowAttackFinished() {
@@ -142,7 +140,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
     private void setThrowAttackFinished(boolean finished) {
         byte b0 = this.entityData.get(THROW_ATTACK_STATE);
-        this.entityData.set(THROW_ATTACK_STATE, finished ? (byte)(b0 | 2) : (byte)(b0 & -3));
+        this.entityData.set(THROW_ATTACK_STATE, finished ? (byte) (b0 | 2) : (byte) (b0 & -3));
     }
 
     @Override
@@ -197,7 +195,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
     @Override
     public int getMaxFallDistance() {
-        return this.getTarget() != null ? (int)this.distanceTo(this.getTarget()) : 3;
+        return this.getTarget() != null ? (int) this.distanceTo(this.getTarget()) : 3;
     }
 
     @Override
@@ -288,6 +286,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
 
     @Override
     protected void updateNoActionTime() {
+
     }
 
     @Override
@@ -300,7 +299,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
             this.heal(2.0F);
         }
 
-        for(int i = this.resurrectionList.size() - 1; i >= 0; --i) {
+        for (int i = this.resurrectionList.size() - 1; i >= 0; --i) {
             ZombieResurrection zr = this.resurrectionList.get(i);
             if (!zr.update(this)) {
                 this.resurrectionList.remove(zr);
@@ -321,7 +320,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
             yaw += 360.0F;
         }
 
-        while(yaw >= 180.0F) {
+        while (yaw >= 180.0F) {
             yaw -= 360.0F;
         }
 
@@ -367,7 +366,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         if (!this.seismicWaveList.isEmpty()) {
             SeismicWave wave = this.seismicWaveList.remove(0);
             wave.affectBlocks(this.level(), this);
-            AABB box = new AABB(wave.getX(), (double)wave.getY() + 1.0, wave.getZ(), (double)wave.getX() + 1.0, (double)wave.getY() + 2.0, (double)wave.getZ() + 1.0);
+            AABB box = new AABB(wave.getX(), (double) wave.getY() + 1.0, wave.getZ(), (double) wave.getX() + 1.0, (double) wave.getY() + 2.0, (double) wave.getZ() + 1.0);
             if (wave.isFirst()) {
                 double addScale = this.random.nextDouble() * 0.75;
                 box = box.inflate(0.25 + addScale, 0.25 + addScale * 0.5, 0.25 + addScale);
@@ -416,12 +415,11 @@ public class MutantZombie extends Monster implements AnimatedEntity {
             this.deathCause = cause;
             this.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
             this.setLastHurtMob(this.getLastHurtByMob());
-            this.level().broadcastEntityEvent(this, (byte)3);
+            this.level().broadcastEntityEvent(this, (byte) 3);
             if (this.lastHurtByPlayerTime > 0) {
                 this.lastHurtByPlayerTime += 140;
             }
         }
-
     }
 
     @Override
@@ -449,7 +447,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                 this.getLastHurtMob().setLastHurtByMob(this);
             }
 
-            this.setHealth((float)Math.round(this.getMaxHealth() / 3.75F));
+            this.setHealth((float) Math.round(this.getMaxHealth() / 3.75F));
         }
 
         if (this.vanishTime >= 100 || this.getLives() <= 0 && this.deathTime > 25) {
@@ -457,7 +455,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
                 super.die(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
             }
 
-            for(int i = 0; i < 30; ++i) {
+            for (int i = 0; i < 30; ++i) {
                 double d0 = this.random.nextGaussian() * 0.02;
                 double d1 = this.random.nextGaussian() * 0.02;
                 double d2 = this.random.nextGaussian() * 0.02;
@@ -495,7 +493,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("Lives", this.getLives());
-        compound.putShort("VanishTime", (short)this.vanishTime);
+        compound.putShort("VanishTime", (short) this.vanishTime);
         if (!this.resurrectionList.isEmpty()) {
             ListTag listnbt = new ListTag();
 
@@ -520,7 +518,7 @@ public class MutantZombie extends Monster implements AnimatedEntity {
         this.vanishTime = compound.getShort("VanishTime");
         ListTag listNBT = compound.getList("Resurrections", 10);
 
-        for(int i = 0; i < listNBT.size(); ++i) {
+        for (int i = 0; i < listNBT.size(); ++i) {
             CompoundTag compoundNBT = listNBT.getCompound(i);
             this.resurrectionList.add(i, new ZombieResurrection(this.level(), NbtUtils.readBlockPos(compoundNBT), compoundNBT.getInt("Tick")));
         }

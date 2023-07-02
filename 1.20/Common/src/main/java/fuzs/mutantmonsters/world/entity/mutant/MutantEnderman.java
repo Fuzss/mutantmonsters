@@ -56,7 +56,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Endermite;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -72,7 +71,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class MutantEnderman extends Monster implements NeutralMob, AnimatedEntity {
+public class MutantEnderman extends AbstractMutantMonster implements NeutralMob, AnimatedEntity {
     private static final EntityDataAccessor<Optional<BlockPos>> TELEPORT_POSITION = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
     private static final EntityDataAccessor<Byte> ACTIVE_ARM = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> CLONE = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.BOOLEAN);

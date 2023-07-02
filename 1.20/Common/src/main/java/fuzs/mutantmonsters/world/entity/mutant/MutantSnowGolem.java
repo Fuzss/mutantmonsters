@@ -43,6 +43,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluids;
@@ -201,7 +202,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                         BlockPos posDown = pos.below();
                         BlockPos posAbove = pos.above();
                         boolean placeSnow = this.level().isEmptyBlock(pos) && Blocks.SNOW.defaultBlockState().canSurvive(this.level(), pos);
-                        boolean placeIce = this.level().isWaterAt(posDown);
+                        boolean placeIce = this.level().isWaterAt(posDown) && this.level().getBlockState(posDown).getBlock() instanceof LiquidBlock;
                         if (this.level().getFluidState(pos).getType() == Fluids.FLOWING_WATER) {
                             this.level().setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
                         }

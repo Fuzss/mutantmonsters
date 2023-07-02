@@ -29,7 +29,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -43,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
-public class MutantCreeper extends Monster {
+public class MutantCreeper extends AbstractMutantMonster {
     private static final EntityDataAccessor<Byte> STATUS;
     public static final int MAX_CHARGE_TIME = 100;
     public static final int MAX_DEATH_TIME = 100;

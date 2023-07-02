@@ -26,7 +26,9 @@
 					"direct_entity": {
 						"equipment": {
 							"mainhand": {
-								"item": "mutantmonsters:hulk_hammer"
+								"items": [
+									"mutantmonsters:hulk_hammer"
+								]
 							}
 						}
 					}
@@ -43,11 +45,9 @@
 					"direct_entity": {
 						"equipment": {
 							"offhand": {
-								"item": {
-									"items": [
-										"mutantmonsters:hulk_hammer"
-									]
-								}
+								"items": [
+									"mutantmonsters:hulk_hammer"
+								]
 							}
 						}
 					}

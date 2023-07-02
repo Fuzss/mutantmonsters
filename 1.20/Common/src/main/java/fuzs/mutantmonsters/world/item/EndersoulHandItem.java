@@ -45,6 +45,11 @@ public class EndersoulHandItem extends Item implements Vanishable {
     }
 
     @Override
+    public boolean isFoil(ItemStack stack) {
+        return super.isFoil(stack) || stack.getDamageValue() == 0;
+    }
+
+    @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         stack.hurtAndBreak(1, attacker, (livingEntity) -> {
             livingEntity.broadcastBreakEvent(EquipmentSlot.MAINHAND);
