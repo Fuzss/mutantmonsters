@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"gui_light": "front",
 	"textures": {
 		"0": "mutantmonsters:item/hulk_hammer_model0",
 		"1": "mutantmonsters:item/hulk_hammer_model1",
