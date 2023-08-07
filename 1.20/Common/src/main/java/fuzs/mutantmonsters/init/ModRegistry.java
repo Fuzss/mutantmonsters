@@ -146,6 +146,7 @@ public class ModRegistry {
     public static final ResourceLocation MUTANT_SKELETON_SKULL_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/skull");
     public static final ResourceLocation MUTANT_SKELETON_LIMB_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/limb");
     public static final ResourceLocation MUTANT_SKELETON_SHOULDER_PAD_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/shoulder_pad");
+    public static final ResourceLocation MUTANT_ENDERMAN_CONTINUOUS_LOOT_TABLE = MutantMonsters.id("entities/mutant_enderman_continuous");
     public static final LootContextParamSet BODY_PART_LOOT_CONTEXT_PARAM_SET = registerLootContextParamSet(MutantMonsters.id("body_part"), (builder) -> {
         builder.required(LootContextParams.THIS_ENTITY);
     });

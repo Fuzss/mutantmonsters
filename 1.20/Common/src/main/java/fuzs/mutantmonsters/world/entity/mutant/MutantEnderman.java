@@ -31,6 +31,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -101,6 +102,8 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
     private int angerTime;
     private UUID angerTarget;
+    @Nullable
+    private ResourceLocation lootTableOverride;
 
     public MutantEnderman(EntityType<? extends MutantEnderman> type, Level worldIn) {
         super(type, worldIn);
@@ -771,6 +774,11 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     }
 
     @Override
+    protected void dropAllDeathLoot(DamageSource damageSource) {
+        // called in LivingEntity::die, but we want this to happen at the end of our LivingEntity::tickDeath calls
+    }
+
+    @Override
     protected void tickDeath() {
         this.setDeltaMovement(0.0, Math.min(this.getDeltaMovement().y, 0.0), 0.0);
         if (this.deathTime == 80) {
@@ -826,23 +834,26 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         if (!this.level().isClientSide && this.deathTime >= 100 && this.deathTime < 150 && this.deathTime % 6 == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            super.dropFromLootTable(this.deathCause != null ? this.deathCause : this.level().damageSources().generic(), this.lastHurtByPlayerTime > 0);
+            this.lootTableOverride = ModRegistry.MUTANT_ENDERMAN_CONTINUOUS_LOOT_TABLE;
+            this.dropFromLootTable(this.deathCause != null ? this.deathCause : this.level().damageSources().generic(), this.lastHurtByPlayerTime > 0);
         }
 
         if (this.deathTime >= DEATH_ANIMATION.duration()) {
-            this.dropExperience();
+            super.dropAllDeathLoot(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
             this.discard();
         }
 
     }
 
     @Override
-    protected void dropFromLootTable(DamageSource damageSourceIn, boolean attackedRecently) {
+    protected ResourceLocation getDefaultLootTable() {
+        return this.lootTableOverride != null ? this.lootTableOverride : super.getDefaultLootTable();
     }
 
     @Override
-    public boolean shouldDropExperience() {
-        return this.deathTime > 0;
+    protected void dropFromLootTable(DamageSource damageSource, boolean hitByPlayer) {
+        super.dropFromLootTable(damageSource, hitByPlayer);
+        this.lootTableOverride = null;
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, MutantZombieModel> {
     private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_zombie");
@@ -21,6 +22,11 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
     @Override
     protected void scale(MutantZombie livingEntity, PoseStack matrixStackIn, float partialTickTime) {
         matrixStackIn.scale(1.3F, 1.3F, 1.3F);
+    }
+
+    @Override
+    public Vec3 getRenderOffset(MutantZombie entity, float partialTicks) {
+        return new Vec3(0.0D, -0.0975D, 0.0D);
     }
 
     @Override
