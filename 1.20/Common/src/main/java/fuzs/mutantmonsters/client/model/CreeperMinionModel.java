@@ -1,5 +1,8 @@
 package fuzs.mutantmonsters.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -42,6 +45,27 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinion> {
     @Override
     public ModelPart root() {
         return this.root;
+    }
+
+    protected Iterable<ModelPart> headParts() {
+        return ImmutableList.of(this.head);
+    }
+
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.body, this.leg1, this.leg2, this.leg3, this.leg4);
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        poseStack.pushPose();
+        poseStack.translate(0.0F, 9.0F / 16.0F, 0.0F);
+        this.headParts().forEach(t -> t.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha));
+        poseStack.popPose();
+        poseStack.pushPose();
+        poseStack.scale(0.5F, 0.5F, 0.5F);
+        poseStack.translate(0.0F, 24.0F / 16.0F, 0.0F);
+        this.bodyParts().forEach(t -> t.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha));
+        poseStack.popPose();
     }
 
     @Override

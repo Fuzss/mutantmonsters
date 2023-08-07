@@ -25,8 +25,8 @@ public class CreeperMinionRenderer extends MobRenderer<CreeperMinion, CreeperMin
         f = Mth.clamp(f, 0.0F, 1.0F);
         f *= f;
         f *= f;
-        float f2 = (1.0F + f * 0.4F) * f1 * 0.5F;
-        float f3 = (1.0F + f * 0.1F) / f1 * 0.5F;
+        float f2 = (1.0F + f * 0.4F) * f1;
+        float f3 = (1.0F + f * 0.1F) / f1;
         matrixStackIn.scale(f2, f3, f2);
     }
 
