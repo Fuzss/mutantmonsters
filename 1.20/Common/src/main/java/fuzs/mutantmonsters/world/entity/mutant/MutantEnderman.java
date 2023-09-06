@@ -838,7 +838,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
             this.dropFromLootTable(this.deathCause != null ? this.deathCause : this.level().damageSources().generic(), this.lastHurtByPlayerTime > 0);
         }
 
-        if (this.deathTime >= DEATH_ANIMATION.duration()) {
+        if (!this.level().isClientSide && this.deathTime >= DEATH_ANIMATION.duration()) {
             super.dropAllDeathLoot(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
             this.discard();
         }

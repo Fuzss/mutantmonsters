@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v8.0.4-1.20.1] - 2023-09-06
+### Fixed
+- Fixed client crash when the mutant enderman tries to drop loot
+
 ## [v8.0.3-1.20.1] - 2023-08-07
 ### Changed
 - The mutant enderman now uses a separate loot table at `mutantmonsters:entities/mutant_enderman_continuous` for the continuous ender pearl drops while it is dying
