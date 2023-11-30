@@ -1,11 +1,13 @@
 package fuzs.mutantmonsters.core;
 
+import fuzs.extensibleenums.api.extensibleenums.v1.BuiltInEnumFactories;
 import fuzs.mutantmonsters.mixin.accessor.ExplosionFabricAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -80,4 +82,8 @@ public class FabricAbstractions implements CommonAbstractions {
         return true;
     }
 
+    @Override
+    public MobCategory createMobCategory(String internalName, String name, int maxInstancesPerChunk, boolean isFriendly, boolean isPersistent, int despawnDistance) {
+        return BuiltInEnumFactories.createMobCategory(internalName, name, maxInstancesPerChunk, isFriendly, isPersistent, despawnDistance);
+    }
 }

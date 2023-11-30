@@ -568,11 +568,10 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
+        return AdditionalAddEntityData.getPacket(this);
     }
 
     static class ThrowAttackGoal extends AnimationGoal<MutantZombie> {
-        private LivingEntity attackTarget;
         private int finish = -1;
 
         public ThrowAttackGoal(MutantZombie mob) {
@@ -587,70 +586,80 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && super.canUse();
+            return this.mob.getTarget() != null && super.canUse();
         }
 
         @Override
         public void start() {
             super.start();
-            this.attackTarget.stopRiding();
-            double x = this.attackTarget.getX() - this.mob.getX();
-            double z = this.attackTarget.getZ() - this.mob.getZ();
-            double d = Math.sqrt(x * x + z * z);
-            this.attackTarget.setDeltaMovement(x / d * 0.800000011920929, 1.600000023841858, z / d * 0.800000011920929);
-            EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                target.stopRiding();
+                double x = target.getX() - this.mob.getX();
+                double z = target.getZ() - this.mob.getZ();
+                double d = Math.sqrt(x * x + z * z);
+                target.setDeltaMovement(x / d * 0.8, 1.6, z / d * 0.8);
+                EntityUtil.sendPlayerVelocityPacket(target);
+            }
         }
 
         @Override
         public boolean canContinueToUse() {
-            return super.canUse() && this.finish < 10;
+            if (this.finish >= 10) {
+                return false;
+            }
+            LivingEntity target = this.mob.getTarget();
+            if (target == null) {
+                return false;
+            } else if (!target.isAlive()) {
+                return false;
+            } else {
+                return !(target instanceof Player) || !target.isSpectator() && !((Player)target).isCreative();
+            }
         }
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
-            double d1;
-            double d2;
-            double x;
-            double z;
-            if (this.mob.animationTick == MutantZombie.THROW_ANIMATION.duration()) {
-                this.mob.stuckSpeedMultiplier = Vec3.ZERO;
-                d1 = this.attackTarget.getX() - this.mob.getX();
-                d2 = this.attackTarget.getY() - this.mob.getY();
-                x = this.attackTarget.getZ() - this.mob.getZ();
-                z = Math.sqrt(d1 * d1 + d2 * d2 + x * x);
-                this.mob.setDeltaMovement(d1 / z * 3.4000000953674316, d2 / z * 1.399999976158142, x / z * 3.4000000953674316);
-            } else if (this.mob.animationTick > MutantZombie.THROW_ANIMATION.duration()) {
-                d1 = this.mob.getBbWidth() * 2.0F * this.mob.getBbWidth() * 2.0F;
-                d2 = this.mob.distanceToSqr(this.attackTarget.getX(), this.attackTarget.getBoundingBox().minY, this.attackTarget.getZ());
-                if (d2 < d1 && !this.mob.hasThrowAttackHit()) {
-                    this.mob.setThrowAttackHit(true);
-                    if (!this.attackTarget.hurt(this.mob.level().damageSources().mobAttack(this.mob), (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
-                        EntityUtil.disableShield(this.attackTarget, 150);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                this.mob.getNavigation().stop();
+                this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
+                if (this.mob.animationTick == MutantZombie.THROW_ANIMATION.duration()) {
+                    this.mob.stuckSpeedMultiplier = Vec3.ZERO;
+                    double d1 = target.getX() - this.mob.getX();
+                    double d2 = target.getY() - this.mob.getY();
+                    double x = target.getZ() - this.mob.getZ();
+                    double z = Math.sqrt(d1 * d1 + d2 * d2 + x * x);
+                    this.mob.setDeltaMovement(d1 / z * 3.4, d2 / z * 1.4, x / z * 3.4);
+                } else if (this.mob.animationTick > MutantZombie.THROW_ANIMATION.duration()) {
+                    double d1 = this.mob.getBbWidth() * 2.0F * this.mob.getBbWidth() * 2.0F;
+                    double d2 = this.mob.distanceToSqr(target.getX(), target.getBoundingBox().minY, target.getZ());
+                    if (d2 < d1 && !this.mob.hasThrowAttackHit()) {
+                        this.mob.setThrowAttackHit(true);
+                        if (!target.hurt(this.mob.level().damageSources().mobAttack(this.mob), (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+                            EntityUtil.disableShield(target, 150);
+                        }
+
+                        double x = target.getX() - this.mob.getX();
+                        double z = target.getZ() - this.mob.getZ();
+                        double d = Math.sqrt(x * x + z * z);
+                        target.setDeltaMovement(x / d * 0.6, -1.2, z / d * 0.6);
+                        target.invulnerableTime = 10;
+                        EntityUtil.sendPlayerVelocityPacket(target);
+                        EntityUtil.stunRavager(target);
+                        this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
                     }
 
-                    x = this.attackTarget.getX() - this.mob.getX();
-                    z = this.attackTarget.getZ() - this.mob.getZ();
-                    double d = Math.sqrt(x * x + z * z);
-                    this.attackTarget.setDeltaMovement(x / d * 0.6000000238418579, -1.2000000476837158, z / d * 0.6000000238418579);
-                    this.attackTarget.invulnerableTime = 10;
-                    EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
-                    EntityUtil.stunRavager(this.attackTarget);
-                    this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
-                }
+                    if ((this.mob.onGround() || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
+                        this.finish = 0;
+                        this.mob.setThrowAttackFinished(true);
+                    }
 
-                if ((this.mob.onGround() || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
-                    this.finish = 0;
-                    this.mob.setThrowAttackFinished(true);
-                }
-
-                if (this.finish >= 0) {
-                    ++this.finish;
+                    if (this.finish >= 0) {
+                        ++this.finish;
+                    }
                 }
             }
-
         }
 
         @Override
@@ -659,7 +668,6 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             this.finish = -1;
             this.mob.setThrowAttackHit(false);
             this.mob.setThrowAttackFinished(false);
-            this.attackTarget = null;
         }
     }
 
@@ -701,7 +709,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                         double x = entity.getX() - this.mob.getX();
                         double z = entity.getZ() - this.mob.getZ();
                         double d = Math.sqrt(x * x + z * z);
-                        entity.setDeltaMovement(x / d * 0.699999988079071, 0.30000001192092896, z / d * 0.699999988079071);
+                        entity.setDeltaMovement(x / d * 0.7, 0.3, z / d * 0.7);
                         entity.hurt(DamageSourcesHelper.source(this.mob.level(), ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), (float) (2 + this.mob.random.nextInt(2)));
                         EntityUtil.sendPlayerVelocityPacket(entity);
                     }
@@ -726,7 +734,6 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     static class SlamGroundGoal extends AnimationGoal<MutantZombie> {
         private double dirX = -1.0;
         private double dirZ = -1.0;
-        private LivingEntity attackTarget;
 
         public SlamGroundGoal(MutantZombie mob) {
             super(mob);
@@ -740,8 +747,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && super.canUse();
+            return this.mob.getTarget() != null && super.canUse();
         }
 
         @Override
@@ -753,29 +759,31 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            if (this.mob.animationTick < 8) {
-                this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
-            }
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                this.mob.getNavigation().stop();
+                if (this.mob.animationTick < 8) {
+                    this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
+                }
 
-            if (this.mob.animationTick == 8) {
-                double x = this.attackTarget.getX() - this.mob.getX();
-                double z = this.attackTarget.getZ() - this.mob.getZ();
-                double d = Math.sqrt(x * x + z * z);
-                this.dirX = x / d;
-                this.dirZ = z / d;
-            }
+                if (this.mob.animationTick == 8) {
+                    double x = target.getX() - this.mob.getX();
+                    double z = target.getZ() - this.mob.getZ();
+                    double d = Math.sqrt(x * x + z * z);
+                    this.dirX = x / d;
+                    this.dirZ = z / d;
+                }
 
-            if (this.mob.animationTick == 12) {
-                int x = Mth.floor(this.mob.getX() + this.dirX * 2.0);
-                int y = Mth.floor(this.mob.getBoundingBox().minY);
-                int z = Mth.floor(this.mob.getZ() + this.dirZ * 2.0);
-                int x1 = Mth.floor(this.mob.getX() + this.dirX * 8.0);
-                int z1 = Mth.floor(this.mob.getZ() + this.dirZ * 8.0);
-                SeismicWave.createWaves(this.mob.level(), this.mob.seismicWaveList, x, z, x1, z1, y);
-                this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                if (this.mob.animationTick == 12) {
+                    int x = Mth.floor(this.mob.getX() + this.dirX * 2.0);
+                    int y = Mth.floor(this.mob.getBoundingBox().minY);
+                    int z = Mth.floor(this.mob.getZ() + this.dirZ * 2.0);
+                    int x1 = Mth.floor(this.mob.getX() + this.dirX * 8.0);
+                    int z1 = Mth.floor(this.mob.getZ() + this.dirZ * 8.0);
+                    SeismicWave.createWaves(this.mob.level(), this.mob.seismicWaveList, x, z, x1, z1, y);
+                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                }
             }
-
         }
 
         @Override
@@ -783,7 +791,6 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             super.stop();
             this.dirX = -1.0;
             this.dirZ = -1.0;
-            this.attackTarget = null;
         }
     }
 }

@@ -36,11 +36,15 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
 
     public MutantEndermanRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantEndermanModel(context.bakeLayer(ClientModRegistry.MUTANT_ENDERMAN)), 0.8F);
-        this.endermanModel = (MutantEndermanModel)this.model;
+        this.endermanModel = (MutantEndermanModel) this.model;
         this.cloneModel = new EndermanModel<>(context.bakeLayer(ClientModRegistry.ENDERMAN_CLONE));
         this.addLayer(new EyesLayer(this));
         this.addLayer(new SoulLayer(this));
         this.addLayer(new HeldBlocksLayer(this, context.getBlockRenderDispatcher()));
+    }
+
+    private static float getDeathProgress(MutantEnderman mutantEnderman) {
+        return (float) (mutantEnderman.deathTime - 80) / (float) (MutantEnderman.DEATH_ANIMATION.duration() - 80);
     }
 
     @Override
@@ -73,10 +77,10 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
             this.teleportAttack = true;
             entityIn.getTeleportPosition().ifPresent((pos) -> {
                 matrixStackIn.pushPose();
-                double d0 = Mth.lerp((double)partialTicks, entityIn.xOld, entityIn.getX());
-                double d1 = Mth.lerp((double)partialTicks, entityIn.yOld, entityIn.getY());
-                double d2 = Mth.lerp((double)partialTicks, entityIn.zOld, entityIn.getZ());
-                matrixStackIn.translate((double)pos.getX() + 0.5 - d0, (double)pos.getY() - d1, (double)pos.getZ() + 0.5 - d2);
+                double d0 = Mth.lerp((double) partialTicks, entityIn.xOld, entityIn.getX());
+                double d1 = Mth.lerp((double) partialTicks, entityIn.yOld, entityIn.getY());
+                double d2 = Mth.lerp((double) partialTicks, entityIn.zOld, entityIn.getZ());
+                matrixStackIn.translate((double) pos.getX() + 0.5 - d0, (double) pos.getY() - d1, (double) pos.getZ() + 0.5 - d2);
                 super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
                 matrixStackIn.popPose();
             });
@@ -130,10 +134,6 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         return livingEntity.isClone() ? null : super.getRenderType(livingEntity, isVisible, visibleToSpectator, isGlowing);
     }
 
-    private static float getDeathProgress(MutantEnderman mutantEnderman) {
-        return (float)(mutantEnderman.deathTime - 80) / (float)(MutantEnderman.DEATH_ANIMATION.duration() - 80);
-    }
-
     @Override
     public ResourceLocation getTextureLocation(MutantEnderman entity) {
         return TEXTURE;
@@ -148,26 +148,41 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         }
 
         @Override
-        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantEnderman entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-            if (entity.getAnimation() != MutantEnderman.CLONE_ANIMATION) {
-                for(int i = 0; i < 4; ++i) {
+        public void render(PoseStack poseStack, MultiBufferSource bufferIn, int packedLightIn, MutantEnderman entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+            if (entity.getAnimation() != MutantEnderman.CLONE_ANIMATION && this.getParentModel() instanceof MutantEndermanModel model) {
+                for (int i = 0; i < 4; ++i) {
                     if (entity.getHeldBlock(i) > 0) {
-                        matrixStackIn.pushPose();
-                        ((MutantEndermanModel)this.getParentModel()).translateRotateArm(matrixStackIn, i);
-                        matrixStackIn.translate(0.0, 1.2, 0.0);
-                        float tick = (float)entity.tickCount + (float)(i + 1) * 2.0F * (float) Math.PI + partialTicks;
-                        matrixStackIn.mulPose(Axis.XP.rotationDegrees(tick * 10.0F));
-                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(tick * 8.0F));
-                        matrixStackIn.mulPose(Axis.ZP.rotationDegrees(tick * 6.0F));
-                        matrixStackIn.scale(-0.75F, -0.75F, 0.75F);
-                        matrixStackIn.translate(-0.5, -0.5, 0.5);
-                        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
-                        this.blockRenderer.renderSingleBlock(Block.stateById(entity.getHeldBlock(i)), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
-                        matrixStackIn.popPose();
+                        poseStack.pushPose();
+                        model.translateRotateArm(poseStack, i);
+                        poseStack.translate(0.0, 1.2, 0.0);
+                        float tick = (float) entity.tickCount + (float) (i + 1) * 2.0F * (float) Math.PI + partialTicks;
+                        poseStack.mulPose(Axis.XP.rotationDegrees(tick * 10.0F));
+                        poseStack.mulPose(Axis.YP.rotationDegrees(tick * 8.0F));
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(tick * 6.0F));
+                        poseStack.scale(-0.75F, -0.75F, 0.75F);
+                        poseStack.translate(-0.5, -0.5, 0.5);
+                        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+                        this.blockRenderer.renderSingleBlock(Block.stateById(entity.getHeldBlock(i)), poseStack, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
+                        poseStack.popPose();
                     }
                 }
 
             }
+        }
+    }
+
+    static class EyesLayer extends RenderLayer<MutantEnderman, EntityModel<MutantEnderman>> {
+        public EyesLayer(RenderLayerParent<MutantEnderman, EntityModel<MutantEnderman>> entityRendererIn) {
+            super(entityRendererIn);
+        }
+
+        @Override
+        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantEnderman entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+            if (!entity.isClone()) {
+                VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantEndermanRenderer.EYES_RENDER_TYPE);
+                this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, entity.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(entity) : 1.0F);
+            }
+
         }
     }
 
@@ -184,19 +199,19 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
             if (teleport || scream || clone) {
                 float scale = 0.0F;
                 if (teleport) {
-                    scale = 1.2F + ((float)entity.getAnimationTick() + partialTicks) / 10.0F;
+                    scale = 1.2F + ((float) entity.getAnimationTick() + partialTicks) / 10.0F;
                     if (MutantEndermanRenderer.this.teleportAttack) {
-                        scale = 2.2F - ((float)entity.getAnimationTick() + partialTicks) / 10.0F;
+                        scale = 2.2F - ((float) entity.getAnimationTick() + partialTicks) / 10.0F;
                     }
                 }
 
                 if (scream) {
                     if (entity.getAnimationTick() < 40) {
-                        scale = 1.2F + ((float)entity.getAnimationTick() + partialTicks) / 40.0F;
+                        scale = 1.2F + ((float) entity.getAnimationTick() + partialTicks) / 40.0F;
                     } else if (entity.getAnimationTick() < 160) {
                         scale = 2.2F;
                     } else {
-                        scale = Math.max(0.0F, 2.2F - ((float)entity.getAnimationTick() + partialTicks) / 10.0F);
+                        scale = Math.max(0.0F, 2.2F - ((float) entity.getAnimationTick() + partialTicks) / 10.0F);
                     }
                 }
 
@@ -216,38 +231,23 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
             float alpha = 1.0F;
             if (entity.getAnimation() == MutantEnderman.TELEPORT_ANIMATION) {
                 if (!MutantEndermanRenderer.this.teleportAttack && entity.getAnimationTick() >= 8) {
-                    alpha -= ((float)entity.getAnimationTick() - 8.0F + partialTicks) / 2.0F;
+                    alpha -= ((float) entity.getAnimationTick() - 8.0F + partialTicks) / 2.0F;
                 }
 
                 if (MutantEndermanRenderer.this.teleportAttack && entity.getAnimationTick() < 2) {
-                    alpha = ((float)entity.getAnimationTick() + partialTicks) / 2.0F;
+                    alpha = ((float) entity.getAnimationTick() + partialTicks) / 2.0F;
                 }
             }
 
             if (entity.getAnimation() == MutantEnderman.SCREAM_ANIMATION) {
                 if (entity.getAnimationTick() < 40) {
-                    alpha = ((float)entity.getAnimationTick() + partialTicks) / 40.0F;
+                    alpha = ((float) entity.getAnimationTick() + partialTicks) / 40.0F;
                 } else if (entity.getAnimationTick() >= 160) {
-                    alpha = 1.0F - ((float)entity.getAnimationTick() + partialTicks) / 40.0F;
+                    alpha = 1.0F - ((float) entity.getAnimationTick() + partialTicks) / 40.0F;
                 }
             }
 
             return alpha;
-        }
-    }
-
-    static class EyesLayer extends RenderLayer<MutantEnderman, EntityModel<MutantEnderman>> {
-        public EyesLayer(RenderLayerParent<MutantEnderman, EntityModel<MutantEnderman>> entityRendererIn) {
-            super(entityRendererIn);
-        }
-
-        @Override
-        public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, MutantEnderman entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-            if (!entity.isClone()) {
-                VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantEndermanRenderer.EYES_RENDER_TYPE);
-                this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, entity.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(entity) : 1.0F);
-            }
-
         }
     }
 }

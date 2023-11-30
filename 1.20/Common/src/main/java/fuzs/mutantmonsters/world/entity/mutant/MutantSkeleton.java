@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
+import com.google.common.collect.Lists;
 import fuzs.mutantmonsters.animation.AnimatedEntity;
 import fuzs.mutantmonsters.animation.Animation;
 import fuzs.mutantmonsters.init.ModRegistry;
@@ -31,6 +32,9 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -66,13 +70,13 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         this.goalSelector.addGoal(0, new ShootGoal(this));
         this.goalSelector.addGoal(0, new MultiShotGoal(this));
         this.goalSelector.addGoal(0, new ConstrictRibsGoal(this));
-        this.goalSelector.addGoal(1, (new MutantMeleeAttackGoal(this, 1.1)).setMaxAttackTick(5));
+        this.goalSelector.addGoal(1, new MutantMeleeAttackGoal(this, 1.1).setMaxAttackTick(5));
         this.goalSelector.addGoal(2, new AvoidDamageGoal(this, 1.0));
         this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this, WitherBoss.class));
-        this.targetSelector.addGoal(1, (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Wolf.class, true));
     }
@@ -192,6 +196,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
             }
 
             for (int i = 0; i < 18; ++i) {
+
                 int j = i;
                 if (i >= 3) {
                     j = i + 1;
@@ -276,7 +281,6 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
     static class MultiShotGoal extends AnimationGoal<MutantSkeleton> {
         private final List<MutantArrow> shots = new ArrayList<>();
-        private LivingEntity attackTarget;
 
         public MultiShotGoal(MutantSkeleton mob) {
             super(mob);
@@ -290,71 +294,70 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround() && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(this.attackTarget) || this.mob.getVehicle() == this.attackTarget);
+            LivingEntity target = this.mob.getTarget();
+            return target != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround() && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(target) || this.mob.getVehicle() == target);
         }
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
-            if (this.mob.animationTick == 10) {
-                this.mob.stopRiding();
-                double x = this.attackTarget.getX() - this.mob.getX();
-                double z = this.attackTarget.getZ() - this.mob.getZ();
-                float scale = 0.06F + this.mob.random.nextFloat() * 0.03F;
-                if (this.mob.distanceToSqr(this.attackTarget) < 16.0) {
-                    x *= -1.0;
-                    z *= -1.0;
-                    scale = (float) ((double) scale * 5.0);
-                }
-
-                this.mob.stuckSpeedMultiplier = Vec3.ZERO;
-                this.mob.setDeltaMovement(x * (double) scale, 1.100000023841858 * (double) this.mob.getBlockJumpFactor(), z * (double) scale);
-            }
-
-            if (this.mob.animationTick == 15) {
-                this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3, 1.0F, 1.0F);
-            }
-
-            if (this.mob.animationTick == 20) {
-                this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
-            }
-
-            if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
-                if (!this.shots.isEmpty()) {
-
-                    for (MutantArrow arrowEntity : this.shots) {
-                        this.mob.level().addFreshEntity(arrowEntity);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                this.mob.getNavigation().stop();
+                this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
+                if (this.mob.animationTick == 10) {
+                    this.mob.stopRiding();
+                    double x = target.getX() - this.mob.getX();
+                    double z = target.getZ() - this.mob.getZ();
+                    float scale = 0.06F + this.mob.random.nextFloat() * 0.03F;
+                    if (this.mob.distanceToSqr(target) < 16.0) {
+                        x *= -1.0;
+                        z *= -1.0;
+                        scale = (float) ((double) scale * 5.0);
                     }
 
-                    this.shots.clear();
+                    this.mob.stuckSpeedMultiplier = Vec3.ZERO;
+                    this.mob.setDeltaMovement(x * (double) scale, 1.1 * (double) this.mob.getBlockJumpFactor(), z * (double) scale);
                 }
 
-                for (int i = 0; i < 6; ++i) {
-                    MutantArrow shot = new MutantArrow(this.mob.level(), this.mob, this.attackTarget);
-                    shot.setSpeed(1.2F - this.mob.random.nextFloat() * 0.1F);
-                    shot.setClones(2);
-                    shot.randomize(3.0F);
-                    shot.setDamage(5 + this.mob.random.nextInt(5));
-                    this.shots.add(shot);
+                if (this.mob.animationTick == 15) {
+                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3, 1.0F, 1.0F);
                 }
 
-                this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+                if (this.mob.animationTick == 20) {
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                }
+
+                if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
+                    if (!this.shots.isEmpty()) {
+
+                        for (MutantArrow arrowEntity : this.shots) {
+                            this.mob.level().addFreshEntity(arrowEntity);
+                        }
+
+                        this.shots.clear();
+                    }
+
+                    for (int i = 0; i < 6; ++i) {
+                        MutantArrow mutantArrow = new MutantArrow(this.mob.level(), this.mob);
+                        mutantArrow.shoot(target, 2.0F - this.mob.random.nextFloat() * 0.1F, 3.0F);
+//                        mutantArrow.setClones(2);
+//                        mutantArrow.setBaseDamage(5.0 + this.mob.random.nextInt(5));
+                        this.shots.add(mutantArrow);
+                    }
+
+                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+                }
             }
-
         }
 
         @Override
         public void stop() {
             super.stop();
             this.shots.clear();
-            this.attackTarget = null;
         }
     }
 
     static class ShootGoal extends AnimationGoal<MutantSkeleton> {
-        private LivingEntity attackTarget;
 
         public ShootGoal(MutantSkeleton mob) {
             super(mob);
@@ -368,57 +371,65 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && !this.mob.isAnimationPlaying() && this.mob.random.nextInt(12) == 0 && this.mob.distanceToSqr(this.attackTarget) > 4.0 && this.mob.hasLineOfSight(this.attackTarget);
+            LivingEntity target = this.mob.getTarget();
+            return target != null && !this.mob.isAnimationPlaying() && this.mob.random.nextInt(12) == 0 && this.mob.distanceToSqr(target) > 4.0 && this.mob.hasLineOfSight(target);
         }
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
-            if (this.mob.animationTick == 5) {
-                this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_2, 1.0F, 1.0F);
+
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+
+                this.mob.getNavigation().stop();
+                this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
+                if (this.mob.animationTick == 5) {
+                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_2, 1.0F, 1.0F);
+                }
+
+                if (this.mob.animationTick == 20) {
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                }
+
+                if (this.mob.animationTick == 26 && target.isAlive()) {
+
+                    float randomization = (float) this.mob.hurtTime / 2.0F;
+                    if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() != null && this.mob.getLastDamageSource().getEntity() != null) {
+                        randomization = (float) this.mob.hurtTime / 2.0F;
+                    } else if (!this.mob.hasLineOfSight(target)) {
+                        randomization = 0.5F + this.mob.random.nextFloat();
+                    }
+
+                    MutantArrow arrowEntity = new MutantArrow(this.mob.level(), this.mob);
+                    arrowEntity.shoot(target, 2.4F, randomization);
+//                    arrowEntity.setClones(10);
+
+                    List<MobEffectInstance> effects = Lists.newArrayList();
+
+                    if (this.mob.random.nextInt(4) == 0) {
+                        effects.add(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
+                    }
+
+                    if (this.mob.random.nextInt(4) == 0) {
+                        effects.add(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
+                    }
+
+                    if (this.mob.random.nextInt(4) == 0) {
+                        effects.add(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
+                    }
+
+                    ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
+                    PotionUtils.setCustomEffects(itemStack, effects);
+                    arrowEntity.setEffectsFromItem(itemStack);
+
+                    this.mob.level().addFreshEntity(arrowEntity);
+                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+                }
             }
-
-            if (this.mob.animationTick == 20) {
-                this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
-            }
-
-            if (this.mob.animationTick == 26 && this.attackTarget.isAlive()) {
-                MutantArrow arrowEntity = new MutantArrow(this.mob.level(), this.mob, this.attackTarget);
-                if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() != null && this.mob.getLastDamageSource().getEntity() != null) {
-                    arrowEntity.randomize((float) this.mob.hurtTime / 2.0F);
-                } else if (!this.mob.hasLineOfSight(this.attackTarget)) {
-                    arrowEntity.randomize(0.5F + this.mob.random.nextFloat());
-                }
-
-                if (this.mob.random.nextInt(4) == 0) {
-                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
-                }
-
-                if (this.mob.random.nextInt(4) == 0) {
-                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
-                }
-
-                if (this.mob.random.nextInt(4) == 0) {
-                    arrowEntity.setPotionEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
-                }
-
-                this.mob.level().addFreshEntity(arrowEntity);
-                this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
-            }
-
-        }
-
-        @Override
-        public void stop() {
-            super.stop();
-            this.attackTarget = null;
         }
     }
 
     static class ConstrictRibsGoal extends AnimationGoal<MutantSkeleton> {
-        private LivingEntity attackTarget;
 
         public ConstrictRibsGoal(MutantSkeleton mob) {
             super(mob);
@@ -432,41 +443,36 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && super.canUse();
+            return this.mob.getTarget() != null && super.canUse();
         }
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            if (this.mob.animationTick < 6) {
-                this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
-            }
-
-            if (this.mob.animationTick == 5) {
-                this.attackTarget.stopRiding();
-            }
-
-            if (this.mob.animationTick == 6) {
-                float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                if (!this.attackTarget.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
-                    EntityUtil.disableShield(this.attackTarget, 100);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                this.mob.getNavigation().stop();
+                if (this.mob.animationTick < 6) {
+                    this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
                 }
 
-                double motionX = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
-                double motionY = 0.4F + this.mob.random.nextFloat() * 0.8F;
-                double motionZ = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
-                this.attackTarget.setDeltaMovement(motionX, motionY, motionZ);
-                EntityUtil.sendPlayerVelocityPacket(this.attackTarget);
-                this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                if (this.mob.animationTick == 5) {
+                    target.stopRiding();
+                }
+
+                if (this.mob.animationTick == 6) {
+                    float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                    if (!target.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                        EntityUtil.disableShield(target, 100);
+                    }
+
+                    double motionX = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
+                    double motionY = 0.4F + this.mob.random.nextFloat() * 0.8F;
+                    double motionZ = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
+                    target.setDeltaMovement(motionX, motionY, motionZ);
+                    EntityUtil.sendPlayerVelocityPacket(target);
+                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                }
             }
-
-        }
-
-        @Override
-        public void stop() {
-            super.stop();
-            this.attackTarget = null;
         }
     }
 
@@ -484,8 +490,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         @Override
         public void tick() {
             this.mob.getNavigation().stop();
-            if (this.mob.getTarget() != null && this.mob.getTarget().isAlive()) {
-                this.mob.lookControl.setLookAt(this.mob.getTarget(), 30.0F, 30.0F);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null && target.isAlive()) {
+                this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
             }
 
             if (this.mob.animationTick == 3) {

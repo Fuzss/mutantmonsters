@@ -13,9 +13,11 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
-    public static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_arrow");
+    public static final ResourceLocation TEXTURE_LOCATION = MutantMonstersClient.entityTexture("mutant_arrow");
 
     private final MutantArrowModel model;
 
@@ -30,28 +32,26 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
     }
 
     @Override
-    public void render(MutantArrow entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
+    public void render(MutantArrow mutantArrow, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferIn, int packedLightIn) {
+        super.render(mutantArrow, entityYaw, partialTicks, poseStack, bufferIn, packedLightIn);
 
-        for(int i = 0; i < entityIn.getClones(); ++i) {
-            matrixStackIn.pushPose();
-            float scale = entityIn.getSpeed() - (float)i * 0.08F;
-            double x = (entityIn.getTargetX() - entityIn.getX()) * (double)((float)entityIn.tickCount + partialTicks) * (double)scale;
-            double y = (entityIn.getTargetY() - entityIn.getY()) * (double)((float)entityIn.tickCount + partialTicks) * (double)scale;
-            double z = (entityIn.getTargetZ() - entityIn.getZ()) * (double)((float)entityIn.tickCount + partialTicks) * (double)scale;
-            matrixStackIn.translate(x, y, z);
-            matrixStackIn.mulPose(Axis.YP.rotationDegrees(entityIn.getYRot()));
-            matrixStackIn.mulPose(Axis.XP.rotationDegrees(entityIn.getXRot()));
-            matrixStackIn.scale(1.2F, 1.2F, 1.2F);
-            VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(TEXTURE));
-            this.model.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F - (float)i * 0.08F);
-            matrixStackIn.popPose();
+        for (int i = 0; i < mutantArrow.getClones(); ++i) {
+            poseStack.pushPose();
+            poseStack.translate(0.0F, -2.35F, 0.5F);
+            Vec3 deltaMovement = mutantArrow.getDeltaMovement().scale(-0.1).multiply(i, i, i);
+            poseStack.translate(deltaMovement.x, deltaMovement.y, deltaMovement.z);
+            poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTicks, mutantArrow.yRotO, mutantArrow.getYRot())));
+            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTicks, mutantArrow.xRotO, mutantArrow.getXRot())));
+            poseStack.scale(1.2F, 1.2F, 1.2F);
+            VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(this.getTextureLocation(mutantArrow)));
+            this.model.renderToBuffer(poseStack, vertexBuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F - (float) i * 0.08F);
+            poseStack.popPose();
         }
 
     }
 
     @Override
     public ResourceLocation getTextureLocation(MutantArrow entity) {
-        return TEXTURE;
+        return TEXTURE_LOCATION;
     }
 }

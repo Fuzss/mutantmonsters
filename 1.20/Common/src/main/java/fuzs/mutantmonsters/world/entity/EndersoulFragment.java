@@ -5,9 +5,6 @@ import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,8 +37,8 @@ public class EndersoulFragment extends Entity {
         this.stickRotations = new float[8][3];
         this.explodeTick = 20 + this.random.nextInt(20);
 
-        for(int i = 0; i < this.stickRotations.length; ++i) {
-            for(int j = 0; j < this.stickRotations[i].length; ++j) {
+        for (int i = 0; i < this.stickRotations.length; ++i) {
+            for (int j = 0; j < this.stickRotations[i].length; ++j) {
                 this.stickRotations[i][j] = this.random.nextFloat() * 2.0F * 3.1415927F;
             }
         }
@@ -51,6 +48,10 @@ public class EndersoulFragment extends Entity {
     public EndersoulFragment(Level world, MutantEnderman spawner) {
         this(ModRegistry.ENDERSOUL_FRAGMENT_ENTITY_TYPE.get(), world);
         this.spawner = new WeakReference<>(spawner);
+    }
+
+    public static boolean isProtected(Entity entity) {
+        return entity instanceof LivingEntity && ((LivingEntity) entity).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get());
     }
 
     @Override
@@ -114,7 +115,7 @@ public class EndersoulFragment extends Entity {
 
             if (this.owner != null && this.distanceToSqr(this.owner) > 9.0) {
                 float scale = 0.05F;
-                this.push((this.owner.getX() - this.getX()) * (double)scale, (this.owner.getY() + (double)(this.owner.getEyeHeight() / 3.0F) - this.getY()) * (double)scale, (this.owner.getZ() - this.getZ()) * (double)scale);
+                this.push((this.owner.getX() - this.getX()) * (double) scale, (this.owner.getY() + (double) (this.owner.getEyeHeight() / 3.0F) - this.getY()) * (double) scale, (this.owner.getZ() - this.getZ()) * (double) scale);
             }
         }
 
@@ -160,7 +161,7 @@ public class EndersoulFragment extends Entity {
 
     private void explode() {
         this.playSound(ModRegistry.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-        this.level().broadcastEntityEvent(this, (byte)3);
+        this.level().broadcastEntityEvent(this, (byte) 3);
 
         for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
             if (this.distanceToSqr(entity) <= 25.0) {
@@ -171,7 +172,7 @@ public class EndersoulFragment extends Entity {
                     double x = entity.getX() - this.getX();
                     double z = entity.getZ() - this.getZ();
                     double d = Math.sqrt(x * x + z * z);
-                    entity.setDeltaMovement(0.800000011920929 * x / d, this.random.nextFloat() * 0.6F - 0.1F, 0.800000011920929 * z / d);
+                    entity.setDeltaMovement(0.8 * x / d, this.random.nextFloat() * 0.6F - 0.1F, 0.8 * z / d);
                     EntityUtil.sendPlayerVelocityPacket(entity);
                 }
 
@@ -182,10 +183,6 @@ public class EndersoulFragment extends Entity {
         }
 
         this.discard();
-    }
-
-    public static boolean isProtected(Entity entity) {
-        return entity instanceof LivingEntity && ((LivingEntity)entity).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get());
     }
 
     @Override
@@ -205,11 +202,5 @@ public class EndersoulFragment extends Entity {
         if (compound.contains("ExplodeTick")) {
             this.explodeTick = compound.getInt("ExplodeTick");
         }
-
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 }

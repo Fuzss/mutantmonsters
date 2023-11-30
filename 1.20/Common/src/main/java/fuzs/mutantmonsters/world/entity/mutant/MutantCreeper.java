@@ -293,7 +293,7 @@ public class MutantCreeper extends AbstractMutantMonster {
             if (!this.level().isClientSide) {
                 MutatedExplosion.create(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
-                if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null) {
+                if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null && this.lastHurtByPlayerTime > 0) {
                     this.level().addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
                 }
             }
@@ -366,7 +366,8 @@ public class MutantCreeper extends AbstractMutantMonster {
 
         @Override
         public boolean canUse() {
-            return MutantCreeper.this.getTarget() != null && MutantCreeper.this.onGround() && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) <= 1024.0 && !MutantCreeper.this.isJumpAttacking() && !MutantCreeper.this.isCharging() && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
+            LivingEntity target = MutantCreeper.this.getTarget();
+            return target != null && MutantCreeper.this.onGround() && MutantCreeper.this.distanceToSqr(target) <= 1024.0 && !MutantCreeper.this.isJumpAttacking() && !MutantCreeper.this.isCharging() && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
         }
 
         @Override
@@ -394,7 +395,8 @@ public class MutantCreeper extends AbstractMutantMonster {
 
         @Override
         public boolean canContinueToUse() {
-            if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0) {
+            LivingEntity target = MutantCreeper.this.getTarget();
+            if (MutantCreeper.this.summonLightning && target != null && MutantCreeper.this.distanceToSqr(target) < 25.0) {
                 return false;
             } else {
                 return MutantCreeper.this.chargeTime < 100 && MutantCreeper.this.chargeHits > 0;

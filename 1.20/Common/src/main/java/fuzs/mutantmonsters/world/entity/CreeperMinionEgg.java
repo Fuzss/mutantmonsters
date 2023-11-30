@@ -8,9 +8,6 @@ import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosion;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -39,7 +36,7 @@ public class CreeperMinionEgg extends Entity {
     private double velocityX;
     private double velocityY;
     private double velocityZ;
-    private UUID ownerUUID;
+    private UUID owner;
     private int dismountTicks;
 
     public CreeperMinionEgg(EntityType<? extends CreeperMinionEgg> type, Level world) {
@@ -51,7 +48,7 @@ public class CreeperMinionEgg extends Entity {
 
     public CreeperMinionEgg(MutantCreeper spawner, Entity owner) {
         this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), spawner.level());
-        this.ownerUUID = owner.getUUID();
+        this.owner = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
         if (spawner.isCharged()) {
             this.setCharged(true);
@@ -117,8 +114,8 @@ public class CreeperMinionEgg extends Entity {
 
     private void hatch() {
         CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(this.level());
-        if (this.ownerUUID != null) {
-            Player playerEntity = this.level().getPlayerByUUID(this.ownerUUID);
+        if (this.owner != null) {
+            Player playerEntity = this.level().getPlayerByUUID(this.owner);
             if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
                 minion.tame(playerEntity);
                 minion.setOrderedToSit(true);
@@ -172,16 +169,18 @@ public class CreeperMinionEgg extends Entity {
                 ++this.health;
             }
 
-            if (--this.age <= 0) {
-                this.hatch();
+            if (--this.age <= 0 && this.owner != null) {
+                Player player = this.level().getPlayerByUUID(this.owner);
+                if (player != null && this.distanceToSqr(player) < 4096.0) {
+                    this.hatch();
+                }
             }
         }
-
     }
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING)) {
+        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING) && !player.hasPassenger(this)) {
             Entity topPassenger = this.getTopPassenger(player);
             this.startRiding(topPassenger, true);
             this.playMountSound(true);
@@ -247,8 +246,8 @@ public class CreeperMinionEgg extends Entity {
             compound.putBoolean("Charged", true);
         }
 
-        if (this.ownerUUID != null) {
-            compound.putUUID("Owner", this.ownerUUID);
+        if (this.owner != null) {
+            compound.putUUID("Owner", this.owner);
         }
         compound.putByte("DismountTicks", (byte) this.dismountTicks);
 
@@ -266,16 +265,9 @@ public class CreeperMinionEgg extends Entity {
 
         this.recentlyHit = compound.getInt("RecentlyHit");
         this.setCharged(compound.getBoolean("Charged"));
-        if (compound.hasUUID("OwnerUUID")) {
-            this.ownerUUID = compound.getUUID("OwnerUUID");
-        } else if (compound.hasUUID("Owner")) {
-            this.ownerUUID = compound.getUUID("Owner");
+        if (compound.hasUUID("Owner")) {
+            this.owner = compound.getUUID("Owner");
         }
         this.dismountTicks = compound.getByte("DismountTicks");
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 }

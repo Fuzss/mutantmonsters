@@ -17,7 +17,7 @@ dependencies {
 //    modApi(include(libs.cardinalcomponentsworld.fabric.get()))
 
     // Extensible Enums
-//    modApi(include(libs.extensibleenums.fabric.get()))
+    modApi(include(libs.extensibleenums.fabric.get()))
 
     // Quality of Life Mods
     versionCatalog.findLibrary("modmenu.fabric").ifPresent {

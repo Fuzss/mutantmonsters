@@ -3,6 +3,7 @@ package fuzs.mutantmonsters;
 import fuzs.mutantmonsters.config.CommonConfig;
 import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
+import fuzs.mutantmonsters.handler.SpawningPreventionHandler;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.S2CAnimationMessage;
 import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
@@ -16,9 +17,13 @@ import fuzs.mutantmonsters.world.entity.mutant.*;
 import fuzs.puzzleslib.api.biome.v1.BiomeLoadingPhase;
 import fuzs.puzzleslib.api.biome.v1.MobSpawnSettingsContext;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
+import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
-import fuzs.puzzleslib.api.core.v1.context.*;
+import fuzs.puzzleslib.api.core.v1.context.BiomeModificationsContext;
+import fuzs.puzzleslib.api.core.v1.context.CreativeModeTabContext;
+import fuzs.puzzleslib.api.core.v1.context.EntityAttributesCreateContext;
+import fuzs.puzzleslib.api.core.v1.context.SpawnPlacementsContext;
 import fuzs.puzzleslib.api.event.v1.entity.ServerEntityLevelEvents;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingDropsCallback;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingHurtCallback;
@@ -80,16 +85,15 @@ public class MutantMonsters implements ModConstructor {
         ArrowLooseCallback.EVENT.register(PlayerEventsHandler::onArrowLoose);
         PlayerInteractEvents.USE_ENTITY.register(EntityEventsHandler::onEntityInteract);
         PlayerTickEvents.END.register(PlayerEventsHandler::onPlayerTick$End);
-        ServerEntityLevelEvents.LOAD.register(EntityEventsHandler::onEntityJoinServerLevel);
+        ServerEntityLevelEvents.LOAD_V2.register(EntityEventsHandler::onEntityLoad);
         LivingDropsCallback.EVENT.register(EntityEventsHandler::onLivingDrops);
         ItemTossCallback.EVENT.register(PlayerEventsHandler::onItemToss);
+        ServerEntityLevelEvents.SPAWN.register(SpawningPreventionHandler::onEntitySpawn);
     }
 
     @Override
-    public void onCommonSetup(ModLifecycleContext context) {
-        context.enqueueWork(() -> {
-            PotionBrewingRegistry.INSTANCE.registerPotionRecipe(Potions.THICK, Ingredient.of(ModRegistry.ENDERSOUL_HAND_ITEM.get(), ModRegistry.HULK_HAMMER_ITEM.get(), ModRegistry.CREEPER_SHARD_ITEM.get(), ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()), ModRegistry.CHEMICAL_X_POTION.get());
-        });
+    public void onCommonSetup() {
+        PotionBrewingRegistry.INSTANCE.registerPotionRecipe(Potions.THICK, Ingredient.of(ModRegistry.ENDERSOUL_HAND_ITEM.get(), ModRegistry.HULK_HAMMER_ITEM.get(), ModRegistry.CREEPER_SHARD_ITEM.get(), ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()), ModRegistry.CHEMICAL_X_POTION.get());
     }
 
     @Override
@@ -126,18 +130,18 @@ public class MutantMonsters implements ModConstructor {
         }, biomeModificationContext -> {
             MobSpawnSettingsContext spawnSettings = biomeModificationContext.mobSpawnSettings();
             CommonConfig config = CONFIG.get(CommonConfig.class);
-            addMutantSpawn(spawnSettings, config.mutantCreeperSpawnWeight, MobCategory.MONSTER, EntityType.CREEPER, ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get());
-            addMutantSpawn(spawnSettings, config.mutantEndermanSpawnWeight, MobCategory.MONSTER, EntityType.ENDERMAN, ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get());
-            addMutantSpawn(spawnSettings, config.mutantSkeletonSpawnWeight, MobCategory.MONSTER, EntityType.SKELETON, ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get());
-            addMutantSpawn(spawnSettings, config.mutantZombieSpawnWeight, MobCategory.MONSTER, EntityType.ZOMBIE, ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantCreeperSpawnWeight, EntityType.CREEPER, ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantEndermanSpawnWeight, EntityType.ENDERMAN, ModRegistry.MUTANT_ENDERMAN_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantSkeletonSpawnWeight, EntityType.SKELETON, ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get());
+            addMutantSpawn(spawnSettings, config.mutantZombieSpawnWeight, EntityType.ZOMBIE, ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.get());
         });
     }
 
-    private static void addMutantSpawn(MobSpawnSettingsContext spawnSettings, double spawnWeight, MobCategory mobCategory, EntityType<?> entityType, EntityType<?> mutantEntityType) {
+    private static void addMutantSpawn(MobSpawnSettingsContext spawnSettings, double spawnWeight, EntityType<?> entityType, EntityType<?> mutantEntityType) {
         if (spawnWeight == 0.0) return;
-        spawnSettings.getSpawnerData(mobCategory).stream().filter(data -> data.type == entityType).findAny().ifPresent(spawnerData -> {
+        spawnSettings.getSpawnerData(MobCategory.MONSTER).stream().filter(data -> data.type == entityType).findAny().ifPresent(spawnerData -> {
             int spawnerDataWeight = Math.max(1, (int) (spawnerData.getWeight().asInt() * spawnWeight));
-            spawnSettings.addSpawn(mobCategory, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnerDataWeight, 1, 1));
+            spawnSettings.addSpawn(ModRegistry.MUTANT_MOB_CATEGORY, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnerDataWeight, 1, 1));
         });
         MobSpawnSettings.MobSpawnCost mobSpawnCost = spawnSettings.getSpawnCost(entityType);
         if (mobSpawnCost != null) {
@@ -171,5 +175,10 @@ public class MutantMonsters implements ModConstructor {
             output.accept(ModRegistry.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.get());
             output.accept(ModRegistry.SPIDER_PIG_SPAWN_EGG_ITEM.get());
         }).appendEnchantmentsAndPotions());
+    }
+
+    @Override
+    public ContentRegistrationFlags[] getContentRegistrationFlags() {
+        return new ContentRegistrationFlags[]{ContentRegistrationFlags.BIOME_MODIFICATIONS};
     }
 }

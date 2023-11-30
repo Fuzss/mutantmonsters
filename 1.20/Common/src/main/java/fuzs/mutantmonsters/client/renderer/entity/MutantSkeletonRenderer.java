@@ -61,7 +61,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
                 matrixStackIn.translate(leftHanded ? 0.2 : -0.2, 0.4, -1.8);
                 matrixStackIn.mulPose(Axis.XP.rotationDegrees(90.0F));
                 matrixStackIn.scale(1.2F, 1.2F, 1.2F);
-                VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(MutantArrowRenderer.TEXTURE));
+                VertexConsumer vertexBuilder = bufferIn.getBuffer(this.model.renderType(MutantArrowRenderer.TEXTURE_LOCATION));
                 this.model.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
                 matrixStackIn.popPose();
             }

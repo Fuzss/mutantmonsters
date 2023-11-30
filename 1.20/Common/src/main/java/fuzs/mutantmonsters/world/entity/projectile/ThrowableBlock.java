@@ -67,7 +67,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         LivingEntity attackTarget = enderman.getTarget();
         Vec3 forward = EntityUtil.getDirVector(this.getYRot(), outer ? 2.7F : 1.4F);
         Vec3 strafe = EntityUtil.getDirVector(this.getYRot() + (right ? 90.0F : -90.0F), outer ? 2.2F : 2.0F);
-        this.setPos(this.getX() + forward.x + strafe.x, this.getY() + (double)(outer ? 2.8F : 1.1F) - 4.8, this.getZ() + forward.z + strafe.z);
+        this.setPos(this.getX() + forward.x + strafe.x, this.getY() + (double) (outer ? 2.8F : 1.1F) - 4.8, this.getZ() + forward.z + strafe.z);
         if (attackTarget != null) {
             double d0 = attackTarget.getX() - this.getX();
             double d1 = attackTarget.getY(0.33) - this.getY();
@@ -87,7 +87,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     }
 
     public ThrowableBlock(Player player, BlockState blockState, BlockPos pos) {
-        this((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5, player);
+        this((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5, player);
         this.blockState = blockState;
         this.setHeld(true);
     }
@@ -158,10 +158,10 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     @Override
     public void handleEntityEvent(byte id) {
         if (id == 3) {
-            for(int i = 0; i < 60; ++i) {
-                double x = this.getX() + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth();
-                double y = this.getY() + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight());
-                double z = this.getZ() + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth();
+            for (int i = 0; i < 60; ++i) {
+                double x = this.getX() + (double) (this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double) this.getBbWidth();
+                double y = this.getY() + 0.5 + (double) (this.random.nextFloat() * this.getBbHeight());
+                double z = this.getZ() + (double) (this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double) this.getBbWidth();
                 double motx = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
                 double moty = 0.5F + this.random.nextFloat() * 2.0F;
                 double motz = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
@@ -197,9 +197,9 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 double y = thrower.getEyeY() + vec.y * 1.6 - this.getY();
                 double z = thrower.getZ() + vec.z * 1.6 - this.getZ();
                 float offset = 0.6F;
-                this.setDeltaMovement(x * (double)offset, y * (double)offset, z * (double)offset);
+                this.setDeltaMovement(x * (double) offset, y * (double) offset, z * (double) offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity)thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
                     this.setHeld(false);
                 }
             }
@@ -262,7 +262,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     @Override
     protected void onHit(HitResult result) {
         Entity thrower = this.getOwner();
-        LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity)thrower : null;
+        LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity) thrower : null;
         if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
 
             for (Mob mobEntity : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
@@ -272,38 +272,39 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
             }
 
             if (result.getType() == HitResult.Type.ENTITY) {
-                Entity entity = ((EntityHitResult)result).getEntity();
+                Entity entity = ((EntityHitResult) result).getEntity();
                 if (entity.hurt(this.level().damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }
             }
 
             if (!this.level().isClientSide) {
-                this.level().broadcastEntityEvent(this, (byte)3);
+                this.level().broadcastEntityEvent(this, (byte) 3);
                 this.discard();
             }
 
             this.playSound(this.blockState.getSoundType().getBreakSound(), 0.8F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.8F);
         } else {
-            boolean canOwnerPlace = livingEntity instanceof Player && ((Player)livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), livingEntity);
+            boolean canOwnerPlace = livingEntity instanceof Player && ((Player) livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), livingEntity);
             if (result.getType() == HitResult.Type.BLOCK) {
-                BlockHitResult blockRayTraceResult = (BlockHitResult)result;
-                this.onHitBlock(blockRayTraceResult);
+                BlockHitResult blockHitResult = (BlockHitResult) result;
+                this.onHitBlock(blockHitResult);
                 if (!this.level().isClientSide) {
-                    if (canOwnerPlace && this.blockState.canSurvive(this.level(), this.blockPosition())) {
-                        this.level().setBlockAndUpdate(this.blockPosition(), this.blockState);
-                        this.blockState.getBlock().setPlacedBy(this.level(), this.blockPosition(), this.blockState, livingEntity, ItemStack.EMPTY);
+                    BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
+                    if (canOwnerPlace && this.level().getBlockState(blockPos).canBeReplaced() && this.blockState.canSurvive(this.level(), blockPos)) {
+                        this.level().setBlockAndUpdate(blockPos, this.blockState);
+                        this.blockState.getBlock().setPlacedBy(this.level(), blockPos, this.blockState, livingEntity, ItemStack.EMPTY);
                         SoundType soundType = this.blockState.getSoundType();
                         this.playSound(soundType.getPlaceSound(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
                     } else {
-                        this.level().levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
+                        this.level().levelEvent(2001, blockPos, Block.getId(this.blockState));
                         if (canOwnerPlace && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                             this.spawnAtLocation(this.blockState.getBlock());
                         }
                     }
                 }
             } else if (result.getType() == HitResult.Type.ENTITY && !this.level().isClientSide) {
-                Entity entity = ((EntityHitResult)result).getEntity();
+                Entity entity = ((EntityHitResult) result).getEntity();
                 if (entity.hurt(this.level().damageSources().thrown(this, livingEntity), 4.0F) && entity.getType() == EntityType.ENDERMAN) {
                     return;
                 }

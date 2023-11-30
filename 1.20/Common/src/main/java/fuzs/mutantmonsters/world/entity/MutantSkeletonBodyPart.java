@@ -3,9 +3,6 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -53,8 +50,8 @@ public class MutantSkeletonBodyPart extends Entity {
         this.pitchPositive = this.random.nextBoolean();
     }
 
-    public MutantSkeletonBodyPart(Level world, Mob owner, int part) {
-        this(ModRegistry.BODY_PART_ENTITY_TYPE.get(), world);
+    public MutantSkeletonBodyPart(Level level, Mob owner, int part) {
+        this(ModRegistry.BODY_PART_ENTITY_TYPE.get(), level);
         this.owner = new WeakReference<>(owner);
         this.setPart(part);
         this.setPos(owner.getX(), owner.getY() + (double) (3.2F * (0.25F + this.random.nextFloat() * 0.5F)), owner.getZ());
@@ -136,7 +133,6 @@ public class MutantSkeletonBodyPart extends Entity {
         if (!this.level().isClientSide && this.despawnTimer >= this.getMaxAge()) {
             this.discard();
         }
-
     }
 
     @Override
@@ -164,11 +160,6 @@ public class MutantSkeletonBodyPart extends Entity {
     @Override
     protected Component getTypeName() {
         return Component.translatable(this.getLegacyItemByPart().getDescriptionId());
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 
     private Item getLegacyItemByPart() {

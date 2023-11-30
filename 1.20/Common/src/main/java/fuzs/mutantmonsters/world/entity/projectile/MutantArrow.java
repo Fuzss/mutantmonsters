@@ -1,108 +1,62 @@
 package fuzs.mutantmonsters.world.entity.projectile;
 
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MutantArrow extends Entity {
-    private static final EntityDataAccessor<Integer> TARGET_X = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> TARGET_Y = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> TARGET_Z = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Float> SPEED = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.FLOAT);
+public class MutantArrow extends Arrow {
     private static final EntityDataAccessor<Integer> CLONES = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
-    private int damage;
-    private final List<Entity> pointedEntities;
-    private MobEffectInstance effectInstance;
-    private LivingEntity shooter;
 
-    public MutantArrow(EntityType<? extends MutantArrow> type, Level world) {
-        super(type, world);
-        this.damage = 10 + this.random.nextInt(3);
-        this.pointedEntities = new ArrayList<>();
-        this.noPhysics = true;
+    public MutantArrow(EntityType<? extends MutantArrow> type, Level level) {
+        super(type, level);
     }
 
-    public MutantArrow(Level world, LivingEntity shooter, LivingEntity target) {
-        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), world);
-        this.shooter = shooter;
-        if (!world.isClientSide) {
-            this.setTargetX(target.getX());
-            this.setTargetY(target.getY());
-            this.setTargetZ(target.getZ());
-        }
+    public MutantArrow(Level level, LivingEntity shooter) {
+        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), level);
+        this.setPos(shooter.getX(), shooter.getEyeY() - (double) 0.1F, shooter.getZ());
+        this.setNoGravity(true);
+        this.setOwner(shooter);
+//        this.setBaseDamage(3.0 + this.random.nextInt(3));
+        this.setCritArrow(true);
+    }
 
-        double yPos = shooter.getEyeY();
-        if (shooter instanceof MutantSkeleton) {
-            yPos = shooter.getY() + 1.28;
+    public void shoot(LivingEntity target, float velocity, float randomization) {
+        Vec3 attackLocation = this.getAttackLocation(target, randomization);
+        Vec3 attackVector = attackLocation.subtract(this.position());
+        double horizontalDistance = attackVector.horizontalDistance();
+        double x = attackVector.x;
+        double y = attackVector.y;
+        double z = attackVector.z;
+        this.shoot(x, y, z, velocity, 0.0F);
+        this.setYRot(180.0F + (float) Math.toDegrees(Math.atan2(x, z)));
+        while (this.getYRot() > 360.0F) {
+            this.setYRot(this.getYRot() - 360.0F);
         }
+        this.setXRot((float) Math.toDegrees(Math.atan2(y, horizontalDistance)));
+    }
 
-        this.setPos(shooter.getX(), yPos, shooter.getZ());
-        double x = this.getTargetX() - this.getX();
-        double y = this.getTargetY() - this.getY();
-        double z = this.getTargetZ() - this.getZ();
-        double d = Math.sqrt(x * x + z * z);
-        this.setYRot(180.0F + (float)Math.toDegrees(Math.atan2(x, z)));
-        this.setXRot((float)Math.toDegrees(Math.atan2(y, d)));
+    private Vec3 getAttackLocation(LivingEntity target, float randomization) {
+        double x = target.getX() + (this.random.nextFloat() - 0.5F) * randomization * 2.0F;
+        double y = target.getY(0.8) + (this.random.nextFloat() - 0.5F) * randomization * 2.0F;
+        double z = target.getZ() + (this.random.nextFloat() - 0.5F) * randomization * 2.0F;
+        return new Vec3(x, y, z);
     }
 
     @Override
     protected void defineSynchedData() {
-        this.entityData.define(TARGET_X, 0);
-        this.entityData.define(TARGET_Y, 0);
-        this.entityData.define(TARGET_Z, 0);
-        this.entityData.define(SPEED, 12.0F);
-        this.entityData.define(CLONES, 10);
-    }
-
-    public double getTargetX() {
-        return (double) this.entityData.get(TARGET_X) / 10000.0;
-    }
-
-    public void setTargetX(double targetX) {
-        this.entityData.set(TARGET_X, (int)(targetX * 10000.0));
-    }
-
-    public double getTargetY() {
-        return (double) this.entityData.get(TARGET_Y) / 10000.0;
-    }
-
-    public void setTargetY(double targetY) {
-        this.entityData.set(TARGET_Y, (int)(targetY * 10000.0));
-    }
-
-    public double getTargetZ() {
-        return (double) this.entityData.get(TARGET_Z) / 10000.0;
-    }
-
-    public void setTargetZ(double targetZ) {
-        this.entityData.set(TARGET_Z, (int)(targetZ * 10000.0));
-    }
-
-    public float getSpeed() {
-        return this.entityData.get(SPEED) / 10.0F;
-    }
-
-    public void setSpeed(float speed) {
-        this.entityData.set(SPEED, speed * 10.0F);
+        super.defineSynchedData();
+        this.entityData.define(CLONES, 1);
     }
 
     public int getClones() {
@@ -113,103 +67,50 @@ public class MutantArrow extends Entity {
         this.entityData.set(CLONES, clones);
     }
 
-    public void randomize(float scale) {
-        this.setTargetX(this.getTargetX() + (double)((this.random.nextFloat() - 0.5F) * scale * 2.0F));
-        this.setTargetY(this.getTargetY() + (double)((this.random.nextFloat() - 0.5F) * scale * 2.0F));
-        this.setTargetZ(this.getTargetZ() + (double)((this.random.nextFloat() - 0.5F) * scale * 2.0F));
-    }
-
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-
-    public void setPotionEffect(MobEffectInstance effectInstance) {
-        this.effectInstance = effectInstance;
-    }
-
     @Override
     public void tick() {
+        float xRot = this.getXRot();
+        float xRotO = this.xRotO;
+        float yRot = this.getYRot();
+        float yRotO = this.yRotO;
         super.tick();
-        double x = this.getTargetX() - this.getX();
-        double y = this.getTargetY() - this.getY();
-        double z = this.getTargetZ() - this.getZ();
-        double d = Math.sqrt(x * x + z * z);
-        this.setYRot(180.0F + (float)Math.toDegrees(Math.atan2(x, z)));
-        if (this.getYRot() > 360.0F) {
-            this.setYRot(this.getYRot() - 360.0F);
-        }
-
-        this.setXRot((float)Math.toDegrees(Math.atan2(y, d)));
-        if (!this.level().isClientSide) {
-            if (this.tickCount == 2) {
-                this.hitEntities(0);
-            }
-
-            if (this.tickCount == 3) {
-                this.hitEntities(32);
-            }
-
-            if (this.tickCount == 4) {
-                this.handleEntities();
-            }
-        }
-
-        if (this.tickCount > 10) {
+        this.setXRot(xRot);
+        this.xRotO = xRotO;
+        this.setYRot(yRot);
+        this.yRotO = yRotO;
+        if (!this.isRemoved() && this.tickCount > 200) {
             this.discard();
         }
-
     }
 
-    protected void hitEntities(int offset) {
-        double targetX = this.getTargetX();
-        double targetY = this.getTargetY();
-        double targetZ = this.getTargetZ();
-        double d3 = this.getX() - targetX;
-        double d4 = this.getY() - targetY;
-        double d5 = this.getZ() - targetZ;
-        double dist = Mth.sqrt((float) (d3 * d3 + d4 * d4 + d5 * d5));
-        double dx = (targetX - this.getX()) / dist;
-        double dy = (targetY - this.getY()) / dist;
-        double dz = (targetZ - this.getZ()) / dist;
-
-        for(int i = offset; i < offset + 200; ++i) {
-            double x = this.getX() + dx * (double)i * 0.5;
-            double y = this.getY() + dy * (double)i * 0.5;
-            double z = this.getZ() + dz * (double)i * 0.5;
-            AABB box = (new AABB(x, y, z, x, y, z)).inflate(0.3);
-            this.pointedEntities.addAll(this.level().getEntities(this.shooter, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(Entity::isPickable)));
+    @Override
+    protected void onHit(HitResult result) {
+        super.onHit(result);
+        if (result.getType() != HitResult.Type.MISS) {
+            this.discard();
         }
-
     }
 
-    protected void handleEntities() {
-        for (Entity entity : this.pointedEntities) {
-            if (entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.MUTANT_ARROW_DAMAGE_TYPE, this, this.shooter), (float) this.damage)) {
-                if (!this.isSilent()) {
-                    this.level().playSound( null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-                }
+    @Override
+    protected float getWaterInertia() {
+        return 0.99F;
+    }
 
-                if (this.effectInstance != null && entity instanceof LivingEntity) {
-                    ((LivingEntity) entity).addEffect(this.effectInstance);
-                }
-            }
+    @Override
+    protected void tickDespawn() {
+        this.discard();
+    }
+
+    @Nullable
+    protected EntityHitResult findHitEntity(Vec3 startVec, Vec3 endVec) {
+        return ProjectileUtil.getEntityHitResult(this.level(), this, startVec, endVec, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity, 1.0F);
+    }
+
+    @Override
+    protected void doPostHurtEffects(LivingEntity target) {
+        super.doPostHurtEffects(target);
+        if (!this.isSilent()) {
+            this.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
         }
-
-        this.pointedEntities.clear();
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
-
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 }

@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v8.0.5-1.20.1] - 2023-11-30
+### Changed
+- Mutants now use a custom mob category for spawning, this ensures only a single mutant can exist at a time
+- The amount of entities spawned as a result of defeating a mutant (mainly skeleton parts and creeper eggs) is now capped to prevent issues with automatic mob farms
+- Reworked mutant skeleton arrow physics
+### Fixed
+- Fix rendering crash with mutant enderman
+- Fix rare crash when mutant zombie is attacking
+- Fix thrown blocks being able to replace non-full blocks (like stairs and slabs) when landing
+
 ## [v8.0.4-1.20.1] - 2023-09-06
 ### Fixed
 - Fixed client crash when the mutant enderman tries to drop loot

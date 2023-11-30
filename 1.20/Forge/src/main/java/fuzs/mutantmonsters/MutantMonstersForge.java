@@ -7,7 +7,6 @@ import fuzs.mutantmonsters.init.ModRegistryForge;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import fuzs.puzzleslib.api.capability.v2.ForgeCapabilityHelper;
-import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
@@ -29,13 +28,15 @@ public class MutantMonstersForge {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
-        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new, ContentRegistrationFlags.BIOME_MODIFICATIONS);
+        ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new);
         ModRegistryForge.touch();
         registerCapabilities();
     }
 
     private static void registerCapabilities() {
-        ForgeCapabilityHelper.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<SeismicWavesCapability>() {});
+        ForgeCapabilityHelper.setCapabilityToken(ModRegistry.SEISMIC_WAVES_CAPABILITY, new CapabilityToken<>() {
+            // NO-OP
+        });
     }
 
     @SubscribeEvent

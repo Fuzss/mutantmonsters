@@ -13,7 +13,6 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.*;
 import fuzs.puzzleslib.api.client.init.v1.ItemModelDisplayOverrides;
-import fuzs.puzzleslib.api.client.init.v1.ItemModelOverrides;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -99,8 +98,8 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterParticleProviders(ParticleProvidersContext context) {
-        context.registerParticleFactory(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), EndersoulParticle.Factory::new);
-        context.registerParticleFactory(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), SkullSpiritParticle.Factory::new);
+        context.registerParticleProvider(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), EndersoulParticle.Factory::new);
+        context.registerParticleProvider(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), SkullSpiritParticle.Factory::new);
     }
 
     @Override

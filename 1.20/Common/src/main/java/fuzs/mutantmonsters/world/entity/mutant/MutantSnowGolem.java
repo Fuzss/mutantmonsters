@@ -412,12 +412,10 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     }
 
     class ThrowIceGoal extends Goal {
-        private LivingEntity attackTarget;
 
         @Override
         public boolean canUse() {
-            this.attackTarget = MutantSnowGolem.this.getTarget();
-            return this.attackTarget != null && MutantSnowGolem.this.isThrowing;
+            return MutantSnowGolem.this.getTarget() != null && MutantSnowGolem.this.isThrowing;
         }
 
         @Override
@@ -427,22 +425,20 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
         @Override
         public void tick() {
-            MutantSnowGolem.this.getNavigation().stop();
-            MutantSnowGolem.this.yBodyRot = MutantSnowGolem.this.getYRot();
-            if (MutantSnowGolem.this.throwingTick == 7) {
-                ThrowableBlock block = new ThrowableBlock(MutantSnowGolem.this);
-                double x = this.attackTarget.getX() - block.getX();
-                double y = this.attackTarget.getY() - block.getY();
-                double z = this.attackTarget.getZ() - block.getZ();
-                double xz = Math.sqrt(x * x + z * z);
-                block.shoot(x, y + xz * 0.4000000059604645, z, 0.9F, 1.0F);
-                MutantSnowGolem.this.level().addFreshEntity(block);
+            LivingEntity target = MutantSnowGolem.this.getTarget();
+            if (target != null) {
+                MutantSnowGolem.this.getNavigation().stop();
+                MutantSnowGolem.this.yBodyRot = MutantSnowGolem.this.getYRot();
+                if (MutantSnowGolem.this.throwingTick == 7) {
+                    ThrowableBlock block = new ThrowableBlock(MutantSnowGolem.this);
+                    double x = target.getX() - block.getX();
+                    double y = target.getY() - block.getY();
+                    double z = target.getZ() - block.getZ();
+                    double distance = Math.sqrt(x * x + y * y + z * z);
+                    block.shoot(x, y + distance * 0.5, z, 0.9F, 1.0F);
+                    MutantSnowGolem.this.level().addFreshEntity(block);
+                }
             }
-
-        }
-
-        @Override
-        public void stop() {
         }
 
         @Override

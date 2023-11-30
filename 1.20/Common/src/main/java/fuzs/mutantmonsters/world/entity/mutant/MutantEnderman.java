@@ -1028,7 +1028,6 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     }
 
     static class TeleSmashGoal extends AnimationGoal<MutantEnderman> {
-        private LivingEntity attackTarget;
 
         public TeleSmashGoal(MutantEnderman mob) {
             super(mob);
@@ -1042,45 +1041,43 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
 
         @Override
         public boolean canUse() {
-            this.attackTarget = this.mob.getTarget();
-            return this.attackTarget != null && super.canUse();
+            return this.mob.getTarget() != null && super.canUse();
         }
 
         @Override
         public void start() {
             super.start();
-            this.attackTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 5));
-            this.attackTarget.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 160 + this.attackTarget.getRandom().nextInt(160)));
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 5));
+                target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 160 + target.getRandom().nextInt(160)));
+            }
         }
 
         @Override
         public void tick() {
-            this.mob.getNavigation().stop();
-            if (this.mob.animationTick < 20) {
-                this.mob.lookControl.setLookAt(this.attackTarget, 30.0F, 30.0F);
+            LivingEntity target = this.mob.getTarget();
+            if (target != null) {
+                this.mob.getNavigation().stop();
+                if (this.mob.animationTick < 20) {
+                    this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
+                }
+
+                if (this.mob.animationTick == 17) {
+                    target.stopRiding();
+                }
+
+                if (this.mob.animationTick == 18) {
+                    double x = target.getX() + (target.getRandom().nextDouble() - 0.5) * 14.0;
+                    double y = target.getY() + target.getRandom().nextDouble() + (target instanceof Player ? 13.0 : 7.0);
+                    double z = target.getZ() + (target.getRandom().nextDouble() - 0.5) * 14.0;
+                    EntityUtil.stunRavager(target);
+                    EntityUtil.sendParticlePacket(target, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
+                    target.teleportTo(x, y, z);
+                    this.mob.level().playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE, target.getSoundSource(), 1.2F, 0.9F + target.getRandom().nextFloat() * 0.2F);
+                    target.hurt(DamageSourcesHelper.source(this.mob.level(), ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), 6.0F);
+                }
             }
-
-            if (this.mob.animationTick == 17) {
-                this.attackTarget.stopRiding();
-            }
-
-            if (this.mob.animationTick == 18) {
-                double x = this.attackTarget.getX() + (this.attackTarget.getRandom().nextDouble() - 0.5) * 14.0;
-                double y = this.attackTarget.getY() + this.attackTarget.getRandom().nextDouble() + (this.attackTarget instanceof Player ? 13.0 : 7.0);
-                double z = this.attackTarget.getZ() + (this.attackTarget.getRandom().nextDouble() - 0.5) * 14.0;
-                EntityUtil.stunRavager(this.attackTarget);
-                EntityUtil.sendParticlePacket(this.attackTarget, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
-                this.attackTarget.teleportTo(x, y, z);
-                this.mob.level().playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE, this.attackTarget.getSoundSource(), 1.2F, 0.9F + this.attackTarget.getRandom().nextFloat() * 0.2F);
-                this.attackTarget.hurt(DamageSourcesHelper.source(this.mob.level(), ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), 6.0F);
-            }
-
-        }
-
-        @Override
-        public void stop() {
-            super.stop();
-            this.attackTarget = null;
         }
     }
 
