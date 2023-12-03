@@ -3,7 +3,6 @@ package fuzs.mutantmonsters.init;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.capability.SeismicWavesCapabilityImpl;
-import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.mixin.accessor.LootContextParamSetsAccessor;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.entity.*;
@@ -45,22 +44,20 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class ModRegistry {
     public static final SkullBlock.Type MUTANT_SKELETON_SKULL_TYPE = new SkullBlock.Type() {};
-    public static final MobCategory MUTANT_MOB_CATEGORY = CommonAbstractions.INSTANCE.createMobCategory(MutantMonsters.id("mutant").toDebugFileName().toUpperCase(Locale.ROOT), "mutant", 1, false, false, 128);
-    
+
     static final RegistryManager REGISTRY = RegistryManager.instant(MutantMonsters.MOD_ID);
     public static final RegistryReference<Block> MUTANT_SKELETON_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_skull", () -> new SkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)));
     public static final RegistryReference<Block> MUTANT_SKELETON_WALL_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_wall_skull", () -> new WallSkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.copy(MUTANT_SKELETON_SKULL_BLOCK.get()).dropsLike(MUTANT_SKELETON_SKULL_BLOCK.get())));
     public static final RegistryReference<EntityType<CreeperMinion>> CREEPER_MINION_ENTITY_TYPE = REGISTRY.registerEntityType("creeper_minion", () -> EntityType.Builder.of(CreeperMinion::new, MobCategory.MISC).sized(0.3F, 0.85F));
-    public static final RegistryReference<EntityType<MutantCreeper>> MUTANT_CREEPER_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_creeper", () -> EntityType.Builder.of(MutantCreeper::new, MUTANT_MOB_CATEGORY).sized(1.99F, 2.8F));
-    public static final RegistryReference<EntityType<MutantEnderman>> MUTANT_ENDERMAN_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_enderman", () -> EntityType.Builder.<MutantEnderman>of(MutantEnderman::new, MUTANT_MOB_CATEGORY).sized(1.2F, 4.2F));
-    public static final RegistryReference<EntityType<MutantSkeleton>> MUTANT_SKELETON_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_skeleton", () -> EntityType.Builder.<MutantSkeleton>of(MutantSkeleton::new, MUTANT_MOB_CATEGORY).sized(1.2F, 3.6F));
+    public static final RegistryReference<EntityType<MutantCreeper>> MUTANT_CREEPER_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_creeper", () -> EntityType.Builder.of(MutantCreeper::new, MobCategory.MONSTER).sized(1.99F, 2.8F));
+    public static final RegistryReference<EntityType<MutantEnderman>> MUTANT_ENDERMAN_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_enderman", () -> EntityType.Builder.<MutantEnderman>of(MutantEnderman::new, MobCategory.MONSTER).sized(1.2F, 4.2F));
+    public static final RegistryReference<EntityType<MutantSkeleton>> MUTANT_SKELETON_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_skeleton", () -> EntityType.Builder.<MutantSkeleton>of(MutantSkeleton::new, MobCategory.MONSTER).sized(1.2F, 3.6F));
     public static final RegistryReference<EntityType<MutantSnowGolem>> MUTANT_SNOW_GOLEM_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_snow_golem", () -> EntityType.Builder.of(MutantSnowGolem::new, MobCategory.MISC).sized(1.15F, 2.3F));
-    public static final RegistryReference<EntityType<MutantZombie>> MUTANT_ZOMBIE_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_zombie", () -> EntityType.Builder.<MutantZombie>of(MutantZombie::new, MUTANT_MOB_CATEGORY).sized(1.8F, 3.2F));
+    public static final RegistryReference<EntityType<MutantZombie>> MUTANT_ZOMBIE_ENTITY_TYPE = REGISTRY.registerEntityType("mutant_zombie", () -> EntityType.Builder.<MutantZombie>of(MutantZombie::new, MobCategory.MONSTER).sized(1.8F, 3.2F));
     public static final RegistryReference<EntityType<SpiderPig>> SPIDER_PIG_ENTITY_TYPE = REGISTRY.registerEntityType("spider_pig", () -> EntityType.Builder.of(SpiderPig::new, MobCategory.CREATURE).sized(1.4F, 0.9F));
     public static final RegistryReference<EntityType<MutantSkeletonBodyPart>> BODY_PART_ENTITY_TYPE = REGISTRY.registerEntityType("body_part", () -> EntityType.Builder.<MutantSkeletonBodyPart>of(MutantSkeletonBodyPart::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(0.7F, 0.7F));
     public static final RegistryReference<EntityType<CreeperMinionEgg>> CREEPER_MINION_EGG_ENTITY_TYPE = REGISTRY.registerEntityType("creeper_minion_egg", () -> EntityType.Builder.<CreeperMinionEgg>of(CreeperMinionEgg::new, MobCategory.MISC).clientTrackingRange(10).updateInterval(20).sized(0.5625F, 0.75F));

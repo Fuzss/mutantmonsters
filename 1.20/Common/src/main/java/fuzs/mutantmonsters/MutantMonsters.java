@@ -141,7 +141,7 @@ public class MutantMonsters implements ModConstructor {
         if (spawnWeight == 0.0) return;
         spawnSettings.getSpawnerData(MobCategory.MONSTER).stream().filter(data -> data.type == entityType).findAny().ifPresent(spawnerData -> {
             int spawnerDataWeight = Math.max(1, (int) (spawnerData.getWeight().asInt() * spawnWeight));
-            spawnSettings.addSpawn(ModRegistry.MUTANT_MOB_CATEGORY, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnerDataWeight, 1, 1));
+            spawnSettings.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(mutantEntityType, spawnerDataWeight, 1, 1));
         });
         MobSpawnSettings.MobSpawnCost mobSpawnCost = spawnSettings.getSpawnCost(entityType);
         if (mobSpawnCost != null) {

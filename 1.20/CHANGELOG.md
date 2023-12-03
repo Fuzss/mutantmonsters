@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v8.0.6-1.20.1] - 2023-12-03
+### Changed
+- Revert spawn category changes from last version for now
+
 ## [v8.0.5-1.20.1] - 2023-11-30
 ### Changed
 - Mutants now use a custom mob category for spawning, this ensures only a single mutant can exist at a time
