@@ -1,0 +1,64 @@
+{
+	"parent": "mutantmonsters:burn_zombie_burn",
+	"display": {
+		"icon": {
+			"item": "mutantmonsters:hulk_hammer"
+		},
+		"title": {
+			"translate": "advancements.mutantmonsters.hulk_smash.title"
+		},
+		"description": {
+			"translate": "advancements.mutantmonsters.hulk_smash.description"
+		},
+		"frame": "goal",
+		"show_toast": true,
+		"announce_to_chat": true,
+		"hidden": false
+	},
+	"criteria": {
+		"hammer_in_mainhand": {
+			"trigger": "minecraft:player_killed_entity",
+			"conditions": {
+				"entity": {
+					"type": "mutantmonsters:mutant_zombie"
+				},
+				"killing_blow": {
+					"direct_entity": {
+						"equipment": {
+							"mainhand": {
+								"items": [
+									"mutantmonsters:hulk_hammer"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"hammer_in_offhand": {
+			"trigger": "minecraft:player_killed_entity",
+			"conditions": {
+				"entity": {
+					"type": "mutantmonsters:mutant_zombie"
+				},
+				"killing_blow": {
+					"direct_entity": {
+						"equipment": {
+							"offhand": {
+								"items": [
+									"mutantmonsters:hulk_hammer"
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"requirements": [
+		[
+			"hammer_in_mainhand",
+			"hammer_in_offhand"
+		]
+	]
+}

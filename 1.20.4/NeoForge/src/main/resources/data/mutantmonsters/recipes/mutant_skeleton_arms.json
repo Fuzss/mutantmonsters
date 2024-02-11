@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		"S S",
+		"L L",
+		"L L"
+	],
+	"key": {
+		"S": {
+			"item": "mutantmonsters:mutant_skeleton_shoulder_pad"
+		},
+		"L": {
+			"item": "mutantmonsters:mutant_skeleton_limb"
+		}
+	},
+	"result": {
+		"item": "mutantmonsters:mutant_skeleton_arms"
+	}
+}

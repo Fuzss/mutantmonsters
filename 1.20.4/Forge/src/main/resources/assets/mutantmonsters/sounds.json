@@ -1,0 +1,295 @@
+{
+	"entity.creeper_minion.ambient": {
+		"sounds": [
+			{
+				"name": "entity.creeper.hurt",
+				"type": "event",
+				"volume": 0.6
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.creeper_minion.ambient"
+	},
+	"entity.creeper_minion.death": {
+		"sounds": [
+			{
+				"name": "entity.creeper.death",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.creeper_minion.death"
+	},
+	"entity.creeper_minion.hurt": {
+		"sounds": [
+			{
+				"name": "entity.creeper.hurt",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.creeper_minion.hurt"
+	},
+	"entity.creeper_minion.primed": {
+		"sounds": [
+			{
+				"name": "entity.creeper.primed",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.creeper_minion.primed"
+	},
+	"entity.creeper_minion_egg.hatch": {
+		"sounds": [
+			"mutantmonsters:entity/creeper_minion_egg_hatch"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.creeper_minion_egg.hatch"
+	},
+	"entity.endersoul_clone.death": {
+		"sounds": [
+			"minecraft:mob/illusion_illager/mirror_move1"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.endersoul_clone.death"
+	},
+	"entity.endersoul_clone.teleport": {
+		"sounds": [
+			{
+				"name": "entity.enderman.teleport",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.endersoul_clone.teleport"
+	},
+	"entity.endersoul_fragment.explode": {
+		"sounds": [
+			{
+				"name": "entity.shulker_bullet.hit",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.endersoul_fragment.explode"
+	},
+	"entity.mutant_creeper.ambient": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_creeper/ambient1",
+			"mutantmonsters:entity/mutant_creeper/ambient2",
+			"mutantmonsters:entity/mutant_creeper/ambient3",
+			"mutantmonsters:entity/mutant_creeper/ambient4"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_creeper.ambient"
+	},
+	"entity.mutant_creeper.charge": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_creeper/charge"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_creeper.charge"
+	},
+	"entity.mutant_creeper.death": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_creeper/death"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_creeper.death"
+	},
+	"entity.mutant_creeper.hurt": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_creeper/hurt1",
+			"mutantmonsters:entity/mutant_creeper/hurt2"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_creeper.hurt"
+	},
+	"entity.mutant_creeper.primed": {
+		"sounds": [
+			{
+				"name": "entity.creeper.primed",
+				"type": "event",
+				"pitch": 0.25
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_creeper.primed"
+	},
+	"entity.mutant_enderman.ambient": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_enderman/ambient1",
+			"mutantmonsters:entity/mutant_enderman/ambient2"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.ambient"
+	},
+	"entity.mutant_enderman.death": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_enderman/death"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.death"
+	},
+	"entity.mutant_enderman.hurt": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_enderman/hurt1",
+			"mutantmonsters:entity/mutant_enderman/hurt2",
+			"mutantmonsters:entity/mutant_enderman/hurt3"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.hurt"
+	},
+	"entity.mutant_enderman.morph": {
+		"sounds": [
+			"minecraft:mob/illusion_illager/mirror_move2"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.morph"
+	},
+	"entity.mutant_enderman.scream": {
+		"sounds": [
+			{
+				"name": "mutantmonsters:entity/mutant_enderman/scream",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.scream"
+	},
+	"entity.mutant_enderman.stare": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_enderman/stare"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.stare"
+	},
+	"entity.mutant_enderman.teleport": {
+		"sounds": [
+			{
+				"name": "entity.enderman.teleport",
+				"type": "event",
+				"pitch": 0.98
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_enderman.teleport"
+	},
+	"entity.mutant_skeleton.ambient": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_skeleton/ambient1",
+			"mutantmonsters:entity/mutant_skeleton/ambient2",
+			"mutantmonsters:entity/mutant_skeleton/ambient3"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_skeleton.ambient"
+	},
+	"entity.mutant_skeleton.death": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_skeleton/death"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_skeleton.death"
+	},
+	"entity.mutant_skeleton.hurt": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_skeleton/hurt1",
+			"mutantmonsters:entity/mutant_skeleton/hurt2",
+			"mutantmonsters:entity/mutant_skeleton/hurt3",
+			"mutantmonsters:entity/mutant_skeleton/hurt4"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_skeleton.hurt"
+	},
+	"entity.mutant_skeleton.step": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_skeleton/step1",
+			"mutantmonsters:entity/mutant_skeleton/step2",
+			"mutantmonsters:entity/mutant_skeleton/step3",
+			"mutantmonsters:entity/mutant_skeleton/step4"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_skeleton.step"
+	},
+	"entity.mutant_snow_golem.death": {
+		"sounds": [
+			{
+				"name": "entity.snow_golem.death",
+				"type": "event",
+				"pitch": 0.75
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_snow_golem.death"
+	},
+	"entity.mutant_snow_golem.hurt": {
+		"sounds": [
+			{
+				"name": "entity.snow_golem.hurt",
+				"type": "event",
+				"pitch": 0.75
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_snow_golem.hurt"
+	},
+	"entity.mutant_zombie.ambient": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_zombie/ambient1",
+			"mutantmonsters:entity/mutant_zombie/ambient2",
+			"mutantmonsters:entity/mutant_zombie/ambient3"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.ambient"
+	},
+	"entity.mutant_zombie.attack": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_zombie/attack"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.attack"
+	},
+	"entity.mutant_zombie.death": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_zombie/hurt1",
+			"mutantmonsters:entity/mutant_zombie/hurt2"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.death"
+	},
+	"entity.mutant_zombie.grunt": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_zombie/grunt"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.grunt"
+	},
+	"entity.mutant_zombie.hurt": {
+		"sounds": [
+			"mutantmonsters:entity/mutant_zombie/hurt1",
+			"mutantmonsters:entity/mutant_zombie/hurt2"
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.hurt"
+	},
+	"entity.mutant_zombie.roar": {
+		"sounds": [
+			{
+				"name": "mutantmonsters:entity/mutant_zombie/roar1",
+				"weight": 2,
+				"attenuation_distance": 32
+			},
+			{
+				"name": "mutantmonsters:entity/mutant_zombie/roar2",
+				"weight": 2,
+				"attenuation_distance": 32
+			},
+			{
+				"name": "mutantmonsters:entity/mutant_zombie/roarslow1",
+				"attenuation_distance": 32
+			},
+			{
+				"name": "mutantmonsters:entity/mutant_zombie/roarslow2",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.mutant_zombie.roar"
+	},
+	"entity.spider_pig.ambient": {
+		"sounds": [
+			{
+				"name": "entity.pig.ambient",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.spider_pig.ambient"
+	},
+	"entity.spider_pig.death": {
+		"sounds": [
+			{
+				"name": "entity.pig.death",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.spider_pig.death"
+	},
+	"entity.spider_pig.hurt": {
+		"sounds": [
+			{
+				"name": "entity.pig.hurt",
+				"type": "event"
+			}
+		],
+		"subtitle": "subtitles.mutantmonsters.entity.spider_pig.hurt"
+	}
+}

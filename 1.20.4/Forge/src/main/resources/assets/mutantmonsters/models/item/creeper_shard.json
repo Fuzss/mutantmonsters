@@ -1,0 +1,6 @@
+{
+	"parent": "item/handheld",
+	"textures": {
+		"layer0": "mutantmonsters:item/creeper_shard"
+	}
+}

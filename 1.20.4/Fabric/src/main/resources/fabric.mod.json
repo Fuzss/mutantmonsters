@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "${modId}",
+  "version": "${modVersion}",
+
+  "name": "${modName}",
+  "description": "${modDescription}",
+
+  "authors": [
+    "${modAuthor}"
+  ],
+  
+  "contact": {
+    "homepage": "${modPageUrl}",
+    "issues": "${modIssueUrl}",
+    "sources": "${modPageUrl}"
+  },
+
+  "license": "${modLicense}",
+  "icon": "mod_logo.png",
+
+  "environment": "${modFabricEnvironment}",
+
+  "entrypoints": {
+    "main": [
+      "${mainEntryPoint}"
+    ],
+    "client": [
+      "${clientEntryPoint}"
+    ],
+    "cardinal-components": [
+      "fuzs.puzzleslib.api.capability.v2.initializer.EntityComponentInitializerImpl"
+    ]
+  },
+
+  "mixins": [
+    "${modId}.common.mixins.json",
+    "${modId}.fabric.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${minFabricVersion}",
+    "fabric-api": ">=${minFabricApiVersion}",
+    "puzzleslib": ">=${minPuzzlesVersion}",
+    "cardinal-components-base": "*",
+    "cardinal-components-entity": "*",
+    "minecraft": "${minecraftVersion}",
+    "java": ">=17"
+  },
+
+  "custom": {
+    "cardinal-components": [
+      "${modId}:seismic_waves"
+    ],
+    "lithium:options": {
+      "mixin.ai.nearby_entity_tracking.goals": false
+    }
+  }
+}
