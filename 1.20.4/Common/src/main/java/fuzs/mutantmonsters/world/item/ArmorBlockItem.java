@@ -23,7 +23,7 @@ public class ArmorBlockItem extends StandingAndWallBlockItem implements Equipabl
     private static final UUID ARMOR_MODIFIER = UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150");
 
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
-    final ArmorMaterial material;
+    protected final ArmorMaterial material;
 
     public ArmorBlockItem(ArmorMaterial material, Block floorBlock, Block wallBlockIn, Item.Properties propertiesIn) {
         super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForType(ArmorItem.Type.HELMET)), Direction.DOWN);

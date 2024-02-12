@@ -30,12 +30,14 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Queue;
+
 public class PlayerEventsHandler {
     private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 16;
 
     public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
         // quick charge for bows
-        if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.get()) {
+        if (entity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.value()) {
             if (useItem.getItem() instanceof BowItem && BowItem.getPowerForTime(useItem.getUseDuration() - useItemRemaining.getAsInt()) < 1.0F) {
                 useItemRemaining.mapInt(i -> i - 2);
             }
@@ -46,7 +48,7 @@ public class PlayerEventsHandler {
     public static EventResult onArrowLoose(Player player, ItemStack stack, Level level, MutableInt charge, boolean hasAmmo) {
         // multi-shot for bows
         if (!(stack.getItem() instanceof BowItem)) return EventResult.PASS;
-        if (hasAmmo && player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get()) {
+        if (hasAmmo && player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ModRegistry.MUTANT_SKELETON_SKULL_ITEM.value()) {
             float velocity = BowItem.getPowerForTime(charge.getAsInt());
             if (!level.isClientSide && velocity >= 0.1F) {
                 ItemStack itemstack = player.getProjectile(stack);
@@ -54,7 +56,7 @@ public class PlayerEventsHandler {
                 float[] shotPitches = getShotPitches(level.random, velocity);
                 for (int i = 0; i < 2; i++) {
                     AbstractArrow abstractarrow = arrowitem.createArrow(level, itemstack, player);
-                    abstractarrow = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) stack.getItem(), abstractarrow);
+                    abstractarrow = CommonAbstractions.INSTANCE.getCustomArrowShotFromBow((BowItem) stack.getItem(), abstractarrow, itemstack);
                     abstractarrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity * 3.0F, 1.5F);
                     applyPowerEnchantment(abstractarrow, stack);
                     applyPunchEnchantment(abstractarrow, stack);
@@ -110,12 +112,18 @@ public class PlayerEventsHandler {
         playShoulderEntitySound(player, player.getShoulderEntityLeft());
         playShoulderEntitySound(player, player.getShoulderEntityRight());
         if (!player.level().isClientSide) {
-            ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(player).map(SeismicWavesCapability::seismicWaves).ifPresent(seismicWaves -> {
-                while (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
-                    seismicWaves.poll();
-                }
-                if (!seismicWaves.isEmpty()) handleSeismicWave(player, seismicWaves.poll());
-            });
+            SeismicWavesCapability capability = ModRegistry.SEISMIC_WAVES_CAPABILITY.get(player);
+            Queue<SeismicWave> seismicWaves = capability.getSeismicWaves();
+            int oldSize = seismicWaves.size();
+            while (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
+                seismicWaves.poll();
+            }
+            if (!seismicWaves.isEmpty()) {
+                handleSeismicWave(player, seismicWaves.poll());
+            }
+            if (oldSize != seismicWaves.size()) {
+                capability.setChanged();
+            }
         }
     }
 
@@ -132,18 +140,18 @@ public class PlayerEventsHandler {
 
     private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
         if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
-            EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
+            EntityType.byString(compoundNBT.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.value()::equals).ifPresent((entityType) -> {
                 if (player.level().random.nextInt(500) == 0) {
-                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get(), player.getSoundSource(), 1.0F, (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F + 1.5F);
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(), player.getSoundSource(), 1.0F, (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F + 1.5F);
                 }
             });
         }
     }
 
-    public static EventResult onItemToss(ItemEntity entityItem, Player player) {
+    public static EventResult onItemToss(Player player, ItemEntity entityItem) {
         if (!player.level().isClientSide) {
             ItemStack stack = entityItem.getItem();
-            boolean isHand = stack.getItem() == ModRegistry.ENDERSOUL_HAND_ITEM.get() && stack.isDamaged();
+            boolean isHand = stack.getItem() == ModRegistry.ENDERSOUL_HAND_ITEM.value() && stack.isDamaged();
             if (stack.getItem() == Items.ENDER_EYE || isHand) {
                 int count = 0;
 
@@ -155,14 +163,14 @@ public class PlayerEventsHandler {
                 }
 
                 if (count > 0) {
-                    EntityUtil.sendParticlePacket(player, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
+                    EntityUtil.sendParticlePacket(player, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
                     int addDmg = count * 60;
                     if (isHand) {
                         int dmg = stack.getDamageValue() - addDmg;
                         stack.setDamageValue(Math.max(dmg, 0));
                     } else {
-                        ItemStack newStack = new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.get());
-                        newStack.setDamageValue(ModRegistry.ENDERSOUL_HAND_ITEM.get().getMaxDamage() - addDmg);
+                        ItemStack newStack = new ItemStack(ModRegistry.ENDERSOUL_HAND_ITEM.value());
+                        newStack.setDamageValue(ModRegistry.ENDERSOUL_HAND_ITEM.value().getMaxDamage() - addDmg);
                         entityItem.setItem(newStack);
                     }
                 }

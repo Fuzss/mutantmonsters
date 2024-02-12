@@ -451,7 +451,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         }
 
         if (isPigOrSpider(livingEntity)) {
-            EntityUtil.convertMobWithNBT(livingEntity, ModRegistry.SPIDER_PIG_ENTITY_TYPE.get(), false);
+            EntityUtil.convertMobWithNBT(livingEntity, ModRegistry.SPIDER_PIG_ENTITY_TYPE.value(), false);
             return false;
         }
         return true;
@@ -480,7 +480,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (this.random.nextInt(20) == 0) {
             return EntityType.PIG.create(serverWorld);
         } else {
-            SpiderPig spiderPig = ModRegistry.SPIDER_PIG_ENTITY_TYPE.get().create(serverWorld);
+            SpiderPig spiderPig = ModRegistry.SPIDER_PIG_ENTITY_TYPE.value().create(serverWorld);
             UUID uuid = this.getOwnerUUID();
             if (uuid != null) {
                 spiderPig.setOwnerUUID(uuid);
@@ -549,17 +549,17 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT.value();
     }
 
     @Override

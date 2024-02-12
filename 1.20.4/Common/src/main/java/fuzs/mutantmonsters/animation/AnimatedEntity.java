@@ -2,12 +2,12 @@ package fuzs.mutantmonsters.animation;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.network.S2CAnimationMessage;
-import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
+import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.ArrayUtils;
 
-public interface AnimatedEntity extends AdditionalAddEntityData {
+public interface AnimatedEntity extends AdditionalSpawnDataEntity {
 
     Animation getAnimation();
 

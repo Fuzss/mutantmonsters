@@ -6,12 +6,12 @@ import fuzs.mutantmonsters.core.SeismicWave;
 import fuzs.mutantmonsters.core.ZombieResurrection;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
-import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -527,17 +527,17 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_MUTANT_ZOMBIE_AMBIENT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_MUTANT_ZOMBIE_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_MUTANT_ZOMBIE_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_ZOMBIE_DEATH_SOUND_EVENT.value();
     }
 
     @Override
@@ -568,7 +568,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+        return AdditionalSpawnDataEntity.getPacket(this);
     }
 
     static class ThrowAttackGoal extends AnimationGoal<MutantZombie> {
@@ -647,7 +647,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                         target.invulnerableTime = 10;
                         EntityUtil.sendPlayerVelocityPacket(target);
                         EntityUtil.stunRavager(target);
-                        this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                        this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.value(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
                     }
 
                     if ((this.mob.onGround() || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
@@ -702,7 +702,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             }
 
             if (this.mob.animationTick == 10) {
-                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ROAR_SOUND_EVENT.get(), 3.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
+                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ROAR_SOUND_EVENT.value(), 3.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
 
                 for (Entity entity : this.mob.level().getEntities(this.mob, this.mob.getBoundingBox().inflate(12.0, 8.0, 12.0))) {
                     if (this.mob.canHarm(entity) && this.mob.distanceToSqr(entity) <= 196.0) {
@@ -754,7 +754,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         public void start() {
             super.start();
             this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
-            this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+            this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.value(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
         }
 
         @Override

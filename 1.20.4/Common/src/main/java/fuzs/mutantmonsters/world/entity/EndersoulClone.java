@@ -150,8 +150,8 @@ public class EndersoulClone extends Monster {
         double z = entity.getZ() + (this.random.nextDouble() - 0.5) * 24.0;
         boolean teleport = EntityUtil.teleportTo(this, x, y, z);
         if (teleport) {
-            this.level().playSound(null, this.xo, this.yo, this.zo, ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), this.getSoundSource(), 1.0F, 1.0F);
-            this.playSound(ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.get(), 1.0F, 1.0F);
+            this.level().playSound(null, this.xo, this.yo, this.zo, ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(), this.getSoundSource(), 1.0F, 1.0F);
+            this.playSound(ModRegistry.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(), 1.0F, 1.0F);
             this.stopRiding();
         }
 
@@ -206,6 +206,6 @@ public class EndersoulClone extends Monster {
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_ENDERSOUL_CLONE_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_ENDERSOUL_CLONE_DEATH_SOUND_EVENT.value();
     }
 }

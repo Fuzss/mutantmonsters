@@ -40,8 +40,8 @@ public class S2CAnimationMessage implements MessageV2<S2CAnimationMessage> {
 
             @Override
             public void handle(S2CAnimationMessage message, Player player, Object gameInstance) {
-                Level world = ((Minecraft) gameInstance).level;
-                Entity entity = world.getEntity(message.entityId);
+                Level level = ((Minecraft) gameInstance).level;
+                Entity entity = level.getEntity(message.entityId);
                 if (entity instanceof AnimatedEntity animatedEntity) {
                     if (message.index == -1) {
                         animatedEntity.setAnimation(Animation.NONE);

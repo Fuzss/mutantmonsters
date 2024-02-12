@@ -73,7 +73,7 @@ public class S2CMutantLevelParticlesMessage implements MessageV2<S2CMutantLevelP
             @Override
             public void handle(S2CMutantLevelParticlesMessage message, Player player, Object gameInstance) {
                 Level level = (((Minecraft) gameInstance)).level;
-                if (message.particleData == ModRegistry.ENDERSOUL_PARTICLE_TYPE.get()) {
+                if (message.particleData == ModRegistry.ENDERSOUL_PARTICLE_TYPE.value()) {
                     for (int i = 0; i < message.amount; ++i) {
                         float f = (level.random.nextFloat() - 0.5F) * 1.8F;
                         float f1 = (level.random.nextFloat() - 0.5F) * 1.8F;
@@ -81,7 +81,7 @@ public class S2CMutantLevelParticlesMessage implements MessageV2<S2CMutantLevelP
                         double tempX = message.posX + (double) (level.random.nextFloat() - 0.5F) * message.speedX;
                         double tempY = message.posY + (double) (level.random.nextFloat() - 0.5F) * message.speedY + 0.5;
                         double tempZ = message.posZ + (double) (level.random.nextFloat() - 0.5F) * message.speedZ;
-                        level.addAlwaysVisibleParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), true, tempX, tempY, tempZ, f, f1, f2);
+                        level.addAlwaysVisibleParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), true, tempX, tempY, tempZ, f, f1, f2);
                     }
                 } else {
                     for (int i = 0; i < message.amount; ++i) {

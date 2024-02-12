@@ -1,0 +1,9 @@
+// 1.20.4	2024-02-12T23:55:55.904634	Entity Type Loot Tables
+6e98338b808c4953b35b5c1b86c276b0efcc742a data/mutantmonsters/loot_tables/entities/creeper_minion.json
+2c00674cd2735a4e1145fc856a9bf2162e4d1541 data/mutantmonsters/loot_tables/entities/endersoul_clone.json
+e6b76d9d23e0bc2bb483e7613e30a844dab3a76d data/mutantmonsters/loot_tables/entities/mutant_creeper.json
+0c3ce845b1c662ac618a82a53e9deaca427ef2ba data/mutantmonsters/loot_tables/entities/mutant_enderman.json
+43a1857328c8dcfe295c716ce06cd1e85aa88ad7 data/mutantmonsters/loot_tables/entities/mutant_skeleton.json
+75dd09fa572b8bb1c49e3cf82ed1fa8b0ec7b133 data/mutantmonsters/loot_tables/entities/mutant_snow_golem.json
+30dcd3f9dca950010bfa990f8721aaf7d9d4cad0 data/mutantmonsters/loot_tables/entities/mutant_zombie.json
+48e03329851a80e8f13b3486149f535ee9480c71 data/mutantmonsters/loot_tables/entities/spider_pig.json

@@ -14,13 +14,13 @@ public class SkullWithItemTagBlockEntity extends SkullBlockEntity {
     @Nullable
     private CompoundTag itemTag;
 
-    public SkullWithItemTagBlockEntity(BlockPos pPos, BlockState pBlockState) {
-        super(pPos, pBlockState);
+    public SkullWithItemTagBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(blockPos, blockState);
     }
 
     @Override
     public BlockEntityType<?> getType() {
-        return ModRegistry.SKULL_BLOCK_ENTITY_TYPE.get();
+        return ModRegistry.SKULL_BLOCK_ENTITY_TYPE.value();
     }
 
     public void setItemData(@Nullable CompoundTag skullData) {

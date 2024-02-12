@@ -5,7 +5,7 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.proxy.Proxy;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -47,7 +47,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     public CreeperMinionEgg(MutantCreeper spawner, Entity owner) {
-        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), spawner.level());
+        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.value(), spawner.level());
         this.owner = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
         if (spawner.isCharged()) {
@@ -69,13 +69,8 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    public double getMyRidingOffset() {
-        return this.getVehicle() instanceof Player ? (double)this.getBbHeight() - (this.getVehicle().getPose() == Pose.CROUCHING ? 0.35 : 0.2) : 0.0;
-    }
-
-    @Override
-    public double getPassengersRidingOffset() {
-        return this.getBbHeight();
+    protected float ridingOffset(Entity entity) {
+        return entity instanceof Player ? 0.2F : super.ridingOffset(entity);
     }
 
     @Override
@@ -99,8 +94,8 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps) {
+        super.lerpTo(x, y, z, yaw, pitch, steps);
         this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
 
@@ -113,7 +108,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     private void hatch() {
-        CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(this.level());
+        CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.value().create(this.level());
         if (this.owner != null) {
             Player playerEntity = this.level().getPlayerByUUID(this.owner);
             if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
@@ -128,7 +123,7 @@ public class CreeperMinionEgg extends Entity {
 
         minion.setPos(this.getX(), this.getY(), this.getZ());
         this.level().addFreshEntity(minion);
-        this.playSound(ModRegistry.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.get(), 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
+        this.playSound(ModRegistry.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(), 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
         this.discard();
     }
 
@@ -216,14 +211,17 @@ public class CreeperMinionEgg extends Entity {
                 this.setDeltaMovement(0.0, 0.2, 0.0);
                 this.health = (int)((float)this.health - amount);
                 if (this.health <= 0) {
-                    MutatedExplosion.create(this, this.isCharged() ? 2.0F : 0.0F, false, Level.ExplosionInteraction.TNT);
+                    float sizeIn = this.isCharged() ? 2.0F : 0.0F;
+                    MutatedExplosionHelper.explode(this, sizeIn, false,
+                            Level.ExplosionInteraction.TNT
+                    );
                     if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for(int i = 5 + this.random.nextInt(6); i > 0; --i) {
                                 this.spawnAtLocation(Items.GUNPOWDER);
                             }
                         } else {
-                            this.spawnAtLocation(ModRegistry.CREEPER_SHARD_ITEM.get());
+                            this.spawnAtLocation(ModRegistry.CREEPER_SHARD_ITEM.value());
                         }
                     }
 

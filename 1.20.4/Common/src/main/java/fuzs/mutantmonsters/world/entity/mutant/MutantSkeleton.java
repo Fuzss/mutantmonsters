@@ -261,22 +261,22 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.value();
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockIn) {
-        this.playSound(ModRegistry.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.get(), 0.15F, 1.0F);
+        this.playSound(ModRegistry.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.value(), 0.15F, 1.0F);
     }
 
     static class MultiShotGoal extends AnimationGoal<MutantSkeleton> {
@@ -418,9 +418,11 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                         effects.add(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
                     }
 
-                    ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
-                    PotionUtils.setCustomEffects(itemStack, effects);
-                    arrowEntity.setEffectsFromItem(itemStack);
+                    if (!effects.isEmpty()) {
+                        ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
+                        PotionUtils.setCustomEffects(itemStack, effects);
+                        arrowEntity.setEffectsFromItem(itemStack);
+                    }
 
                     this.mob.level().addFreshEntity(arrowEntity);
                     this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);

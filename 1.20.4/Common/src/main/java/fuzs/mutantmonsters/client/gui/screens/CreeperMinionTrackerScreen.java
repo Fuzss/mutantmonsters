@@ -23,10 +23,10 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public class CreeperMinionTrackerScreen extends Screen {
-    private static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/gui/creeper_minion_tracker.png");
-    private static final MutableComponent HEALTH_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.health");
-    private static final MutableComponent EXPLOSION_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion");
-    private static final MutableComponent BLAST_RADIUS_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.blast_radius");
+    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/gui/creeper_minion_tracker.png");
+    public static final MutableComponent HEALTH_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.health");
+    public static final MutableComponent EXPLOSION_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion");
+    public static final MutableComponent BLAST_RADIUS_COMPONENT = Component.translatable("gui.mutantmonsters.creeper_minion_tracker.blast_radius");
     private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("#.0"), decimalFormat -> {
         decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
     });
@@ -103,7 +103,6 @@ public class CreeperMinionTrackerScreen extends Screen {
         if (!this.creeperMinion.isAlive()) {
             this.minecraft.player.closeContainer();
         }
-        this.name.tick();
     }
 
     private void onNameChanged(String input) {
@@ -134,22 +133,26 @@ public class CreeperMinionTrackerScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 166, 146, 5);
-        float healthProgress = Mth.clamp(this.creeperMinion.getHealth() / this.creeperMinion.getMaxHealth(), 0.0F, 1.0F);
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 171, (int) (healthProgress * 146.0F), 5);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, this.title, this.leftPos + this.titleLabelX, this.topPos + this.titleLabelY, 4210752, false);
-        this.name.render(guiGraphics, mouseX, mouseY, partialTicks);
+        this.name.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, HEALTH_COMPONENT, (this.leftPos + 13), (this.topPos + 31), 4210752, false);
         guiGraphics.drawString(this.font, EXPLOSION_COMPONENT, (this.leftPos + 13), (this.topPos + 51), 4210752, false);
         guiGraphics.drawString(this.font, BLAST_RADIUS_COMPONENT, (this.leftPos + 13), (this.topPos + 71), 4210752, false);
         guiGraphics.drawCenteredString(this.font, String.format("%s / %s", DECIMAL_FORMAT.format(this.creeperMinion.getHealth()), DECIMAL_FORMAT.format(this.creeperMinion.getMaxHealth())), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 31, 16777215);
         guiGraphics.drawCenteredString(this.font, this.creeperMinion.canExplodeContinuously() ? Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion.continuous") : Component.translatable("gui.mutantmonsters.creeper_minion_tracker.explosion.one_time"), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 51, 16777215);
         guiGraphics.drawCenteredString(this.font, DECIMAL_FORMAT.format(this.creeperMinion.getExplosionRadius()), this.leftPos + this.imageWidth / 2 + 38, this.topPos + 71, 16777215);
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 166, 146, 5);
+        float healthProgress = Mth.clamp(this.creeperMinion.getHealth() / this.creeperMinion.getMaxHealth(), 0.0F, 1.0F);
+        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 171, (int) (healthProgress * 146.0F), 5);
     }
 
     @Override

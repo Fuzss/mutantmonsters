@@ -30,6 +30,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class MutantSkeletonBodyPart extends Entity {
+    public static final String TAG_PART = "Part";
+    public static final String TAG_DESPAWN_TIMER = "DespawnTimer";
     private static final EntityDataAccessor<Byte> PART = SynchedEntityData.defineId(MutantSkeletonBodyPart.class, EntityDataSerializers.BYTE);
 
     private final boolean yawPositive;
@@ -51,7 +53,7 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     public MutantSkeletonBodyPart(Level level, Mob owner, int part) {
-        this(ModRegistry.BODY_PART_ENTITY_TYPE.get(), level);
+        this(ModRegistry.BODY_PART_ENTITY_TYPE.value(), level);
         this.owner = new WeakReference<>(owner);
         this.setPart(part);
         this.setPos(owner.getX(), owner.getY() + (double) (3.2F * (0.25F + this.random.nextFloat() * 0.5F)), owner.getZ());
@@ -87,7 +89,7 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
         this.setPos(x, y, z);
         this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
@@ -118,7 +120,7 @@ public class MutantSkeletonBodyPart extends Entity {
             this.setXRot(this.getXRot() + 15.0F * (float) (this.pitchPositive ? 1 : -1));
 
             for (Entity entity : this.level().getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(this.level().damageSources().thrown(this, this.owner != null ? (Entity) this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
+                if (entity.hurt(this.level().damageSources().thrown(this, this.owner != null ? this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
                     entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
                 }
             }
@@ -154,7 +156,7 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     private boolean canHarm(Entity entity) {
-        return entity.isPickable() && entity.getType() != ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.get();
+        return entity.isPickable() && entity.getType() != ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.value();
     }
 
     @Override
@@ -165,15 +167,15 @@ public class MutantSkeletonBodyPart extends Entity {
     private Item getLegacyItemByPart() {
         int part = this.getPart();
         if (part == 0) {
-            return ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.get();
+            return ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.value();
         } else if (part >= 1 && part < 19) {
-            return ModRegistry.MUTANT_SKELETON_RIB_ITEM.get();
+            return ModRegistry.MUTANT_SKELETON_RIB_ITEM.value();
         } else if (part == 19) {
-            return ModRegistry.MUTANT_SKELETON_SKULL_ITEM.get();
+            return ModRegistry.MUTANT_SKELETON_SKULL_ITEM.value();
         } else if (part >= 21 && part < 29) {
-            return ModRegistry.MUTANT_SKELETON_LIMB_ITEM.get();
+            return ModRegistry.MUTANT_SKELETON_LIMB_ITEM.value();
         } else {
-            return part != 29 && part != 30 ? Items.AIR : ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.get();
+            return part != 29 && part != 30 ? Items.AIR : ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value();
         }
     }
 
@@ -199,13 +201,13 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putByte("Part", (byte) this.getPart());
-        compound.putShort("DespawnTimer", (short) this.despawnTimer);
+        compound.putByte(TAG_PART, (byte) this.getPart());
+        compound.putShort(TAG_DESPAWN_TIMER, (short) this.despawnTimer);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setPart(compound.getByte("Part"));
-        this.despawnTimer = compound.getShort("DespawnTimer");
+        this.setPart(compound.getByte(TAG_PART));
+        this.despawnTimer = compound.getShort(TAG_DESPAWN_TIMER);
     }
 }

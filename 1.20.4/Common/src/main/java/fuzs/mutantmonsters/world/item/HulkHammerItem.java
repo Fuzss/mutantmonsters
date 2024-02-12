@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class HulkHammerItem extends Item implements Vanishable {
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
@@ -81,7 +82,9 @@ public class HulkHammerItem extends Item implements Vanishable {
                 int x1 = Mth.floor(playerEntity.getX() + vec.x * 8.0);
                 int z1 = Mth.floor(playerEntity.getZ() + vec.z * 8.0);
                 SeismicWave.createWaves(world, list, x, z, x1, z1, y);
-                ModRegistry.SEISMIC_WAVES_CAPABILITY.maybeGet(playerEntity).map(SeismicWavesCapability::seismicWaves).ifPresent(seismicWaves -> seismicWaves.addAll(list));
+                SeismicWavesCapability capability = ModRegistry.SEISMIC_WAVES_CAPABILITY.get(playerEntity);
+                capability.getSeismicWaves().addAll(list);
+                capability.setChanged();
             }
 
             world.playSound(playerEntity, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 0.8F, 0.8F + playerEntity.getRandom().nextFloat() * 0.4F);

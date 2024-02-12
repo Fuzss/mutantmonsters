@@ -3,9 +3,9 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
-import fuzs.mutantmonsters.client.renderer.entity.CreeperMinionRenderer;
 import fuzs.mutantmonsters.client.model.CreeperMinionModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
+import fuzs.mutantmonsters.client.renderer.entity.CreeperMinionRenderer;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -28,27 +28,26 @@ public class CreeperMinionShoulderLayer<T extends Player> extends RenderLayer<T,
     }
 
     @Override
-    public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, T entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.renderCreeperMinion(matrixStackIn, bufferIn, packedLightIn, entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, true);
-        this.renderCreeperMinion(matrixStackIn, bufferIn, packedLightIn, entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, false);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, T livingEntity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
+        this.renderCreeperMinion(poseStack, multiBufferSource, packedLight, livingEntity, limbSwing, limbSwingAmount, partialTick, ageInTicks, netHeadYaw, headPitch, true);
+        this.renderCreeperMinion(poseStack, multiBufferSource, packedLight, livingEntity, limbSwing, limbSwingAmount, partialTick, ageInTicks, netHeadYaw, headPitch, false);
     }
 
-    private void renderCreeperMinion(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, T livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, boolean leftShoulderIn) {
-        CompoundTag compoundnbt = leftShoulderIn ? livingEntity.getShoulderEntityLeft() : livingEntity.getShoulderEntityRight();
-        EntityType.byString(compoundnbt.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.get()::equals).ifPresent((entityType) -> {
-            matrixStackIn.pushPose();
-            matrixStackIn.translate(leftShoulderIn ? 0.41999998688697815 : -0.41999998688697815, livingEntity.isCrouching() ? -0.550000011920929 : -0.75, 0.0);
-            matrixStackIn.scale(0.5F, 0.5F, 0.5F);
-            VertexConsumer ivertexbuilder = bufferIn.getBuffer(this.model.renderType(CreeperMinionRenderer.TEXTURE));
+    private void renderCreeperMinion(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, T livingEntity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch, boolean leftShoulder) {
+        CompoundTag tag = leftShoulder ? livingEntity.getShoulderEntityLeft() : livingEntity.getShoulderEntityRight();
+        EntityType.byString(tag.getString("id")).filter(ModRegistry.CREEPER_MINION_ENTITY_TYPE.value()::equals).ifPresent((entityType) -> {
+            poseStack.pushPose();
+            poseStack.translate(leftShoulder ? 0.42 : -0.42, livingEntity.isCrouching() ? -0.55 : -0.75, 0.0);
+            poseStack.scale(0.5F, 0.5F, 0.5F);
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(CreeperMinionRenderer.TEXTURE));
             this.model.setupAnim(null, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-            this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-            if (compoundnbt.getBoolean("Powered")) {
-                VertexConsumer ivertexbuilder1 = bufferIn.getBuffer(MutantRenderTypes.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
+            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            if (tag.getBoolean("Powered")) {
+                VertexConsumer ivertexbuilder1 = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
                 this.chargedModel.setupAnim(null, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-                this.chargedModel.renderToBuffer(matrixStackIn, ivertexbuilder1, packedLightIn, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
+                this.chargedModel.renderToBuffer(poseStack, ivertexbuilder1, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
             }
-
-            matrixStackIn.popPose();
+            poseStack.popPose();
         });
     }
 }

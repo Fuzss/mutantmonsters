@@ -24,18 +24,18 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
     }
 
     @Override
-    public void render(T entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        if (ClientAbstractions.INSTANCE.onRenderLiving$Pre(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn)) return;
-        matrixStackIn.pushPose();
-        this.model.attackTime = this.getAttackAnim(entityIn, partialTicks);
-        boolean shouldSit = entityIn.isPassenger() && CommonAbstractions.INSTANCE.shouldRiderSit(entityIn.getVehicle());
+    public void render(T entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
+        if (ClientAbstractions.INSTANCE.onRenderLiving$Pre(entity, this, partialTicks, poseStack, multiBufferSource, packedLight)) return;
+        poseStack.pushPose();
+        this.model.attackTime = this.getAttackAnim(entity, partialTicks);
+        boolean shouldSit = entity.isPassenger() && CommonAbstractions.INSTANCE.shouldRiderSit(entity.getVehicle());
         this.model.riding = shouldSit;
-        this.model.young = entityIn.isBaby();
-        float rotationYaw = Mth.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
-        float rotationYawHead = Mth.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
+        this.model.young = entity.isBaby();
+        float rotationYaw = Mth.rotLerp(partialTicks, entity.yBodyRotO, entity.yBodyRot);
+        float rotationYawHead = Mth.rotLerp(partialTicks, entity.yHeadRotO, entity.yHeadRot);
         float netHeadYaw = rotationYawHead - rotationYaw;
         float ageInTicks;
-        if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingentity) {
+        if (shouldSit && entity.getVehicle() instanceof LivingEntity livingentity) {
             rotationYaw = Mth.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
             netHeadYaw = rotationYawHead - rotationYaw;
             ageInTicks = Mth.wrapDegrees(netHeadYaw);
@@ -55,27 +55,27 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
             netHeadYaw = rotationYawHead - rotationYaw;
         }
 
-        float headPitch = Mth.lerp(partialTicks, entityIn.xRotO, entityIn.getXRot());
+        float headPitch = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
         float limbSwingAmount;
-        if (entityIn.getPose() == Pose.SLEEPING) {
-            Direction direction = entityIn.getBedOrientation();
+        if (entity.getPose() == Pose.SLEEPING) {
+            Direction direction = entity.getBedOrientation();
             if (direction != null) {
-                limbSwingAmount = entityIn.getEyeHeight(Pose.STANDING) - 0.1F;
-                matrixStackIn.translate((double)((float)(-direction.getStepX()) * limbSwingAmount), 0.0, (double)((float)(-direction.getStepZ()) * limbSwingAmount));
+                limbSwingAmount = entity.getEyeHeight(Pose.STANDING) - 0.1F;
+                poseStack.translate((double)((float)(-direction.getStepX()) * limbSwingAmount), 0.0, (double)((float)(-direction.getStepZ()) * limbSwingAmount));
             }
         }
 
-        ageInTicks = this.getBob(entityIn, partialTicks);
-        this.setupRotations(entityIn, matrixStackIn, ageInTicks, rotationYaw, partialTicks);
-        matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
-        this.scale(entityIn, matrixStackIn, partialTicks);
-        matrixStackIn.translate(0.0, -1.5010000467300415, 0.0);
+        ageInTicks = this.getBob(entity, partialTicks);
+        this.setupRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
+        poseStack.scale(-1.0F, -1.0F, 1.0F);
+        this.scale(entity, poseStack, partialTicks);
+        poseStack.translate(0.0, -1.5010000467300415, 0.0);
         limbSwingAmount = 0.0F;
         float limbSwing = 0.0F;
         if (!shouldSit) {
-            limbSwingAmount = entityIn.walkAnimation.speed(partialTicks);
-            limbSwing = entityIn.walkAnimation.position(partialTicks);
-            if (entityIn.isBaby()) {
+            limbSwingAmount = entity.walkAnimation.speed(partialTicks);
+            limbSwing = entity.walkAnimation.position(partialTicks);
+            if (entity.isBaby()) {
                 limbSwing *= 3.0F;
             }
 
@@ -84,29 +84,29 @@ public abstract class AlternateMobRenderer<T extends Mob, M extends EntityModel<
             }
         }
 
-        this.model.prepareMobModel(entityIn, limbSwing, limbSwingAmount, partialTicks);
-        this.model.setupAnim(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+        this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         Minecraft minecraft = Minecraft.getInstance();
-        boolean isVisible = this.isBodyVisible(entityIn);
-        boolean visibleToSpectator = !isVisible && !entityIn.isInvisibleTo(minecraft.player);
-        boolean isGlowing = minecraft.shouldEntityAppearGlowing(entityIn);
-        RenderType rendertype = this.getRenderType(entityIn, isVisible, visibleToSpectator, isGlowing);
-        if (rendertype != null && !this.hasAlternateRender(entityIn, partialTicks, matrixStackIn, bufferIn, packedLightIn)) {
-            VertexConsumer ivertexbuilder = bufferIn.getBuffer(rendertype);
-            int packedOverlay = OverlayTexture.pack(this.getWhiteOverlayProgress(entityIn, partialTicks), this.showsHurtColor(entityIn));
-            this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, packedOverlay, 1.0F, 1.0F, 1.0F, visibleToSpectator ? 0.15F : this.getAlpha(entityIn, partialTicks));
+        boolean isVisible = this.isBodyVisible(entity);
+        boolean visibleToSpectator = !isVisible && !entity.isInvisibleTo(minecraft.player);
+        boolean isGlowing = minecraft.shouldEntityAppearGlowing(entity);
+        RenderType rendertype = this.getRenderType(entity, isVisible, visibleToSpectator, isGlowing);
+        if (rendertype != null && !this.hasAlternateRender(entity, partialTicks, poseStack, multiBufferSource, packedLight)) {
+            VertexConsumer ivertexbuilder = multiBufferSource.getBuffer(rendertype);
+            int packedOverlay = OverlayTexture.pack(this.getWhiteOverlayProgress(entity, partialTicks), this.showsHurtColor(entity));
+            this.model.renderToBuffer(poseStack, ivertexbuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, visibleToSpectator ? 0.15F : this.getAlpha(entity, partialTicks));
         }
 
         for (RenderLayer<T, M> layer : this.layers) {
-            layer.render(matrixStackIn, bufferIn, packedLightIn, entityIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
+            layer.render(poseStack, multiBufferSource, packedLight, entity, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
         }
 
-        matrixStackIn.popPose();
-        ClientAbstractions.INSTANCE.getEntityDisplayName(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn, this.shouldShowName(entityIn)).ifPresent(component -> {
-            this.renderNameTag(entityIn, component, matrixStackIn, bufferIn, packedLightIn);
+        poseStack.popPose();
+        ClientAbstractions.INSTANCE.getEntityDisplayName(entity, this, partialTicks, poseStack, multiBufferSource, packedLight, this.shouldShowName(entity)).ifPresent(component -> {
+            this.renderNameTag(entity, component, poseStack, multiBufferSource, packedLight);
         });
 
-        ClientAbstractions.INSTANCE.onRenderLiving$Post(entityIn, this, partialTicks, matrixStackIn, bufferIn, packedLightIn);
+        ClientAbstractions.INSTANCE.onRenderLiving$Post(entity, this, partialTicks, poseStack, multiBufferSource, packedLight);
     }
 
     protected boolean hasAlternateRender(T mob, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {

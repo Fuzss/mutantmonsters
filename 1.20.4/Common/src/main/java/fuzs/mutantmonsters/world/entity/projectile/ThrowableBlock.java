@@ -3,9 +3,9 @@ package fuzs.mutantmonsters.world.entity.projectile;
 import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
-import fuzs.puzzleslib.api.entity.v1.AdditionalAddEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalInt;
 
-public class ThrowableBlock extends ThrowableProjectile implements AdditionalAddEntityData {
+public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpawnDataEntity {
     private static final EntityDataAccessor<OptionalInt> OWNER_ENTITY_ID = SynchedEntityData.defineId(ThrowableBlock.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
     private static final EntityDataAccessor<Boolean> HELD = SynchedEntityData.defineId(ThrowableBlock.class, EntityDataSerializers.BOOLEAN);
     private BlockState blockState;
@@ -53,7 +53,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     }
 
     public ThrowableBlock(double x, double y, double z, LivingEntity entity) {
-        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.get(), x, y, z, entity.level());
+        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.value(), x, y, z, entity.level());
         this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
         this.setOwner(entity);
         this.ownerType = entity.getType();
@@ -129,7 +129,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         if (this.ownerType == EntityType.PLAYER) {
             return 0.04F;
         } else {
-            return this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get() ? 0.06F : 0.01F;
+            return this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() ? 0.06F : 0.01F;
         }
     }
 
@@ -140,7 +140,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
     @Override
     public boolean isPickable() {
-        return this.isAlive() && this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get();
+        return this.isAlive() && this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
                 float offset = 0.6F;
                 this.setDeltaMovement(x * (double) offset, y * (double) offset, z * (double) offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.get()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.value()))) {
                     this.setHeld(false);
                 }
             }
@@ -217,7 +217,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         if (!super.canHitEntity(entity)) {
             return false;
         } else {
-            return this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get() || MutantSnowGolem.canHarm(this.getOwner(), entity);
+            return this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() || MutantSnowGolem.canHarm(this.getOwner(), entity);
         }
     }
 
@@ -226,7 +226,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
         ItemStack itemStack = player.getItemInHand(hand);
         if (player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (itemStack.getItem() != ModRegistry.ENDERSOUL_HAND_ITEM.get()) {
+        } else if (itemStack.getItem() != ModRegistry.ENDERSOUL_HAND_ITEM.value()) {
             return InteractionResult.PASS;
         } else if (this.isHeld()) {
             if (this.getOwner() == player) {
@@ -263,7 +263,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
     protected void onHit(HitResult result) {
         Entity thrower = this.getOwner();
         LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity) thrower : null;
-        if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
+        if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
 
             for (Mob mobEntity : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
@@ -364,6 +364,6 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalAdd
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return AdditionalAddEntityData.getPacket(this);
+        return AdditionalSpawnDataEntity.getPacket(this);
     }
 }

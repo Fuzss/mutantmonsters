@@ -6,13 +6,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -21,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -29,6 +24,7 @@ import java.util.List;
 public interface CommonAbstractions {
     CommonAbstractions INSTANCE = ServiceProviderHelper.load(CommonAbstractions.class);
 
+    @Nullable
     BlockPathTypes getAdjacentBlockPathType(BlockGetter blockReader, BlockPos.MutableBlockPos mutable, BlockPathTypes pathNodeType);
 
     void onBlockCaughtFire(Block block, BlockState state, Level level, BlockPos pos, @Nullable Direction direction, @Nullable LivingEntity igniter);
@@ -43,14 +39,7 @@ public interface CommonAbstractions {
 
     void onExplosionDetonate(Level level, Explosion explosion, List<Entity> list, double diameter);
 
-    @Nullable
-    Entity getExplosionExploder(Explosion explosion);
-
-    Vec3 getExplosionPosition(Explosion explosion);
-
-    AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow);
+    AbstractArrow getCustomArrowShotFromBow(BowItem bow, AbstractArrow arrow, ItemStack arrowStack);
 
     boolean shouldRiderSit(Entity vehicle);
-
-    MobCategory createMobCategory(String internalName, String name, int maxInstancesPerChunk, boolean isFriendly, boolean isPersistent, int despawnDistance);
 }

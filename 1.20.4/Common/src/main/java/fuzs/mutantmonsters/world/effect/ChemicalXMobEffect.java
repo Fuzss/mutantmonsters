@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 public class ChemicalXMobEffect extends InstantenousMobEffect {
     public static final Predicate<LivingEntity> IS_APPLICABLE = (target) -> {
         EntityType<?> entityType = target.getType();
-        return !CommonAbstractions.INSTANCE.isBossMob(entityType) && !MutantMonsters.CONFIG.get(CommonConfig.class).mutantXConversions.containsValue(entityType) && entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.get() && entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.get();
+        return !CommonAbstractions.INSTANCE.isBossMob(entityType) && !MutantMonsters.CONFIG.get(CommonConfig.class).mutantXConversions.containsValue(entityType) && entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.value() && entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.value();
     };
     public static final TargetingConditions PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
 

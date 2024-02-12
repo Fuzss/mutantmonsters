@@ -203,7 +203,7 @@ public final class EntityUtil {
             double tempX = entity.getX() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
             double tempY = entity.getY() + (double) ((random.nextFloat() - 0.5F) * entity.getBbHeight()) + 0.5;
             double tempZ = entity.getZ() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
-            entity.level().addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), tempX, tempY, tempZ, f, f1, f2);
+            entity.level().addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), tempX, tempY, tempZ, f, f1, f2);
         }
 
     }

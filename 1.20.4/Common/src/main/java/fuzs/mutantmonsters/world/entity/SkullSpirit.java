@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -41,7 +41,7 @@ public class SkullSpirit extends Entity {
     }
 
     public SkullSpirit(Level worldIn, Mob target) {
-        this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.get(), worldIn);
+        this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.value(), worldIn);
         this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(target.getId()));
     }
 
@@ -98,7 +98,9 @@ public class SkullSpirit extends Entity {
                     if (--this.attachedTick <= 0) {
                         EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
                         if (mutantType != null && this.random.nextFloat() < 0.75F) {
-                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
+                            MutatedExplosionHelper.explode(this, 2.0F, false,
+                                    Level.ExplosionInteraction.NONE
+                            );
                             Entity mutant = EntityUtil.convertMobWithNBT(this.target, mutantType, true);
                             if (mutant instanceof Mob mob) mob.setPersistenceRequired();
                             AABB bb = mutant.getBoundingBox();
@@ -114,7 +116,9 @@ public class SkullSpirit extends Entity {
                             }
                         } else {
                             this.setAttached(false);
-                            MutatedExplosion.create(this, 2.0F, false, Level.ExplosionInteraction.NONE);
+                            MutatedExplosionHelper.explode(this, 2.0F, false,
+                                    Level.ExplosionInteraction.NONE
+                            );
                         }
                         this.discard();
                     }
@@ -132,7 +136,7 @@ public class SkullSpirit extends Entity {
                     double x = this.random.nextGaussian() * 0.02;
                     double y = this.random.nextGaussian() * 0.02;
                     double z = this.random.nextGaussian() * 0.02;
-                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), posX, posY, posZ, x, y, z);
+                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.value(), posX, posY, posZ, x, y, z);
                 }
             } else {
                 this.xo = this.getX();
@@ -159,7 +163,7 @@ public class SkullSpirit extends Entity {
                     float xx = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float yy = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float zz = (this.random.nextFloat() - 0.5F) * 1.2F;
-                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.get(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
+                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.value(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
                 }
             }
         } else {

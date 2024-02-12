@@ -418,9 +418,11 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                         effects.add(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
                     }
 
-                    ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
-                    PotionUtils.setCustomEffects(itemStack, effects);
-                    arrowEntity.setEffectsFromItem(itemStack);
+                    if (!effects.isEmpty()) {
+                        ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
+                        PotionUtils.setCustomEffects(itemStack, effects);
+                        arrowEntity.setEffectsFromItem(itemStack);
+                    }
 
                     this.mob.level().addFreshEntity(arrowEntity);
                     this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);

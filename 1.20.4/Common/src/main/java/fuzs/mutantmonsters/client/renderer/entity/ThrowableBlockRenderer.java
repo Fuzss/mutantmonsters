@@ -22,27 +22,29 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock> {
     }
 
     @Override
-    public void render(ThrowableBlock entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        matrixStackIn.pushPose();
-        matrixStackIn.translate(0.0, 0.5, 0.0);
-        if (entityIn.getOwnerType() != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.get()) {
-            matrixStackIn.scale(-0.75F, -0.75F, 0.75F);
+    public void render(ThrowableBlock throwableBlock, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
+        super.render(throwableBlock, entityYaw, partialTick, poseStack, multiBufferSource, packedLight);
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.5, 0.0);
+        if (throwableBlock.getOwnerType() != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
+            poseStack.scale(-0.75F, -0.75F, 0.75F);
         } else {
-            matrixStackIn.mulPose(Axis.YP.rotationDegrees(entityIn.getYRot()));
+            poseStack.mulPose(Axis.YP.rotationDegrees(throwableBlock.getYRot()));
         }
 
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(45.0F));
-        matrixStackIn.mulPose(Axis.XP.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 20.0F));
-        matrixStackIn.mulPose(Axis.ZN.rotationDegrees(((float)entityIn.tickCount + partialTicks) * 12.0F));
-        matrixStackIn.translate(-0.5, -0.5, 0.5);
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
-        this.blockRenderer.renderSingleBlock(entityIn.getBlockState(), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
-        matrixStackIn.popPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(((float) throwableBlock.tickCount + partialTick) * 20.0F));
+        poseStack.mulPose(Axis.ZN.rotationDegrees(((float) throwableBlock.tickCount + partialTick) * 12.0F));
+        poseStack.translate(-0.5, -0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+        this.blockRenderer.renderSingleBlock(throwableBlock.getBlockState(), poseStack, multiBufferSource, packedLight,
+                OverlayTexture.NO_OVERLAY
+        );
+        poseStack.popPose();
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ThrowableBlock pEntity) {
+    public ResourceLocation getTextureLocation(ThrowableBlock throwableBlock) {
         return InventoryMenu.BLOCK_ATLAS;
     }
 }

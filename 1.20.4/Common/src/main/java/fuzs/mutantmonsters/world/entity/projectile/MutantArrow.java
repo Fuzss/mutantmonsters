@@ -23,7 +23,7 @@ public class MutantArrow extends Arrow {
     }
 
     public MutantArrow(Level level, LivingEntity shooter) {
-        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.get(), level);
+        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.value(), level);
         this.setPos(shooter.getX(), shooter.getEyeY() - (double) 0.1F, shooter.getZ());
         this.setNoGravity(true);
         this.setOwner(shooter);

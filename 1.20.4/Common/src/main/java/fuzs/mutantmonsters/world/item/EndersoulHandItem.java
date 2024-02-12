@@ -111,7 +111,7 @@ public class EndersoulHandItem extends Item implements Vanishable {
                     playerIn.teleportTo((double)endPos.getX() + 0.5, endPos.getY(), (double)endPos.getZ() + 0.5);
                     level.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
                     MutantEnderman.teleportAttack(playerIn);
-                    EntityUtil.sendParticlePacket(playerIn, ModRegistry.ENDERSOUL_PARTICLE_TYPE.get(), 256);
+                    EntityUtil.sendParticlePacket(playerIn, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
                     playerIn.getCooldowns().addCooldown(this, 40);
                     stack.hurtAndBreak(4, playerIn, (e) -> {
                         e.broadcastBreakEvent(handIn);

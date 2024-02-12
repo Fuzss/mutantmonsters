@@ -7,7 +7,7 @@ import fuzs.mutantmonsters.world.entity.CreeperMinionEgg;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 
 public class MutantCreeper extends AbstractMutantMonster {
-    private static final EntityDataAccessor<Byte> STATUS;
+    private static final EntityDataAccessor<Byte> STATUS = SynchedEntityData.defineId(MutantCreeper.class, EntityDataSerializers.BYTE);
     public static final int MAX_CHARGE_TIME = 100;
     public static final int MAX_DEATH_TIME = 100;
 
@@ -73,7 +73,7 @@ public class MutantCreeper extends AbstractMutantMonster {
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this));
-        this.targetSelector.addGoal(1, (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(200));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(200));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Animal.class, 100, true, true, EntityUtil::isFeline));
     }
 
@@ -218,13 +218,16 @@ public class MutantCreeper extends AbstractMutantMonster {
         this.lastJumpTick = this.jumpTick;
         if (this.isJumpAttacking()) {
             if (this.jumpTick == 0) {
-                this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_PRIMED_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, this.getVoicePitch());
+                this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_PRIMED_SOUND_EVENT.value(), this.getSoundSource(), 2.0F, this.getVoicePitch());
             }
 
             ++this.jumpTick;
             this.stuckSpeedMultiplier = Vec3.ZERO;
             if (!this.level().isClientSide && (this.onGround() || !this.getFeetBlockState().getFluidState().isEmpty())) {
-                MutatedExplosion.create(this, this.isCharged() ? 6.0F : 4.0F, false, Level.ExplosionInteraction.MOB);
+                float sizeIn = this.isCharged() ? 6.0F : 4.0F;
+                MutatedExplosionHelper.explode(this, sizeIn, false,
+                        Level.ExplosionInteraction.MOB
+                );
                 this.setJumpAttacking(false);
             }
         } else if (this.jumpTick > 0) {
@@ -264,7 +267,7 @@ public class MutantCreeper extends AbstractMutantMonster {
             this.deathCause = cause;
             this.setCharging(false);
             this.level().broadcastEntityEvent(this, (byte)3);
-            this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.get(), this.getSoundSource(), 2.0F, 1.0F);
+            this.level().playSound(null, this, ModRegistry.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.value(), this.getSoundSource(), 2.0F, 1.0F);
             if (this.lastHurtByPlayerTime > 0) {
                 this.lastHurtByPlayerTime += 100;
             }
@@ -291,7 +294,10 @@ public class MutantCreeper extends AbstractMutantMonster {
         this.setPosRaw(this.getX() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612, this.getY(), this.getZ() + (double)(this.random.nextFloat() * 0.2F) - 0.10000000149011612);
         if (this.deathTime >= 100) {
             if (!this.level().isClientSide) {
-                MutatedExplosion.create(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
+                boolean causesFireIn = this.isOnFire();
+                MutatedExplosionHelper.explode(this, power, causesFireIn,
+                        Level.ExplosionInteraction.MOB
+                );
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
                 if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null && this.lastHurtByPlayerTime > 0) {
                     this.level().addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
@@ -313,22 +319,21 @@ public class MutantCreeper extends AbstractMutantMonster {
         if (this.getTarget() == null) {
             super.playAmbientSound();
         }
-
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_MUTANT_CREEPER_AMBIENT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_CREEPER_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_CREEPER_HURT_SOUND_EVENT.value();
     }
 
     @Override
@@ -356,13 +361,7 @@ public class MutantCreeper extends AbstractMutantMonster {
         this.summonLightning = compound.getBoolean("SummonLightning");
     }
 
-    static {
-        STATUS = SynchedEntityData.defineId(MutantCreeper.class, EntityDataSerializers.BYTE);
-    }
-
     class JumpAttackGoal extends Goal {
-        JumpAttackGoal() {
-        }
 
         @Override
         public boolean canUse() {
@@ -417,7 +416,7 @@ public class MutantCreeper extends AbstractMutantMonster {
             MutantCreeper.this.getNavigation().stop();
             int i = MutantCreeper.this.chargeTime % 20;
             if (i == 0) {
-                MutantCreeper.this.playSound(ModRegistry.ENTITY_MUTANT_CREEPER_CHARGE_SOUND_EVENT.get(), 0.6F, 0.7F + MutantCreeper.this.random.nextFloat() * 0.6F);
+                MutantCreeper.this.playSound(ModRegistry.ENTITY_MUTANT_CREEPER_CHARGE_SOUND_EVENT.value(), 0.6F, 0.7F + MutantCreeper.this.random.nextFloat() * 0.6F);
             }
 
             ++MutantCreeper.this.chargeTime;
@@ -442,8 +441,6 @@ public class MutantCreeper extends AbstractMutantMonster {
     }
 
     class SpawnMinionsGoal extends Goal {
-        SpawnMinionsGoal() {
-        }
 
         @Override
         public boolean canUse() {
@@ -459,7 +456,7 @@ public class MutantCreeper extends AbstractMutantMonster {
         @Override
         public void start() {
             for(int i = (int)Math.ceil((double)(MutantCreeper.this.getHealth() / MutantCreeper.this.getMaxHealth()) * 4.0); i > 0; --i) {
-                CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.get().create(MutantCreeper.this.level());
+                CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.value().create(MutantCreeper.this.level());
                 double x = MutantCreeper.this.getX() + (double) MutantCreeper.this.random.nextFloat() - (double) MutantCreeper.this.random.nextFloat();
                 double y = MutantCreeper.this.getY() + (double)(MutantCreeper.this.random.nextFloat() * 0.5F);
                 double z = MutantCreeper.this.getZ() + (double) MutantCreeper.this.random.nextFloat() - (double) MutantCreeper.this.random.nextFloat();

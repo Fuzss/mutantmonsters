@@ -18,9 +18,9 @@ public class SpawningPreventionHandler {
 
     static {
         Object2IntMap<EntityType<?>> map = new Object2IntArrayMap<>();
-        map.put(ModRegistry.BODY_PART_ENTITY_TYPE.get(), 128);
-        map.put(ModRegistry.ENDERSOUL_FRAGMENT_ENTITY_TYPE.get(), 128);
-        map.put(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.get(), 32);
+        map.put(ModRegistry.BODY_PART_ENTITY_TYPE.value(), 128);
+        map.put(ModRegistry.ENDERSOUL_FRAGMENT_ENTITY_TYPE.value(), 128);
+        map.put(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.value(), 32);
         SPAWN_LIMITS_PER_ENTITY_TYPE = Object2IntMaps.unmodifiable(map);
     }
 

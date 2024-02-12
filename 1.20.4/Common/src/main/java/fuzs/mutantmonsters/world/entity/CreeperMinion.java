@@ -7,7 +7,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -36,13 +36,13 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -240,7 +240,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
             int i = this.getExplodeState();
             if (i > 0 && this.timeSinceIgnited == 0) {
-                this.playSound(ModRegistry.ENTITY_CREEPER_MINION_PRIMED_SOUND_EVENT.get(), 1.0F, this.getVoicePitch());
+                this.playSound(ModRegistry.ENTITY_CREEPER_MINION_PRIMED_SOUND_EVENT.value(), 1.0F, this.getVoicePitch());
             }
 
             this.timeSinceIgnited += i;
@@ -251,7 +251,9 @@ public class CreeperMinion extends ShoulderRidingEntity {
             if (this.timeSinceIgnited >= this.fuseTime) {
                 this.timeSinceIgnited = 0;
                 if (!this.level().isClientSide) {
-                    MutatedExplosion.create(this, this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F), false, this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                    float sizeIn = this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F);
+                    Level.ExplosionInteraction interaction = this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
+                    MutatedExplosionHelper.explode(this, sizeIn, false, interaction);
                     if (!this.canExplodeContinuously()) {
                         if (this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
                             this.getOwner().sendSystemMessage(Component.translatable("death.attack.explosion", this.getDisplayName()));
@@ -282,7 +284,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
         if (this.isTame()) {
-            if (itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get())) {
+            if (itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value())) {
                 if (this.level().isClientSide) {
                     Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
                 }
@@ -357,11 +359,11 @@ public class CreeperMinion extends ShoulderRidingEntity {
             }
 
             return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else if (player.isCreative() && itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get()) && this.getOwner() == null) {
+        } else if (player.isCreative() && itemInHand.is(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value()) && this.getOwner() == null) {
             if (!this.level().isClientSide) {
                 this.setTame(true);
                 this.setOwnerUUID(player.getUUID());
-                player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.get().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
+                player.sendSystemMessage(Component.translatable(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value().getDescriptionId() + ".tame_success", this.getDisplayName(), player.getDisplayName()));
             }
 
             return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -401,7 +403,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public boolean ignoreExplosion() {
+    public boolean ignoreExplosion(Explosion explosion) {
         return this.isTame();
     }
 
@@ -412,7 +414,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     public boolean canAttackType(EntityType<?> typeIn) {
-        return super.canAttackType(typeIn) && typeIn != ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.get();
+        return super.canAttackType(typeIn) && typeIn != ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.value();
     }
 
     @Override
@@ -427,7 +429,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     @Nullable
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         LivingEntity owner = this.getOwner();
         return owner != null ? owner.getTeam() : super.getTeam();
     }
@@ -458,17 +460,17 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_CREEPER_MINION_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_CREEPER_MINION_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_CREEPER_MINION_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_CREEPER_MINION_DEATH_SOUND_EVENT.value();
     }
 
     @Override

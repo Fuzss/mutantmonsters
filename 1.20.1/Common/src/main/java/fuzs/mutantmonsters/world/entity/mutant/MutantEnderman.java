@@ -980,7 +980,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) AdditionalAddEntityData.getPacket(this);
+        return AdditionalAddEntityData.getPacket(this);
     }
 
     static class ThrowBlockGoal extends AnimationGoal<MutantEnderman> {

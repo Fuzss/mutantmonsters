@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.world.level.MutatedExplosion;
+import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Vanishable;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -63,25 +64,25 @@ public class CreeperShardItem extends Item implements Vanishable {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-        ItemStack stack = playerIn.getItemInHand(handIn);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+        ItemStack stack = player.getItemInHand(interactionHand);
         int maxDmg = stack.getMaxDamage();
         int dmg = stack.getDamageValue();
-        if (!worldIn.isClientSide) {
-            float damage = 5.0F * (float)(maxDmg - dmg) / 32.0F;
+        if (!level.isClientSide) {
+            float radius = 5.0F * (float)(maxDmg - dmg) / 32.0F;
             if (dmg == 0) {
-                damage += 2.0F;
+                radius += 2.0F;
             }
 
-            MutatedExplosion.create(worldIn, playerIn, playerIn.getX(), playerIn.getY() + 1.0, playerIn.getZ(), damage, false, playerIn.mayBuild() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+            level.explode(player, Explosion.getDefaultDamageSource(level, player), new MutatedExplosionHelper.MutatedExplosionDamageCalculator(), player.getX(), player.getY() + 1.0, player.getZ(), radius, false, player.mayBuild() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
         }
 
-        if (!playerIn.getAbilities().instabuild) {
+        if (!player.getAbilities().instabuild) {
             stack.setDamageValue(maxDmg);
         }
 
-        playerIn.getCooldowns().addCooldown(this, (maxDmg - dmg) * 2);
-        playerIn.awardStat(Stats.ITEM_USED.get(this));
+        player.getCooldowns().addCooldown(this, (maxDmg - dmg) * 2);
+        player.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.success(stack);
     }
 

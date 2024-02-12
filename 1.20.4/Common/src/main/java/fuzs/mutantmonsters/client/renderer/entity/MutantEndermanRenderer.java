@@ -59,30 +59,30 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
     }
 
     @Override
-    public void render(MutantEnderman entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        if (entityIn.isClone()) {
+    public void render(MutantEnderman entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
+        if (entity.isClone()) {
             this.model = this.cloneModel;
-            this.cloneModel.creepy = entityIn.isAggressive();
+            this.cloneModel.creepy = entity.isAggressive();
             this.shadowRadius = 0.5F;
             this.shadowStrength = 0.5F;
         } else {
             this.model = this.endermanModel;
             this.shadowRadius = 0.8F;
-            this.shadowStrength = entityIn.deathTime > 80 ? 1.0F - getDeathProgress(entityIn) : 1.0F;
+            this.shadowStrength = entity.deathTime > 80 ? 1.0F - getDeathProgress(entity) : 1.0F;
         }
 
         this.teleportAttack = false;
-        super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        if (entityIn.getAnimation() == MutantEnderman.TELEPORT_ANIMATION) {
+        super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+        if (entity.getAnimation() == MutantEnderman.TELEPORT_ANIMATION) {
             this.teleportAttack = true;
-            entityIn.getTeleportPosition().ifPresent((pos) -> {
-                matrixStackIn.pushPose();
-                double d0 = Mth.lerp((double) partialTicks, entityIn.xOld, entityIn.getX());
-                double d1 = Mth.lerp((double) partialTicks, entityIn.yOld, entityIn.getY());
-                double d2 = Mth.lerp((double) partialTicks, entityIn.zOld, entityIn.getZ());
-                matrixStackIn.translate((double) pos.getX() + 0.5 - d0, (double) pos.getY() - d1, (double) pos.getZ() + 0.5 - d2);
-                super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-                matrixStackIn.popPose();
+            entity.getTeleportPosition().ifPresent((pos) -> {
+                poseStack.pushPose();
+                double d0 = Mth.lerp((double) partialTicks, entity.xOld, entity.getX());
+                double d1 = Mth.lerp((double) partialTicks, entity.yOld, entity.getY());
+                double d2 = Mth.lerp((double) partialTicks, entity.zOld, entity.getZ());
+                poseStack.translate((double) pos.getX() + 0.5 - d0, (double) pos.getY() - d1, (double) pos.getZ() + 0.5 - d2);
+                super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+                poseStack.popPose();
             });
         }
 

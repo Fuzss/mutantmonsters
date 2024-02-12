@@ -17,15 +17,14 @@ public class SkullWithItemTagBlock extends SkullBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return new SkullWithItemTagBlockEntity(pPos, pState);
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new SkullWithItemTagBlockEntity(blockPos, blockState);
     }
 
     @Override
-    public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        BlockEntity tileentity = worldIn.getBlockEntity(pos);
-        if (tileentity instanceof SkullWithItemTagBlockEntity && stack.hasTag()) {
-            ((SkullWithItemTagBlockEntity) tileentity).setItemData(stack.getTag());
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        if (level.getBlockEntity(pos) instanceof SkullWithItemTagBlockEntity blockEntity && stack.hasTag()) {
+            blockEntity.setItemData(stack.getTag());
         }
     }
 }

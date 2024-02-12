@@ -398,12 +398,12 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_HURT_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_DEATH_SOUND_EVENT.get();
+        return ModRegistry.ENTITY_MUTANT_SNOW_GOLEM_DEATH_SOUND_EVENT.value();
     }
 
     @Override

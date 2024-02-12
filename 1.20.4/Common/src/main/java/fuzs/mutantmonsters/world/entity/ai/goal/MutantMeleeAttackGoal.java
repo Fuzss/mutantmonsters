@@ -45,17 +45,22 @@ public class MutantMeleeAttackGoal extends MeleeAttackGoal {
             }
 
             this.attackTick = Math.max(this.attackTick - 1, 0);
-            this.checkAndPerformAttack(livingentity, this.mob.distanceToSqr(livingentity));
+            this.checkAndPerformAttack(livingentity);
         }
     }
 
     @Override
-    protected void checkAndPerformAttack(LivingEntity enemy, double distToEnemySqr) {
-        if ((distToEnemySqr <= this.getAttackReachSqr(enemy) || this.mob.getBoundingBox().intersects(enemy.getBoundingBox())) && this.attackTick <= 0) {
-            this.attackTick = this.maxAttackTick;
-            this.mob.doHurtTarget(enemy);
-        }
+    protected void resetAttackCooldown() {
+        this.attackTick = this.maxAttackTick;
+    }
 
+    @Override
+    protected boolean isTimeToAttack() {
+        return this.attackTick <= 0;
+    }
+
+    protected boolean canPerformAttack(LivingEntity entity) {
+        return (this.mob.isWithinMeleeAttackRange(entity) || this.mob.getBoundingBox().intersects(entity.getBoundingBox())) && this.isTimeToAttack() && this.mob.getSensing().hasLineOfSight(entity);
     }
 
     @Override
@@ -64,7 +69,6 @@ public class MutantMeleeAttackGoal extends MeleeAttackGoal {
         if (this.mob.getTarget() == null) {
             this.mob.setAggressive(false);
         }
-
     }
 
     public MutantMeleeAttackGoal setMaxAttackTick(int max) {

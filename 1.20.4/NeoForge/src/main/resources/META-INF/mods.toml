@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[${minFMLVersion},)"
+loaderVersion = "*"
 license = "${modLicense}"
 issueTrackerURL = "${modIssueUrl}"
 
@@ -15,16 +15,24 @@ displayURL = "${modPageUrl}"
 updateJSONURL = "${modUpdateUrl}"
 displayTest = "${modForgeDisplayTest}"
 
+[[mixins]]
+config="${modId}.common.mixins.json"
+
+[[mixins]]
+config="${modId}.neoforge.mixins.json"
+
 [[dependencies.${ modId }]]
-modId = "forge"
+modId = "neoforge"
 mandatory = true
-versionRange = "[${minForgeVersion},)"
+type = "required"
+versionRange = "[${minNeoForgeVersion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${ modId }]]
 modId = "minecraft"
 mandatory = true
+type = "required"
 versionRange = "[${minecraftVersion}]"
 ordering = "NONE"
 side = "BOTH"
@@ -32,6 +40,7 @@ side = "BOTH"
 [[dependencies.${ modId }]]
 modId = "puzzleslib"
 mandatory = true
+type = "required"
 versionRange = "[${minPuzzlesVersion},)"
 ordering = "NONE"
 side = "BOTH"
