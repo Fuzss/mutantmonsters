@@ -2,10 +2,12 @@ package fuzs.mutantmonsters.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
+import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
+import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
+import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -34,27 +36,26 @@ public class EndersoulHandItem extends Item implements Vanishable {
     public EndersoulHandItem(Item.Properties properties) {
         super(properties);
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 5.0, AttributeModifier.Operation.ADDITION));
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -2.4000000953674316, AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ATTACK_DAMAGE,
+                new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
+                        "Weapon modifier",
+                        5.0,
+                        AttributeModifier.Operation.ADDITION
+                )
+        );
+        builder.put(Attributes.ATTACK_SPEED,
+                new AttributeModifier(BASE_ATTACK_SPEED_UUID,
+                        "Weapon modifier",
+                        -2.4,
+                        AttributeModifier.Operation.ADDITION
+                )
+        );
         this.attributeModifiers = builder.build();
     }
 
     @Override
     public boolean canAttackBlock(BlockState state, Level worldIn, BlockPos pos, Player player) {
         return !player.isCreative();
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        return super.isFoil(stack) || stack.getDamageValue() == 0;
-    }
-
-    @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        stack.hurtAndBreak(1, attacker, (livingEntity) -> {
-            livingEntity.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
     }
 
     @Override
@@ -66,7 +67,11 @@ public class EndersoulHandItem extends Item implements Vanishable {
         Player player = context.getPlayer();
         if (context.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (!MutantEnderman.canBlockBeHeld(level, pos, blockState, ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG)) {
+        } else if (!MutantEnderman.canBlockBeHeld(level,
+                pos,
+                blockState,
+                ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG
+        )) {
             return InteractionResult.PASS;
         } else if (!level.mayInteract(player, pos)) {
             return InteractionResult.PASS;
@@ -83,22 +88,22 @@ public class EndersoulHandItem extends Item implements Vanishable {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player playerIn, InteractionHand handIn) {
-        ItemStack stack = playerIn.getItemInHand(handIn);
-        if (!playerIn.isSecondaryUseActive()) {
-            return InteractionResultHolder.pass(stack);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+        ItemStack itemInHand = player.getItemInHand(interactionHand);
+        if (!player.isSecondaryUseActive()) {
+            return InteractionResultHolder.pass(itemInHand);
         } else {
-            HitResult result = playerIn.pick(128.0, 1.0F, false);
+            HitResult result = player.pick(MutantMonsters.CONFIG.get(ServerConfig.class).endersoulHandTeleportDistance, 1.0F, false);
             if (result.getType() != HitResult.Type.BLOCK) {
-                playerIn.displayClientMessage(Component.translatable(this.getDescriptionId() + ".teleport_failed"), true);
-                return InteractionResultHolder.fail(stack);
+                player.displayClientMessage(Component.translatable(this.getDescriptionId() + ".teleport_failed"), true);
+                return InteractionResultHolder.fail(itemInHand);
             } else {
                 if (!level.isClientSide) {
-                    BlockPos startPos = ((BlockHitResult)result).getBlockPos();
-                    BlockPos endPos = startPos.relative(((BlockHitResult)result).getDirection());
+                    BlockPos startPos = ((BlockHitResult) result).getBlockPos();
+                    BlockPos endPos = startPos.relative(((BlockHitResult) result).getDirection());
                     BlockPos posDown = startPos.below();
                     if (!level.isEmptyBlock(posDown) || !level.getBlockState(posDown).blocksMotion()) {
-                        for(int tries = 0; tries < 3; ++tries) {
+                        for (int tries = 0; tries < 3; ++tries) {
                             BlockPos checkPos = startPos.above(tries + 1);
                             if (level.isEmptyBlock(checkPos)) {
                                 endPos = checkPos;
@@ -107,23 +112,50 @@ public class EndersoulHandItem extends Item implements Vanishable {
                         }
                     }
 
-                    level.playSound(null, playerIn.xo, playerIn.yo, playerIn.zo, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
-                    playerIn.teleportTo((double)endPos.getX() + 0.5, endPos.getY(), (double)endPos.getZ() + 0.5);
-                    level.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, playerIn.getSoundSource(), 1.0F, 1.0F);
-                    MutantEnderman.teleportAttack(playerIn);
-                    EntityUtil.sendParticlePacket(playerIn, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
-                    playerIn.getCooldowns().addCooldown(this, 40);
-                    stack.hurtAndBreak(4, playerIn, (e) -> {
-                        e.broadcastBreakEvent(handIn);
+                    level.playSound(null,
+                            player.xo,
+                            player.yo,
+                            player.zo,
+                            SoundEvents.CHORUS_FRUIT_TELEPORT,
+                            player.getSoundSource(),
+                            1.0F,
+                            1.0F
+                    );
+                    player.teleportTo((double) endPos.getX() + 0.5, endPos.getY(), (double) endPos.getZ() + 0.5);
+                    level.playSound(null,
+                            endPos,
+                            SoundEvents.CHORUS_FRUIT_TELEPORT,
+                            player.getSoundSource(),
+                            1.0F,
+                            1.0F
+                    );
+                    MutantEnderman.teleportAttack(player);
+                    EntityUtil.sendParticlePacket(player, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
+                    player.getCooldowns().addCooldown(this, 200);
+                    itemInHand.hurtAndBreak(4, player, (player1) -> {
+                        player1.broadcastBreakEvent(interactionHand);
                     });
                 }
 
-                playerIn.fallDistance = 0.0F;
-                playerIn.swing(handIn);
-                playerIn.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+                player.fallDistance = 0.0F;
+                player.swing(interactionHand);
+                player.awardStat(Stats.ITEM_USED.get(this));
+                return InteractionResultHolder.sidedSuccess(itemInHand, level.isClientSide);
             }
         }
+    }
+
+    @Override
+    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        stack.hurtAndBreak(1, attacker, (livingEntity) -> {
+            livingEntity.broadcastBreakEvent(EquipmentSlot.MAINHAND);
+        });
+        return true;
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return super.isFoil(stack) || stack.getDamageValue() == 0;
     }
 
     @Override

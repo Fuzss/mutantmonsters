@@ -16,6 +16,7 @@ import fuzs.puzzleslib.api.capability.v3.CapabilityController;
 import fuzs.puzzleslib.api.capability.v3.data.EntityCapabilityKey;
 import fuzs.puzzleslib.api.init.v3.registry.RegistryManager;
 import fuzs.puzzleslib.api.init.v3.tags.BoundTagFactory;
+import fuzs.puzzleslib.api.item.v2.ItemEquipmentFactories;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
@@ -30,10 +31,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
@@ -48,6 +48,8 @@ import java.util.function.Consumer;
 
 public class ModRegistry {
     public static final SkullBlock.Type MUTANT_SKELETON_SKULL_TYPE = () -> "mutant_skeleton";
+    public static final ArmorMaterial MUTANT_SKELETON_ARMOR_MATERIAL = ItemEquipmentFactories.registerArmorMaterial(MutantMonsters.id(
+            "mutant_skeleton"), 15, new int[]{2, 5, 6, 2}, 9, () -> Ingredient.of(Items.BONE_BLOCK));
 
     static final RegistryManager REGISTRY = RegistryManager.from(MutantMonsters.MOD_ID);
     public static final Holder.Reference<Block> MUTANT_SKELETON_SKULL_BLOCK = REGISTRY.registerBlock("mutant_skeleton_skull", () -> new SkullWithItemTagBlock(MUTANT_SKELETON_SKULL_TYPE, BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)));
@@ -83,10 +85,14 @@ public class ModRegistry {
     public static final Holder.Reference<Item> MUTANT_SKELETON_RIB_ITEM = REGISTRY.registerItem("mutant_skeleton_rib", () -> new Item(new Item.Properties()));
     public static final Holder.Reference<Item> MUTANT_SKELETON_RIB_CAGE_ITEM = REGISTRY.registerItem("mutant_skeleton_rib_cage", () -> new Item(new Item.Properties()));
     public static final Holder.Reference<Item> MUTANT_SKELETON_SHOULDER_PAD_ITEM = REGISTRY.registerItem("mutant_skeleton_shoulder_pad", () -> new Item(new Item.Properties()));
-    public static final Holder.Reference<Item> MUTANT_SKELETON_SKULL_ITEM = REGISTRY.whenOnFabricLike().registerItem("mutant_skeleton_skull", () -> new ArmorBlockItem(MutantSkeletonArmorMaterial.INSTANCE, ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(), ModRegistry.MUTANT_SKELETON_WALL_SKULL_BLOCK.value(), new Item.Properties().rarity(Rarity.UNCOMMON)));
-    public static final Holder.Reference<Item> MUTANT_SKELETON_CHESTPLATE_ITEM = REGISTRY.registerItem("mutant_skeleton_chestplate", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
-    public static final Holder.Reference<Item> MUTANT_SKELETON_LEGGINGS_ITEM = REGISTRY.registerItem("mutant_skeleton_leggings", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.LEGGINGS, new Item.Properties()));
-    public static final Holder.Reference<Item> MUTANT_SKELETON_BOOTS_ITEM = REGISTRY.registerItem("mutant_skeleton_boots", () -> new SkeletonArmorItem(MutantSkeletonArmorMaterial.INSTANCE, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final Holder.Reference<Item> MUTANT_SKELETON_SKULL_ITEM = REGISTRY.whenOnFabricLike().registerItem("mutant_skeleton_skull", () -> new ArmorBlockItem(
+            MUTANT_SKELETON_ARMOR_MATERIAL, ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(), ModRegistry.MUTANT_SKELETON_WALL_SKULL_BLOCK.value(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final Holder.Reference<Item> MUTANT_SKELETON_CHESTPLATE_ITEM = REGISTRY.registerItem("mutant_skeleton_chestplate", () -> new SkeletonArmorItem(
+            MUTANT_SKELETON_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final Holder.Reference<Item> MUTANT_SKELETON_LEGGINGS_ITEM = REGISTRY.registerItem("mutant_skeleton_leggings", () -> new SkeletonArmorItem(
+            MUTANT_SKELETON_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final Holder.Reference<Item> MUTANT_SKELETON_BOOTS_ITEM = REGISTRY.registerItem("mutant_skeleton_boots", () -> new SkeletonArmorItem(
+            MUTANT_SKELETON_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties()));
     public static final Holder.Reference<BlockEntityType<SkullWithItemTagBlockEntity>> SKULL_BLOCK_ENTITY_TYPE = REGISTRY.registerBlockEntityType("skull", () -> BlockEntityType.Builder.of(SkullWithItemTagBlockEntity::new, MUTANT_SKELETON_SKULL_BLOCK.value(), MUTANT_SKELETON_WALL_SKULL_BLOCK.value()));
     public static final Holder.Reference<MobEffect> CHEMICAL_X_MOB_EFFECT = REGISTRY.registerMobEffect("chemical_x", () -> new ChemicalXMobEffect(MobEffectCategory.HARMFUL, 0x000000));
     public static final Holder.Reference<Potion> CHEMICAL_X_POTION = REGISTRY.registerPotion("chemical_x", () -> new Potion(new MobEffectInstance(CHEMICAL_X_MOB_EFFECT.value(), 1)));
@@ -135,6 +141,7 @@ public class ModRegistry {
     static final BoundTagFactory TAGS = BoundTagFactory.make(MutantMonsters.MOD_ID);
     public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG = TAGS.registerBlockTag("mutant_enderman_holdable_immune");
     public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG = TAGS.registerBlockTag("endersoul_hand_holdable_immune");
+    public static final TagKey<EntityType<?>> MUTANTS_ENTITY_TYPE_TAG = TAGS.registerEntityTypeTag("mutants");
     public static final TagKey<Biome> WITHOUT_MUTANT_CREEPER_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_creeper_spawns");
     public static final TagKey<Biome> WITHOUT_MUTANT_ENDERMAN_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_enderman_spawns");
     public static final TagKey<Biome> WITHOUT_MUTANT_SKELETON_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_skeleton_spawns");

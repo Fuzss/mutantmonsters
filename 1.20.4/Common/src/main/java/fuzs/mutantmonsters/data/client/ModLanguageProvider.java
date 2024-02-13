@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.data.client;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.gui.screens.CreeperMinionTrackerScreen;
+import fuzs.mutantmonsters.data.ModAdvancementProvider;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.data.v2.AbstractLanguageProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
@@ -48,6 +49,10 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(ModRegistry.SPIDER_PIG_SPAWN_EGG_ITEM.value(), "Spider Pig");
         builder.add(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value(), "Creeper Minion Tracker");
         builder.add(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value(), "tame_success", "%1$s was tamed by %2$s");
+        builder.add(ModRegistry.CREEPER_SHARD_ITEM.value(), "Creeper Shard");
+        builder.add(ModRegistry.HULK_HAMMER_ITEM.value(), "Hulk Hammer");
+        builder.add(ModRegistry.ENDERSOUL_HAND_ITEM.value(), "Endersoul Hand");
+        builder.add(ModRegistry.ENDERSOUL_HAND_ITEM.value(), "teleport_failed", "Unable to teleport to location");
         builder.add(ModRegistry.MUTANT_SKELETON_ARMS_ITEM.value(), "Mutant Skeleton Arms");
         builder.add(ModRegistry.MUTANT_SKELETON_LIMB_ITEM.value(), "Mutant Skeleton Limb");
         builder.add(ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.value(), "Mutant Skeleton Pelvis");
@@ -94,5 +99,37 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(ModRegistry.ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT.value(), "Spider Pig oinks");
         builder.add(ModRegistry.ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT.value(), "Spider Pig dies");
         builder.add(ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.value(), "Spider Pig hurts");
+        builder.add(ModAdvancementProvider.ROOT_ADVANCEMENT.title(), MutantMonsters.MOD_NAME);
+        builder.add(ModAdvancementProvider.ROOT_ADVANCEMENT.description(),
+                "Mutant creatures and beasts to face off against. Will you triumph, or will you perish?"
+        );
+        builder.add(ModAdvancementProvider.BURN_ZOMBIE_BURN_ADVANCEMENT.title(), "Burn Zombie Burn");
+        builder.add(ModAdvancementProvider.BURN_ZOMBIE_BURN_ADVANCEMENT.description(),
+                "Use a flint and steel to light a mutant zombie on fire when it's down"
+        );
+        builder.add(ModAdvancementProvider.FROSTY_THE_SNOW_GOLEM_ADVANCEMENT.title(), "Frosty the Snow Golem");
+        builder.add(ModAdvancementProvider.FROSTY_THE_SNOW_GOLEM_ADVANCEMENT.description(),
+                "Create a Mutant Snow Golem using Chemical X"
+        );
+        builder.add(ModAdvancementProvider.GUNPOWDER_SPICE_ADVANCEMENT.title(), "Gunpowder, spice...");
+        builder.add(ModAdvancementProvider.GUNPOWDER_SPICE_ADVANCEMENT.description(),
+                "...and everything nice. Obtain a potion of Chemical X."
+        );
+        builder.add(ModAdvancementProvider.HULK_SMASH_ADVANCEMENT.title(), "Hulk Smash!");
+        builder.add(ModAdvancementProvider.HULK_SMASH_ADVANCEMENT.description(),
+                "Kill a Mutant Zombie using a Hulk Hammer"
+        );
+        builder.add(ModAdvancementProvider.NO_BONES_ABOUT_IT_ADVANCEMENT.title(), "No Bones About It");
+        builder.add(ModAdvancementProvider.NO_BONES_ABOUT_IT_ADVANCEMENT.description(),
+                "Kill a Mutant Skeleton using a crossbow while wearing a full set of Mutant Skeleton armor"
+        );
+        builder.add(ModAdvancementProvider.SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.title(), "Spider-Pig, Spider-Pig...");
+        builder.add(ModAdvancementProvider.SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.description(),
+                "Feed a Pig a Fermented Spider Eye and throw Chemical X at it"
+        );
+        builder.add(ModAdvancementProvider.YOU_DA_BOMBY_ADVANCEMENT.title(), "You da Bomby");
+        builder.add(ModAdvancementProvider.YOU_DA_BOMBY_ADVANCEMENT.description(),
+                "Hatch a Creeper Minion from its egg"
+        );
     }
 }

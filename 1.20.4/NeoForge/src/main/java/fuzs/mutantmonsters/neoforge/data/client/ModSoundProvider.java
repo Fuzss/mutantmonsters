@@ -124,6 +124,8 @@ public class ModSoundProvider extends AbstractSoundDefinitionProvider {
         this.add(ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.value(), SoundEvents.PIG_HURT);
     }
 
+    // TODO remove these after Puzzles Lib update
+
     protected void add(SoundEvent soundEvent, SoundEvent... soundEvents) {
         SoundDefinition definition = definition();
         for (SoundEvent vanillaSoundEvent : soundEvents) {

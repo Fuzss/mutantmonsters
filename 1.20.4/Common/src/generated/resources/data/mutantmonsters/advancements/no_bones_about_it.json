@@ -1,0 +1,74 @@
+{
+  "parent": "mutantmonsters:root",
+  "criteria": {
+    "killed_mutant_skeleton": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "mutantmonsters:mutant_skeleton"
+            }
+          }
+        ],
+        "killing_blow": {
+          "direct_entity": {
+            "type": "#minecraft:arrows",
+            "nbt": "{ShotFromCrossbow:1b}"
+          },
+          "source_entity": {
+            "equipment": {
+              "chest": {
+                "items": [
+                  "mutantmonsters:mutant_skeleton_chestplate"
+                ]
+              },
+              "feet": {
+                "items": [
+                  "mutantmonsters:mutant_skeleton_boots"
+                ]
+              },
+              "head": {
+                "items": [
+                  "mutantmonsters:mutant_skeleton_skull"
+                ]
+              },
+              "legs": {
+                "items": [
+                  "mutantmonsters:mutant_skeleton_leggings"
+                ]
+              }
+            }
+          },
+          "tags": [
+            {
+              "expected": true,
+              "id": "minecraft:is_projectile"
+            }
+          ]
+        }
+      },
+      "trigger": "minecraft:player_killed_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.mutantmonsters.no_bones_about_it.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "item": "mutantmonsters:mutant_skeleton_skull",
+      "nbt": "{Damage:0}"
+    },
+    "title": {
+      "translate": "advancements.mutantmonsters.no_bones_about_it.title"
+    }
+  },
+  "requirements": [
+    [
+      "killed_mutant_skeleton"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

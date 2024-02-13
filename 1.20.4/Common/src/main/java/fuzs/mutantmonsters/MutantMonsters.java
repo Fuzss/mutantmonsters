@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters;
 
 import fuzs.mutantmonsters.config.CommonConfig;
+import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.handler.SpawningPreventionHandler;
@@ -59,7 +60,7 @@ public class MutantMonsters implements ModConstructor {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static final NetworkHandlerV2 NETWORK = NetworkHandlerV2.build(MOD_ID, false);
-    public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID).common(CommonConfig.class);
+    public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID).common(CommonConfig.class).server(ServerConfig.class);
 
     public static ResourceLocation id(String name) {
         return new ResourceLocation(MOD_ID, name);

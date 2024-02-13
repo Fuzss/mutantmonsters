@@ -17,8 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 public class ModModelProvider extends AbstractModelProvider {
-    public static final ModelTemplate MUTANT_SPAWN_EGG = createItemModelTemplate(decorateItemModelLocation(
-            MutantMonsters.id("template_spawn_egg")));
+    public static final ModelTemplate MUTANT_SPAWN_EGG = createItemModelTemplate(MutantMonsters.id("template_spawn_egg"));
 
     public ModModelProvider(DataProviderContext context) {
         super(context);
@@ -26,7 +25,7 @@ public class ModModelProvider extends AbstractModelProvider {
 
     @Override
     public void addBlockModels(BlockModelGenerators builder) {
-        builder.blockEntityModels(decorateBlockModelLocation(MutantMonsters.id("skull")), Blocks.BONE_BLOCK)
+        builder.blockEntityModels(decorateBlockModelLocation(MutantMonsters.id("skull")), Blocks.SOUL_SAND)
                 .createWithCustomBlockItemModel(ModelTemplates.SKULL_INVENTORY,
                         ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value()
                 )

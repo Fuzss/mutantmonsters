@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.world.effect;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.config.CommonConfig;
+import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
@@ -20,7 +20,10 @@ import java.util.function.Predicate;
 public class ChemicalXMobEffect extends InstantenousMobEffect {
     public static final Predicate<LivingEntity> IS_APPLICABLE = (target) -> {
         EntityType<?> entityType = target.getType();
-        return !CommonAbstractions.INSTANCE.isBossMob(entityType) && !MutantMonsters.CONFIG.get(CommonConfig.class).mutantXConversions.containsValue(entityType) && entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.value() && entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.value();
+        return !CommonAbstractions.INSTANCE.isBossMob(entityType) &&
+                !MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsValue(entityType) &&
+                entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.value() &&
+                entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.value();
     };
     public static final TargetingConditions PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
 
@@ -41,12 +44,14 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
     @Nullable
     public static EntityType<?> getMutantOf(LivingEntity target) {
         EntityType<?> targetType = target.getType();
-        if (!MutantMonsters.CONFIG.get(CommonConfig.class).mutantXConversions.containsKey(targetType) || target.isBaby()) {
+        if (!MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsKey(targetType) ||
+                target.isBaby()) {
             return null;
-        } else if (targetType == EntityType.PIG && (!target.hasEffect(MobEffects.UNLUCK) || target.getEffect(MobEffects.UNLUCK).getAmplifier() != 13)) {
+        } else if (targetType == EntityType.PIG &&
+                (!target.hasEffect(MobEffects.UNLUCK) || target.getEffect(MobEffects.UNLUCK).getAmplifier() != 13)) {
             return null;
         } else {
-            return MutantMonsters.CONFIG.get(CommonConfig.class).mutantXConversions.get(targetType);
+            return MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.get(targetType);
         }
     }
 }

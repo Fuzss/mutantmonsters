@@ -1,17 +1,18 @@
 package fuzs.mutantmonsters.neoforge;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.data.client.ModModelProvider;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.neoforge.data.ModDamageTypeProvider;
+import fuzs.mutantmonsters.data.ModAdvancementProvider;
 import fuzs.mutantmonsters.data.ModRecipeProvider;
 import fuzs.mutantmonsters.data.client.ModLanguageProvider;
-import fuzs.mutantmonsters.neoforge.data.client.ModParticleProvider;
+import fuzs.mutantmonsters.data.client.ModModelProvider;
 import fuzs.mutantmonsters.data.loot.ModBlockLootProvider;
 import fuzs.mutantmonsters.data.loot.ModBodyPartLootProvider;
 import fuzs.mutantmonsters.data.loot.ModEntityLootProvider;
 import fuzs.mutantmonsters.data.loot.ModEntityTypeLootProvider;
 import fuzs.mutantmonsters.data.tags.*;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.neoforge.data.ModDamageTypeProvider;
+import fuzs.mutantmonsters.neoforge.data.client.ModParticleProvider;
 import fuzs.mutantmonsters.neoforge.data.client.ModSoundProvider;
 import fuzs.mutantmonsters.neoforge.init.NeoForgeModRegistry;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
@@ -47,7 +48,8 @@ public class MutantMonstersNeoForge {
                 ModLanguageProvider::new,
                 ModParticleProvider::new,
                 ModModelProvider::new,
-                ModSoundProvider::new
+                ModSoundProvider::new,
+                ModAdvancementProvider::new
         );
     }
 
