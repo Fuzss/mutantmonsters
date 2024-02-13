@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.capability;
 
 import com.google.common.collect.Queues;
-import fuzs.mutantmonsters.core.SeismicWave;
+import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.puzzleslib.api.capability.v3.data.CapabilityComponent;
 import net.minecraft.world.entity.player.Player;
 

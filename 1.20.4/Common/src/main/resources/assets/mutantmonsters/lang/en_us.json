@@ -17,6 +17,7 @@
 	"advancements.mutantmonsters.spider_pig_spider_pig.description": "Feed a Pig a Fermented Spider Eye and throw Chemical X at it",
 	"advancements.mutantmonsters.you_da_bomby.title": "You da Bomby",
 	"advancements.mutantmonsters.you_da_bomby.description": "Hatch a Creeper Minion from its egg",
+
 	"block.mutantmonsters.mutant_skeleton_skull": "Mutant Skeleton Skull",
 	"block.mutantmonsters.mutant_skeleton_wall_skull": "Mutant Skeleton Wall Skull",
 	"entity.mutantmonsters.body_part": "Body Part",
@@ -45,6 +46,7 @@
 	"gui.mutantmonsters.creeper_minion_tracker.ride_on_shoulder": "Ride On Shoulder",
 	"itemGroup.mutantmonsters.main": "Mutant Monsters",
 	"itemGroup.mutantmonsters": "Mutant Monsters",
+
 	"item.mutantmonsters.creeper_minion_spawn_egg": "Creeper Minion Spawn Egg",
 	"item.mutantmonsters.mutant_creeper_spawn_egg": "Mutant Creeper Spawn Egg",
 	"item.mutantmonsters.mutant_enderman_spawn_egg": "Mutant Enderman Spawn Egg",
@@ -54,6 +56,7 @@
 	"item.mutantmonsters.mutant_zombie_villager_spawn_egg": "Mutant Zombie Villager Spawn Egg",
 	"item.mutantmonsters.spider_pig_spawn_egg": "Spider-Pig Spawn Egg",
 	"item.mutantmonsters.creeper_minion_tracker": "Creeper Minion Tracker",
+
 	"item.mutantmonsters.creeper_minion_tracker.tame_success": "%1$s was tamed by %2$s",
 	"item.mutantmonsters.creeper_shard": "Creeper Shard",
 	"item.mutantmonsters.hulk_hammer": "Hulk Hammer",
@@ -70,19 +73,23 @@
 	"item.mutantmonsters.mutant_skeleton_chestplate": "Mutant Skeleton Chestplate",
 	"item.mutantmonsters.mutant_skeleton_leggings": "Mutant Skeleton Leggings",
 	"item.mutantmonsters.mutant_skeleton_boots": "Mutant Skeleton Boots",
+
 	"item.minecraft.tipped_arrow.effect.chemical_x": "Arrow of Chemical X",
 	"item.minecraft.potion.effect.chemical_x": "Potion of Chemical X",
 	"item.minecraft.splash_potion.effect.chemical_x": "Splash Potion of Chemical X",
 	"item.minecraft.lingering_potion.effect.chemical_x": "Lingering Potion of Chemical X",
 	"effect.mutantmonsters.chemical_x": "Chemical X",
+
 	"subtitles.mutantmonsters.entity.creeper_minion.ambient": "Creeper Minion hisses",
 	"subtitles.mutantmonsters.entity.creeper_minion.death": "Creeper Minion dies",
 	"subtitles.mutantmonsters.entity.creeper_minion.hurt": "Creeper Minion hurts",
 	"subtitles.mutantmonsters.entity.creeper_minion.primed": "Creeper Minion primes",
 	"subtitles.mutantmonsters.entity.creeper_minion_egg.hatch": "Creeper Minion Egg hatches",
+
 	"subtitles.mutantmonsters.entity.endersoul_clone.death": "Endersoul Clone dies",
 	"subtitles.mutantmonsters.entity.endersoul_clone.teleport": "Endersoul Clone teleports",
 	"subtitles.mutantmonsters.entity.endersoul_fragment.explode": "Endersoul Fragment explodes",
+
 	"subtitles.mutantmonsters.entity.mutant_creeper.ambient": "Mutant Creeper hisses",
 	"subtitles.mutantmonsters.entity.mutant_creeper.charge": "Mutant Creeper charges",
 	"subtitles.mutantmonsters.entity.mutant_creeper.death": "Mutant Creeper dies",

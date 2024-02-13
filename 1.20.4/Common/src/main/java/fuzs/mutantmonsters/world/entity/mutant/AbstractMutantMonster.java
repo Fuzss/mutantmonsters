@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.mutantmonsters.core.CommonAbstractions;
+import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -28,7 +28,7 @@ public abstract class AbstractMutantMonster extends Monster {
     public void aiStep() {
         super.aiStep();
         if (this.isAlive() && this.getTarget() != null) {
-            if (this.horizontalCollision && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+            if (this.horizontalCollision && CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
                 boolean flag = false;
                 AABB aabb = this.getBoundingBox().inflate(0.2D);
 

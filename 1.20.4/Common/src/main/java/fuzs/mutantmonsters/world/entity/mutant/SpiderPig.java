@@ -206,7 +206,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     private void removeWeb(BlockPos pos) {
-        if (this.level().getBlockState(pos).is(Blocks.COBWEB) && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+        if (this.level().getBlockState(pos).is(Blocks.COBWEB) && fuzs.puzzleslib.api.core.v1.CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
             this.level().destroyBlock(pos, false, this);
         }
 
@@ -259,7 +259,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public boolean doHurtTarget(Entity entityIn) {
         this.isLeaping = false;
-        if (this.random.nextInt(2) == 0 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+        if (this.random.nextInt(2) == 0 && fuzs.puzzleslib.api.core.v1.CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
             double dx = entityIn.getX() - entityIn.xo;
             double dz = entityIn.getZ() - entityIn.zo;
             BlockPos pos = new BlockPos((int) (entityIn.getX() + dx * 0.5), Mth.floor(this.getBoundingBox().minY), (int) (entityIn.getZ() + dz * 0.5));

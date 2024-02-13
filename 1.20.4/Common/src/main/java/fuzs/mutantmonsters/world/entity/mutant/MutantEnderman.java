@@ -1,9 +1,8 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.animation.AnimatedEntity;
-import fuzs.mutantmonsters.animation.Animation;
-import fuzs.mutantmonsters.core.CommonAbstractions;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
 import fuzs.mutantmonsters.util.EntityUtil;
@@ -16,6 +15,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
+import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -76,17 +76,17 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     private static final EntityDataAccessor<Optional<BlockPos>> TELEPORT_POSITION = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
     private static final EntityDataAccessor<Byte> ACTIVE_ARM = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> CLONE = SynchedEntityData.defineId(MutantEnderman.class, EntityDataSerializers.BOOLEAN);
-    public static final Animation MELEE_ANIMATION = new Animation(10);
-    public static final Animation THROW_ANIMATION = new Animation(14);
-    public static final Animation STARE_ANIMATION = new Animation(100);
-    public static final Animation TELEPORT_ANIMATION = new Animation(10);
-    public static final Animation SCREAM_ANIMATION = new Animation(165);
-    public static final Animation CLONE_ANIMATION = new Animation(600);
-    public static final Animation TELESMASH_ANIMATION = new Animation(30);
-    public static final Animation DEATH_ANIMATION = new Animation(280);
-    private static final Animation[] ANIMATIONS = new Animation[]{MELEE_ANIMATION, THROW_ANIMATION, STARE_ANIMATION, TELEPORT_ANIMATION, SCREAM_ANIMATION, CLONE_ANIMATION, TELESMASH_ANIMATION, DEATH_ANIMATION};
+    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation(10);
+    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation(14);
+    public static final EntityAnimation STARE_ANIMATION = new EntityAnimation(100);
+    public static final EntityAnimation TELEPORT_ANIMATION = new EntityAnimation(10);
+    public static final EntityAnimation SCREAM_ANIMATION = new EntityAnimation(165);
+    public static final EntityAnimation CLONE_ANIMATION = new EntityAnimation(600);
+    public static final EntityAnimation TELESMASH_ANIMATION = new EntityAnimation(30);
+    public static final EntityAnimation DEATH_ANIMATION = new EntityAnimation(280);
+    private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{MELEE_ANIMATION, THROW_ANIMATION, STARE_ANIMATION, TELEPORT_ANIMATION, SCREAM_ANIMATION, CLONE_ANIMATION, TELESMASH_ANIMATION, DEATH_ANIMATION};
 
-    private Animation animation;
+    private EntityAnimation animation;
     private int animationTick;
     private int prevArmScale;
     private int armScale;
@@ -107,7 +107,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
 
     public MutantEnderman(EntityType<? extends MutantEnderman> type, Level worldIn) {
         super(type, worldIn);
-        this.animation = Animation.NONE;
+        this.animation = EntityAnimation.NONE;
         this.heldBlock = new int[4];
         this.heldBlockTick = new int[4];
         this.xpReward = 40;
@@ -216,17 +216,17 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     }
 
     @Override
-    public Animation getAnimation() {
+    public EntityAnimation getAnimation() {
         return this.animation;
     }
 
     @Override
-    public void setAnimation(Animation animation) {
+    public void setAnimation(EntityAnimation animation) {
         this.animation = animation;
     }
 
     @Override
-    public Animation[] getAnimations() {
+    public EntityAnimation[] getAnimations() {
         return ANIMATIONS;
     }
 
@@ -336,7 +336,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         } else if (emptyHanded) {
             this.armScale = Math.max(0, this.armScale - 1);
         } else if (!this.level().isClientSide) {
-            boolean mobGriefing = CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this);
+            boolean mobGriefing = CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this);
 
             for(int i = 0; i < this.heldBlock.length; ++i) {
                 if (this.heldBlock[i] > 0 && this.heldBlockTick[i] == 0) {
@@ -428,7 +428,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
                 BlockState blockState = this.level().getBlockState(pos);
                 if (index != -1 && canBlockBeHeld(this.level(), pos, blockState, ModRegistry.MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG)) {
                     this.setHeldBlock(index, Block.getId(blockState), 0);
-                    if (CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+                    if (CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
                         this.level().removeBlock(pos, false);
                     }
                 }
@@ -571,7 +571,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
             } else {
                 boolean damaged = super.hurt(source, amount);
                 if (damaged && this.animation == STARE_ANIMATION) {
-                    this.animation = Animation.NONE;
+                    this.animation = EntityAnimation.NONE;
                     return damaged;
                 } else {
                     if (!this.level().isClientSide && !this.isAnimationPlaying() && this.isAlive()) {
@@ -685,7 +685,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
             }
 
             if (!success) {
-                this.animation = Animation.NONE;
+                this.animation = EntityAnimation.NONE;
                 return false;
             } else {
                 this.setTeleportPosition(pos);
@@ -989,7 +989,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.THROW_ANIMATION;
         }
 
@@ -1035,7 +1035,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.TELESMASH_ANIMATION;
         }
 
@@ -1088,7 +1088,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.TELEPORT_ANIMATION;
         }
 
@@ -1133,7 +1133,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.SCREAM_ANIMATION;
         }
 
@@ -1198,7 +1198,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.CLONE_ANIMATION;
         }
 
@@ -1295,7 +1295,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.MELEE_ANIMATION;
         }
 
@@ -1337,7 +1337,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantEnderman.STARE_ANIMATION;
         }
 

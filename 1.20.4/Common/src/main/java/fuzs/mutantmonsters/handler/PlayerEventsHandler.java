@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.handler;
 
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.core.SeismicWave;
+import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;

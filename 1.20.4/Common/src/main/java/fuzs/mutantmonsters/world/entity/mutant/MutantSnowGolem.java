@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
@@ -8,6 +7,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.FleeRainGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
+import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -190,7 +190,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             this.heal(1.0F);
         }
 
-        if (!this.level().isClientSide && this.onGround() && !this.level().dimensionType().ultraWarm() && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), this)) {
+        if (!this.level().isClientSide && this.onGround() && !this.level().dimensionType().ultraWarm() && CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
             x = Mth.floor(this.getX());
             int y = Mth.floor(this.getBoundingBox().minY);
             int z = Mth.floor(this.getZ());
@@ -480,7 +480,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         @Override
         public void tick() {
             --this.jumpTick;
-            if (!this.waterReplaced && !this.golem.isInWater() && this.jumpTick < 17 && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.golem.level(), this.golem)) {
+            if (!this.waterReplaced && !this.golem.isInWater() && this.jumpTick < 17 && CommonAbstractions.INSTANCE.getMobGriefingRule(this.golem.level(), this.golem)) {
                 this.prevPos.setY(this.getWaterSurfaceHeight(this.golem.level(), this.prevPos));
                 if ((double)this.prevPos.getY() > this.golem.getY()) {
                     return;

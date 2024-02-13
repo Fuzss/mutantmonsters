@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import fuzs.mutantmonsters.client.MutantMonstersClient;
+import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.MutantZombieModel;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
@@ -13,37 +13,42 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, MutantZombieModel> {
-    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("mutant_zombie");
+    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_zombie.png");
 
     public MutantZombieRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantZombieModel(context.bakeLayer(ClientModRegistry.MUTANT_ZOMBIE)), 1.0F);
     }
 
     @Override
-    protected void scale(MutantZombie livingEntity, PoseStack matrixStackIn, float partialTickTime) {
-        matrixStackIn.scale(1.3F, 1.3F, 1.3F);
-    }
-
-    @Override
-    public Vec3 getRenderOffset(MutantZombie entity, float partialTicks) {
+    public Vec3 getRenderOffset(MutantZombie mutantZombie, float partialTick) {
         return new Vec3(0.0D, -0.0975D, 0.0D);
     }
 
     @Override
-    protected void setupRotations(MutantZombie livingEntity, PoseStack matrixStackIn, float ageInTicks, float rotationYaw, float partialTicks) {
-        if (livingEntity.deathTime > 0) {
-            matrixStackIn.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
-            int pitch = Math.min(20, livingEntity.deathTime);
+    public ResourceLocation getTextureLocation(MutantZombie mutantZombie) {
+        return TEXTURE_LOCATION;
+    }
+
+    @Override
+    protected RenderType getRenderType(MutantZombie mutantZombie, boolean bodyVisible, boolean translucent, boolean glowing) {
+        return super.getRenderType(mutantZombie, bodyVisible, translucent | mutantZombie.vanishTime > 0, glowing);
+    }
+
+    @Override
+    protected void setupRotations(MutantZombie mutantZombie, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+        if (mutantZombie.deathTime > 0) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
+            int pitch = Math.min(20, mutantZombie.deathTime);
             boolean reviving = false;
-            if (livingEntity.deathTime > 100) {
-                pitch = 140 - livingEntity.deathTime;
+            if (mutantZombie.deathTime > 100) {
+                pitch = 140 - mutantZombie.deathTime;
                 reviving = true;
             }
 
             if (pitch > 0) {
-                float f = ((float)pitch + partialTicks - 1.0F) / 20.0F * 1.6F;
+                float f = ((float) pitch + partialTick - 1.0F) / 20.0F * 1.6F;
                 if (reviving) {
-                    f = ((float)pitch - partialTicks) / 40.0F * 1.6F;
+                    f = ((float) pitch - partialTick) / 40.0F * 1.6F;
                 }
 
                 f = Mth.sqrt(f);
@@ -51,35 +56,32 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
                     f = 1.0F;
                 }
 
-                matrixStackIn.mulPose(Axis.XN.rotationDegrees(f * this.getFlipDegrees(livingEntity)));
+                poseStack.mulPose(Axis.XN.rotationDegrees(f * this.getFlipDegrees(mutantZombie)));
             }
         } else {
-            super.setupRotations(livingEntity, matrixStackIn, ageInTicks, rotationYaw, partialTicks);
+            super.setupRotations(mutantZombie, poseStack, ageInTicks, rotationYaw, partialTick);
         }
     }
 
     @Override
-    protected float getFlipDegrees(MutantZombie livingEntity) {
+    protected float getFlipDegrees(MutantZombie mutantZombie) {
         return 80.0F;
     }
 
     @Override
-    protected RenderType getRenderType(MutantZombie livingEntity, boolean isVisible, boolean visibleToSpectator, boolean glowing) {
-        return super.getRenderType(livingEntity, isVisible, visibleToSpectator | livingEntity.vanishTime > 0, glowing);
+    protected void scale(MutantZombie mutantZombie, PoseStack poseStack, float partialTick) {
+        poseStack.scale(1.3F, 1.3F, 1.3F);
     }
 
     @Override
-    protected float getAlpha(MutantZombie mob, float partialTicks) {
-        return mob.vanishTime > 0 ? 1.0F - ((float)mob.vanishTime + partialTicks) / 100.0F * 0.6F : 1.0F;
+    protected float getAlpha(MutantZombie mutantZombie, float partialTick) {
+        return mutantZombie.vanishTime > 0 ?
+                1.0F - ((float) mutantZombie.vanishTime + partialTick) / 100.0F * 0.6F :
+                1.0F;
     }
 
     @Override
     protected boolean showsHurtColor(MutantZombie mob) {
         return super.showsHurtColor(mob) || mob.deathTime > 0 && mob.getLives() <= 0;
-    }
-
-    @Override
-    public ResourceLocation getTextureLocation(MutantZombie entity) {
-        return TEXTURE;
     }
 }

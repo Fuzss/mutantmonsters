@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.world.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fuzs.mutantmonsters.capability.SeismicWavesCapability;
-import fuzs.mutantmonsters.core.SeismicWave;
+import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +28,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 public class HulkHammerItem extends Item implements Vanishable {
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;

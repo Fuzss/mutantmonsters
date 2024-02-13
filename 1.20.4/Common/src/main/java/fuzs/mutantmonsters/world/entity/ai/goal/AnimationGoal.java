@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.world.entity.ai.goal;
 
-import fuzs.mutantmonsters.animation.Animation;
-import fuzs.mutantmonsters.animation.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
@@ -17,7 +17,7 @@ public abstract class AnimationGoal<T extends Mob & AnimatedEntity> extends Goal
         return false;
     }
 
-    protected abstract Animation getAnimation();
+    protected abstract EntityAnimation getAnimation();
 
     @Override
     public boolean canUse() {
@@ -36,7 +36,7 @@ public abstract class AnimationGoal<T extends Mob & AnimatedEntity> extends Goal
 
     @Override
     public void stop() {
-        AnimatedEntity.sendAnimationPacket(this.mob, Animation.NONE);
+        AnimatedEntity.sendAnimationPacket(this.mob, EntityAnimation.NONE);
     }
 
     @Override

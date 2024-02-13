@@ -1,8 +1,8 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
 import com.google.common.collect.Lists;
-import fuzs.mutantmonsters.animation.AnimatedEntity;
-import fuzs.mutantmonsters.animation.Animation;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
@@ -44,18 +44,18 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEntity {
-    public static final Animation MELEE_ANIMATION = new Animation(14);
-    public static final Animation CONSTRICT_RIBS_ANIMATION = new Animation(20);
-    public static final Animation SHOOT_ANIMATION = new Animation(32);
-    public static final Animation MULTI_SHOT_ANIMATION = new Animation(30);
-    private static final Animation[] ANIMATIONS = new Animation[]{MELEE_ANIMATION, CONSTRICT_RIBS_ANIMATION, SHOOT_ANIMATION, MULTI_SHOT_ANIMATION};
+    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation(14);
+    public static final EntityAnimation CONSTRICT_RIBS_ANIMATION = new EntityAnimation(20);
+    public static final EntityAnimation SHOOT_ANIMATION = new EntityAnimation(32);
+    public static final EntityAnimation MULTI_SHOT_ANIMATION = new EntityAnimation(30);
+    private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{MELEE_ANIMATION, CONSTRICT_RIBS_ANIMATION, SHOOT_ANIMATION, MULTI_SHOT_ANIMATION};
 
-    private Animation animation;
+    private EntityAnimation animation;
     private int animationTick;
 
     public MutantSkeleton(EntityType<? extends MutantSkeleton> type, Level worldIn) {
         super(type, worldIn);
-        this.animation = Animation.NONE;
+        this.animation = EntityAnimation.NONE;
         this.setMaxUpStep(1.0F);
         this.xpReward = 30;
     }
@@ -162,17 +162,17 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     @Override
-    public Animation getAnimation() {
+    public EntityAnimation getAnimation() {
         return this.animation;
     }
 
     @Override
-    public void setAnimation(Animation animation) {
+    public void setAnimation(EntityAnimation animation) {
         this.animation = animation;
     }
 
     @Override
-    public Animation[] getAnimations() {
+    public EntityAnimation[] getAnimations() {
         return ANIMATIONS;
     }
 
@@ -288,7 +288,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantSkeleton.MULTI_SHOT_ANIMATION;
         }
 
@@ -365,7 +365,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantSkeleton.SHOOT_ANIMATION;
         }
 
@@ -439,7 +439,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantSkeleton.CONSTRICT_RIBS_ANIMATION;
         }
 
@@ -485,7 +485,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantSkeleton.MELEE_ANIMATION;
         }
 

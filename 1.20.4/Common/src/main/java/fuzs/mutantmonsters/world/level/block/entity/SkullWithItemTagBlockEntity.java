@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class SkullWithItemTagBlockEntity extends SkullBlockEntity {
-    private static  final String ITEM_TAG_KEY = "ItemTag";
+    public static final String TAG_ITEM = "ItemTag";
 
     @Nullable
     private CompoundTag itemTag;
@@ -32,15 +32,15 @@ public class SkullWithItemTagBlockEntity extends SkullBlockEntity {
     public void saveAdditional(CompoundTag compound) {
         super.saveAdditional(compound);
         if (this.itemTag != null) {
-            compound.put(ITEM_TAG_KEY, this.itemTag);
+            compound.put(TAG_ITEM, this.itemTag);
         }
     }
 
     @Override
     public void load(CompoundTag compound) {
         super.load(compound);
-        if (compound.contains(ITEM_TAG_KEY, 10)) {
-            this.itemTag = compound.getCompound(ITEM_TAG_KEY);
+        if (compound.contains(TAG_ITEM, 10)) {
+            this.itemTag = compound.getCompound(TAG_ITEM);
         }
     }
 }

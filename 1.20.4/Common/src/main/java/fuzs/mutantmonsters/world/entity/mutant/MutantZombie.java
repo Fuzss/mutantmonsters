@@ -1,9 +1,9 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.mutantmonsters.animation.AnimatedEntity;
-import fuzs.mutantmonsters.animation.Animation;
-import fuzs.mutantmonsters.core.SeismicWave;
-import fuzs.mutantmonsters.core.ZombieResurrection;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.level.SeismicWave;
+import fuzs.mutantmonsters.world.level.ZombieResurrection;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
@@ -61,24 +61,24 @@ import java.util.List;
 public class MutantZombie extends AbstractMutantMonster implements AnimatedEntity {
     public static final int MAX_VANISH_TIME = 100;
     public static final int MAX_DEATH_TIME = 140;
-    public static final Animation SLAM_GROUND_ANIMATION = new Animation(25);
-    public static final Animation THROW_ANIMATION = new Animation(15);
-    public static final Animation ROAR_ANIMATION = new Animation(120);
+    public static final EntityAnimation SLAM_GROUND_ANIMATION = new EntityAnimation(25);
+    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation(15);
+    public static final EntityAnimation ROAR_ANIMATION = new EntityAnimation(120);
     private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Byte> THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.BYTE);
-    private static final Animation[] ANIMATIONS = new Animation[]{SLAM_GROUND_ANIMATION, THROW_ANIMATION, ROAR_ANIMATION};
+    private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{SLAM_GROUND_ANIMATION, THROW_ANIMATION, ROAR_ANIMATION};
     private final List<SeismicWave> seismicWaveList;
     private final List<ZombieResurrection> resurrectionList;
     public int throwHitTick;
     public int throwFinishTick;
     public int vanishTime;
-    private Animation animation;
+    private EntityAnimation animation;
     private int animationTick;
     private DamageSource deathCause;
 
     public MutantZombie(EntityType<? extends MutantZombie> type, Level worldIn) {
         super(type, worldIn);
-        this.animation = Animation.NONE;
+        this.animation = EntityAnimation.NONE;
         this.throwHitTick = -1;
         this.throwFinishTick = -1;
         this.seismicWaveList = new ArrayList<>();
@@ -144,17 +144,17 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     }
 
     @Override
-    public Animation getAnimation() {
+    public EntityAnimation getAnimation() {
         return this.animation;
     }
 
     @Override
-    public void setAnimation(Animation animation) {
+    public void setAnimation(EntityAnimation animation) {
         this.animation = animation;
     }
 
     @Override
-    public Animation[] getAnimations() {
+    public EntityAnimation[] getAnimations() {
         return ANIMATIONS;
     }
 
@@ -580,7 +580,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantZombie.THROW_ANIMATION;
         }
 
@@ -678,7 +678,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantZombie.ROAR_ANIMATION;
         }
 
@@ -741,7 +741,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         }
 
         @Override
-        protected Animation getAnimation() {
+        protected EntityAnimation getAnimation() {
             return MutantZombie.SLAM_GROUND_ANIMATION;
         }
 

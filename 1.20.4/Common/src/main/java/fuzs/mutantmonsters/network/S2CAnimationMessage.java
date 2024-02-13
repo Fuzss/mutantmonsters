@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.network;
 
-import fuzs.mutantmonsters.animation.AnimatedEntity;
-import fuzs.mutantmonsters.animation.Animation;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
 import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -44,7 +44,7 @@ public class S2CAnimationMessage implements MessageV2<S2CAnimationMessage> {
                 Entity entity = level.getEntity(message.entityId);
                 if (entity instanceof AnimatedEntity animatedEntity) {
                     if (message.index == -1) {
-                        animatedEntity.setAnimation(Animation.NONE);
+                        animatedEntity.setAnimation(EntityAnimation.NONE);
                     } else {
                         animatedEntity.setAnimation(animatedEntity.getAnimations()[message.index]);
                     }

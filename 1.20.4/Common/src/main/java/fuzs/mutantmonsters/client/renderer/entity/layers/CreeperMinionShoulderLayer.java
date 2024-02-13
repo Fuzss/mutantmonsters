@@ -39,7 +39,7 @@ public class CreeperMinionShoulderLayer<T extends Player> extends RenderLayer<T,
             poseStack.pushPose();
             poseStack.translate(leftShoulder ? 0.42 : -0.42, livingEntity.isCrouching() ? -0.55 : -0.75, 0.0);
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(CreeperMinionRenderer.TEXTURE));
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(CreeperMinionRenderer.TEXTURE_LOCATION));
             this.model.setupAnim(null, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
             if (tag.getBoolean("Powered")) {

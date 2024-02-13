@@ -1,11 +1,11 @@
 package fuzs.mutantmonsters.world.entity.projectile;
 
-import fuzs.mutantmonsters.core.CommonAbstractions;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
+import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -285,7 +285,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
 
             this.playSound(this.blockState.getSoundType().getBreakSound(), 0.8F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.8F);
         } else {
-            boolean canOwnerPlace = livingEntity instanceof Player && ((Player) livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingEvent(this.level(), livingEntity);
+            boolean canOwnerPlace = livingEntity instanceof Player && ((Player) livingEntity).mayBuild() || livingEntity instanceof Mob && CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), livingEntity);
             if (result.getType() == HitResult.Type.BLOCK) {
                 BlockHitResult blockHitResult = (BlockHitResult) result;
                 this.onHitBlock(blockHitResult);

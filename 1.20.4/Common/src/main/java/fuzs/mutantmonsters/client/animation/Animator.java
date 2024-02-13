@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.animation;
 
-import fuzs.mutantmonsters.animation.Animation;
-import fuzs.mutantmonsters.animation.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
@@ -30,7 +30,7 @@ public class Animator {
         this.partialTick = partialTick;
     }
 
-    public boolean setAnimation(Animation animation) {
+    public boolean setAnimation(EntityAnimation animation) {
         this.tempTick = this.prevTempTick = 0;
         this.correctAnim = this.animEntity.getAnimation() == animation;
         return this.correctAnim;

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,8 +19,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ForgeAbstractions implements CommonAbstractions {
 
@@ -40,11 +37,6 @@ public class ForgeAbstractions implements CommonAbstractions {
     }
 
     @Override
-    public boolean getMobGriefingEvent(Level level, Entity entity) {
-        return ForgeEventFactory.getMobGriefingEvent(level, entity);
-    }
-
-    @Override
     public boolean onAnimalTame(Animal animal, Player tamer) {
         return ForgeEventFactory.onAnimalTame(animal, tamer);
     }
@@ -52,16 +44,6 @@ public class ForgeAbstractions implements CommonAbstractions {
     @Override
     public BlockParticleOption setBlockParticlePos(BlockParticleOption particleOption, BlockPos pos) {
         return particleOption.setPos(pos);
-    }
-
-    @Override
-    public boolean onExplosionStart(Level level, Explosion explosion) {
-        return ForgeEventFactory.onExplosionStart(level, explosion);
-    }
-
-    @Override
-    public void onExplosionDetonate(Level level, Explosion explosion, List<Entity> list, double diameter) {
-        ForgeEventFactory.onExplosionDetonate(level, explosion, list, diameter);
     }
 
     @Override

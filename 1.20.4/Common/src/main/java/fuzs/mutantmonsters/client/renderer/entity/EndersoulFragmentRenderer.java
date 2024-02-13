@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.client.MutantMonstersClient;
+import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.EndersoulFragmentModel;
 import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
@@ -14,7 +14,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 public class EndersoulFragmentRenderer extends EntityRenderer<EndersoulFragment> {
-    private static final ResourceLocation TEXTURE = MutantMonstersClient.entityTexture("endersoul_fragment");
+    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/endersoul_fragment.png");
+
     private final EndersoulFragmentModel model;
 
     public EndersoulFragmentRenderer(EntityRendererProvider.Context context) {
@@ -25,20 +26,31 @@ public class EndersoulFragmentRenderer extends EntityRenderer<EndersoulFragment>
     }
 
     @Override
-    public void render(EndersoulFragment entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        matrixStackIn.pushPose();
-        matrixStackIn.translate(0.0, -1.9, 0.0);
-        matrixStackIn.scale(1.6F, 1.6F, 1.6F);
-        float ageInTicks = (float)entityIn.tickCount + partialTicks;
-        this.model.setupAnim(entityIn, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantRenderTypes.energySwirl(TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F));
-        this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
-        matrixStackIn.popPose();
+    public void render(EndersoulFragment endersoulFragment, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
+        super.render(endersoulFragment, entityYaw, partialTick, poseStack, multiBufferSource, packedLight);
+        poseStack.pushPose();
+        poseStack.translate(0.0, -1.9, 0.0);
+        poseStack.scale(1.6F, 1.6F, 1.6F);
+        float ageInTicks = (float) endersoulFragment.tickCount + partialTick;
+        this.model.setupAnim(endersoulFragment, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(TEXTURE_LOCATION,
+                ageInTicks * 0.008F,
+                ageInTicks * 0.008F
+        ));
+        this.model.renderToBuffer(poseStack,
+                vertexConsumer,
+                packedLight,
+                OverlayTexture.NO_OVERLAY,
+                0.9F,
+                0.3F,
+                1.0F,
+                1.0F
+        );
+        poseStack.popPose();
     }
 
     @Override
-    public ResourceLocation getTextureLocation(EndersoulFragment entity) {
-        return TEXTURE;
+    public ResourceLocation getTextureLocation(EndersoulFragment endersoulFragment) {
+        return TEXTURE_LOCATION;
     }
 }

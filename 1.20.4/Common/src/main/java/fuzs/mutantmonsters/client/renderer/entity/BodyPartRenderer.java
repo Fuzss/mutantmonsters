@@ -35,6 +35,6 @@ public class BodyPartRenderer extends EntityRenderer<MutantSkeletonBodyPart> {
 
     @Override
     public ResourceLocation getTextureLocation(MutantSkeletonBodyPart entity) {
-        return MutantSkeletonRenderer.TEXTURE;
+        return MutantSkeletonRenderer.TEXTURE_LOCATION;
     }
 }
