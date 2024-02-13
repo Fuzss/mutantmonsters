@@ -12,6 +12,7 @@ import fuzs.mutantmonsters.data.loot.ModBodyPartLootProvider;
 import fuzs.mutantmonsters.data.loot.ModEntityLootProvider;
 import fuzs.mutantmonsters.data.loot.ModEntityTypeLootProvider;
 import fuzs.mutantmonsters.data.tags.*;
+import fuzs.mutantmonsters.neoforge.data.client.ModSoundProvider;
 import fuzs.mutantmonsters.neoforge.init.NeoForgeModRegistry;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
@@ -45,7 +46,8 @@ public class MutantMonstersNeoForge {
                 ModRecipeProvider::new,
                 ModLanguageProvider::new,
                 ModParticleProvider::new,
-                ModModelProvider::new
+                ModModelProvider::new,
+                ModSoundProvider::new
         );
     }
 

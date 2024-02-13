@@ -12,7 +12,7 @@ public class ModParticleProvider extends AbstractParticleDescriptionProvider {
     }
 
     @Override
-    protected void addParticleDescriptions() {
+    public void addParticleDescriptions() {
         this.add(ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), new ResourceLocation("generic"), 7);
         this.add(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.value());
     }
