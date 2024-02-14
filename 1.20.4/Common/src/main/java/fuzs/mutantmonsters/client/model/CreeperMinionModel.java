@@ -59,17 +59,21 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinion> {
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         poseStack.pushPose();
         poseStack.translate(0.0F, 9.0F / 16.0F, 0.0F);
-        this.headParts().forEach(t -> t.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha));
+        this.headParts().forEach(modelPart -> {
+            modelPart.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        });
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.scale(0.5F, 0.5F, 0.5F);
         poseStack.translate(0.0F, 24.0F / 16.0F, 0.0F);
-        this.bodyParts().forEach(t -> t.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha));
+        this.bodyParts().forEach(modelPart -> {
+            modelPart.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        });
         poseStack.popPose();
     }
 
     @Override
-    public void setupAnim(@Nullable CreeperMinion entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(CreeperMinion entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         limbSwing *= 3.0F;
         this.head.yRot = netHeadYaw * 0.017453292F;
         this.head.xRot = headPitch * 0.017453292F;
@@ -83,8 +87,8 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinion> {
         this.leg2.setPos(2.0F, 18.0F, 4.0F);
         this.leg3.setPos(-2.0F, 18.0F, -4.0F);
         this.leg4.setPos(2.0F, 18.0F, -4.0F);
-        if (entity == null || entity.isInSittingPose()) {
-            this.head.y += 6.0F;
+        if (entity.isInSittingPose()) {
+            this.head.y += 3.0F;
             this.body.y += 6.0F;
             this.leg1.y += 4.0F;
             this.leg1.z -= 2.0F;

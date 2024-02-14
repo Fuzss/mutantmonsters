@@ -192,7 +192,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         if (!this.level().isClientSide) {
 
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
-                livingEntity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this), 7.0F);
+                livingEntity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE, this), 7.0F);
             }
 
             for (int i = 0; i < 18; ++i) {

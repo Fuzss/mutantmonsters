@@ -34,6 +34,7 @@ public class MutantMonstersNeoForge {
         NeoForgeModRegistry.touch();
         ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new);
         DataProviderHelper.registerDataProviders(MutantMonsters.MOD_ID,
+                ModDamageTypeProvider::new,
                 ModBlockLootProvider::new,
                 ModBodyPartLootProvider::new,
                 ModEntityLootProvider::new,
@@ -43,7 +44,6 @@ public class MutantMonstersNeoForge {
                 ModDamageTypeTagProvider::new,
                 ModEntityTypeTagProvider::new,
                 ModItemTagProvider::new,
-                ModDamageTypeProvider::new,
                 ModRecipeProvider::new,
                 ModLanguageProvider::new,
                 ModParticleProvider::new,

@@ -61,7 +61,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                 .save(writer, ROOT_ADVANCEMENT.name());
         Advancement.Builder.advancement()
                 .display(display(Items.FLINT_AND_STEEL.getDefaultInstance(), BURN_ZOMBIE_BURN_ADVANCEMENT.id()))
-                .parent(ROOT_ADVANCEMENT.id())
+                .parent(ROOT_ADVANCEMENT.asParent())
                 .addCriterion("used_flint_and_steel",
                         PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(ItemPredicate.Builder.item()
                                         .of(Items.FLINT_AND_STEEL, Items.FIRE_CHARGE),
@@ -72,7 +72,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                 .save(writer, BURN_ZOMBIE_BURN_ADVANCEMENT.name());
         Advancement.Builder.advancement()
                 .display(display(Items.GUNPOWDER.getDefaultInstance(), GUNPOWDER_SPICE_ADVANCEMENT.id()))
-                .parent(ROOT_ADVANCEMENT.id())
+                .parent(ROOT_ADVANCEMENT.asParent())
                 .addCriterion("obtained_chemical_x",
                         InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item()
                                 .isPotion(ModRegistry.CHEMICAL_X_POTION.value()))
@@ -80,7 +80,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                 .save(writer, GUNPOWDER_SPICE_ADVANCEMENT.name());
         Advancement.Builder.advancement()
                 .display(display(Items.JACK_O_LANTERN.getDefaultInstance(), FROSTY_THE_SNOW_GOLEM_ADVANCEMENT.id()))
-                .parent(GUNPOWDER_SPICE_ADVANCEMENT.id())
+                .parent(GUNPOWDER_SPICE_ADVANCEMENT.asParent())
                 .addCriterion("created_mutant_snow_golem",
                         SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity()
                                 .of(ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()))
@@ -91,7 +91,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                         HULK_SMASH_ADVANCEMENT.id(),
                         AdvancementType.GOAL
                 ))
-                .parent(BURN_ZOMBIE_BURN_ADVANCEMENT.id())
+                .parent(BURN_ZOMBIE_BURN_ADVANCEMENT.asParent())
                 .addCriterion("killed_mutant_zombie",
                         KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity()
                                         .of(ModRegistry.MUTANT_ZOMBIE_ENTITY_TYPE.value()),
@@ -108,7 +108,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                         NO_BONES_ABOUT_IT_ADVANCEMENT.id(),
                         AdvancementType.GOAL
                 ))
-                .parent(ROOT_ADVANCEMENT.id())
+                .parent(ROOT_ADVANCEMENT.asParent())
                 .addCriterion("killed_mutant_skeleton",
                         KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity()
                                         .of(ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.value()),
@@ -134,7 +134,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                 .save(writer, NO_BONES_ABOUT_IT_ADVANCEMENT.name());
         Advancement.Builder.advancement()
                 .display(display(Items.COBWEB.getDefaultInstance(), SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.id()))
-                .parent(GUNPOWDER_SPICE_ADVANCEMENT.id())
+                .parent(GUNPOWDER_SPICE_ADVANCEMENT.asParent())
                 .addCriterion("created_spider_pig",
                         SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity()
                                 .of(ModRegistry.SPIDER_PIG_ENTITY_TYPE.value()))
@@ -142,7 +142,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
                 .save(writer, SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.name());
         Advancement.Builder.advancement()
                 .display(display(Items.CREEPER_HEAD.getDefaultInstance(), YOU_DA_BOMBY_ADVANCEMENT.id()))
-                .parent(ROOT_ADVANCEMENT.id())
+                .parent(ROOT_ADVANCEMENT.asParent())
                 .addCriterion("tamed_creeper_minion",
                         TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity()
                                 .of(ModRegistry.CREEPER_MINION_ENTITY_TYPE.value()))

@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.handler;
 
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
@@ -18,7 +19,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +30,7 @@ import net.minecraft.world.level.Level;
 import java.util.Collection;
 
 public class EntityEventsHandler {
+    private static final Ingredient PIG_POISON_INGREDIENT = Ingredient.of(Items.FERMENTED_SPIDER_EYE);
 
     public static EventResult onEntityLoad(Entity entity, ServerLevel level) {
         if (entity instanceof PathfinderMob creature) {
@@ -38,7 +39,10 @@ public class EntityEventsHandler {
             }
 
             if (creature.getType() == EntityType.PIG) {
-                creature.goalSelector.addGoal(2, new TemptGoal(creature, 1.0, Ingredient.of(Items.FERMENTED_SPIDER_EYE), false));
+                creature.goalSelector.addGoal(2, new AvoidEntityGoal<>(creature, Player.class, 10.0F, 1.25, 1.25, livingEntity -> {
+                    return livingEntity instanceof Player player && (PIG_POISON_INGREDIENT.test(player.getMainHandItem()) ||
+                            PIG_POISON_INGREDIENT.test(player.getOffhandItem()));
+                }));
             }
 
             if (creature.getType() == EntityType.VILLAGER) {
@@ -55,12 +59,12 @@ public class EntityEventsHandler {
     public static EventResultHolder<InteractionResult> onEntityInteract(Player player, Level level, InteractionHand hand, Entity entity) {
         if (entity instanceof Pig pig && !pig.hasEffect(MobEffects.UNLUCK)) {
             ItemStack stackInHand = player.getItemInHand(hand);
-            if (stackInHand.getItem() == Items.FERMENTED_SPIDER_EYE) {
+            if (PIG_POISON_INGREDIENT.test(stackInHand)) {
                 if (!player.isCreative()) {
                     stackInHand.shrink(1);
                 }
 
-                pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600, 13));
+                pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600));
                 return EventResultHolder.interrupt(InteractionResult.sidedSuccess(level.isClientSide));
             }
         }
@@ -88,15 +92,15 @@ public class EntityEventsHandler {
     }
 
     public static EventResult onLivingDrops(LivingEntity entity, DamageSource source, Collection<ItemEntity> drops, int lootingLevel, boolean recentlyHit) {
-        Entity trueSource = source.getEntity();
-        if (SpiderPig.isPigOrSpider(entity) && trueSource instanceof SpiderPig) {
+        Entity attacker = source.getEntity();
+        if (entity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) && attacker instanceof SpiderPig) {
             return EventResult.INTERRUPT;
         }
 
-        if ((trueSource instanceof MutantCreeper && ((MutantCreeper) trueSource).isCharged() || trueSource instanceof CreeperMinion && ((CreeperMinion) trueSource).isCharged()) && source.is(DamageTypeTags.IS_EXPLOSION)) {
+        if ((attacker instanceof MutantCreeper && ((MutantCreeper) attacker).isCharged() || attacker instanceof CreeperMinion && ((CreeperMinion) attacker).isCharged()) && source.is(DamageTypeTags.IS_EXPLOSION)) {
             ItemStack itemStack = EntityUtil.getSkullDrop(entity.getType());
             if (!itemStack.isEmpty()) {
-                drops.add(new ItemEntity(trueSource.level(), entity.getX(), entity.getY(), entity.getZ(), itemStack));
+                drops.add(new ItemEntity(attacker.level(), entity.getX(), entity.getY(), entity.getZ(), itemStack));
             }
         }
         return EventResult.PASS;

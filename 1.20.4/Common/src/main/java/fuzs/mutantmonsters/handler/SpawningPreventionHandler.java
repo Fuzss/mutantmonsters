@@ -27,7 +27,10 @@ public class SpawningPreventionHandler {
     public static EventResult onEntitySpawn(Entity entity, ServerLevel level, @Nullable MobSpawnType spawnType) {
         int spawnLimit = SPAWN_LIMITS_PER_ENTITY_TYPE.getOrDefault(entity.getType(), -1);
         if (spawnLimit != -1) {
-            long entitiesOfType = StreamSupport.stream(level.getAllEntities().spliterator(), false).filter(entity1 -> entity1.getType() == entity.getType()).count();
+            long entitiesOfType = StreamSupport.stream(level.getAllEntities().spliterator(), false)
+                    .filter((Entity currentEntity) -> {
+                        return currentEntity.getType() == entity.getType();
+                    }).count();
             if (entitiesOfType >= spawnLimit) {
                 return EventResult.INTERRUPT;
             }

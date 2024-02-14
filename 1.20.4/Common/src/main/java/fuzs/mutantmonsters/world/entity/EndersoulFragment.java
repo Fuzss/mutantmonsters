@@ -177,7 +177,7 @@ public class EndersoulFragment extends Entity {
                 }
 
                 if (hitChance) {
-                    entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ARMOR_BYPASSING_THROWN_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
+                    entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
                 }
             }
         }

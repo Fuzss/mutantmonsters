@@ -1,26 +1,28 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.mutantmonsters.world.entity.AnimatedEntity;
-import fuzs.mutantmonsters.world.entity.EntityAnimation;
-import fuzs.mutantmonsters.world.level.SeismicWave;
-import fuzs.mutantmonsters.world.level.ZombieResurrection;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
+import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.EntityAnimation;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
+import fuzs.mutantmonsters.world.level.SeismicWave;
+import fuzs.mutantmonsters.world.level.ZombieResurrection;
 import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -44,11 +46,14 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
@@ -96,7 +101,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         this.goalSelector.addGoal(0, new SlamGroundGoal(this));
         this.goalSelector.addGoal(0, new RoarGoal(this));
         this.goalSelector.addGoal(0, new ThrowAttackGoal(this));
-        this.goalSelector.addGoal(1, (new MutantMeleeAttackGoal(this, 1.2)).setMaxAttackTick(0));
+        this.goalSelector.addGoal(1, new MutantMeleeAttackGoal(this, 1.2).setMaxAttackTick(0));
         this.goalSelector.addGoal(2, new AvoidDamageGoal(this, 1.0));
         this.goalSelector.addGoal(3, new MoveThroughVillageGoal(this, 1.0, true, 4, () -> {
             return false;
@@ -104,9 +109,9 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
-        this.targetSelector.addGoal(0, (new HurtByNearestTargetGoal(this, WitherBoss.class)).setAlertOthers());
+        this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this, WitherBoss.class).setAlertOthers());
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
-        this.targetSelector.addGoal(2, (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
@@ -239,7 +244,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                 if (!itemInHand.isDamageableItem()) {
                     itemInHand.shrink(1);
                 } else {
-                    itemInHand.hurtAndBreak(1, player, (livingEntity) -> {
+                    itemInHand.hurtAndBreak(1, player, livingEntity -> {
                         livingEntity.broadcastBreakEvent(hand);
                     });
                 }
@@ -372,7 +377,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                 box = box.inflate(0.25 + addScale, 0.25 + addScale * 0.5, 0.25 + addScale);
             }
 
-            DamageSource source = DamageSourcesHelper.source(this.level(), ModRegistry.EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this);
+            DamageSource source = DamageSourcesHelper.source(this.level(), ModRegistry.MUTANT_ZOMBIE_SEISMIC_WAVE_DAMAGE_TYPE, this);
 
             for (Entity entity : this.level().getEntities(this, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(this::canHarm))) {
                 if (entity instanceof LivingEntity && entity.hurt(source, wave.isFirst() ? (float) (9 + this.random.nextInt(4)) : (float) (6 + this.random.nextInt(3))) && this.random.nextInt(5) == 0) {
@@ -417,20 +422,27 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             this.setLastHurtMob(this.getLastHurtByMob());
             this.level().broadcastEntityEvent(this, (byte) 3);
             if (this.lastHurtByPlayerTime > 0) {
-                this.lastHurtByPlayerTime += 140;
+                this.lastHurtByPlayerTime += MAX_DEATH_TIME;
             }
         }
     }
 
     @Override
     protected void tickDeath() {
-        if (this.deathTime <= 25 || !this.isOnFire() || this.deathTime >= 100) {
+        if (this.deathTime <= 25 || !this.isOnFire() || this.deathTime >= MAX_VANISH_TIME) {
             ++this.deathTime;
         }
 
         if (this.isOnFire()) {
             if (this.vanishTime == 0) {
-                EntityUtil.sendMetadataPacket(this);
+                if (level() instanceof ServerLevel level) {
+                    level.getChunkSource()
+                            .broadcast(this,
+                                    new ClientboundSetEntityDataPacket(getId(),
+                                            getEntityData().getNonDefaultValues()
+                                    )
+                            );
+                }
             }
 
             ++this.vanishTime;
@@ -438,7 +450,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             this.vanishTime = Math.max(0, this.vanishTime - 1);
         }
 
-        if (this.deathTime >= 140) {
+        if (this.deathTime >= MAX_DEATH_TIME) {
             this.deathTime = 0;
             this.vanishTime = 0;
             this.deathCause = null;
@@ -450,7 +462,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             this.setHealth((float) Math.round(this.getMaxHealth() / 3.75F));
         }
 
-        if (this.vanishTime >= 100 || this.getLives() <= 0 && this.deathTime > 25) {
+        if (this.vanishTime >= MAX_VANISH_TIME || this.getLives() <= 0 && this.deathTime > 25) {
             if (!this.level().isClientSide) {
                 super.die(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
             }
@@ -478,15 +490,31 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     }
 
     @Override
-    public boolean killedEntity(ServerLevel serverWorld, LivingEntity livingEntity) {
-        if ((serverWorld.getDifficulty() == Difficulty.NORMAL && this.random.nextBoolean() || serverWorld.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
-            EntityUtil.convertMobWithNBT(livingEntity, EntityType.ZOMBIE_VILLAGER, false);
-            if (!livingEntity.isSilent()) {
-                serverWorld.levelEvent(null, 1026, livingEntity.blockPosition(), 0);
+    public boolean killedEntity(ServerLevel level, LivingEntity entity) {
+        boolean bl = super.killedEntity(level, entity);
+        if ((level.getDifficulty() == Difficulty.NORMAL || level.getDifficulty() == Difficulty.HARD) && entity instanceof Villager villager) {
+            if (level.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+                return bl;
             }
-            return false;
+
+            ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
+            if (zombieVillager != null) {
+                zombieVillager.finalizeSpawn(level, level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true),
+                        null
+                );
+                zombieVillager.setVillagerData(villager.getVillagerData());
+                zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
+                zombieVillager.setTradeOffers(villager.getOffers().createTag());
+                zombieVillager.setVillagerXp(villager.getVillagerXp());
+                if (!this.isSilent()) {
+                    level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_INFECTED, this.blockPosition(), 0);
+                }
+
+                bl = false;
+            }
         }
-        return true;
+
+        return bl;
     }
 
     @Override
@@ -520,7 +548,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         for (int i = 0; i < listNBT.size(); ++i) {
             CompoundTag compoundNBT = listNBT.getCompound(i);
-            this.resurrectionList.add(i, new ZombieResurrection(this.level(), NbtUtils.readBlockPos(compoundNBT), compoundNBT.getInt("Tick")));
+            this.resurrectionList.add(i, new ZombieResurrection(NbtUtils.readBlockPos(compoundNBT), compoundNBT.getInt("Tick")));
         }
 
     }

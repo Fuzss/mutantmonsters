@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v8.0.7-1.20.1] - 2024-02-14
+### Added
+- Add a config option for the max distance of the ender soul hand's teleport ability, also allows for disabling the ability all together
+### Fixed
+- Fix crash when the mutant skeleton is firing arrows with the Bewitchment mod installed
+- Fix unable to use chemical x on Fabric
+
 ## [v8.0.6-1.20.1] - 2023-12-03
 ### Changed
 - Revert spawn category changes from last version for now

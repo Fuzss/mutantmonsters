@@ -3,7 +3,6 @@ package fuzs.mutantmonsters.world.level;
 import fuzs.mutantmonsters.world.entity.ai.goal.TrackSummonerGoal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -14,7 +13,6 @@ import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.Scoreboard;
@@ -22,12 +20,12 @@ import net.minecraft.world.scores.Scoreboard;
 public class ZombieResurrection extends BlockPos {
     private int tick;
 
-    public ZombieResurrection(Level world, int x, int y, int z) {
+    public ZombieResurrection(Level level, int x, int y, int z) {
         super(x, y, z);
-        this.tick = 100 + world.random.nextInt(40);
+        this.tick = 100 + level.random.nextInt(40);
     }
 
-    public ZombieResurrection(Level world, BlockPos pos, int tick) {
+    public ZombieResurrection(BlockPos pos, int tick) {
         super(pos);
         this.tick = tick;
     }
@@ -82,15 +80,13 @@ public class ZombieResurrection extends BlockPos {
         return i;
     }
 
-    public static EntityType<? extends Zombie> getZombieByLocation(Level world, BlockPos pos) {
-        Holder<Biome> biome = world.getBiome(pos);
-        int chance = world.random.nextInt(100);
-        if (biome.is(BiomeTags.SPAWNS_GOLD_RABBITS)) {
-            return chance < 80 && world.canSeeSky(pos) ? EntityType.HUSK : (chance < 1 ? EntityType.ZOMBIE_VILLAGER : EntityType.ZOMBIE);
-        } else if ((biome.is(BiomeTags.REQUIRED_OCEAN_MONUMENT_SURROUNDING)) && world.isWaterAt(pos)) {
+    public static EntityType<? extends Zombie> getZombieByLocation(Level level, BlockPos pos) {
+        if ((level.getBiome(pos).is(BiomeTags.IS_OCEAN) || level.getBiome(pos).is(BiomeTags.IS_RIVER)) && level.isWaterAt(pos)) {
             return EntityType.DROWNED;
+        } else if (level.isDay() && level.canSeeSky(pos)) {
+            return EntityType.HUSK;
         } else {
-            return chance < 95 ? EntityType.ZOMBIE : EntityType.ZOMBIE_VILLAGER;
+            return level.random.nextFloat() < 0.05F ? EntityType.ZOMBIE_VILLAGER : EntityType.ZOMBIE;
         }
     }
 

@@ -142,17 +142,17 @@ public class ModRegistry {
     public static final TagKey<Block> MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG = TAGS.registerBlockTag("mutant_enderman_holdable_immune");
     public static final TagKey<Block> ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG = TAGS.registerBlockTag("endersoul_hand_holdable_immune");
     public static final TagKey<EntityType<?>> MUTANTS_ENTITY_TYPE_TAG = TAGS.registerEntityTypeTag("mutants");
+    public static final TagKey<EntityType<?>> SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG = TAGS.registerEntityTypeTag("spider_pig_targets");
     public static final TagKey<Biome> WITHOUT_MUTANT_CREEPER_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_creeper_spawns");
     public static final TagKey<Biome> WITHOUT_MUTANT_ENDERMAN_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_enderman_spawns");
     public static final TagKey<Biome> WITHOUT_MUTANT_SKELETON_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_skeleton_spawns");
     public static final TagKey<Biome> WITHOUT_MUTANT_ZOMBIE_SPAWNS_BIOME_TAG = TAGS.registerBiomeTag("without_mutant_zombie_spawns");
 
     public static final ResourceKey<DamageType> PLAYER_SEISMIC_WAVE_DAMAGE_TYPE = REGISTRY.registerDamageType("player_seismic_wave");
-    public static final ResourceKey<DamageType> ARMOR_BYPASSING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("armor_bypassing_mob_attack");
-    public static final ResourceKey<DamageType> EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("effects_bypassing_mob_attack");
+    public static final ResourceKey<DamageType> MUTANT_SKELETON_SHATTER_DAMAGE_TYPE = REGISTRY.registerDamageType("mutant_skeleton_shatter");
+    public static final ResourceKey<DamageType> MUTANT_ZOMBIE_SEISMIC_WAVE_DAMAGE_TYPE = REGISTRY.registerDamageType("mutant_zombie_seismic_wave");
     public static final ResourceKey<DamageType> PIERCING_MOB_ATTACK_DAMAGE_TYPE = REGISTRY.registerDamageType("piercing_mob_attack");
-    public static final ResourceKey<DamageType> MUTANT_ARROW_DAMAGE_TYPE = REGISTRY.registerDamageType("mutant_arrow");
-    public static final ResourceKey<DamageType> ARMOR_BYPASSING_THROWN_DAMAGE_TYPE = REGISTRY.registerDamageType("armor_bypassing_thrown");
+    public static final ResourceKey<DamageType> ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE = REGISTRY.registerDamageType("endersoul_fragment_explosion");
 
     public static final ResourceLocation MUTANT_SKELETON_PELVIS_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/pelvis");
     public static final ResourceLocation MUTANT_SKELETON_RIB_LOOT_TABLE = MutantMonsters.id("entities/mutant_skeleton/rib");

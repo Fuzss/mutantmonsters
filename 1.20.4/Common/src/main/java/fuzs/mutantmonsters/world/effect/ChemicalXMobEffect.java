@@ -8,10 +8,12 @@ import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,30 +27,30 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
                 entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.value() &&
                 entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.value();
     };
-    public static final TargetingConditions PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
+    public static final TargetingConditions TARGET_PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
 
     public ChemicalXMobEffect(MobEffectCategory mobEffectCategory, int effectColor) {
         super(mobEffectCategory, effectColor);
     }
 
     @Override
-    public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
+    public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity indirectSource, LivingEntity livingEntity, int amplifier, double health) {
         Level level = livingEntity.level();
-        if (!level.isClientSide && livingEntity instanceof Mob target && PREDICATE.test(null, target)) {
-            SkullSpirit spirit = new SkullSpirit(level, target);
-            spirit.moveTo(target.getX(), target.getY(), target.getZ());
-            level.addFreshEntity(spirit);
+        Player player = indirectSource instanceof Player ? (Player) indirectSource : null;
+        if (!level.isClientSide && livingEntity instanceof Mob mob && TARGET_PREDICATE.test(player, livingEntity)) {
+            SkullSpirit skullSpirit = new SkullSpirit(level, mob, player != null ? player.getUUID() : null);
+            skullSpirit.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            level.addFreshEntity(skullSpirit);
         }
     }
 
     @Nullable
-    public static EntityType<?> getMutantOf(LivingEntity target) {
+    public static EntityType<?> getMutantOf(Mob target) {
         EntityType<?> targetType = target.getType();
         if (!MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsKey(targetType) ||
                 target.isBaby()) {
             return null;
-        } else if (targetType == EntityType.PIG &&
-                (!target.hasEffect(MobEffects.UNLUCK) || target.getEffect(MobEffects.UNLUCK).getAmplifier() != 13)) {
+        } else if (targetType == EntityType.PIG && !target.hasEffect(MobEffects.UNLUCK)) {
             return null;
         } else {
             return MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.get(targetType);

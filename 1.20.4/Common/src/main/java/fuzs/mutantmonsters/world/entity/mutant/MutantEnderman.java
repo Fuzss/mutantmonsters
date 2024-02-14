@@ -124,7 +124,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         this.goalSelector.addGoal(1, new ScreamGoal(this));
         this.goalSelector.addGoal(1, new CloneGoal(this));
         this.goalSelector.addGoal(1, new TeleSmashGoal(this));
-        this.goalSelector.addGoal(2, (new MutantMeleeAttackGoal(this, 1.2)).setMaxAttackTick(15));
+        this.goalSelector.addGoal(2, new MutantMeleeAttackGoal(this, 1.2).setMaxAttackTick(15));
         this.goalSelector.addGoal(3, new AvoidDamageGoal(this, 1.0));
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0, 0.0F));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -1097,7 +1097,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
             this.mob.animation = MutantEnderman.TELEPORT_ANIMATION;
             this.mob.animationTick = 0;
             MutantEnderman.teleportAttack(this.mob);
-            this.mob.getTeleportPosition().ifPresent((pos) -> {
+            this.mob.getTeleportPosition().ifPresent(pos -> {
                 this.mob.setPos((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
             });
             if (!this.mob.isSilent()) {
@@ -1118,7 +1118,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
         public void stop() {
             this.mob.stopRiding();
             this.mob.fallDistance = 0.0F;
-            this.mob.getTeleportPosition().ifPresent((pos) -> {
+            this.mob.getTeleportPosition().ifPresent(pos -> {
                 this.mob.teleportTo((double)pos.getX() + 0.5, pos.getY(), (double)pos.getZ() + 0.5);
             });
             super.stop();
@@ -1381,7 +1381,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
 
     static class FindTargetGoal extends NearestAttackableTargetGoal<LivingEntity> {
         public FindTargetGoal(MutantEnderman mutantEnderman) {
-            super(mutantEnderman, LivingEntity.class, 10, false, false, (target) -> {
+            super(mutantEnderman, LivingEntity.class, 10, false, false, target -> {
                 return (mutantEnderman.isAngryAt(target) || mutantEnderman.isBeingLookedAtBy(target) || EndersoulFragment.isProtected(target)) && target.attackable();
             });
         }

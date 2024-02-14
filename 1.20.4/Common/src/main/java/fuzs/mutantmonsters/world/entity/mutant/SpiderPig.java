@@ -59,6 +59,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(SpiderPig.class, EntityDataSerializers.BOOLEAN);
     private static final Ingredient TEMPTATION_ITEMS = Ingredient.of(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.PORKCHOP, Items.SPIDER_EYE);
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+
     private final List<WebPos> webList = new ArrayList<>(12);
     private int leapCooldown;
     private int leapTick;
@@ -78,10 +79,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         return createMobAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
-    public static boolean isPigOrSpider(LivingEntity livingEntity) {
-        return livingEntity.getType() == EntityType.PIG || livingEntity.getType() == EntityType.SPIDER;
-    }
-
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -97,9 +94,11 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new OwnerTargetGoal(this));
-        this.targetSelector.addGoal(1, (new HurtByNearestTargetGoal(this)).setAlertOthers());
+        this.targetSelector.addGoal(1, new HurtByNearestTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
-        this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Mob.class, true, SpiderPig::isPigOrSpider));
+        this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Mob.class, true,
+                livingEntity -> livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)
+        ));
         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, true));
     }
 
@@ -253,7 +252,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     @Override
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner) {
-        return EntityUtil.shouldAttackEntity(this, target, owner, false);
+        return EntityUtil.shouldAttackEntity(target, owner, false);
     }
 
     @Override
@@ -319,7 +318,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (soundCategory != null) {
             this.level().playSound(null, this, SoundEvents.PIG_SADDLE, soundCategory, 0.5F, 1.0F);
         }
-
     }
 
     @Override
@@ -450,10 +448,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        if (isPigOrSpider(livingEntity)) {
-            EntityUtil.convertMobWithNBT(livingEntity, ModRegistry.SPIDER_PIG_ENTITY_TYPE.value(), false);
-            return false;
+        if (livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) && livingEntity instanceof Mob mob) {
+            return mob.convertTo(ModRegistry.SPIDER_PIG_ENTITY_TYPE.value(), true) == null;
         }
+
         return true;
     }
 
@@ -472,7 +470,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         if (!blockState.is(Blocks.COBWEB)) {
             super.makeStuckInBlock(blockState, motionMultiplier);
         }
-
     }
 
     @Override
@@ -497,7 +494,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             this.spawnAtLocation(Items.SADDLE);
             this.setSaddled(false);
         }
-
     }
 
     @Override
@@ -508,7 +504,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 this.removeWeb(webPos);
             }
         }
-
     }
 
     @Override
@@ -527,7 +522,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
             compound.put("Webs", listnbt);
         }
-
     }
 
     @Override
@@ -544,7 +538,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             CompoundTag compound1 = listnbt.getCompound(i);
             this.webList.add(i, new WebPos(NbtUtils.readBlockPos(compound1), compound1.getInt("TimeLeft")));
         }
-
     }
 
     @Override
@@ -577,8 +570,6 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     class LeapAttackGoal extends Goal {
-        LeapAttackGoal() {
-        }
 
         @Override
         public boolean canUse() {

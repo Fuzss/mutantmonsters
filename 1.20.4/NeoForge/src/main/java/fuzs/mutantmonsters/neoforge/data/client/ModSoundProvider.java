@@ -4,10 +4,7 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.neoforge.api.data.v2.client.AbstractSoundDefinitionProvider;
 import fuzs.puzzleslib.neoforge.api.data.v2.core.ForgeDataProviderContext;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.neoforged.neoforge.common.data.SoundDefinition;
 
 public class ModSoundProvider extends AbstractSoundDefinitionProvider {
 
@@ -122,31 +119,5 @@ public class ModSoundProvider extends AbstractSoundDefinitionProvider {
         this.add(ModRegistry.ENTITY_SPIDER_PIG_AMBIENT_SOUND_EVENT.value(), SoundEvents.PIG_AMBIENT);
         this.add(ModRegistry.ENTITY_SPIDER_PIG_DEATH_SOUND_EVENT.value(), SoundEvents.PIG_DEATH);
         this.add(ModRegistry.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.value(), SoundEvents.PIG_HURT);
-    }
-
-    // TODO remove these after Puzzles Lib update
-
-    protected void add(SoundEvent soundEvent, SoundEvent... soundEvents) {
-        SoundDefinition definition = definition();
-        for (SoundEvent vanillaSoundEvent : soundEvents) {
-            definition.with(sound(vanillaSoundEvent));
-        }
-        this.add(soundEvent, definition);
-    }
-
-    protected void add(SoundEvent soundEvent, ResourceLocation... sounds) {
-        SoundDefinition definition = definition();
-        for (ResourceLocation sound : sounds) {
-            definition.with(sound(sound));
-        }
-        this.add(soundEvent, definition);
-    }
-
-    protected void add(SoundEvent soundEvent, String... sounds) {
-        SoundDefinition definition = definition();
-        for (String sound : sounds) {
-            definition.with(sound(sound));
-        }
-        this.add(soundEvent, definition);
     }
 }

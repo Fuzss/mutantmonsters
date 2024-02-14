@@ -57,8 +57,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
     private int timeSinceIgnited;
     private final int fuseTime = 26;
 
-    public CreeperMinion(EntityType<? extends CreeperMinion> type, Level worldIn) {
-        super(type, worldIn);
+    public CreeperMinion(EntityType<? extends CreeperMinion> entityType, Level level) {
+        super(entityType, level);
         this.setDestroyBlocks(true);
     }
 
@@ -114,7 +114,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 entity = ((ServerLevel)this.level()).getEntity(uuid);
             }
 
-            return entity instanceof LivingEntity ? (LivingEntity)entity : null;
+            return entity instanceof LivingEntity livingEntity ? livingEntity : null;
         }
     }
 
@@ -374,7 +374,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner) {
-        return EntityUtil.shouldAttackEntity(this, target, owner, true);
+        return EntityUtil.shouldAttackEntity(target, owner, true);
     }
 
     @Override

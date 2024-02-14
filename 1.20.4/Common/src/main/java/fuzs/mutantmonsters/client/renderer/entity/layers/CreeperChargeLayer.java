@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 
 public class CreeperChargeLayer<T extends Entity, M extends EntityModel<T>> extends RenderLayer<T, M> {
     public static final ResourceLocation LIGHTNING_TEXTURE = new ResourceLocation("textures/entity/creeper/creeper_armor.png");
+
     private final M model;
 
     public CreeperChargeLayer(RenderLayerParent<T, M> renderer, M model) {
@@ -23,13 +24,13 @@ public class CreeperChargeLayer<T extends Entity, M extends EntityModel<T>> exte
     }
 
     @Override
-    public void render(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity instanceof MutantCreeper && ((MutantCreeper)entity).isCharged() || entity instanceof CreeperMinion && ((CreeperMinion)entity).isCharged()) {
-            this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
+        if (entity instanceof MutantCreeper mutantCreeper && mutantCreeper.isCharged() || entity instanceof CreeperMinion creeperMinion && creeperMinion.isCharged()) {
+            this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
             this.getParentModel().copyPropertiesTo(this.model);
-            VertexConsumer ivertexbuilder = bufferIn.getBuffer(MutantRenderTypes.energySwirl(LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
             this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-            this.model.renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
+            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
         }
 
     }
