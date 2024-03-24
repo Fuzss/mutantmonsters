@@ -52,10 +52,10 @@ public class CreeperMinion extends ShoulderRidingEntity {
     private static final EntityDataAccessor<Byte> CREEPER_MINION_FLAGS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> EXPLODE_STATE = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> EXPLOSION_RADIUS = SynchedEntityData.defineId(CreeperMinion.class, EntityDataSerializers.FLOAT);
+    private static final int TOTAL_FUSE_TIME = 26;
 
     private int lastActiveTime;
     private int timeSinceIgnited;
-    private final int fuseTime = 26;
 
     public CreeperMinion(EntityType<? extends CreeperMinion> entityType, Level level) {
         super(entityType, level);
@@ -185,17 +185,16 @@ public class CreeperMinion extends ShoulderRidingEntity {
         if (DATA_FLAGS_ID.equals(key)) {
             this.refreshDimensions();
         }
-
     }
 
     @Override
-    protected PathNavigation createNavigation(Level worldIn) {
-        return new MutantGroundPathNavigation(this, worldIn);
+    protected PathNavigation createNavigation(Level level) {
+        return new MutantGroundPathNavigation(this, level);
     }
 
     @Override
-    public EntityDimensions getDimensions(Pose poseIn) {
-        return this.isInSittingPose() ? super.getDimensions(poseIn).scale(1.0F, 0.75F) : super.getDimensions(poseIn);
+    public EntityDimensions getDimensions(Pose pose) {
+        return this.isInSittingPose() ? super.getDimensions(pose).scale(1.0F, 0.75F) : super.getDimensions(pose);
     }
 
     @Override
@@ -209,8 +208,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public void thunderHit(ServerLevel serverWorld, LightningBolt lightningBoltEntity) {
-        super.thunderHit(serverWorld, lightningBoltEntity);
+    public void thunderHit(ServerLevel level, LightningBolt lightning) {
+        super.thunderHit(level, lightning);
         this.setCharged(true);
     }
 
@@ -223,8 +222,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
     public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
         boolean hasFallen = super.causeFallDamage(distance, damageMultiplier, source);
         this.timeSinceIgnited = (int)((float)this.timeSinceIgnited + distance * 1.5F);
-        if (this.timeSinceIgnited > this.fuseTime - 5) {
-            this.timeSinceIgnited = this.fuseTime - 5;
+        if (this.timeSinceIgnited > this.TOTAL_FUSE_TIME - 5) {
+            this.timeSinceIgnited = this.TOTAL_FUSE_TIME - 5;
         }
 
         return hasFallen;
@@ -248,7 +247,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 this.timeSinceIgnited = 0;
             }
 
-            if (this.timeSinceIgnited >= this.fuseTime) {
+            if (this.timeSinceIgnited >= this.TOTAL_FUSE_TIME) {
                 this.timeSinceIgnited = 0;
                 if (!this.level().isClientSide) {
                     float sizeIn = this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F);
@@ -265,11 +264,11 @@ public class CreeperMinion extends ShoulderRidingEntity {
                     }
                 }
 
-                this.setExplodeState(-this.fuseTime);
+                this.setExplodeState(-this.TOTAL_FUSE_TIME);
             }
 
             if (this.getDeltaMovement().lengthSqr() > 0.800000011920929 && this.getTarget() != null && this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(0.5).intersects(this.getTarget().getBoundingBox())) {
-                this.timeSinceIgnited = this.fuseTime;
+                this.timeSinceIgnited = this.TOTAL_FUSE_TIME;
             }
         }
 
@@ -277,7 +276,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     public float getFlashIntensity(float partialTicks) {
-        return Mth.lerp(partialTicks, (float)this.lastActiveTime, (float)this.timeSinceIgnited) / (float)(this.fuseTime - 2);
+        return Mth.lerp(partialTicks, (float)this.lastActiveTime, (float)this.timeSinceIgnited) / (float)(this.TOTAL_FUSE_TIME - 2);
     }
 
     @Override
@@ -378,7 +377,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity entityIn) {
+    public boolean doHurtTarget(Entity target) {
         return true;
     }
 
@@ -413,8 +412,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> typeIn) {
-        return super.canAttackType(typeIn) && typeIn != ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.value();
+    public boolean canAttackType(EntityType<?> entityType) {
+        return super.canAttackType(entityType) && entityType != ModRegistry.MUTANT_CREEPER_ENTITY_TYPE.value();
     }
 
     @Override
@@ -435,13 +434,13 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public boolean isAlliedTo(Entity entityIn) {
+    public boolean isAlliedTo(Entity entity) {
         LivingEntity owner = this.getOwner();
-        return owner != null && (entityIn == owner || owner.isAlliedTo(entityIn)) || super.isAlliedTo(entityIn);
+        return owner != null && (entity == owner || owner.isAlliedTo(entity)) || super.isAlliedTo(entity);
     }
 
     @Override
-    public AgeableMob getBreedOffspring(ServerLevel p_241840_1_, AgeableMob p_241840_2_) {
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return null;
     }
 
@@ -450,7 +449,6 @@ public class CreeperMinion extends ShoulderRidingEntity {
         if (this.getTarget() == null && this.getExplodeState() <= 0) {
             super.playAmbientSound();
         }
-
     }
 
     @Override
@@ -494,7 +492,6 @@ public class CreeperMinion extends ShoulderRidingEntity {
         for (String s : new String[]{"Age", "ForcedAge", "InLove", "LoveCause"}) {
             compound.remove(s);
         }
-
     }
 
     @Override
@@ -516,6 +513,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     class CreeperMinionFollowOwnerGoal extends FollowOwnerGoal {
+
         public CreeperMinionFollowOwnerGoal() {
             super(CreeperMinion.this, 1.2, 10.0F, 5.0F, false);
         }
@@ -529,11 +527,11 @@ public class CreeperMinion extends ShoulderRidingEntity {
             } else {
                 super.tick();
             }
-
         }
     }
 
     class CreeperMinionSwellGoal extends Goal {
+
         public CreeperMinionSwellGoal() {
             this.setFlags(EnumSet.of(Flag.MOVE));
         }
