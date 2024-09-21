@@ -1,12 +1,14 @@
 package fuzs.mutantmonsters.world.entity;
 
+import fuzs.mutantmonsters.init.ModEntityTypes;
+import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -53,7 +55,7 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     public MutantSkeletonBodyPart(Level level, Mob owner, int part) {
-        this(ModRegistry.BODY_PART_ENTITY_TYPE.value(), level);
+        this(ModEntityTypes.BODY_PART_ENTITY_TYPE.value(), level);
         this.owner = new WeakReference<>(owner);
         this.setPart(part);
         this.setPos(owner.getX(), owner.getY() + (double) (3.2F * (0.25F + this.random.nextFloat() * 0.5F)), owner.getZ());
@@ -61,8 +63,8 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(PART, (byte) 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(PART, (byte) 0);
     }
 
     public int getPart() {
@@ -121,7 +123,7 @@ public class MutantSkeletonBodyPart extends Entity {
 
             for (Entity entity : this.level().getEntities(this, this.getBoundingBox(), this::canHarm)) {
                 if (entity.hurt(this.level().damageSources().thrown(this, this.owner != null ? this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
-                    entity.setSecondsOnFire(this.getRemainingFireTicks() / 20);
+                    entity.igniteForSeconds(this.getRemainingFireTicks() / 20.0F);
                 }
             }
 
@@ -140,9 +142,9 @@ public class MutantSkeletonBodyPart extends Entity {
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            ResourceLocation location = this.getItemPartLootTableId();
-            if (location != null) {
-                LootTable lootTable = this.level().getServer().getLootData().getLootTable(location);
+            ResourceKey<LootTable> resourceKey = this.getItemPartLootTableId();
+            if (resourceKey != null) {
+                LootTable lootTable = this.level().getServer().reloadableRegistries().getLootTable(resourceKey);
                 List<ItemStack> list = lootTable.getRandomItems((new LootParams.Builder((ServerLevel) this.level())).withParameter(LootContextParams.THIS_ENTITY, this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET));
                 for (ItemStack item : list) {
                     if (!item.isEmpty()) {
@@ -156,7 +158,7 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     private boolean canHarm(Entity entity) {
-        return entity.isPickable() && entity.getType() != ModRegistry.MUTANT_SKELETON_ENTITY_TYPE.value();
+        return entity.isPickable() && entity.getType() != ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE.value();
     }
 
     @Override
@@ -167,20 +169,20 @@ public class MutantSkeletonBodyPart extends Entity {
     private Item getLegacyItemByPart() {
         int part = this.getPart();
         if (part == 0) {
-            return ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.value();
+            return ModItems.MUTANT_SKELETON_PELVIS_ITEM.value();
         } else if (part >= 1 && part < 19) {
-            return ModRegistry.MUTANT_SKELETON_RIB_ITEM.value();
+            return ModItems.MUTANT_SKELETON_RIB_ITEM.value();
         } else if (part == 19) {
-            return ModRegistry.MUTANT_SKELETON_SKULL_ITEM.value();
+            return ModItems.MUTANT_SKELETON_SKULL_ITEM.value();
         } else if (part >= 21 && part < 29) {
-            return ModRegistry.MUTANT_SKELETON_LIMB_ITEM.value();
+            return ModItems.MUTANT_SKELETON_LIMB_ITEM.value();
         } else {
-            return part != 29 && part != 30 ? Items.AIR : ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value();
+            return part != 29 && part != 30 ? Items.AIR : ModItems.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value();
         }
     }
 
     @Nullable
-    public ResourceLocation getItemPartLootTableId() {
+    public ResourceKey<LootTable> getItemPartLootTableId() {
         int part = this.getPart();
         if (part == 0) {
             return ModRegistry.MUTANT_SKELETON_PELVIS_LOOT_TABLE;

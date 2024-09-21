@@ -1,54 +1,82 @@
 package fuzs.mutantmonsters.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Suppliers;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class ArmorBlockItem extends StandingAndWallBlockItem implements Equipable {
-    private static final UUID ARMOR_MODIFIER = UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150");
+    private final Holder<ArmorMaterial> material;
+    private final Supplier<ItemAttributeModifiers> defaultModifiers;
 
-    private final Multimap<Attribute, AttributeModifier> attributeModifiers;
-    protected final ArmorMaterial material;
-
-    public ArmorBlockItem(ArmorMaterial material, Block floorBlock, Block wallBlockIn, Item.Properties propertiesIn) {
-        super(floorBlock, wallBlockIn, propertiesIn.defaultDurability(material.getDurabilityForType(ArmorItem.Type.HELMET)), Direction.DOWN);
+    public ArmorBlockItem(Holder<ArmorMaterial> material, Block floorBlock, Block wallBlock, Item.Properties properties) {
+        super(floorBlock, wallBlock, properties, Direction.DOWN);
         this.material = material;
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ARMOR, new AttributeModifier(ARMOR_MODIFIER, "Armor modifier", material.getDefenseForType(ArmorItem.Type.HELMET), AttributeModifier.Operation.ADDITION));
-        builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(ARMOR_MODIFIER, "Armor toughness", material.getToughness(), AttributeModifier.Operation.ADDITION));
-        this.attributeModifiers = builder.build();
         DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
+        this.defaultModifiers = Suppliers.memoize(() -> {
+            return getDefaultArmorItemModifiers(material, ArmorItem.Type.HELMET);
+        });
+    }
+
+    static ItemAttributeModifiers getDefaultArmorItemModifiers(Holder<ArmorMaterial> material, ArmorItem.Type type) {
+        int defense = material.value().getDefense(type);
+        float toughness = material.value().toughness();
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(type.getSlot());
+        ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + type.getName());
+        builder.add(Attributes.ARMOR,
+                new AttributeModifier(resourceLocation, defense, AttributeModifier.Operation.ADD_VALUE),
+                equipmentSlotGroup
+        );
+        builder.add(Attributes.ARMOR_TOUGHNESS,
+                new AttributeModifier(resourceLocation, toughness, AttributeModifier.Operation.ADD_VALUE),
+                equipmentSlotGroup
+        );
+        float knockbackResistance = material.value().knockbackResistance();
+        if (knockbackResistance > 0.0F) {
+            builder.add(Attributes.KNOCKBACK_RESISTANCE,
+                    new AttributeModifier(resourceLocation, knockbackResistance, AttributeModifier.Operation.ADD_VALUE),
+                    equipmentSlotGroup
+            );
+        }
+
+        return builder.build();
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return this.material.value().enchantmentValue();
     }
 
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-        return this.material.getRepairIngredient().test(repair);
+        return this.material.value().repairIngredient().get().test(repair);
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        return slot == EquipmentSlot.HEAD ? this.attributeModifiers : super.getDefaultAttributeModifiers(slot);
+    public ItemAttributeModifiers getDefaultAttributeModifiers() {
+        return this.defaultModifiers.get();
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack itemStack = player.getItemInHand(usedHand);
-        EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+        EquipmentSlot equipmentSlot = player.getEquipmentSlotForItem(itemStack);
         ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
         if (itemStack2.isEmpty()) {
             player.setItemSlot(equipmentSlot, itemStack.copy());

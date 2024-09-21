@@ -17,7 +17,9 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
@@ -27,8 +29,8 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
             "textures/entity/mutant_snow_golem/mutant_snow_golem.png");
     public static final ResourceLocation JACK_O_LANTERN_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_snow_golem/jack_o_lantern.png");
-    private static final RenderType GLOW_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonsters.id(
-            "textures/entity/mutant_snow_golem/glow.png"));
+    private static final RenderType GLOW_RENDER_TYPE = MutantRenderTypes.eyes(
+            MutantMonsters.id("textures/entity/mutant_snow_golem/glow.png"));
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantSnowGolemModel(context.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM)), 0.7F);
@@ -46,9 +48,9 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
                 poseStack.translate(0.0, 0.259, 0.0);
             }
 
-            this.renderNameTag(mutantSnowGolem, owner.getDisplayName().copy().withStyle((style) -> {
+            this.renderNameTag(mutantSnowGolem, owner.getDisplayName().copy().withStyle((Style style) -> {
                 return style.withItalic(true);
-            }), poseStack, multiBufferSource, packedLight);
+            }), poseStack, multiBufferSource, packedLight, partialTick);
             poseStack.popPose();
         }
 
@@ -79,11 +81,8 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
                 poseStack.scale(-scale, -scale, scale);
                 poseStack.translate(-0.5, -0.5, 0.5);
                 poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-                this.blockRenderer.renderSingleBlock(Blocks.ICE.defaultBlockState(),
-                        poseStack,
-                        multiBufferSource,
-                        packedLight,
-                        OverlayTexture.NO_OVERLAY
+                this.blockRenderer.renderSingleBlock(Blocks.ICE.defaultBlockState(), poseStack, multiBufferSource,
+                        packedLight, OverlayTexture.NO_OVERLAY
                 );
                 poseStack.popPose();
             }
@@ -95,7 +94,8 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
 
         public JackOLanternLayer(RenderLayerParent<MutantSnowGolem, MutantSnowGolemModel> renderer, EntityModelSet entityModelSet) {
             super(renderer);
-            this.headModel = new MutantSnowGolemModel(entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD)).setRenderHeadOnly();
+            this.headModel = new MutantSnowGolemModel(
+                    entityModelSet.bakeLayer(ClientModRegistry.MUTANT_SNOW_GOLEM_HEAD)).setRenderHeadOnly();
         }
 
         @Override
@@ -103,31 +103,18 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
             if (mutantSnowGolem.hasJackOLantern()) {
                 if (!mutantSnowGolem.isInvisible()) {
                     this.getParentModel().copyPropertiesTo(this.headModel);
-                    renderColoredCutoutModel(this.headModel,
-                            MutantSnowGolemRenderer.JACK_O_LANTERN_TEXTURE_LOCATION,
-                            poseStack,
-                            multiBufferSource,
-                            packedLight,
-                            mutantSnowGolem,
-                            1.0F,
-                            1.0F,
-                            1.0F
+                    renderColoredCutoutModel(this.headModel, MutantSnowGolemRenderer.JACK_O_LANTERN_TEXTURE_LOCATION,
+                            poseStack, multiBufferSource, packedLight, mutantSnowGolem, -1
                     );
                 }
 
                 float green = Math.max(0.0F, 0.8F + 0.05F * Mth.cos(ageInTicks * 0.15F));
                 float blue = Math.max(0.0F, 0.15F + 0.2F * Mth.cos(ageInTicks * 0.1F));
-                VertexConsumer ivertexbuilder = multiBufferSource.getBuffer(MutantSnowGolemRenderer.GLOW_RENDER_TYPE);
-                this.getParentModel()
-                        .renderToBuffer(poseStack,
-                                ivertexbuilder,
-                                0xF00000,
-                                OverlayTexture.NO_OVERLAY,
-                                1.0F,
-                                green,
-                                blue,
-                                1.0F
-                        );
+                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MutantSnowGolemRenderer.GLOW_RENDER_TYPE);
+                int color = FastColor.ARGB32.colorFromFloat(1.0F, 1.0F, green, blue);
+                this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY,
+                        color
+                );
             }
         }
     }

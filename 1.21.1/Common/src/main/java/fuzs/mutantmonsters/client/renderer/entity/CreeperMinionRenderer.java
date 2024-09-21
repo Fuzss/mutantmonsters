@@ -5,13 +5,14 @@ import fuzs.mutantmonsters.client.init.ClientModRegistry;
 import fuzs.mutantmonsters.client.model.CreeperMinionModel;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
+import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class CreeperMinionRenderer extends MobRenderer<CreeperMinion, CreeperMinionModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/creeper/creeper.png");
+    public static final ResourceLocation TEXTURE_LOCATION = ResourceLocationHelper.withDefaultNamespace("textures/entity/creeper/creeper.png");
 
     public CreeperMinionRenderer(EntityRendererProvider.Context context) {
         super(context, new CreeperMinionModel(context.bakeLayer(ClientModRegistry.CREEPER_MINION)), 0.25F);

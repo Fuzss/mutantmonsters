@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -29,8 +30,8 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
             "textures/entity/mutant_enderman/mutant_enderman.png");
     private static final ResourceLocation DEATH_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_enderman/death.png");
-    private static final RenderType EYES_RENDER_TYPE = MutantRenderTypes.eyes(MutantMonsters.id(
-            "textures/entity/mutant_enderman/eyes.png"));
+    private static final RenderType EYES_RENDER_TYPE = MutantRenderTypes.eyes(
+            MutantMonsters.id("textures/entity/mutant_enderman/eyes.png"));
     private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(TEXTURE_LOCATION);
 
     private final MutantEndermanModel endermanModel;
@@ -51,11 +52,8 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         if (super.shouldRender(mutantEnderman, camera, camX, camY, camZ)) {
             return true;
         } else if (mutantEnderman.getAnimation() == MutantEnderman.TELEPORT_ANIMATION) {
-            return mutantEnderman.getTeleportPosition()
-                    .map(Vec3::atBottomCenterOf)
-                    .map(mutantEnderman.getType().getDimensions()::makeBoundingBox)
-                    .filter(camera::isVisible)
-                    .isPresent();
+            return mutantEnderman.getTeleportPosition().map(Vec3::atBottomCenterOf).map(
+                    mutantEnderman.getType().getDimensions()::makeBoundingBox).filter(camera::isVisible).isPresent();
         } else {
             return false;
         }
@@ -83,8 +81,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                 double d0 = Mth.lerp((double) partialTick, mutantEnderman.xOld, mutantEnderman.getX());
                 double d1 = Mth.lerp((double) partialTick, mutantEnderman.yOld, mutantEnderman.getY());
                 double d2 = Mth.lerp((double) partialTick, mutantEnderman.zOld, mutantEnderman.getZ());
-                poseStack.translate((double) pos.getX() + 0.5 - d0,
-                        (double) pos.getY() - d1,
+                poseStack.translate((double) pos.getX() + 0.5 - d0, (double) pos.getY() - d1,
                         (double) pos.getZ() + 0.5 - d2
                 );
                 super.render(mutantEnderman, entityYaw, partialTick, poseStack, multiBufferSource, packedLight);
@@ -101,27 +98,12 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
     @Override
     protected boolean hasAlternateRender(MutantEnderman mutantEnderman, float partialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
         if (mutantEnderman.deathTime > 80) {
-            VertexConsumer ivertexbuilder = multiBufferSource.getBuffer(RenderType.dragonExplosionAlpha(
-                    DEATH_TEXTURE_LOCATION));
-            this.model.renderToBuffer(poseStack,
-                    ivertexbuilder,
-                    packedLight,
-                    OverlayTexture.NO_OVERLAY,
-                    1.0F,
-                    1.0F,
-                    1.0F,
-                    getDeathProgress(mutantEnderman)
-            );
-            VertexConsumer ivertexbuilder1 = multiBufferSource.getBuffer(DEATH_RENDER_TYPE);
-            this.model.renderToBuffer(poseStack,
-                    ivertexbuilder1,
-                    packedLight,
-                    OverlayTexture.NO_OVERLAY,
-                    1.0F,
-                    1.0F,
-                    1.0F,
-                    1.0F
-            );
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
+                    RenderType.dragonExplosionAlpha(DEATH_TEXTURE_LOCATION));
+            int color = FastColor.ARGB32.colorFromFloat(getDeathProgress(mutantEnderman), 1.0F, 1.0F, 1.0F);
+            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+            vertexConsumer = multiBufferSource.getBuffer(DEATH_RENDER_TYPE);
+            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
             return true;
         } else {
             return false;
@@ -148,8 +130,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                 shake *= 0.5;
             }
 
-            return new Vec3(mutantEnderman.getRandom().nextGaussian() * shake,
-                    0.0,
+            return new Vec3(mutantEnderman.getRandom().nextGaussian() * shake, 0.0,
                     mutantEnderman.getRandom().nextGaussian() * shake
             );
         }
@@ -195,11 +176,8 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                         poseStack.scale(-0.75F, -0.75F, 0.75F);
                         poseStack.translate(-0.5, -0.5, 0.5);
                         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-                        this.blockRenderer.renderSingleBlock(Block.stateById(mutantEnderman.getHeldBlock(i)),
-                                poseStack,
-                                multiBufferSource,
-                                packedLight,
-                                OverlayTexture.NO_OVERLAY
+                        this.blockRenderer.renderSingleBlock(Block.stateById(mutantEnderman.getHeldBlock(i)), poseStack,
+                                multiBufferSource, packedLight, OverlayTexture.NO_OVERLAY
                         );
                         poseStack.popPose();
                     }
@@ -210,6 +188,7 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
     }
 
     static class EyesLayer extends RenderLayer<MutantEnderman, EntityModel<MutantEnderman>> {
+
         public EyesLayer(RenderLayerParent<MutantEnderman, EntityModel<MutantEnderman>> renderer) {
             super(renderer);
         }
@@ -218,24 +197,19 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
         public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, MutantEnderman mutantEnderman, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
             if (!mutantEnderman.isClone()) {
                 VertexConsumer ivertexbuilder = multiBufferSource.getBuffer(MutantEndermanRenderer.EYES_RENDER_TYPE);
-                this.getParentModel()
-                        .renderToBuffer(poseStack,
-                                ivertexbuilder,
-                                0xF00000,
-                                OverlayTexture.NO_OVERLAY,
-                                1.0F,
-                                1.0F,
-                                1.0F,
-                                mutantEnderman.deathTime > 80 ?
-                                        1.0F - MutantEndermanRenderer.getDeathProgress(mutantEnderman) :
-                                        1.0F
-                        );
+                float alpha = mutantEnderman.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(
+                        mutantEnderman) : 1.0F;
+                int color = FastColor.ARGB32.colorFromFloat(alpha, 1.0F, 1.0F, 1.0F);
+                this.getParentModel().renderToBuffer(poseStack, ivertexbuilder, 0xF00000, OverlayTexture.NO_OVERLAY,
+                        color
+                );
             }
 
         }
     }
 
     class SoulLayer extends EndersoulLayer<MutantEnderman, EntityModel<MutantEnderman>> {
+
         public SoulLayer(RenderLayerParent<MutantEnderman, EntityModel<MutantEnderman>> renderer) {
             super(renderer);
         }
@@ -272,16 +246,8 @@ public class MutantEndermanRenderer extends AlternateMobRenderer<MutantEnderman,
                     poseStack.scale(scale, scale * 0.8F, scale);
                 }
 
-                super.render(poseStack,
-                        multiBufferSource,
-                        packedLight,
-                        mutantEnderman,
-                        limbSwing,
-                        limbSwingAmount,
-                        partialTick,
-                        ageInTicks,
-                        netHeadYaw,
-                        headPitch
+                super.render(poseStack, multiBufferSource, packedLight, mutantEnderman, limbSwing, limbSwingAmount,
+                        partialTick, ageInTicks, netHeadYaw, headPitch
                 );
                 poseStack.popPose();
             }

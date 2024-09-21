@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -26,7 +26,7 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock> {
         super.render(throwableBlock, entityYaw, partialTick, poseStack, multiBufferSource, packedLight);
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5, 0.0);
-        if (throwableBlock.getOwnerType() != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
+        if (throwableBlock.getOwnerType() != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
             poseStack.scale(-0.75F, -0.75F, 0.75F);
         } else {
             poseStack.mulPose(Axis.YP.rotationDegrees(throwableBlock.getYRot()));

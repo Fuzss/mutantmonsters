@@ -23,12 +23,9 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
             "textures/entity/mutant_crossbow.png");
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
-        super(context,
-                new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON),
-                        context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)
-                ),
-                0.6F
-        );
+        super(context, new MutantSkeletonModel(context.bakeLayer(ClientModRegistry.MUTANT_SKELETON),
+                context.bakeLayer(ClientModRegistry.MUTANT_CROSSBOW)
+        ), 0.6F);
         this.addLayer(new CrossbowLayer(this, context.getModelSet()));
     }
 
@@ -59,19 +56,10 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
                 poseStack.scale(-1.0F, 1.0F, -1.0F);
             }
 
-            this.getParentModel()
-                    .getCrossbow()
-                    .renderToBuffer(poseStack,
-                            multiBufferSource.getBuffer(this.getParentModel()
-                                    .getCrossbow()
-                                    .renderType(MutantSkeletonRenderer.CROSSBOW_TEXTURE_LOCATION)),
-                            packedLight,
-                            OverlayTexture.NO_OVERLAY,
-                            1.0F,
-                            1.0F,
-                            1.0F,
-                            1.0F
-                    );
+            this.getParentModel().getCrossbow().renderToBuffer(poseStack, multiBufferSource.getBuffer(
+                            this.getParentModel().getCrossbow().renderType(MutantSkeletonRenderer.CROSSBOW_TEXTURE_LOCATION)),
+                    packedLight, OverlayTexture.NO_OVERLAY
+            );
             poseStack.popPose();
             if (mutantSkeleton.getAnimation() == MutantSkeleton.SHOOT_ANIMATION &&
                     mutantSkeleton.getAnimationTick() > 10 && mutantSkeleton.getAnimationTick() < 26 ||
@@ -82,16 +70,9 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
                 poseStack.translate(leftHanded ? 0.2 : -0.2, 0.4, -1.8);
                 poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
                 poseStack.scale(1.2F, 1.2F, 1.2F);
-                VertexConsumer vertexBuilder = multiBufferSource.getBuffer(this.model.renderType(MutantArrowRenderer.TEXTURE_LOCATION));
-                this.model.renderToBuffer(poseStack,
-                        vertexBuilder,
-                        packedLight,
-                        OverlayTexture.NO_OVERLAY,
-                        1.0F,
-                        1.0F,
-                        1.0F,
-                        1.0F
-                );
+                VertexConsumer vertexBuilder = multiBufferSource.getBuffer(
+                        this.model.renderType(MutantArrowRenderer.TEXTURE_LOCATION));
+                this.model.renderToBuffer(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
                 poseStack.popPose();
             }
         }

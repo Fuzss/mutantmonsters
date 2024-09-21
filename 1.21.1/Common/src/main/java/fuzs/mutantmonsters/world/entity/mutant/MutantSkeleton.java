@@ -1,17 +1,16 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import com.google.common.collect.Lists;
+import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModSoundEvents;
+import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.AnimatedEntity;
 import fuzs.mutantmonsters.world.entity.EntityAnimation;
-import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
-import fuzs.mutantmonsters.world.level.pathfinder.MutantGroundPathNavigation;
 import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
@@ -19,22 +18,19 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -56,12 +52,11 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     public MutantSkeleton(EntityType<? extends MutantSkeleton> type, Level worldIn) {
         super(type, worldIn);
         this.animation = EntityAnimation.NONE;
-        this.setMaxUpStep(1.0F);
         this.xpReward = 30;
     }
 
     public static AttributeSupplier.Builder registerAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FOLLOW_RANGE, 48.0).add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.75);
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FOLLOW_RANGE, 48.0).add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.75).add(Attributes.STEP_HEIGHT, 1.0);
     }
 
     @Override
@@ -82,37 +77,13 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     @Override
-    protected float getStandingEyeHeight(Pose poseIn, EntityDimensions sizeIn) {
-        return 3.25F;
-    }
-
-    @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
-    }
-
-    @Override
-    protected PathNavigation createNavigation(Level worldIn) {
-        return new MutantGroundPathNavigation(this, worldIn);
-    }
-
-    @Override
-    protected BodyRotationControl createBodyControl() {
-        return super.createBodyControl();
-    }
-
-    @Override
     public int getMaxSpawnClusterSize() {
         return 1;
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
-        return false;
-    }
-
-    @Override
     protected void updateNoActionTime() {
+        // NO-OP
     }
 
     @Override
@@ -261,22 +232,22 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.value();
+        return ModSoundEvents.ENTITY_MUTANT_SKELETON_AMBIENT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.value();
+        return ModSoundEvents.ENTITY_MUTANT_SKELETON_HURT_SOUND_EVENT.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModRegistry.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.value();
+        return ModSoundEvents.ENTITY_MUTANT_SKELETON_DEATH_SOUND_EVENT.value();
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockIn) {
-        this.playSound(ModRegistry.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.value(), 0.15F, 1.0F);
+        this.playSound(ModSoundEvents.ENTITY_MUTANT_SKELETON_STEP_SOUND_EVENT.value(), 0.15F, 1.0F);
     }
 
     static class MultiShotGoal extends AnimationGoal<MutantSkeleton> {
@@ -320,11 +291,11 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 }
 
                 if (this.mob.animationTick == 15) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3, 1.0F, 1.0F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3.value(), 1.0F, 1.0F);
                 }
 
                 if (this.mob.animationTick == 20) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
                 }
 
                 if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
@@ -384,11 +355,11 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 this.mob.getNavigation().stop();
                 this.mob.lookControl.setLookAt(target, 30.0F, 30.0F);
                 if (this.mob.animationTick == 5) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_2, 1.0F, 1.0F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_2.value(), 1.0F, 1.0F);
                 }
 
                 if (this.mob.animationTick == 20) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
                 }
 
                 if (this.mob.animationTick == 26 && target.isAlive()) {
@@ -400,31 +371,23 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                         randomization = 0.5F + this.mob.random.nextFloat();
                     }
 
-                    MutantArrow arrowEntity = new MutantArrow(this.mob.level(), this.mob);
-                    arrowEntity.shoot(target, 2.4F, randomization);
+                    MutantArrow mutantArrow = new MutantArrow(this.mob.level(), this.mob);
+                    mutantArrow.shoot(target, 2.4F, randomization);
 //                    arrowEntity.setClones(10);
 
-                    List<MobEffectInstance> effects = Lists.newArrayList();
-
                     if (this.mob.random.nextInt(4) == 0) {
-                        effects.add(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
                     }
 
                     if (this.mob.random.nextInt(4) == 0) {
-                        effects.add(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
                     }
 
                     if (this.mob.random.nextInt(4) == 0) {
-                        effects.add(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
                     }
 
-                    if (!effects.isEmpty()) {
-                        ItemStack itemStack = new ItemStack(Items.TIPPED_ARROW);
-                        PotionUtils.setCustomEffects(itemStack, effects);
-                        arrowEntity.setEffectsFromItem(itemStack);
-                    }
-
-                    this.mob.level().addFreshEntity(arrowEntity);
+                    this.mob.level().addFreshEntity(mutantArrow);
                     this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
                 }
             }
@@ -472,7 +435,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                     double motionZ = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
                     target.setDeltaMovement(motionX, motionY, motionZ);
                     EntityUtil.sendPlayerVelocityPacket(target);
-                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE, 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE.value(), 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
                 }
             }
         }

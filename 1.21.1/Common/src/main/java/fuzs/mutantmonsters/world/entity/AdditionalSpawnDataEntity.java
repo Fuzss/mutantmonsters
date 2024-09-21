@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -32,14 +33,13 @@ public interface AdditionalSpawnDataEntity {
      * @return the vanilla packet to be sent
      */
     @SuppressWarnings("unchecked")
-    static <T extends Entity & AdditionalSpawnDataEntity> Packet<ClientGamePacketListener> getPacket(T entity) {
-        ClientboundAddEntityPacket vanillaPacket = new ClientboundAddEntityPacket(entity);
+    static <T extends Entity & AdditionalSpawnDataEntity> Packet<ClientGamePacketListener> getPacket(T entity, ServerEntity serverEntity) {
+        ClientboundAddEntityPacket vanillaPacket = new ClientboundAddEntityPacket(entity, serverEntity);
         FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer());
         try {
             entity.writeAdditionalAddEntityData(friendlyByteBuf);
-            Packet<?> packet = MutantMonsters.NETWORK.toClientboundPacket(new S2CAddEntityDataMessage(vanillaPacket,
-                    friendlyByteBuf.array()
-            ));
+            Packet<?> packet = MutantMonsters.NETWORK.toClientboundPacket(
+                    new S2CAddEntityDataMessage(vanillaPacket, friendlyByteBuf.array()).toClientboundMessage());
             return (Packet<ClientGamePacketListener>) packet;
         } finally {
             friendlyByteBuf.release();

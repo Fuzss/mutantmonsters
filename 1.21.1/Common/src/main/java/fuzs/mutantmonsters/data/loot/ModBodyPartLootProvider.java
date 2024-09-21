@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.data.loot;
 
+import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.data.v2.AbstractLootProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
@@ -19,27 +20,25 @@ public class ModBodyPartLootProvider extends AbstractLootProvider.Simple {
     @Override
     public void addLootTables() {
         this.add(ModRegistry.MUTANT_SKELETON_PELVIS_LOOT_TABLE,
-                getBodyPartBuilder(ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.value())
+                getBodyPartBuilder(ModItems.MUTANT_SKELETON_PELVIS_ITEM.value())
         );
         this.add(ModRegistry.MUTANT_SKELETON_RIB_LOOT_TABLE,
-                getBodyPartBuilder(ModRegistry.MUTANT_SKELETON_RIB_ITEM.value())
+                getBodyPartBuilder(ModItems.MUTANT_SKELETON_RIB_ITEM.value())
         );
         this.add(ModRegistry.MUTANT_SKELETON_SKULL_LOOT_TABLE,
-                getBodyPartBuilder(ModRegistry.MUTANT_SKELETON_SKULL_ITEM.value())
+                getBodyPartBuilder(ModItems.MUTANT_SKELETON_SKULL_ITEM.value())
         );
         this.add(ModRegistry.MUTANT_SKELETON_LIMB_LOOT_TABLE,
-                getBodyPartBuilder(ModRegistry.MUTANT_SKELETON_LIMB_ITEM.value())
+                getBodyPartBuilder(ModItems.MUTANT_SKELETON_LIMB_ITEM.value())
         );
         this.add(ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_LOOT_TABLE,
-                getBodyPartBuilder(ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value())
+                getBodyPartBuilder(ModItems.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value())
         );
     }
 
     private static LootTable.Builder getBodyPartBuilder(Item item) {
-        return LootTable.lootTable()
-                .withPool(LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(item)
-                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))));
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .add(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))));
     }
 }

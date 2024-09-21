@@ -1,0 +1,35 @@
+{
+  "parent": "mutantmonsters:root",
+  "criteria": {
+    "obtained_chemical_x": {
+      "conditions": {
+        "items": [
+          {
+            "predicates": {
+              "minecraft:potion_contents": "mutantmonsters:chemical_x"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.mutantmonsters.gunpowder_spice.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:gunpowder"
+    },
+    "title": {
+      "translate": "advancements.mutantmonsters.gunpowder_spice.title"
+    }
+  },
+  "requirements": [
+    [
+      "obtained_chemical_x"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

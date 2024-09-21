@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 
 public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEgg> {
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/creeper_minion_egg.png");
@@ -33,13 +34,14 @@ public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEgg> {
         poseStack.pushPose();
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.scale(1.5F, 1.5F, 1.5F);
-        poseStack.translate(0.0, -1.5010000467300415, 0.0);
-        VertexConsumer ivertexbuilder = multiBufferSource.getBuffer(this.eggModel.renderType(this.getTextureLocation(creeperMinionEgg)));
-        this.eggModel.renderToBuffer(poseStack, ivertexbuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        poseStack.translate(0.0, -1.5, 0.0);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.eggModel.renderType(this.getTextureLocation(creeperMinionEgg)));
+        this.eggModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
         if (creeperMinionEgg.isCharged()) {
             float ageInTicks = (float)creeperMinionEgg.tickCount + partialTick;
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
-            this.chargedModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
+            vertexConsumer = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
+            int color = FastColor.ARGB32.colorFromFloat(1.0F, 0.5F, 0.5F, 0.5F);
+            this.chargedModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
         }
 
         poseStack.popPose();

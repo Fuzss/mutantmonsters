@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.world.entity;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.network.S2CAnimationMessage;
+import fuzs.puzzleslib.api.network.v3.PlayerSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,7 +40,10 @@ public interface AnimatedEntity extends AdditionalSpawnDataEntity {
         if (!entity.level().isClientSide) {
             entity.setAnimation(animation);
             entity.setAnimationTick(0);
-            MutantMonsters.NETWORK.sendToAllTracking(new S2CAnimationMessage(entity.getId(), ArrayUtils.indexOf(entity.getAnimations(), animation)), entity);
+            PlayerSet playerSet = PlayerSet.nearEntity(entity);
+            MutantMonsters.NETWORK.sendMessage(playerSet, new S2CAnimationMessage(entity.getId(),
+                    ArrayUtils.indexOf(entity.getAnimations(), animation)
+            ).toClientboundMessage());
         }
     }
 }

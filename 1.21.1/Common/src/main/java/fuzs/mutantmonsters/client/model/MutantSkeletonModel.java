@@ -124,8 +124,8 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeleton> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.skeleBase.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        this.skeleBase.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     @Override

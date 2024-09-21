@@ -1,5 +1,6 @@
 package fuzs.mutantmonsters.world.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -13,15 +14,15 @@ import net.minecraft.world.level.Level;
 
 public class SkeletonArmorItem extends ArmorItem {
 
-    public SkeletonArmorItem(ArmorMaterial material, Type type, Item.Properties properties) {
+    public SkeletonArmorItem(Holder<ArmorMaterial> material, Type type, Item.Properties properties) {
         super(material, type, properties);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+    public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (entity instanceof Player player && slotId == this.type.getSlot().getIndex()) {
-            if (player.getInventory().getArmor(slotId) == stack) {
-                MobEffect mobEffect = switch (this.type) {
+            if (player.getInventory().getArmor(slotId) == itemStack) {
+                Holder<MobEffect> mobEffect = switch (this.type) {
                     case BOOTS -> MobEffects.JUMP;
                     case LEGGINGS -> MobEffects.MOVEMENT_SPEED;
                     default -> null;

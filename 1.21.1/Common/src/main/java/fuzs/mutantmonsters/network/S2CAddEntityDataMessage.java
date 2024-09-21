@@ -6,6 +6,7 @@ import fuzs.puzzleslib.api.network.v2.WritableMessage;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,14 +22,14 @@ public class S2CAddEntityDataMessage implements WritableMessage<S2CAddEntityData
     }
 
     public S2CAddEntityDataMessage(FriendlyByteBuf friendlyByteBuf) {
-        this.vanillaPacket = new ClientboundAddEntityPacket(friendlyByteBuf);
+        this.vanillaPacket = ClientboundAddEntityPacket.STREAM_CODEC.decode((RegistryFriendlyByteBuf) friendlyByteBuf);
         this.additionalData = friendlyByteBuf.readByteArray();
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        this.vanillaPacket.write(buf);
-        buf.writeByteArray(this.additionalData);
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        ClientboundAddEntityPacket.STREAM_CODEC.encode((RegistryFriendlyByteBuf) friendlyByteBuf, this.vanillaPacket);
+        friendlyByteBuf.writeByteArray(this.additionalData);
     }
 
     @Override
@@ -40,7 +41,8 @@ public class S2CAddEntityDataMessage implements WritableMessage<S2CAddEntityData
                 minecraft.getConnection().handleAddEntity(message.vanillaPacket);
                 Entity entity = minecraft.level.getEntity(message.vanillaPacket.getId());
                 if (entity instanceof AdditionalSpawnDataEntity spawnDataEntity) {
-                    FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(message.additionalData));
+                    FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(
+                            Unpooled.wrappedBuffer(message.additionalData));
                     try {
                         spawnDataEntity.readAdditionalAddEntityData(friendlyByteBuf);
                     } finally {

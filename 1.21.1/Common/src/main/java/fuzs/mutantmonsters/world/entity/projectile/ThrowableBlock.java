@@ -1,11 +1,13 @@
 package fuzs.mutantmonsters.world.entity.projectile;
 
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModEntityTypes;
+import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
+import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,6 +21,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -53,7 +56,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     }
 
     public ThrowableBlock(double x, double y, double z, LivingEntity entity) {
-        super(ModRegistry.THROWABLE_BLOCK_ENTITY_TYPE.value(), x, y, z, entity.level());
+        super(ModEntityTypes.THROWABLE_BLOCK_ENTITY_TYPE.value(), x, y, z, entity.level());
         this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
         this.setOwner(entity);
         this.ownerType = entity.getType();
@@ -93,9 +96,9 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(OWNER_ENTITY_ID, OptionalInt.empty());
-        this.entityData.define(HELD, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(OWNER_ENTITY_ID, OptionalInt.empty());
+        builder.define(HELD, false);
     }
 
     public BlockState getBlockState() {
@@ -125,11 +128,13 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         if (this.ownerType == EntityType.PLAYER) {
-            return 0.04F;
+            return 0.04;
+        } else if (this.ownerType == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
+            return 0.06;
         } else {
-            return this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() ? 0.06F : 0.01F;
+            return 0.01;
         }
     }
 
@@ -140,7 +145,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
 
     @Override
     public boolean isPickable() {
-        return this.isAlive() && this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
+        return this.isAlive() && this.ownerType != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
     }
 
     @Override
@@ -199,7 +204,8 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
                 float offset = 0.6F;
                 this.setDeltaMovement(x * (double) offset, y * (double) offset, z * (double) offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(ModRegistry.ENDERSOUL_HAND_ITEM.value()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(
+                        ModItems.ENDERSOUL_HAND_ITEM.value()))) {
                     this.setHeld(false);
                 }
             }
@@ -217,16 +223,16 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
         if (!super.canHitEntity(entity)) {
             return false;
         } else {
-            return this.ownerType != ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() || MutantSnowGolem.canHarm(this.getOwner(), entity);
+            return this.ownerType != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() || MutantSnowGolem.canHarm(this.getOwner(), entity);
         }
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
         if (player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (itemStack.getItem() != ModRegistry.ENDERSOUL_HAND_ITEM.value()) {
+        } else if (itemStack.getItem() != ModItems.ENDERSOUL_HAND_ITEM.value()) {
             return InteractionResult.PASS;
         } else if (this.isHeld()) {
             if (this.getOwner() == player) {
@@ -235,9 +241,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
                     this.throwBlock(player);
                 }
 
-                itemStack.hurtAndBreak(1, player, (e) -> {
-                    e.broadcastBreakEvent(hand);
-                });
+                ItemHelper.hurtAndBreak(itemStack, 1, player, interactionHand);
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
@@ -263,7 +267,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     protected void onHit(HitResult result) {
         Entity thrower = this.getOwner();
         LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity) thrower : null;
-        if (this.ownerType == ModRegistry.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
+        if (this.ownerType == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
 
             for (Mob mobEntity : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
                 if (this.distanceToSqr(mobEntity) <= 6.25) {
@@ -363,7 +367,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return AdditionalSpawnDataEntity.getPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+        return AdditionalSpawnDataEntity.getPacket(this, serverEntity);
     }
 }

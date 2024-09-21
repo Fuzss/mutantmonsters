@@ -13,31 +13,39 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class EndersoulHandRenderer implements ReloadingBuiltInItemRenderer {
-    public static final ModelResourceLocation ENDERSOUL_BUILT_IN_MODEL = new ModelResourceLocation(MutantMonsters.id("endersoul_hand_in_hand"), "inventory");
-    public static final ModelResourceLocation ENDERSOUL_ITEM_MODEL = new ModelResourceLocation(MutantMonsters.id("endersoul_hand"), "inventory");
-    private static final ResourceLocation ENDERSOUL_HAND_TEXTURE = MutantMonsters.id("textures/item/endersoul_hand_model.png");
+    public static final ResourceLocation ENDERSOUL_BUILT_IN_MODEL = MutantMonsters.id("item/endersoul_hand_in_hand");
+    public static final ModelResourceLocation ENDERSOUL_ITEM_MODEL = new ModelResourceLocation(
+            MutantMonsters.id("endersoul_hand"), "inventory");
+    private static final ResourceLocation ENDERSOUL_HAND_TEXTURE = MutantMonsters.id(
+            "textures/item/endersoul_hand_model.png");
 
     private final Minecraft minecraft = Minecraft.getInstance();
     private EndersoulHandModel enderSoulHandModel;
 
     @Override
-    public void renderByItem(ItemStack stack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, int overlay) {
+    public void renderByItem(ItemStack itemStack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, int overlay) {
         poseStack.pushPose();
-        float ageInTicks = (float) this.minecraft.player.tickCount + this.minecraft.getFrameTime();
+        float partialTick = this.minecraft.getTimer().getGameTimeDeltaPartialTick(false);
+        float ageInTicks = (float) this.minecraft.player.tickCount + partialTick;
         this.enderSoulHandModel.setAngles();
-        RenderType renderType = MutantRenderTypes.energySwirl(ENDERSOUL_HAND_TEXTURE, ageInTicks * 0.008F, ageInTicks * 0.008F);
+        RenderType renderType = MutantRenderTypes.energySwirl(ENDERSOUL_HAND_TEXTURE, ageInTicks * 0.008F,
+                ageInTicks * 0.008F
+        );
         // ignore enchanting glint, it looks bad
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
-        this.enderSoulHandModel.renderToBuffer(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY, 0.9F, 0.3F, 1.0F, 1.0F);
+        int color = FastColor.ARGB32.colorFromFloat(1.0F, 0.9F, 0.3F, 1.0F);
+        this.enderSoulHandModel.renderToBuffer(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY, color);
         poseStack.popPose();
     }
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-        this.enderSoulHandModel = new EndersoulHandModel(this.minecraft.getEntityModels().bakeLayer(ClientModRegistry.ENDERSOUL_HAND_RIGHT), true);
+        this.enderSoulHandModel = new EndersoulHandModel(
+                this.minecraft.getEntityModels().bakeLayer(ClientModRegistry.ENDERSOUL_HAND_RIGHT), true);
     }
 }

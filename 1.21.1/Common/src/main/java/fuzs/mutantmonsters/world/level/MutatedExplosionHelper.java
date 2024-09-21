@@ -4,6 +4,7 @@ import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
+import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
@@ -63,9 +64,7 @@ public class MutatedExplosionHelper {
                     if (mutantCreeper.isJumpAttacking()) {
                         EntityUtil.disableShield(player, mutantCreeper.isCharged() ? 200 : 100);
                     } else {
-                        player.getUseItem().hurtAndBreak((int) entityDamageAmount * 2, player, (player1) -> {
-                            player1.broadcastBreakEvent(player.getUsedItemHand());
-                        });
+                        ItemHelper.hurtAndBreak(player.getUseItem(), (int) entityDamageAmount * 2, player, player.getUsedItemHand());
                     }
                     entity.hurt(explosion.damageSource, entityDamageAmount * 0.5F);
                 }

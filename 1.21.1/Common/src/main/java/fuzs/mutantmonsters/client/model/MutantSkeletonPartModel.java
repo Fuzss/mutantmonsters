@@ -62,8 +62,8 @@ public class MutantSkeletonPartModel extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        // NO-OP
     }
 
     public ModelPart getPart(int index) {

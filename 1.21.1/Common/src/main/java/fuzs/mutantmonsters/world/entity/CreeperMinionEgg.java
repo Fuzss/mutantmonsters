@@ -1,8 +1,10 @@
 package fuzs.mutantmonsters.world.entity;
 
-import fuzs.mutantmonsters.core.CommonAbstractions;
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModEntityTypes;
+import fuzs.mutantmonsters.init.ModItems;
+import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.proxy.Proxy;
+import fuzs.mutantmonsters.services.CommonAbstractions;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
@@ -28,7 +30,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class CreeperMinionEgg extends Entity {
-    private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(CreeperMinionEgg.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(CreeperMinionEgg.class,
+            EntityDataSerializers.BOOLEAN
+    );
 
     private int health;
     private int age;
@@ -47,7 +51,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     public CreeperMinionEgg(MutantCreeper spawner, Entity owner) {
-        this(ModRegistry.CREEPER_MINION_EGG_ENTITY_TYPE.value(), spawner.level());
+        this(ModEntityTypes.CREEPER_MINION_EGG_ENTITY_TYPE.value(), spawner.level());
         this.owner = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
         if (spawner.isCharged()) {
@@ -56,8 +60,8 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(CHARGED, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(CHARGED, false);
     }
 
     public boolean isCharged() {
@@ -66,11 +70,6 @@ public class CreeperMinionEgg extends Entity {
 
     public void setCharged(boolean charged) {
         this.entityData.set(CHARGED, charged);
-    }
-
-    @Override
-    protected float ridingOffset(Entity entity) {
-        return entity instanceof Player ? 0.2F : super.ridingOffset(entity);
     }
 
     @Override
@@ -108,7 +107,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     private void hatch() {
-        CreeperMinion minion = ModRegistry.CREEPER_MINION_ENTITY_TYPE.value().create(this.level());
+        CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value().create(this.level());
         if (this.owner != null) {
             Player playerEntity = this.level().getPlayerByUUID(this.owner);
             if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
@@ -123,7 +122,9 @@ public class CreeperMinionEgg extends Entity {
 
         minion.setPos(this.getX(), this.getY(), this.getZ());
         this.level().addFreshEntity(minion);
-        this.playSound(ModRegistry.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(), 0.7F, 0.9F + this.random.nextFloat() * 0.1F);
+        this.playSound(ModSoundEvents.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(), 0.7F,
+                0.9F + this.random.nextFloat() * 0.1F
+        );
         this.discard();
     }
 
@@ -153,7 +154,8 @@ public class CreeperMinionEgg extends Entity {
                 this.dismountTicks--;
             }
             Entity rootVehicle = this.getRootVehicle();
-            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) || this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
+            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) ||
+                    this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
                 this.stopRiding();
                 this.playMountSound(false);
             }
@@ -203,25 +205,23 @@ public class CreeperMinionEgg extends Entity {
         } else if (!this.level().isClientSide && this.isAlive()) {
             this.markHurt();
             if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-                this.age = (int)((float)this.age - amount * 80.0F);
-                EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int)(amount / 2.0F));
+                this.age = (int) ((float) this.age - amount * 80.0F);
+                EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int) (amount / 2.0F));
                 return false;
             } else {
                 this.recentlyHit = this.tickCount;
                 this.setDeltaMovement(0.0, 0.2, 0.0);
-                this.health = (int)((float)this.health - amount);
+                this.health = (int) ((float) this.health - amount);
                 if (this.health <= 0) {
                     float sizeIn = this.isCharged() ? 2.0F : 0.0F;
-                    MutatedExplosionHelper.explode(this, sizeIn, false,
-                            Level.ExplosionInteraction.TNT
-                    );
+                    MutatedExplosionHelper.explode(this, sizeIn, false, Level.ExplosionInteraction.TNT);
                     if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
-                            for(int i = 5 + this.random.nextInt(6); i > 0; --i) {
+                            for (int i = 5 + this.random.nextInt(6); i > 0; --i) {
                                 this.spawnAtLocation(Items.GUNPOWDER);
                             }
                         } else {
-                            this.spawnAtLocation(ModRegistry.CREEPER_SHARD_ITEM.value());
+                            this.spawnAtLocation(ModItems.CREEPER_SHARD_ITEM.value());
                         }
                     }
 

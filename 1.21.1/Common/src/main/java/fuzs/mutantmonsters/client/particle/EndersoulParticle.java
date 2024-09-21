@@ -7,12 +7,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class EndersoulParticle extends TextureSheetParticle {
 
-    private EndersoulParticle(ClientLevel worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
-        super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0, 0.0, 0.0);
-        this.lifetime = (int)(Math.random() * 15.0) + 10;
-        this.xd *= 0.10000000149011612;
-        this.yd *= 0.10000000149011612;
-        this.zd *= 0.10000000149011612;
+    private EndersoulParticle(ClientLevel clientLevel, double x, double y, double z, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
+        super(clientLevel, x, y, z, 0.0, 0.0, 0.0);
+        this.lifetime = (int) (Math.random() * 15.0) + 10;
+        this.xd *= 0.1;
+        this.yd *= 0.1;
+        this.zd *= 0.1;
         this.xd += xSpeedIn;
         this.yd += ySpeedIn;
         this.zd += zSpeedIn;
@@ -26,7 +26,7 @@ public class EndersoulParticle extends TextureSheetParticle {
 
     @Override
     public float getQuadSize(float partialTicks) {
-        float scale = 1.0F - ((float)this.age + partialTicks) / (float)this.lifetime;
+        float scale = 1.0F - ((float) this.age + partialTicks) / (float) this.lifetime;
         scale *= scale;
         scale = 1.0F - scale;
         return this.quadSize * scale;
@@ -72,8 +72,8 @@ public class EndersoulParticle extends TextureSheetParticle {
 
         @Override
         @Nullable
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            EndersoulParticle endersoulParticle = new EndersoulParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed);
+        public Particle createParticle(SimpleParticleType particleType, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+            EndersoulParticle endersoulParticle = new EndersoulParticle(clientLevel, x, y, z, xSpeed, ySpeed, zSpeed);
             endersoulParticle.pickSprite(this.spriteSet);
             return endersoulParticle;
         }

@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.world.entity;
 
+import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -13,7 +13,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -42,15 +45,15 @@ public class SkullSpirit extends Entity {
     }
 
     public SkullSpirit(Level level, Mob target, @Nullable UUID conversionStarter) {
-        this(ModRegistry.SKULL_SPIRIT_ENTITY_TYPE.value(), level);
+        this(ModEntityTypes.SKULL_SPIRIT_ENTITY_TYPE.value(), level);
         this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(target.getId()));
         this.conversionStarter = conversionStarter;
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(TARGET_ENTITY_ID, OptionalInt.empty());
-        this.entityData.define(ATTACHED, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(TARGET_ENTITY_ID, OptionalInt.empty());
+        builder.define(ATTACHED, false);
     }
 
     public boolean isAttached() {

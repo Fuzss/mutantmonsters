@@ -35,7 +35,7 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
     }
 
     @Override
-    protected void setupRotations(MutantZombie mutantZombie, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+    protected void setupRotations(MutantZombie mutantZombie, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float scale) {
         if (mutantZombie.deathTime > 0) {
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
             int pitch = Math.min(20, mutantZombie.deathTime);
@@ -46,20 +46,20 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
             }
 
             if (pitch > 0) {
-                float f = ((float) pitch + partialTick - 1.0F) / 20.0F * 1.6F;
+                float rotationAmount = ((float) pitch + partialTick - 1.0F) / 20.0F * 1.6F;
                 if (reviving) {
-                    f = ((float) pitch - partialTick) / 40.0F * 1.6F;
+                    rotationAmount = ((float) pitch - partialTick) / 40.0F * 1.6F;
                 }
 
-                f = Mth.sqrt(f);
-                if (f > 1.0F) {
-                    f = 1.0F;
+                rotationAmount = Mth.sqrt(rotationAmount);
+                if (rotationAmount > 1.0F) {
+                    rotationAmount = 1.0F;
                 }
 
-                poseStack.mulPose(Axis.XN.rotationDegrees(f * this.getFlipDegrees(mutantZombie)));
+                poseStack.mulPose(Axis.XN.rotationDegrees(rotationAmount * this.getFlipDegrees(mutantZombie)));
             }
         } else {
-            super.setupRotations(mutantZombie, poseStack, ageInTicks, rotationYaw, partialTick);
+            super.setupRotations(mutantZombie, poseStack, ageInTicks, rotationYaw, partialTick, scale);
         }
     }
 

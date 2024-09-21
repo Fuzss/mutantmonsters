@@ -105,7 +105,7 @@ public class ZombieResurrection extends BlockPos {
             if (--this.tick <= 0) {
                 Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level);
                 if (level instanceof ServerLevelAccessor) {
-                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), MobSpawnType.MOB_SUMMONED, null, null);
+                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), MobSpawnType.MOB_SUMMONED, null);
                     if (ilivingentitydata instanceof Zombie.ZombieGroupData) {
                         new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) ilivingentitydata).isBaby, false);
                     }

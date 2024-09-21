@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.mixin.accessor.RavagerAccessor;
 import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
+import fuzs.puzzleslib.api.network.v3.PlayerSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -34,15 +35,8 @@ import java.util.Map;
 
 public final class EntityUtil {
     private static final Map<EntityType<?>, Item> VANILLA_SKULLS_MAP = ImmutableMap.of(EntityType.CREEPER,
-            Items.CREEPER_HEAD,
-            EntityType.ZOMBIE,
-            Items.ZOMBIE_HEAD,
-            EntityType.SKELETON,
-            Items.SKELETON_SKULL,
-            EntityType.WITHER_SKELETON,
-            Items.WITHER_SKELETON_SKULL,
-            EntityType.ENDER_DRAGON,
-            Items.DRAGON_HEAD
+            Items.CREEPER_HEAD, EntityType.ZOMBIE, Items.ZOMBIE_HEAD, EntityType.SKELETON, Items.SKELETON_SKULL,
+            EntityType.WITHER_SKELETON, Items.WITHER_SKELETON_SKULL, EntityType.ENDER_DRAGON, Items.DRAGON_HEAD
     );
 
     private EntityUtil() {
@@ -56,17 +50,14 @@ public final class EntityUtil {
     public static void spawnLingeringCloud(LivingEntity livingEntity) {
         Collection<MobEffectInstance> collection = livingEntity.getActiveEffects();
         if (!collection.isEmpty()) {
-            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(livingEntity.level(),
-                    livingEntity.getX(),
-                    livingEntity.getY(),
-                    livingEntity.getZ()
+            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(livingEntity.level(), livingEntity.getX(),
+                    livingEntity.getY(), livingEntity.getZ()
             );
             areaEffectCloud.setRadius(1.5F);
             areaEffectCloud.setRadiusOnUse(-0.5F);
             areaEffectCloud.setWaitTime(10);
             areaEffectCloud.setDuration(areaEffectCloud.getDuration() / 2);
-            areaEffectCloud.setRadiusPerTick(
-                    -areaEffectCloud.getRadius() / (float) areaEffectCloud.getDuration());
+            areaEffectCloud.setRadiusPerTick(-areaEffectCloud.getRadius() / (float) areaEffectCloud.getDuration());
 
             for (MobEffectInstance effectinstance : collection) {
                 areaEffectCloud.addEffect(new MobEffectInstance(effectinstance));
@@ -130,22 +121,18 @@ public final class EntityUtil {
             double tempZ = entity.getZ() + (double) ((random.nextFloat() - 0.5F) * entity.getBbWidth());
             entity.level().addParticle(ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), tempX, tempY, tempZ, f, f1, f2);
         }
-
     }
 
     public static void sendParticlePacket(Entity entity, ParticleOptions particleData, int amount) {
         double x = entity.getX();
         double y = entity.getY();
         double z = entity.getZ();
-        MutantMonsters.NETWORK.sendToAllNearExcept(new S2CMutantLevelParticlesMessage(particleData,
-                x,
-                y,
-                z,
-                entity.getBbWidth(),
-                entity.getBbHeight(),
-                entity.getBbWidth(),
-                amount
-        ), null, x, y, z, 1024.0, entity.level());
+        PlayerSet playerSet = PlayerSet.nearEntity(entity);
+        MutantMonsters.NETWORK.sendMessage(playerSet,
+                new S2CMutantLevelParticlesMessage(particleData, x, y, z, entity.getBbWidth(), entity.getBbHeight(),
+                        entity.getBbWidth(), amount
+                ).toClientboundMessage()
+        );
     }
 
     public static Vec3 getDirVector(float rotation, float scale) {
@@ -161,8 +148,9 @@ public final class EntityUtil {
                 pos.move(Direction.DOWN);
                 if (pos.getY() <= mob.level().getMinBuildHeight() || mob.level().getBlockState(pos).blocksMotion()) {
                     pos.move(Direction.UP);
-                    AABB bb = mob.getDimensions(Pose.STANDING)
-                            .makeBoundingBox((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5);
+                    AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double) pos.getX() + 0.5, pos.getY(),
+                            (double) pos.getZ() + 0.5
+                    );
                     if (mob.level().noCollision(mob, bb) && !mob.level().containsAnyLiquid(bb)) {
                         success = true;
                     }
@@ -181,8 +169,9 @@ public final class EntityUtil {
     }
 
     public static void divertAttackers(Mob targetedMob, LivingEntity newTarget) {
-        for (Mob attacker : targetedMob.level()
-                .getEntitiesOfClass(Mob.class, targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0))) {
+        for (Mob attacker : targetedMob.level().getEntitiesOfClass(Mob.class,
+                targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0)
+        )) {
             if (attacker != targetedMob && attacker.getTarget() == targetedMob) {
                 attacker.setTarget(newTarget);
             }

@@ -1,10 +1,7 @@
 package fuzs.mutantmonsters.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import fuzs.mutantmonsters.capability.SeismicWavesCapability;
 import fuzs.mutantmonsters.world.level.SeismicWave;
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -13,14 +10,15 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Vanishable;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,15 +27,24 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HulkHammerItem extends Item implements Vanishable {
-    private final Multimap<Attribute, AttributeModifier> attributeModifiers;
+public class HulkHammerItem extends Item {
 
     public HulkHammerItem(Item.Properties properties) {
         super(properties);
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 8.0, AttributeModifier.Operation.ADDITION));
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -3.0, AttributeModifier.Operation.ADDITION));
-        this.attributeModifiers = builder.build();
+    }
+
+    public static ItemAttributeModifiers createAttributes() {
+        return ItemAttributeModifiers.builder().add(Attributes.ATTACK_DAMAGE,
+                new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 8.0, AttributeModifier.Operation.ADD_VALUE),
+                EquipmentSlotGroup.MAINHAND
+        ).add(Attributes.ATTACK_SPEED,
+                new AttributeModifier(BASE_ATTACK_SPEED_ID, -2.9F, AttributeModifier.Operation.ADD_VALUE),
+                EquipmentSlotGroup.MAINHAND
+        ).build();
+    }
+
+    public static Tool createToolProperties() {
+        return new Tool(List.of(), 1.0F, 2);
     }
 
     @Override
@@ -47,57 +54,40 @@ public class HulkHammerItem extends Item implements Vanishable {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        stack.hurtAndBreak(1, attacker, (e) -> {
-            e.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
         return true;
     }
 
     @Override
-    public boolean mineBlock(ItemStack stack, Level worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
-        if (state.getDestroySpeed(worldIn, pos) != 0.0F) {
-            stack.hurtAndBreak(2, entityLiving, (e) -> {
-                e.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-            });
-        }
-
-        return true;
+    public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        stack.hurtAndBreak(1, attacker, EquipmentSlot.MAINHAND);
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        Level world = context.getLevel();
-        Player playerEntity = context.getPlayer();
-        ItemStack itemStack = context.getItemInHand();
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
         if (context.getClickedFace() != Direction.UP) {
             return InteractionResult.PASS;
         } else {
-            if (!world.isClientSide) {
-                List<SeismicWave> list = new ArrayList<>();
-                Vec3 vec = Vec3.directionFromRotation(0.0F, playerEntity.getYRot());
-                int x = Mth.floor(playerEntity.getX() + vec.x * 1.5);
-                int y = Mth.floor(playerEntity.getBoundingBox().minY);
-                int z = Mth.floor(playerEntity.getZ() + vec.z * 1.5);
-                int x1 = Mth.floor(playerEntity.getX() + vec.x * 8.0);
-                int z1 = Mth.floor(playerEntity.getZ() + vec.z * 8.0);
-                SeismicWave.createWaves(world, list, x, z, x1, z1, y);
-                SeismicWavesCapability capability = ModRegistry.SEISMIC_WAVES_CAPABILITY.get(playerEntity);
-                capability.getSeismicWaves().addAll(list);
-                capability.setChanged();
+            if (!level.isClientSide) {
+                List<SeismicWave> seismicWaves = new ArrayList<>();
+                Vec3 vec = Vec3.directionFromRotation(0.0F, player.getYRot());
+                int x = Mth.floor(player.getX() + vec.x * 1.5);
+                int y = Mth.floor(player.getBoundingBox().minY);
+                int z = Mth.floor(player.getZ() + vec.z * 1.5);
+                int x1 = Mth.floor(player.getX() + vec.x * 8.0);
+                int z1 = Mth.floor(player.getZ() + vec.z * 8.0);
+                SeismicWave.createWaves(level, seismicWaves, x, z, x1, z1, y);
+                SeismicWave.addAll(player, seismicWaves);
             }
 
-            world.playSound(playerEntity, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 0.8F, 0.8F + playerEntity.getRandom().nextFloat() * 0.4F);
-            playerEntity.getCooldowns().addCooldown(this, 25);
-            playerEntity.awardStat(Stats.ITEM_USED.get(this));
-            itemStack.hurtAndBreak(1, playerEntity, (e) -> {
-                e.broadcastBreakEvent(context.getHand());
-            });
-            return InteractionResult.sidedSuccess(world.isClientSide);
+            level.playSound(player, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS,
+                    0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F
+            );
+            player.getCooldowns().addCooldown(this, 25);
+            player.awardStat(Stats.ITEM_USED.get(this));
+            ItemHelper.hurtAndBreak(context.getItemInHand(), 1, player, context.getHand());
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
-    }
-
-    @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        return slot == EquipmentSlot.MAINHAND ? this.attributeModifiers : super.getDefaultAttributeModifiers(slot);
     }
 }

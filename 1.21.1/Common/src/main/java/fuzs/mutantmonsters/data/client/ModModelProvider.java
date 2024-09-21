@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.data.client;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
+import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.data.v2.AbstractModelProvider;
 import fuzs.puzzleslib.api.client.data.v2.ItemModelProperties;
@@ -41,26 +42,26 @@ public class ModModelProvider extends AbstractModelProvider {
         createPotionItem(builder, Items.POTION, "chemical_x");
         createPotionItem(builder, Items.SPLASH_POTION, "splash_chemical_x");
         createPotionItem(builder, Items.LINGERING_POTION, "lingering_chemical_x");
-        builder.generateFlatItem(ModRegistry.CREEPER_MINION_SPAWN_EGG_ITEM.value(), SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.CREEPER_MINION_TRACKER_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.CREEPER_SHARD_ITEM.value(), ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
-        builder.generateFlatItem(ModRegistry.ENDERSOUL_HAND_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.HULK_HAMMER_ITEM.value(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_CREEPER_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.SPIDER_PIG_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_ARMS_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_BOOTS_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_CHESTPLATE_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_LEGGINGS_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_LIMB_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_PELVIS_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_RIB_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_RIB_CAGE_ITEM.value(), ModelTemplates.FLAT_ITEM);
-        builder.generateFlatItem(ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.CREEPER_MINION_SPAWN_EGG_ITEM.value(), SPAWN_EGG);
+        builder.generateFlatItem(ModItems.CREEPER_MINION_TRACKER_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.CREEPER_SHARD_ITEM.value(), ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
+        builder.generateFlatItem(ModItems.ENDERSOUL_HAND_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.HULK_HAMMER_ITEM.value(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_CREEPER_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.SPIDER_PIG_SPAWN_EGG_ITEM.value(), MUTANT_SPAWN_EGG);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_ARMS_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_BOOTS_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_LEGGINGS_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_LIMB_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_PELVIS_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_RIB_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_RIB_CAGE_ITEM.value(), ModelTemplates.FLAT_ITEM);
+        builder.generateFlatItem(ModItems.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value(), ModelTemplates.FLAT_ITEM);
     }
 
     private static void createPotionItem(ItemModelGenerators builder, Item item, String modelOverride) {

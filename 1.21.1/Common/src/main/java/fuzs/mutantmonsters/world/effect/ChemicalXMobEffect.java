@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.world.effect;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.config.ServerConfig;
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.world.effect.InstantenousMobEffect;
@@ -24,8 +24,8 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
         EntityType<?> entityType = target.getType();
         return !CommonAbstractions.INSTANCE.isBossMob(entityType) &&
                 !MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsValue(entityType) &&
-                entityType != ModRegistry.CREEPER_MINION_ENTITY_TYPE.value() &&
-                entityType != ModRegistry.ENDERSOUL_CLONE_ENTITY_TYPE.value();
+                entityType != ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value() &&
+                entityType != ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value();
     };
     public static final TargetingConditions TARGET_PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
 
@@ -47,10 +47,7 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
     @Nullable
     public static EntityType<?> getMutantOf(Mob target) {
         EntityType<?> targetType = target.getType();
-        if (!MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsKey(targetType) ||
-                target.isBaby()) {
-            return null;
-        } else if (targetType == EntityType.PIG && !target.hasEffect(MobEffects.UNLUCK)) {
+        if (target.isBaby() || targetType == EntityType.PIG && !target.hasEffect(MobEffects.UNLUCK)) {
             return null;
         } else {
             return MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.get(targetType);

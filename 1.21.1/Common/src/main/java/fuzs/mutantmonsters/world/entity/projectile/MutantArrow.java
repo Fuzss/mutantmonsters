@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.world.entity.projectile;
 
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModEntityTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -23,7 +23,7 @@ public class MutantArrow extends Arrow {
     }
 
     public MutantArrow(Level level, LivingEntity shooter) {
-        this(ModRegistry.MUTANT_ARROW_ENTITY_TYPE.value(), level);
+        this(ModEntityTypes.MUTANT_ARROW_ENTITY_TYPE.value(), level);
         this.setPos(shooter.getX(), shooter.getEyeY() - (double) 0.1F, shooter.getZ());
         this.setNoGravity(true);
         this.setOwner(shooter);
@@ -54,9 +54,9 @@ public class MutantArrow extends Arrow {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(CLONES, 1);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(CLONES, 1);
     }
 
     public int getClones() {

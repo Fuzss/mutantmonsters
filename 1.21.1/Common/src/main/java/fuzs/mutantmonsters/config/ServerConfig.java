@@ -17,8 +17,8 @@ import java.util.Map;
 
 public class ServerConfig implements ConfigCore {
     @Config(description = "Maximum distance the endersoul hand can be used to travel to.")
-    @Config.IntRange(min = 0, max = 128)
-    public int endersoulHandTeleportDistance = 128;
+    @Config.IntRange(min = 0, max = 512)
+    public int endersoulHandTeleportDistance = 256;
     @Config(name = "mutant_x_conversions", description = {"When infested with a Mutant X potion, what mutant mob should the target transform into. Otherwise the target will ony explode and take damage.", "Format for every entry is \"<namespace>:<path>,<namespace>:<path>\" with the second id representing the mutant. Namespace may be omitted to use \"minecraft\" by default."})
     List<String> mutantXConversionsRaw = Lists.newArrayList("minecraft:creeper,mutantmonsters:mutant_creeper", "minecraft:enderman,mutantmonsters:mutant_enderman", "minecraft:skeleton,mutantmonsters:mutant_skeleton", "minecraft:snow_golem,mutantmonsters:mutant_snow_golem", "minecraft:zombie,mutantmonsters:mutant_zombie", "minecraft:pig,mutantmonsters:spider_pig");
 

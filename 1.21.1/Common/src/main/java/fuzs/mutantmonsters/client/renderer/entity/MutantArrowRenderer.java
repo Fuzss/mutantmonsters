@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -43,17 +44,10 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow> {
             poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTick, mutantArrow.yRotO, mutantArrow.getYRot())));
             poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, mutantArrow.xRotO, mutantArrow.getXRot())));
             poseStack.scale(1.2F, 1.2F, 1.2F);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(
-                    mutantArrow)));
-            this.model.renderToBuffer(poseStack,
-                    vertexConsumer,
-                    packedLight,
-                    OverlayTexture.NO_OVERLAY,
-                    1.0F,
-                    1.0F,
-                    1.0F,
-                    1.0F - (float) i * 0.08F
-            );
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
+                    this.model.renderType(this.getTextureLocation(mutantArrow)));
+            int color = FastColor.ARGB32.colorFromFloat(1.0F - (float) i * 0.08F, 1.0F, 1.0F, 1.0F);
+            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
             poseStack.popPose();
         }
 

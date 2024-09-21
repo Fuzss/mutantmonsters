@@ -57,8 +57,8 @@ public class MutantCreeperModel extends EntityModel<MutantCreeper> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.pelvis.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        this.pelvis.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     @Override

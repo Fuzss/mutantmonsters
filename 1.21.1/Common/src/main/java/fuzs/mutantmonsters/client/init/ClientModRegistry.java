@@ -8,7 +8,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
 public class ClientModRegistry {
-    private static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);
+    static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);
     public static final ModelLayerLocation MUTANT_SKELETON_SKULL = REGISTRY.register("mutant_skeleton_skull");
     public static final ModelLayerLocation CREEPER_MINION_EGG = REGISTRY.register("creeper_minion_egg");
     public static final ModelLayerLocation CREEPER_MINION_EGG_ARMOR = REGISTRY.register("creeper_minion_egg", "armor");

@@ -27,10 +27,10 @@ public class MutantCreeperRenderer extends AlternateMobRenderer<MutantCreeper, M
 
     @Override
     protected float getWhiteOverlayProgress(MutantCreeper mutantCreeper, float partialTick) {
-        float f = mutantCreeper.getOverlayColor(partialTick);
+        float overlayColor = mutantCreeper.getOverlayColor(partialTick);
         return mutantCreeper.isJumpAttacking() && mutantCreeper.deathTime == 0 ?
-                ((int) (f * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(f, 0.5F, 1.0F)) :
-                f;
+                ((int) (overlayColor * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(overlayColor, 0.5F, 1.0F)) :
+                overlayColor;
     }
 
     @Override

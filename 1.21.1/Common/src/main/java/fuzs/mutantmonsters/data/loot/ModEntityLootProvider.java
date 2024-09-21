@@ -18,12 +18,9 @@ public class ModEntityLootProvider extends AbstractLootProvider.Simple {
 
     @Override
     public void addLootTables() {
-        this.add(ModRegistry.MUTANT_ENDERMAN_CONTINUOUS_LOOT_TABLE,
-                LootTable.lootTable()
-                        .withPool(LootPool.lootPool()
-                                .setRolls(ConstantValue.exactly(1.0F))
-                                .add(LootItem.lootTableItem(Items.ENDER_PEARL))
-                                .add(LootItem.lootTableItem(Items.ENDER_EYE)))
-        );
+        this.add(ModRegistry.MUTANT_ENDERMAN_CONTINUOUS_LOOT_TABLE, LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .add(LootItem.lootTableItem(Items.ENDER_PEARL))
+                .add(LootItem.lootTableItem(Items.ENDER_EYE))));
     }
 }

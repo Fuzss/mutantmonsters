@@ -55,18 +55,18 @@ public class CreeperMinionModel extends HierarchicalModel<CreeperMinion> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
         poseStack.pushPose();
         poseStack.translate(0.0F, 9.0F / 16.0F, 0.0F);
         this.headParts().forEach(modelPart -> {
-            modelPart.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+            modelPart.render(poseStack, buffer, packedLight, packedOverlay, color);
         });
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.scale(0.5F, 0.5F, 0.5F);
         poseStack.translate(0.0F, 24.0F / 16.0F, 0.0F);
         this.bodyParts().forEach(modelPart -> {
-            modelPart.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+            modelPart.render(poseStack, buffer, packedLight, packedOverlay, color);
         });
         poseStack.popPose();
     }
