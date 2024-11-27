@@ -16,6 +16,7 @@
   "advancements.mutantmonsters.you_da_bomby.description": "Hatch a Creeper Minion from its egg",
   "advancements.mutantmonsters.you_da_bomby.title": "You da Bomby",
   "block.mutantmonsters.mutant_skeleton_skull": "Mutant Skeleton Skull",
+  "effect.mutantmonsters.chemical_x.description": "Turns an entity to a mutant form with a 50% chance. Explodes, if transformation is impossible.",
   "effect.mutantmonsters.chemical_x": "Chemical X",
   "entity.mutantmonsters.body_part": "Body Part",
   "entity.mutantmonsters.creeper_minion": "Creeper Minion",
