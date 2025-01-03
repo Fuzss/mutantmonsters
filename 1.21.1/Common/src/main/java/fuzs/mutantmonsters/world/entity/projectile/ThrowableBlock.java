@@ -295,15 +295,18 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
                 this.onHitBlock(blockHitResult);
                 if (!this.level().isClientSide) {
                     BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    if (canOwnerPlace && this.level().getBlockState(blockPos).canBeReplaced() && this.blockState.canSurvive(this.level(), blockPos)) {
-                        this.level().setBlockAndUpdate(blockPos, this.blockState);
-                        this.blockState.getBlock().setPlacedBy(this.level(), blockPos, this.blockState, livingEntity, ItemStack.EMPTY);
-                        SoundType soundType = this.blockState.getSoundType();
-                        this.playSound(soundType.getPlaceSound(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-                    } else {
-                        this.level().levelEvent(2001, blockPos, Block.getId(this.blockState));
-                        if (canOwnerPlace && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                            this.spawnAtLocation(this.blockState.getBlock());
+                    Block block = this.level().getBlockState(blockPos).getBlock();
+                    if (!block.equals(Blocks.END_PORTAL)) {
+                        if (canOwnerPlace && this.level().getBlockState(blockPos).canBeReplaced() && this.blockState.canSurvive(this.level(), blockPos)) {
+                            this.level().setBlockAndUpdate(blockPos, this.blockState);
+                            this.blockState.getBlock().setPlacedBy(this.level(), blockPos, this.blockState, livingEntity, ItemStack.EMPTY);
+                            SoundType soundType = this.blockState.getSoundType();
+                            this.playSound(soundType.getPlaceSound(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+                        } else {
+                            this.level().levelEvent(2001, blockPos, Block.getId(this.blockState));
+                            if (canOwnerPlace && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                                this.spawnAtLocation(this.blockState.getBlock());
+                            }
                         }
                     }
                 }
