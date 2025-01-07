@@ -1,0 +1,3 @@
+accessWidener   v2  named
+accessible  field   net/minecraft/world/level/Explosion damageSource    Lnet/minecraft/world/damagesource/DamageSource;
+accessible  field   net/minecraft/world/level/Explosion damageCalculator    Lnet/minecraft/world/level/ExplosionDamageCalculator;

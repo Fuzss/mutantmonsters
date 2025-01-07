@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_mutant_skeleton_pelvis_or_mutant_skeleton_limb": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mutantmonsters:mutant_skeleton_pelvis",
+              "mutantmonsters:mutant_skeleton_limb"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mutantmonsters:mutant_skeleton_leggings"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_mutant_skeleton_pelvis_or_mutant_skeleton_limb"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mutantmonsters:mutant_skeleton_leggings"
+    ]
+  }
+}
