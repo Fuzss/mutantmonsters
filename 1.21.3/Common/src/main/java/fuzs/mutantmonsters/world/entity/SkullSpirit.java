@@ -13,10 +13,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -25,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalInt;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class SkullSpirit extends Entity {
     private static final EntityDataAccessor<OptionalInt> TARGET_ENTITY_ID = SynchedEntityData.defineId(SkullSpirit.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
@@ -106,12 +105,13 @@ public class SkullSpirit extends Entity {
                             MutatedExplosionHelper.explode(this, 2.0F, false,
                                     Level.ExplosionInteraction.NONE
                             );
-                            Mob mutant = this.target.convertTo((EntityType<? extends Mob>) mutantType, true);
-                            if (mutant != null) {
-                                mutant.setPersistenceRequired();
-                                AABB boundingBox = mutant.getBoundingBox();
+                            Mob mob = this.target.convertTo((EntityType<? extends Mob>) mutantType, ConversionParams.single(this.target, true, true),
+                                    Function.identity()::apply);
+                            if (mob != null) {
+                                mob.setPersistenceRequired();
+                                AABB boundingBox = mob.getBoundingBox();
 
-                                for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(boundingBox.minX), Mth.floor(mutant.getY()), Mth.floor(boundingBox.minZ), Mth.floor(boundingBox.maxX), Mth.floor(boundingBox.maxY), Mth.floor(boundingBox.maxZ))) {
+                                for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(boundingBox.minX), Mth.floor(mob.getY()), Mth.floor(boundingBox.minZ), Mth.floor(boundingBox.maxX), Mth.floor(boundingBox.maxY), Mth.floor(boundingBox.maxZ))) {
                                     if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) > -1.0F) {
                                         this.level().destroyBlock(pos, true);
                                     }
@@ -120,7 +120,7 @@ public class SkullSpirit extends Entity {
                                 if (this.conversionStarter != null) {
                                     Player player = this.level().getPlayerByUUID(this.conversionStarter);
                                     if (player instanceof ServerPlayer serverPlayer) {
-                                        CriteriaTriggers.SUMMONED_ENTITY.trigger(serverPlayer, mutant);
+                                        CriteriaTriggers.SUMMONED_ENTITY.trigger(serverPlayer, mob);
                                     }
                                 }
                             }
@@ -179,6 +179,11 @@ public class SkullSpirit extends Entity {
         } else {
             this.discard();
         }
+    }
+
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
+        return false;
     }
 
     @Override

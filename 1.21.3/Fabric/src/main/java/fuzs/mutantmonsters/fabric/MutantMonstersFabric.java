@@ -9,7 +9,7 @@ public class MutantMonstersFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        FabricModRegistry.touch();
+        FabricModRegistry.bootstrap();
         ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new);
     }
 }

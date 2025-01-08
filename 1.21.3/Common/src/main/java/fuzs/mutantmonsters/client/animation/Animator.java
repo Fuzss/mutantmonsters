@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.animation;
 
+import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
 import fuzs.mutantmonsters.world.entity.EntityAnimation;
-import fuzs.mutantmonsters.world.entity.AnimatedEntity;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
@@ -12,27 +12,25 @@ public class Animator {
     private int tempTick;
     private int prevTempTick;
     private boolean correctAnim;
-    private AnimatedEntity animEntity;
+    private AnimatedEntityRenderState renderState;
     private final Map<ModelPart, Transform> transformMap = new HashMap<>();
     private final Map<ModelPart, Transform> prevTransformMap = new HashMap<>();
-    private float partialTick;
 
-    public AnimatedEntity getEntity() {
-        return this.animEntity;
+    public AnimatedEntityRenderState getRenderState() {
+        return this.renderState;
     }
 
-    public void update(AnimatedEntity entity, float partialTick) {
+    public void update(AnimatedEntityRenderState renderState) {
         this.tempTick = this.prevTempTick = 0;
         this.correctAnim = false;
-        this.animEntity = entity;
+        this.renderState = renderState;
         this.transformMap.clear();
         this.prevTransformMap.clear();
-        this.partialTick = partialTick;
     }
 
     public boolean setAnimation(EntityAnimation animation) {
         this.tempTick = this.prevTempTick = 0;
-        this.correctAnim = this.animEntity.getAnimation() == animation;
+        this.correctAnim = this.renderState.animation == animation;
         return this.correctAnim;
     }
 
@@ -41,7 +39,6 @@ public class Animator {
             this.prevTempTick = this.tempTick;
             this.tempTick += duration;
         }
-
     }
 
     public void setStationaryPhase(int duration) {
@@ -80,17 +77,17 @@ public class Animator {
 
     private void endPhase(boolean stationary) {
         if (this.correctAnim) {
-            int animTick = this.animEntity.getAnimationTick();
+            float animTick = this.renderState.animationTime;
             if (animTick >= this.prevTempTick && animTick < this.tempTick) {
                 if (stationary) {
 
-                    for (ModelPart model : this.prevTransformMap.keySet()) {
-                        Transform transform = this.prevTransformMap.get(model);
-                        transform.rotate(model, 1.0F);
-                        transform.offset(model, 1.0F);
+                    for (ModelPart modelPart : this.prevTransformMap.keySet()) {
+                        Transform transform = this.prevTransformMap.get(modelPart);
+                        transform.rotate(modelPart, 1.0F);
+                        transform.offset(modelPart, 1.0F);
                     }
                 } else {
-                    float tick = ((float)(animTick - this.prevTempTick) + this.partialTick) / (float)(this.tempTick - this.prevTempTick);
+                    float tick = (animTick - this.prevTempTick) / (float) (this.tempTick - this.prevTempTick);
                     float inc = Mth.sin(tick * 3.1415927F / 2.0F);
                     float dec = 1.0F - inc;
 
@@ -118,26 +115,27 @@ public class Animator {
                 this.transformMap.clear();
             }
         }
-
     }
 
-    public static void addRotationAngle(ModelPart model, float x, float y, float z) {
-        model.xRot += x;
-        model.yRot += y;
-        model.zRot += z;
+    public static void addRotationAngle(ModelPart modelPart, float x, float y, float z) {
+        modelPart.xRot += x;
+        modelPart.yRot += y;
+        modelPart.zRot += z;
     }
 
-    public static void resetAngles(ModelPart... boxes) {
-
-        for (ModelPart box : boxes) {
+    public static void resetAngles(ModelPart... modelParts) {
+        for (ModelPart box : modelParts) {
             resetAngles(box);
         }
-
     }
 
-    public static void resetAngles(ModelPart box) {
-        box.xRot = 0.0F;
-        box.yRot = 0.0F;
-        box.zRot = 0.0F;
+    public static void resetAngles(ModelPart modelPart) {
+        modelPart.xRot = 0.0F;
+        modelPart.yRot = 0.0F;
+        modelPart.zRot = 0.0F;
+    }
+
+    public static void setScale(ModelPart modelPart, float scale) {
+        modelPart.xScale = modelPart.yScale = modelPart.zScale = scale;
     }
 }

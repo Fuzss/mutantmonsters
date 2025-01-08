@@ -1,12 +1,13 @@
 package fuzs.mutantmonsters.world.item;
 
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -66,7 +67,7 @@ public class CreeperShardItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+    public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemInHand = player.getItemInHand(interactionHand);
         int maxDamage = itemInHand.getMaxDamage();
         int damageValue = itemInHand.getDamageValue();
@@ -88,9 +89,9 @@ public class CreeperShardItem extends Item {
                 itemInHand.setDamageValue(damageValue + 1);
             }
 
-            player.getCooldowns().addCooldown(this, (maxDamage - damageValue) * 2);
+            player.getCooldowns().addCooldown(itemInHand, (maxDamage - damageValue) * 2);
             player.awardStat(Stats.ITEM_USED.get(this));
-            return InteractionResultHolder.success(itemInHand);
+            return InteractionResultHelper.success(itemInHand);
         } else {
             return super.use(level, player, interactionHand);
         }

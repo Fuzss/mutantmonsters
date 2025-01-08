@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -86,6 +88,11 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     @Override
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
+        return false;
+    }
+
+    @Override
     public boolean isPickable() {
         return this.isAlive();
     }
@@ -121,9 +128,15 @@ public class MutantSkeletonBodyPart extends Entity {
             this.setYRot(this.getYRot() + 10.0F * (float) (this.yawPositive ? 1 : -1));
             this.setXRot(this.getXRot() + 15.0F * (float) (this.pitchPositive ? 1 : -1));
 
-            for (Entity entity : this.level().getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                if (entity.hurt(this.level().damageSources().thrown(this, this.owner != null ? this.owner.get() : this), 4.0F + (float) this.random.nextInt(4))) {
-                    entity.igniteForSeconds(this.getRemainingFireTicks() / 20.0F);
+            if (this.level() instanceof ServerLevel serverLevel) {
+                for (Entity entity : serverLevel.getEntities(this, this.getBoundingBox(), this::canHarm)) {
+                    DamageSource damageSource = serverLevel
+                            .damageSources()
+                            .thrown(this, this.owner != null ? this.owner.get() : this);
+                    float damageAmount = 4.0F + (float) this.random.nextInt(4);
+                    if (entity.hurtServer(serverLevel, damageSource, damageAmount)) {
+                        entity.igniteForSeconds(this.getRemainingFireTicks() / 20.0F);
+                    }
                 }
             }
 
@@ -141,20 +154,22 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ResourceKey<LootTable> resourceKey = this.getItemPartLootTableId();
             if (resourceKey != null) {
-                LootTable lootTable = this.level().getServer().reloadableRegistries().getLootTable(resourceKey);
-                List<ItemStack> list = lootTable.getRandomItems((new LootParams.Builder((ServerLevel) this.level())).withParameter(LootContextParams.THIS_ENTITY, this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET));
+                LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
+                LootParams lootParams = new LootParams.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY,
+                        this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET);
+                List<ItemStack> list = lootTable.getRandomItems(lootParams);
                 for (ItemStack item : list) {
                     if (!item.isEmpty()) {
-                        this.spawnAtLocation(item).setNoPickUpDelay();
+                        this.spawnAtLocation(serverLevel, item).setNoPickUpDelay();
                     }
                 }
             }
         }
         this.discard();
-        return InteractionResult.sidedSuccess(this.level().isClientSide);
+        return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
     }
 
     private boolean canHarm(Entity entity) {

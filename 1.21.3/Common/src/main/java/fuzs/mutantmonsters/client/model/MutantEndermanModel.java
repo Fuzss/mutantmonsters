@@ -1,8 +1,8 @@
 package fuzs.mutantmonsters.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.animation.Animator;
+import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,7 +12,7 @@ import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 
-public class MutantEndermanModel extends EntityModel<MutantEnderman> {
+public class MutantEndermanModel extends EntityModel<MutantEndermanRenderState> {
     private final ModelPart pelvis;
     private final ModelPart abdomen;
     private final ModelPart chest;
@@ -29,9 +29,9 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
     private final ModelPart leg2;
     private final ModelPart foreLeg1;
     private final ModelPart foreLeg2;
-    private float partialTick;
 
     public MutantEndermanModel(ModelPart modelPart) {
+        super(modelPart);
         this.pelvis = modelPart.getChild("pelvis");
         this.abdomen = this.pelvis.getChild("abdomen");
         this.chest = this.abdomen.getChild("chest");
@@ -73,31 +73,20 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        this.pelvis.render(poseStack, buffer, packedLight, packedOverlay, color);
+    public void setupAnim(MutantEndermanRenderState renderState) {
+        super.setupAnim(renderState);
+        this.setupInitialAngles();
+        float limbSwing = renderState.walkAnimationPos;
+        float limbSwingAmount = renderState.walkAnimationSpeed;
+        float ageInTicks = renderState.ageInTicks;
+        float netHeadYaw = renderState.yRot;
+        float headPitch = renderState.xRot;
+        this.animate(renderState, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        Animator.setScale(this.lowerRightArm.arm, renderState.armScale);
+        Animator.setScale(this.lowerLeftArm.arm, renderState.armScale);
     }
 
-    @Override
-    public void setupAnim(MutantEnderman entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.setAngles();
-        this.animate(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        float armScale = entityIn.getArmScale(this.partialTick);
-        setModelPartScale(this.lowerRightArm.arm, armScale);
-        setModelPartScale(this.lowerLeftArm.arm, armScale);
-    }
-
-    private static void setModelPartScale(ModelPart modelPart, float scale) {
-        // not sure if setting scale to 0.0 could cause issues, so instead of that simply disable rendering of the model part
-        // the visibility is changed nowhere else, so just enabling again when scale > 0.0 is fine
-        if (scale != 0.0F) {
-            modelPart.visible = true;
-            modelPart.xScale = modelPart.yScale = modelPart.zScale = scale;
-        } else {
-            modelPart.visible = false;
-        }
-    }
-
-    private void setAngles() {
+    private void setupInitialAngles() {
         this.pelvis.y = -15.5F;
         this.abdomen.xRot = 0.31415927F;
         this.chest.xRot = 0.3926991F;
@@ -131,7 +120,7 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
         this.foreLeg2.zRot = 0.1308997F;
     }
 
-    private void animate(MutantEnderman enderman, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    private void animate(MutantEndermanRenderState renderState, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         float walkSpeed = 0.3F;
         float walkAnim1 = (Mth.sin((limbSwing - 0.8F) * walkSpeed) + 0.8F) * limbSwingAmount;
         float walkAnim2 = -(Mth.sin((limbSwing + 0.8F) * walkSpeed) - 0.8F) * limbSwingAmount;
@@ -143,28 +132,26 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
         float faceYaw = netHeadYaw * 3.1415927F / 180.0F;
         float facePitch = headPitch * 3.1415927F / 180.0F;
 
-        int arm;
-        for (arm = 0; arm < 4; ++arm) {
-            if (enderman.getHeldBlock(arm) > 0) {
-                this.animateHoldBlock(enderman.getHeldBlockTick(arm), arm, enderman.hasTarget > 0);
-                walkAnim[arm] *= 0.4F;
+        for (int i = 0; i < 4; ++i) {
+            if (renderState.heldBlocks[i] > 0) {
+                this.animateHoldBlock(renderState, i);
+                walkAnim[i] *= 0.4F;
             }
         }
 
-        if (enderman.getAnimation() == MutantEnderman.MELEE_ANIMATION) {
-            arm = enderman.getActiveArm();
-            this.animateMelee(enderman.getAnimationTick(), arm);
-            walkAnim[arm] = 0.0F;
+        if (renderState.animation == MutantEnderman.MELEE_ANIMATION) {
+            this.animateMelee(renderState, renderState.activeArm);
+            walkAnim[renderState.activeArm] = 0.0F;
         }
 
-        if (enderman.getAnimation() == MutantEnderman.THROW_ANIMATION) {
-            this.animateThrowBlock(enderman.getAnimationTick(), enderman.getActiveArm());
+        if (renderState.animation == MutantEnderman.THROW_ANIMATION) {
+            this.animateThrowBlock(renderState, renderState.activeArm);
         }
 
         float scale;
-        if (enderman.getAnimation() == MutantEnderman.SCREAM_ANIMATION) {
-            this.animateScream(enderman.getAnimationTick());
-            scale = 1.0F - Mth.clamp((float) enderman.getAnimationTick() / 6.0F, 0.0F, 1.0F);
+        if (renderState.animation == MutantEnderman.SCREAM_ANIMATION) {
+            this.animateScream(renderState);
+            scale = 1.0F - Mth.clamp(renderState.animationTime / 6.0F, 0.0F, 1.0F);
             faceYaw *= scale;
             facePitch *= scale;
             walkAnim1 *= scale;
@@ -174,13 +161,13 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             Arrays.fill(walkAnim, 0.0F);
         }
 
-        if (enderman.getAnimation() == MutantEnderman.TELESMASH_ANIMATION) {
-            this.animateTeleSmash(enderman.getAnimationTick());
+        if (renderState.animation == MutantEnderman.TELESMASH_ANIMATION) {
+            this.animateTeleSmash(renderState);
         }
 
-        if (enderman.getAnimation() == MutantEnderman.DEATH_ANIMATION) {
-            this.animateDeath(enderman.deathTime);
-            scale = 1.0F - Mth.clamp((float) enderman.deathTime / 6.0F, 0.0F, 1.0F);
+        if (renderState.animation == MutantEnderman.DEATH_ANIMATION) {
+            this.animateDeath(renderState);
+            scale = 1.0F - Mth.clamp(renderState.deathTime / 6.0F, 0.0F, 1.0F);
             faceYaw *= scale;
             facePitch *= scale;
             walkAnim1 *= scale;
@@ -199,43 +186,29 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
         this.neck.xRot -= breatheAnim * 0.02F;
         this.rightArm.arm.zRot += breatheAnim * 0.004F;
         this.leftArm.arm.zRot -= breatheAnim * 0.004F;
-        ModelPart[] var21 = this.rightArm.finger;
-        int var18 = var21.length;
 
-        int var19;
-        ModelPart finger;
-        for (var19 = 0; var19 < var18; ++var19) {
-            finger = var21[var19];
-            finger.zRot += breatheAnim * 0.05F;
+        for (ModelPart modelPart : this.rightArm.finger) {
+            modelPart.zRot += breatheAnim * 0.05F;
         }
 
         this.rightArm.thumb.zRot -= breatheAnim * 0.05F;
-        var21 = this.leftArm.finger;
-        var18 = var21.length;
 
-        for (var19 = 0; var19 < var18; ++var19) {
-            finger = var21[var19];
-            finger.zRot -= breatheAnim * 0.05F;
+        for (ModelPart modelPart : this.leftArm.finger) {
+            modelPart.zRot -= breatheAnim * 0.05F;
         }
 
         this.leftArm.thumb.zRot += breatheAnim * 0.05F;
         this.lowerRightArm.arm.zRot += breatheAnim * 0.002F;
         this.lowerLeftArm.arm.zRot -= breatheAnim * 0.002F;
-        var21 = this.lowerRightArm.finger;
-        var18 = var21.length;
 
-        for (var19 = 0; var19 < var18; ++var19) {
-            finger = var21[var19];
-            finger.zRot += breatheAnim * 0.02F;
+        for (ModelPart modelPart : this.lowerRightArm.finger) {
+            modelPart.zRot += breatheAnim * 0.02F;
         }
 
         this.lowerRightArm.thumb.zRot -= breatheAnim * 0.02F;
-        var21 = this.lowerLeftArm.finger;
-        var18 = var21.length;
 
-        for (var19 = 0; var19 < var18; ++var19) {
-            finger = var21[var19];
-            finger.zRot -= breatheAnim * 0.02F;
+        for (ModelPart modelPart : this.lowerLeftArm.finger) {
+            modelPart.zRot -= breatheAnim * 0.02F;
         }
 
         this.lowerLeftArm.thumb.zRot += breatheAnim * 0.02F;
@@ -255,337 +228,264 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
         this.foreLeg2.xRot += walkAnim4 * 0.3F;
     }
 
-    private void animateHoldBlock(int fullTick, int armID, boolean hasTarget) {
-        float tick = ((float) fullTick + this.partialTick) / 10.0F;
-        if (!hasTarget) {
-            tick = fullTick == 0 ? 0.0F : ((float) fullTick - this.partialTick) / 10.0F;
+    private void animateHoldBlock(MutantEndermanRenderState renderState, int armId) {
+        float animationProgress = renderState.heldBlockTicks[armId] / 10.0F;
+        float rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+        if (armId == 0) {
+            this.rightArm.arm.zRot += rotationAmount * 0.8F;
+            this.rightArm.foreArm.zRot += rotationAmount * 0.6F;
+            this.rightArm.hand.yRot += rotationAmount * 0.8F;
+            this.rightArm.finger[0].xRot += -rotationAmount * 0.2F;
+            this.rightArm.finger[2].xRot += rotationAmount * 0.2F;
+
+            for (ModelPart modelPart : this.rightArm.finger) {
+                modelPart.zRot += rotationAmount * 0.6F;
+            }
+
+            this.rightArm.thumb.zRot += -rotationAmount * 0.4F;
+        } else if (armId == 1) {
+            this.leftArm.arm.zRot += -rotationAmount * 0.8F;
+            this.leftArm.foreArm.zRot += -rotationAmount * 0.6F;
+            this.leftArm.hand.yRot += -rotationAmount * 0.8F;
+            this.leftArm.finger[0].xRot += -rotationAmount * 0.2F;
+            this.leftArm.finger[2].xRot += rotationAmount * 0.2F;
+
+            for (ModelPart modelPart : this.leftArm.finger) {
+                modelPart.zRot += -rotationAmount * 0.6F;
+            }
+
+            this.leftArm.thumb.zRot += rotationAmount * 0.4F;
+        } else if (armId == 2) {
+            this.lowerRightArm.arm.zRot += rotationAmount * 0.5F;
+            this.lowerRightArm.foreArm.zRot += rotationAmount * 0.4F;
+            this.lowerRightArm.hand.yRot += rotationAmount * 0.4F;
+            this.lowerRightArm.finger[0].xRot += -rotationAmount * 0.2F;
+            this.lowerRightArm.finger[2].xRot += rotationAmount * 0.2F;
+
+            for (ModelPart modelPart : this.lowerRightArm.finger) {
+                modelPart.zRot += rotationAmount * 0.6F;
+            }
+
+            this.lowerRightArm.thumb.zRot += -rotationAmount * 0.4F;
+        } else if (armId == 3) {
+            this.lowerLeftArm.arm.zRot += -rotationAmount * 0.5F;
+            this.lowerLeftArm.foreArm.zRot += -rotationAmount * 0.4F;
+            this.lowerLeftArm.hand.yRot += -rotationAmount * 0.4F;
+            this.lowerLeftArm.finger[0].xRot += -rotationAmount * 0.2F;
+            this.lowerLeftArm.finger[2].xRot += rotationAmount * 0.2F;
+
+            for (ModelPart modelPart : this.lowerLeftArm.finger) {
+                modelPart.zRot += -rotationAmount * 0.6F;
+            }
+
+            this.lowerLeftArm.thumb.zRot += rotationAmount * 0.4F;
         }
-
-        float f = Mth.sin(tick * 3.1415927F / 2.0F);
-        ModelPart[] var6;
-        int var7;
-        int var8;
-        ModelPart finger;
-        if (armID == 0) {
-            this.rightArm.arm.zRot += f * 0.8F;
-            this.rightArm.foreArm.zRot += f * 0.6F;
-            this.rightArm.hand.yRot += f * 0.8F;
-            this.rightArm.finger[0].xRot += -f * 0.2F;
-            this.rightArm.finger[2].xRot += f * 0.2F;
-            var6 = this.rightArm.finger;
-            var7 = var6.length;
-
-            for (var8 = 0; var8 < var7; ++var8) {
-                finger = var6[var8];
-                finger.zRot += f * 0.6F;
-            }
-
-            this.rightArm.thumb.zRot += -f * 0.4F;
-        } else if (armID == 1) {
-            this.leftArm.arm.zRot += -f * 0.8F;
-            this.leftArm.foreArm.zRot += -f * 0.6F;
-            this.leftArm.hand.yRot += -f * 0.8F;
-            this.leftArm.finger[0].xRot += -f * 0.2F;
-            this.leftArm.finger[2].xRot += f * 0.2F;
-            var6 = this.leftArm.finger;
-            var7 = var6.length;
-
-            for (var8 = 0; var8 < var7; ++var8) {
-                finger = var6[var8];
-                finger.zRot += -f * 0.6F;
-            }
-
-            this.leftArm.thumb.zRot += f * 0.4F;
-        } else if (armID == 2) {
-            this.lowerRightArm.arm.zRot += f * 0.5F;
-            this.lowerRightArm.foreArm.zRot += f * 0.4F;
-            this.lowerRightArm.hand.yRot += f * 0.4F;
-            this.lowerRightArm.finger[0].xRot += -f * 0.2F;
-            this.lowerRightArm.finger[2].xRot += f * 0.2F;
-            var6 = this.lowerRightArm.finger;
-            var7 = var6.length;
-
-            for (var8 = 0; var8 < var7; ++var8) {
-                finger = var6[var8];
-                finger.zRot += f * 0.6F;
-            }
-
-            this.lowerRightArm.thumb.zRot += -f * 0.4F;
-        } else if (armID == 3) {
-            this.lowerLeftArm.arm.zRot += -f * 0.5F;
-            this.lowerLeftArm.foreArm.zRot += -f * 0.4F;
-            this.lowerLeftArm.hand.yRot += -f * 0.4F;
-            this.lowerLeftArm.finger[0].xRot += -f * 0.2F;
-            this.lowerLeftArm.finger[2].xRot += f * 0.2F;
-            var6 = this.lowerLeftArm.finger;
-            var7 = var6.length;
-
-            for (var8 = 0; var8 < var7; ++var8) {
-                finger = var6[var8];
-                finger.zRot += -f * 0.6F;
-            }
-
-            this.lowerLeftArm.thumb.zRot += f * 0.4F;
-        }
-
     }
 
-    private void animateMelee(int fullTick, int armID) {
-        int right = (armID & 1) == 0 ? 1 : -1;
-        Arm arm = this.getArmFromID(armID);
-        ModelPart var10000;
-        float tick;
-        float f;
-        ModelPart var8;
-        if (fullTick < 2) {
-            tick = ((float) fullTick + this.partialTick) / 2.0F;
-            f = Mth.sin(tick * 3.1415927F / 2.0F);
-            var10000 = arm.arm;
-            var10000.xRot += f * 0.2F;
-            var8 = arm.finger[0];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.finger[1];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.finger[2];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.foreFinger[0];
-            var8.zRot += -f * 0.5F * (float) right;
-            var8 = arm.foreFinger[1];
-            var8.zRot += -f * 0.5F * (float) right;
-            var8 = arm.foreFinger[2];
-            var8.zRot += -f * 0.5F * (float) right;
-        } else if (fullTick < 5) {
-            tick = ((float) (fullTick - 2) + this.partialTick) / 3.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            float f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.chest.yRot += -f1 * 0.1F * (float) right;
-            var10000 = arm.arm;
-            var10000.xRot += f * 1.1F - 1.1F;
-            var8 = arm.foreArm;
-            var8.xRot += -f * 0.4F;
-            var8 = arm.finger[0];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.finger[1];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.finger[2];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.foreFinger[0];
-            var8.zRot += -0.5F * (float) right;
-            var8 = arm.foreFinger[1];
-            var8.zRot += -0.5F * (float) right;
-            var8 = arm.foreFinger[2];
-            var8.zRot += -0.5F * (float) right;
-        } else if (fullTick < 6) {
-            this.chest.yRot += -0.1F * (float) right;
-            var10000 = arm.arm;
-            var10000.xRot += -1.1F;
-            var8 = arm.foreArm;
-            var8.xRot += -0.4F;
-            var8 = arm.finger[0];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.finger[1];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.finger[2];
-            var8.zRot += 0.3F * (float) right;
-            var8 = arm.foreFinger[0];
-            var8.zRot += -0.5F * (float) right;
-            var8 = arm.foreFinger[1];
-            var8.zRot += -0.5F * (float) right;
-            var8 = arm.foreFinger[2];
-            var8.zRot += -0.5F * (float) right;
-        } else if (fullTick < 10) {
-            tick = ((float) (fullTick - 6) + this.partialTick) / 4.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            this.chest.yRot += -f * 0.1F * (float) right;
-            var10000 = arm.arm;
-            var10000.xRot += -f * 1.1F;
-            var8 = arm.foreArm;
-            var8.xRot += -f * 0.4F;
-            var8 = arm.finger[0];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.finger[1];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.finger[2];
-            var8.zRot += f * 0.3F * (float) right;
-            var8 = arm.foreFinger[0];
-            var8.zRot += -f * 0.5F * (float) right;
-            var8 = arm.foreFinger[1];
-            var8.zRot += -f * 0.5F * (float) right;
-            var8 = arm.foreFinger[2];
-            var8.zRot += -f * 0.5F * (float) right;
+    private void animateMelee(MutantEndermanRenderState renderState, int armId) {
+        float isRightArm = (armId & 1) == 0 ? 1.0F : -1.0F;
+        Arm arm = this.getArmFromId(armId);
+        if (renderState.animationTime < 2.0F) {
+            float animationProgress = renderState.animationTime / 2.0F;
+            float rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            arm.arm.xRot += rotationAmount * 0.2F;
+            arm.finger[0].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.finger[1].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.finger[2].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.foreFinger[0].zRot += -rotationAmount * 0.5F * isRightArm;
+            arm.foreFinger[1].zRot += -rotationAmount * 0.5F * isRightArm;
+            arm.foreFinger[2].zRot += -rotationAmount * 0.5F * isRightArm;
+        } else if (renderState.animationTime < 5.0F) {
+            float animationProgress = (renderState.animationTime - 2.0F) / 3.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            float f1 = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.chest.yRot += -f1 * 0.1F * isRightArm;
+            arm.arm.xRot += rotationAmount * 1.1F - 1.1F;
+            arm.foreArm.xRot += -rotationAmount * 0.4F;
+            arm.finger[0].zRot += 0.3F * isRightArm;
+            arm.finger[1].zRot += 0.3F * isRightArm;
+            arm.finger[2].zRot += 0.3F * isRightArm;
+            arm.foreFinger[0].zRot += -0.5F * isRightArm;
+            arm.foreFinger[1].zRot += -0.5F * isRightArm;
+            arm.foreFinger[2].zRot += -0.5F * isRightArm;
+        } else if (renderState.animationTime < 6.0F) {
+            this.chest.yRot += -0.1F * isRightArm;
+            arm.arm.xRot += -1.1F;
+            arm.foreArm.xRot += -0.4F;
+            arm.finger[0].zRot += 0.3F * isRightArm;
+            arm.finger[1].zRot += 0.3F * isRightArm;
+            arm.finger[2].zRot += 0.3F * isRightArm;
+            arm.foreFinger[0].zRot += -0.5F * isRightArm;
+            arm.foreFinger[1].zRot += -0.5F * isRightArm;
+            arm.foreFinger[2].zRot += -0.5F * isRightArm;
+        } else if (renderState.animationTime < 10.0F) {
+            float animationProgress = (renderState.animationTime - 6.0F) / 4.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            this.chest.yRot += -rotationAmount * 0.1F * isRightArm;
+            arm.arm.xRot += -rotationAmount * 1.1F;
+            arm.foreArm.xRot += -rotationAmount * 0.4F;
+            arm.finger[0].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.finger[1].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.finger[2].zRot += rotationAmount * 0.3F * isRightArm;
+            arm.foreFinger[0].zRot += -rotationAmount * 0.5F * isRightArm;
+            arm.foreFinger[1].zRot += -rotationAmount * 0.5F * isRightArm;
+            arm.foreFinger[2].zRot += -rotationAmount * 0.5F * isRightArm;
         }
-
     }
 
-    private void animateThrowBlock(int fullTick, int armID) {
-        float tick;
-        float f;
-        float f1;
-        ModelPart[] var6;
-        int var7;
-        int var8;
-        ModelPart finger;
-        if (armID == 0) {
-            if (fullTick < 4) {
-                tick = ((float) fullTick + this.partialTick) / 4.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-                this.rightArm.arm.xRot += -f1 * 1.5F;
-                this.rightArm.arm.zRot += f * 0.8F;
-                this.rightArm.foreArm.zRot += f * 0.6F;
-                this.rightArm.hand.yRot += f * 0.8F;
-                this.rightArm.finger[0].xRot += -f * 0.2F;
-                this.rightArm.finger[2].xRot += f * 0.2F;
-                var6 = this.rightArm.finger;
-                var7 = var6.length;
+    private void animateThrowBlock(MutantEndermanRenderState renderState, int armId) {
+        switch (armId) {
+            case 0 -> {
+                if (renderState.animationTime < 4.0F) {
+                    float animationProgress = renderState.animationTime / 4.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    float sinSwingAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+                    this.rightArm.arm.xRot += -sinSwingAmount * 1.5F;
+                    this.rightArm.arm.zRot += cosSwingAmount * 0.8F;
+                    this.rightArm.foreArm.zRot += cosSwingAmount * 0.6F;
+                    this.rightArm.hand.yRot += cosSwingAmount * 0.8F;
+                    this.rightArm.finger[0].xRot += -cosSwingAmount * 0.2F;
+                    this.rightArm.finger[2].xRot += cosSwingAmount * 0.2F;
 
-                for (var8 = 0; var8 < var7; ++var8) {
-                    finger = var6[var8];
-                    finger.zRot += f * 0.6F;
+                    for (ModelPart finger : this.rightArm.finger) {
+                        finger.zRot += cosSwingAmount * 0.6F;
+                    }
+
+                    this.rightArm.thumb.zRot += -cosSwingAmount * 0.4F;
+                } else if (renderState.animationTime < 7.0F) {
+                    this.rightArm.arm.xRot += -1.5F;
+                } else if (renderState.animationTime < 14.0F) {
+                    float animationProgress = (renderState.animationTime - 7.0F) / 7.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    this.rightArm.arm.xRot += -cosSwingAmount * 1.5F;
                 }
-
-                this.rightArm.thumb.zRot += -f * 0.4F;
-            } else if (fullTick < 7) {
-                this.rightArm.arm.xRot += -1.5F;
-            } else if (fullTick < 14) {
-                tick = ((float) (fullTick - 7) + this.partialTick) / 7.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                this.rightArm.arm.xRot += -f * 1.5F;
             }
-        } else if (armID == 1) {
-            if (fullTick < 4) {
-                tick = ((float) fullTick + this.partialTick) / 4.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-                this.leftArm.arm.xRot += -f1 * 1.5F;
-                this.leftArm.arm.zRot += -f * 0.8F;
-                this.leftArm.foreArm.zRot += -f * 0.6F;
-                this.leftArm.hand.yRot += -f * 0.8F;
-                this.leftArm.finger[0].xRot += -f * 0.2F;
-                this.leftArm.finger[2].xRot += f * 0.2F;
+            case 1 -> {
+                if (renderState.animationTime < 4.0F) {
+                    float animationProgress = renderState.animationTime / 4.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    float sinSwingAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+                    this.leftArm.arm.xRot += -sinSwingAmount * 1.5F;
+                    this.leftArm.arm.zRot += -cosSwingAmount * 0.8F;
+                    this.leftArm.foreArm.zRot += -cosSwingAmount * 0.6F;
+                    this.leftArm.hand.yRot += -cosSwingAmount * 0.8F;
+                    this.leftArm.finger[0].xRot += -cosSwingAmount * 0.2F;
+                    this.leftArm.finger[2].xRot += cosSwingAmount * 0.2F;
 
-                for (var8 = 0; var8 < this.leftArm.finger.length; ++var8) {
-                    finger = this.leftArm.finger[var8];
-                    finger.zRot += -f * 0.6F;
+                    for (ModelPart finger : this.leftArm.finger) {
+                        finger.zRot += -cosSwingAmount * 0.6F;
+                    }
+
+                    this.leftArm.thumb.zRot += cosSwingAmount * 0.4F;
+                } else if (renderState.animationTime < 7.0F) {
+                    this.leftArm.arm.xRot += -1.5F;
+                } else if (renderState.animationTime < 14.0F) {
+                    float animationProgress = (renderState.animationTime - 7.0F) / 7.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    this.leftArm.arm.xRot += -cosSwingAmount * 1.5F;
                 }
-
-                this.leftArm.thumb.zRot += f * 0.4F;
-            } else if (fullTick < 7) {
-                this.leftArm.arm.xRot += -1.5F;
-            } else if (fullTick < 14) {
-                tick = ((float) (fullTick - 7) + this.partialTick) / 7.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                this.leftArm.arm.xRot += -f * 1.5F;
             }
-        } else if (armID == 2) {
-            if (fullTick < 4) {
-                tick = ((float) fullTick + this.partialTick) / 4.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-                this.lowerRightArm.arm.xRot += -f1 * 1.5F;
-                this.lowerRightArm.arm.zRot += f * 0.5F;
-                this.lowerRightArm.foreArm.zRot += f * 0.4F;
-                this.lowerRightArm.hand.yRot += f * 0.4F;
-                this.lowerRightArm.finger[0].xRot += -f * 0.2F;
-                this.lowerRightArm.finger[2].xRot += f * 0.2F;
-                var6 = this.lowerRightArm.finger;
-                var7 = var6.length;
+            case 2 -> {
+                if (renderState.animationTime < 4.0F) {
+                    float animationProgress = renderState.animationTime / 4.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    float sinSwingAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+                    this.lowerRightArm.arm.xRot += -sinSwingAmount * 1.5F;
+                    this.lowerRightArm.arm.zRot += cosSwingAmount * 0.5F;
+                    this.lowerRightArm.foreArm.zRot += cosSwingAmount * 0.4F;
+                    this.lowerRightArm.hand.yRot += cosSwingAmount * 0.4F;
+                    this.lowerRightArm.finger[0].xRot += -cosSwingAmount * 0.2F;
+                    this.lowerRightArm.finger[2].xRot += cosSwingAmount * 0.2F;
 
-                for (var8 = 0; var8 < var7; ++var8) {
-                    finger = var6[var8];
-                    finger.zRot += f * 0.6F;
+                    for (ModelPart finger : this.lowerRightArm.finger) {
+                        finger.zRot += cosSwingAmount * 0.6F;
+                    }
+
+                    this.lowerRightArm.thumb.zRot += -cosSwingAmount * 0.4F;
+                } else if (renderState.animationTime < 7.0F) {
+                    this.lowerRightArm.arm.xRot += -1.5F;
+                } else if (renderState.animationTime < 14.0F) {
+                    float animationProgress = (renderState.animationTime - 7.0F) / 7.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    this.lowerRightArm.arm.xRot += -cosSwingAmount * 1.5F;
                 }
-
-                this.lowerRightArm.thumb.zRot += -f * 0.4F;
-            } else if (fullTick < 7) {
-                this.lowerRightArm.arm.xRot += -1.5F;
-            } else if (fullTick < 14) {
-                tick = ((float) (fullTick - 7) + this.partialTick) / 7.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                this.lowerRightArm.arm.xRot += -f * 1.5F;
             }
-        } else if (armID == 3) {
-            if (fullTick < 4) {
-                tick = ((float) fullTick + this.partialTick) / 4.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-                this.lowerLeftArm.arm.xRot += -f1 * 1.5F;
-                this.lowerLeftArm.arm.zRot += -f * 0.5F;
-                this.lowerLeftArm.foreArm.zRot += -f * 0.4F;
-                this.lowerLeftArm.hand.yRot += -f * 0.4F;
-                this.lowerLeftArm.finger[0].xRot += -f * 0.2F;
-                this.lowerLeftArm.finger[2].xRot += f * 0.2F;
-                var6 = this.lowerLeftArm.finger;
-                var7 = var6.length;
+            case 3 -> {
+                if (renderState.animationTime < 4.0F) {
+                    float animationProgress = renderState.animationTime / 4.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    float sinSwingAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+                    this.lowerLeftArm.arm.xRot += -sinSwingAmount * 1.5F;
+                    this.lowerLeftArm.arm.zRot += -cosSwingAmount * 0.5F;
+                    this.lowerLeftArm.foreArm.zRot += -cosSwingAmount * 0.4F;
+                    this.lowerLeftArm.hand.yRot += -cosSwingAmount * 0.4F;
+                    this.lowerLeftArm.finger[0].xRot += -cosSwingAmount * 0.2F;
+                    this.lowerLeftArm.finger[2].xRot += cosSwingAmount * 0.2F;
 
-                for (var8 = 0; var8 < var7; ++var8) {
-                    finger = var6[var8];
-                    finger.zRot += -f * 0.6F;
+                    for (ModelPart finger : this.lowerLeftArm.finger) {
+                        finger.zRot += -cosSwingAmount * 0.6F;
+                    }
+
+                    this.lowerLeftArm.thumb.zRot += cosSwingAmount * 0.4F;
+                } else if (renderState.animationTime < 7.0F) {
+                    this.lowerLeftArm.arm.xRot += -1.5F;
+                } else if (renderState.animationTime < 14.0F) {
+                    float animationProgress = (renderState.animationTime - 7.0F) / 7.0F;
+                    float cosSwingAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+                    this.lowerLeftArm.arm.xRot += -cosSwingAmount * 1.5F;
                 }
-
-                this.lowerLeftArm.thumb.zRot += f * 0.4F;
-            } else if (fullTick < 7) {
-                this.lowerLeftArm.arm.xRot += -1.5F;
-            } else if (fullTick < 14) {
-                tick = ((float) (fullTick - 7) + this.partialTick) / 7.0F;
-                f = Mth.cos(tick * 3.1415927F / 2.0F);
-                this.lowerLeftArm.arm.xRot += -f * 1.5F;
             }
         }
-
     }
 
-    private void animateScream(int fullTick) {
-        float tick;
-        float f;
-        int i;
-        if (fullTick < 35) {
-            tick = ((float) fullTick + this.partialTick) / 35.0F;
-            f = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += f * 0.3F;
-            this.chest.xRot += f * 0.4F;
-            this.neck.xRot += f * 0.2F;
-            this.head.xRot += f * 0.3F;
-            this.rightArm.arm.xRot += -f * 0.6F;
-            this.rightArm.arm.yRot += f * 0.4F;
-            this.rightArm.foreArm.xRot += -f * 0.8F;
-            this.rightArm.hand.zRot += -f * 0.4F;
+    private void animateScream(MutantEndermanRenderState renderState) {
+        if (renderState.animationTime < 35.0F) {
+            float animationProgress = renderState.animationTime / 35.0F;
+            float rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += rotationAmount * 0.3F;
+            this.chest.xRot += rotationAmount * 0.4F;
+            this.neck.xRot += rotationAmount * 0.2F;
+            this.head.xRot += rotationAmount * 0.3F;
+            this.rightArm.arm.xRot += -rotationAmount * 0.6F;
+            this.rightArm.arm.yRot += rotationAmount * 0.4F;
+            this.rightArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.rightArm.hand.zRot += -rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.rightArm.finger[i].zRot += f * 0.3F;
-                this.rightArm.foreFinger[i].zRot += -f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.rightArm.finger[i].zRot += rotationAmount * 0.3F;
+                this.rightArm.foreFinger[i].zRot += -rotationAmount * 0.5F;
             }
 
-            this.leftArm.arm.xRot += -f * 0.6F;
-            this.leftArm.arm.yRot += -f * 0.4F;
-            this.leftArm.foreArm.xRot += -f * 0.8F;
-            this.leftArm.hand.zRot += f * 0.4F;
+            this.leftArm.arm.xRot += -rotationAmount * 0.6F;
+            this.leftArm.arm.yRot += -rotationAmount * 0.4F;
+            this.leftArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.leftArm.hand.zRot += rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.leftArm.finger[i].zRot += -f * 0.3F;
-                this.leftArm.foreFinger[i].zRot += f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.leftArm.finger[i].zRot += -rotationAmount * 0.3F;
+                this.leftArm.foreFinger[i].zRot += rotationAmount * 0.5F;
             }
 
-            this.lowerRightArm.arm.xRot += -f * 0.4F;
-            this.lowerRightArm.arm.yRot += f * 0.2F;
-            this.lowerRightArm.foreArm.xRot += -f * 0.8F;
-            this.lowerRightArm.hand.zRot += -f * 0.4F;
+            this.lowerRightArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerRightArm.arm.yRot += rotationAmount * 0.2F;
+            this.lowerRightArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.lowerRightArm.hand.zRot += -rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.lowerRightArm.finger[i].zRot += f * 0.3F;
-                this.lowerRightArm.foreFinger[i].zRot += -f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.lowerRightArm.finger[i].zRot += rotationAmount * 0.3F;
+                this.lowerRightArm.foreFinger[i].zRot += -rotationAmount * 0.5F;
             }
 
-            this.lowerLeftArm.arm.xRot += -f * 0.4F;
-            this.lowerLeftArm.arm.yRot += -f * 0.2F;
-            this.lowerLeftArm.foreArm.xRot += -f * 0.8F;
-            this.lowerLeftArm.hand.zRot += f * 0.4F;
+            this.lowerLeftArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerLeftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.lowerLeftArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.lowerLeftArm.hand.zRot += rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.lowerLeftArm.finger[i].zRot += -f * 0.3F;
-                this.lowerLeftArm.foreFinger[i].zRot += f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.lowerLeftArm.finger[i].zRot += -rotationAmount * 0.3F;
+                this.lowerLeftArm.foreFinger[i].zRot += rotationAmount * 0.5F;
             }
-        } else if (fullTick < 40) {
+        } else if (renderState.animationTime < 40.0F) {
             this.abdomen.xRot += 0.3F;
             this.chest.xRot += 0.4F;
             this.neck.xRot += 0.2F;
@@ -595,7 +495,7 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.rightArm.foreArm.xRot += -0.8F;
             this.rightArm.hand.zRot += -0.4F;
 
-            for (i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 this.rightArm.finger[i].zRot += 0.3F;
                 this.rightArm.foreFinger[i].zRot += -0.5F;
             }
@@ -605,7 +505,7 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.leftArm.foreArm.xRot += -0.8F;
             this.leftArm.hand.zRot += 0.4F;
 
-            for (i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 this.leftArm.finger[i].zRot += -0.3F;
                 this.leftArm.foreFinger[i].zRot += 0.5F;
             }
@@ -615,7 +515,7 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.lowerRightArm.foreArm.xRot += -0.8F;
             this.lowerRightArm.hand.zRot += -0.4F;
 
-            for (i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 this.lowerRightArm.finger[i].zRot += 0.3F;
                 this.lowerRightArm.foreFinger[i].zRot += -0.5F;
             }
@@ -625,73 +525,73 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.lowerLeftArm.foreArm.xRot += -0.8F;
             this.lowerLeftArm.hand.zRot += 0.4F;
 
-            for (i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 this.lowerLeftArm.finger[i].zRot += -0.3F;
                 this.lowerLeftArm.foreFinger[i].zRot += 0.5F;
             }
-        } else if (fullTick < 44) {
-            tick = ((float) (fullTick - 40) + this.partialTick) / 4.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            float f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += -f * 0.1F + 0.4F;
-            this.chest.xRot += f * 0.1F + 0.3F;
+        } else if (renderState.animationTime < 44.0F) {
+            float animationProgress = (renderState.animationTime - 40.0F) / 4.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            float f1 = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += -rotationAmount * 0.1F + 0.4F;
+            this.chest.xRot += rotationAmount * 0.1F + 0.3F;
             this.chest.zRot += f1 * 0.5F;
-            this.neck.xRot += f * 0.2F;
+            this.neck.xRot += rotationAmount * 0.2F;
             this.neck.zRot += f1 * 0.2F;
-            this.head.xRot += f * 1.2F - 0.8F;
+            this.head.xRot += rotationAmount * 1.2F - 0.8F;
             this.head.zRot += f1 * 0.4F;
             this.mouth.xRot += f1 * 0.6F;
-            this.rightArm.arm.xRot += -f * 0.6F;
+            this.rightArm.arm.xRot += -rotationAmount * 0.6F;
             this.rightArm.arm.yRot += 0.4F;
-            this.rightArm.foreArm.xRot += -f * 0.8F;
-            this.rightArm.hand.zRot += -f * 0.4F;
+            this.rightArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.rightArm.hand.zRot += -rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.rightArm.finger[i].zRot += f * 0.3F;
-                this.rightArm.foreFinger[i].zRot += -f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.rightArm.finger[i].zRot += rotationAmount * 0.3F;
+                this.rightArm.foreFinger[i].zRot += -rotationAmount * 0.5F;
             }
 
-            this.leftArm.arm.xRot += -f * 0.6F;
+            this.leftArm.arm.xRot += -rotationAmount * 0.6F;
             this.leftArm.arm.yRot += -0.4F;
-            this.leftArm.foreArm.xRot += -f * 0.8F;
-            this.leftArm.hand.zRot += f * 0.4F;
+            this.leftArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.leftArm.hand.zRot += rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.leftArm.finger[i].zRot += -f * 0.3F;
-                this.leftArm.foreFinger[i].zRot += f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.leftArm.finger[i].zRot += -rotationAmount * 0.3F;
+                this.leftArm.foreFinger[i].zRot += rotationAmount * 0.5F;
             }
 
-            this.lowerRightArm.arm.xRot += -f * 0.4F;
-            this.lowerRightArm.arm.yRot += -f * 0.1F + 0.3F;
-            this.lowerRightArm.foreArm.xRot += -f * 0.8F;
-            this.lowerRightArm.hand.zRot += -f * 0.4F;
+            this.lowerRightArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerRightArm.arm.yRot += -rotationAmount * 0.1F + 0.3F;
+            this.lowerRightArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.lowerRightArm.hand.zRot += -rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.lowerRightArm.finger[i].zRot += f * 0.3F;
-                this.lowerRightArm.foreFinger[i].zRot += -f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.lowerRightArm.finger[i].zRot += rotationAmount * 0.3F;
+                this.lowerRightArm.foreFinger[i].zRot += -rotationAmount * 0.5F;
             }
 
-            this.lowerLeftArm.arm.xRot += -f * 0.4F;
-            this.lowerLeftArm.arm.yRot += f * 0.1F - 0.3F;
-            this.lowerLeftArm.foreArm.xRot += -f * 0.8F;
-            this.lowerLeftArm.hand.zRot += f * 0.4F;
+            this.lowerLeftArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerLeftArm.arm.yRot += rotationAmount * 0.1F - 0.3F;
+            this.lowerLeftArm.foreArm.xRot += -rotationAmount * 0.8F;
+            this.lowerLeftArm.hand.zRot += rotationAmount * 0.4F;
 
-            for (i = 0; i < 3; ++i) {
-                this.lowerLeftArm.finger[i].zRot += -f * 0.3F;
-                this.lowerLeftArm.foreFinger[i].zRot += f * 0.5F;
+            for (int i = 0; i < 3; ++i) {
+                this.lowerLeftArm.finger[i].zRot += -rotationAmount * 0.3F;
+                this.lowerLeftArm.foreFinger[i].zRot += rotationAmount * 0.5F;
             }
 
             this.leg1.zRot += f1 * 0.1F;
             this.leg2.zRot += -f1 * 0.1F;
-        } else if (fullTick < 155) {
-            tick = ((float) (fullTick - 44) + this.partialTick) / 111.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
+        } else if (renderState.animationTime < 155.0F) {
+            float animationProgress = (renderState.animationTime - 44.0F) / 111.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
             this.abdomen.xRot += 0.4F;
             this.chest.xRot += 0.3F;
-            this.chest.zRot += f - 0.5F;
-            this.neck.zRot += f * 0.4F - 0.2F;
+            this.chest.zRot += rotationAmount - 0.5F;
+            this.neck.zRot += rotationAmount * 0.4F - 0.2F;
             this.head.xRot += -0.8F;
-            this.head.zRot += f * 0.8F - 0.4F;
+            this.head.zRot += rotationAmount * 0.8F - 0.4F;
             this.mouth.xRot += 0.6F;
             this.rightArm.arm.yRot += 0.4F;
             this.leftArm.arm.yRot += -0.4F;
@@ -699,50 +599,47 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.lowerLeftArm.arm.yRot += -0.3F;
             this.leg1.zRot += 0.1F;
             this.leg2.zRot += -0.1F;
-        } else if (fullTick < 160) {
-            tick = ((float) (fullTick - 155) + this.partialTick) / 5.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += f * 0.4F;
-            this.chest.xRot += f * 0.3F;
-            this.chest.zRot += -f * 0.5F;
-            this.neck.zRot += -f * 0.2F;
-            this.head.xRot += -f * 0.8F;
-            this.head.zRot += -f * 0.4F;
-            this.mouth.xRot += f * 0.6F;
-            this.rightArm.arm.yRot += f * 0.4F;
-            this.leftArm.arm.yRot += -f * 0.4F;
-            this.lowerRightArm.arm.yRot += f * 0.3F;
-            this.lowerLeftArm.arm.yRot += -f * 0.3F;
-            this.leg1.zRot += f * 0.1F;
-            this.leg2.zRot += -f * 0.1F;
+        } else if (renderState.animationTime < 160.0F) {
+            float animationProgress = (renderState.animationTime - 155.0F) / 5.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += rotationAmount * 0.4F;
+            this.chest.xRot += rotationAmount * 0.3F;
+            this.chest.zRot += -rotationAmount * 0.5F;
+            this.neck.zRot += -rotationAmount * 0.2F;
+            this.head.xRot += -rotationAmount * 0.8F;
+            this.head.zRot += -rotationAmount * 0.4F;
+            this.mouth.xRot += rotationAmount * 0.6F;
+            this.rightArm.arm.yRot += rotationAmount * 0.4F;
+            this.leftArm.arm.yRot += -rotationAmount * 0.4F;
+            this.lowerRightArm.arm.yRot += rotationAmount * 0.3F;
+            this.lowerLeftArm.arm.yRot += -rotationAmount * 0.3F;
+            this.leg1.zRot += rotationAmount * 0.1F;
+            this.leg2.zRot += -rotationAmount * 0.1F;
         }
-
     }
 
-    private void animateTeleSmash(int fullTick) {
-        float tick;
-        float f;
-        if (fullTick < 18) {
-            tick = ((float) fullTick + this.partialTick) / 18.0F;
-            f = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.chest.xRot += -f * 0.3F;
-            this.rightArm.arm.yRot += f * 0.2F;
-            this.rightArm.arm.zRot += f * 0.8F;
-            this.rightArm.hand.yRot += f * 1.7F;
-            this.leftArm.arm.yRot += -f * 0.2F;
-            this.leftArm.arm.zRot += -f * 0.8F;
-            this.leftArm.hand.yRot += -f * 1.7F;
-            this.lowerRightArm.arm.yRot += f * 0.2F;
-            this.lowerRightArm.arm.zRot += f * 0.6F;
-            this.lowerRightArm.hand.yRot += f * 1.7F;
-            this.lowerLeftArm.arm.yRot += -f * 0.2F;
-            this.lowerLeftArm.arm.zRot += -f * 0.6F;
-            this.lowerLeftArm.hand.yRot += -f * 1.7F;
-        } else if (fullTick < 20) {
-            tick = ((float) (fullTick - 18) + this.partialTick) / 2.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            float f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.chest.xRot += -f * 0.3F;
+    private void animateTeleSmash(MutantEndermanRenderState renderState) {
+        if (renderState.animationTime < 18.0F) {
+            float animationProgress = renderState.animationTime / 18.0F;
+            float rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.chest.xRot += -rotationAmount * 0.3F;
+            this.rightArm.arm.yRot += rotationAmount * 0.2F;
+            this.rightArm.arm.zRot += rotationAmount * 0.8F;
+            this.rightArm.hand.yRot += rotationAmount * 1.7F;
+            this.leftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.leftArm.arm.zRot += -rotationAmount * 0.8F;
+            this.leftArm.hand.yRot += -rotationAmount * 1.7F;
+            this.lowerRightArm.arm.yRot += rotationAmount * 0.2F;
+            this.lowerRightArm.arm.zRot += rotationAmount * 0.6F;
+            this.lowerRightArm.hand.yRot += rotationAmount * 1.7F;
+            this.lowerLeftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.lowerLeftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.lowerLeftArm.hand.yRot += -rotationAmount * 1.7F;
+        } else if (renderState.animationTime < 20.0F) {
+            float animationProgress = (renderState.animationTime - 18.0F) / 2.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            float f1 = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.chest.xRot += -rotationAmount * 0.3F;
             this.rightArm.arm.xRot += -f1 * 0.8F;
             this.rightArm.arm.yRot += 0.2F;
             this.rightArm.arm.zRot += 0.8F;
@@ -759,7 +656,7 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.lowerLeftArm.arm.yRot += -0.2F;
             this.lowerLeftArm.arm.zRot += -0.6F;
             this.lowerLeftArm.hand.yRot += -1.7F;
-        } else if (fullTick < 24) {
+        } else if (renderState.animationTime < 24.0F) {
             this.rightArm.arm.xRot += -0.8F;
             this.rightArm.arm.yRot += 0.2F;
             this.rightArm.arm.zRot += 0.8F;
@@ -776,94 +673,93 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.lowerLeftArm.arm.yRot += -0.2F;
             this.lowerLeftArm.arm.zRot += -0.6F;
             this.lowerLeftArm.hand.yRot += -1.7F;
-        } else if (fullTick < 30) {
-            tick = ((float) (fullTick - 24) + this.partialTick) / 6.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            this.rightArm.arm.xRot += -f * 0.8F;
-            this.rightArm.arm.yRot += f * 0.2F;
-            this.rightArm.arm.zRot += f * 0.8F;
-            this.rightArm.hand.yRot += f * 1.7F;
-            this.leftArm.arm.xRot += -f * 0.8F;
-            this.leftArm.arm.yRot += -f * 0.2F;
-            this.leftArm.arm.zRot += -f * 0.8F;
-            this.leftArm.hand.yRot += -f * 1.7F;
-            this.lowerRightArm.arm.xRot += -f * 0.9F;
-            this.lowerRightArm.arm.yRot += f * 0.2F;
-            this.lowerRightArm.arm.zRot += f * 0.6F;
-            this.lowerRightArm.hand.yRot += f * 1.7F;
-            this.lowerLeftArm.arm.xRot += -f * 0.9F;
-            this.lowerLeftArm.arm.yRot += -f * 0.2F;
-            this.lowerLeftArm.arm.zRot += -f * 0.6F;
-            this.lowerLeftArm.hand.yRot += -f * 1.7F;
+        } else if (renderState.animationTime < 30.0F) {
+            float animationProgress = (renderState.animationTime- 24.0F) / 6.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            this.rightArm.arm.xRot += -rotationAmount * 0.8F;
+            this.rightArm.arm.yRot += rotationAmount * 0.2F;
+            this.rightArm.arm.zRot += rotationAmount * 0.8F;
+            this.rightArm.hand.yRot += rotationAmount * 1.7F;
+            this.leftArm.arm.xRot += -rotationAmount * 0.8F;
+            this.leftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.leftArm.arm.zRot += -rotationAmount * 0.8F;
+            this.leftArm.hand.yRot += -rotationAmount * 1.7F;
+            this.lowerRightArm.arm.xRot += -rotationAmount * 0.9F;
+            this.lowerRightArm.arm.yRot += rotationAmount * 0.2F;
+            this.lowerRightArm.arm.zRot += rotationAmount * 0.6F;
+            this.lowerRightArm.hand.yRot += rotationAmount * 1.7F;
+            this.lowerLeftArm.arm.xRot += -rotationAmount * 0.9F;
+            this.lowerLeftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.lowerLeftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.lowerLeftArm.hand.yRot += -rotationAmount * 1.7F;
         }
-
     }
 
-    private void animateDeath(int deathTick) {
-        float tick;
-        float f;
-        if (deathTick < 80) {
-            tick = ((float) deathTick + this.partialTick) / 80.0F;
-            f = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.head.xRot += f * 0.4F;
-            this.neck.xRot += f * 0.3F;
-            this.pelvis.y += -f * 12.0F;
-            this.rightArm.arm.xRot += -f * 0.4F;
-            this.rightArm.arm.yRot += f * 0.4F;
-            this.rightArm.arm.zRot += f * 0.6F;
-            this.rightArm.foreArm.xRot += -f * 1.2F;
-            this.leftArm.arm.xRot += -f * 0.4F;
-            this.leftArm.arm.yRot += -f * 0.2F;
-            this.leftArm.arm.zRot += -f * 0.6F;
-            this.leftArm.foreArm.xRot += -f * 1.2F;
-            this.lowerRightArm.arm.xRot += -f * 0.4F;
-            this.lowerRightArm.arm.yRot += f * 0.4F;
-            this.lowerRightArm.arm.zRot += f * 0.6F;
-            this.lowerRightArm.foreArm.xRot += -f * 1.2F;
-            this.lowerLeftArm.arm.xRot += -f * 0.4F;
-            this.lowerLeftArm.arm.yRot += -f * 0.2F;
-            this.lowerLeftArm.arm.zRot += -f * 0.6F;
-            this.lowerLeftArm.foreArm.xRot += -f * 1.2F;
-            this.leg1.xRot += -f * 0.9F;
-            this.leg1.yRot += f * 0.3F;
-            this.leg2.xRot += -f * 0.9F;
-            this.leg2.yRot += -f * 0.3F;
-            this.foreLeg1.xRot += f * 1.6F;
-            this.foreLeg2.xRot += f * 1.6F;
-        } else if (deathTick < 84) {
-            tick = ((float) (deathTick - 80) + this.partialTick) / 4.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            float f1 = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.head.xRot += f * 0.4F;
+    private void animateDeath(MutantEndermanRenderState renderState) {
+        float animationProgress;
+        float rotationAmount;
+        if (renderState.deathTime < 80.0F) {
+            animationProgress = renderState.deathTime / 80.0F;
+            rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.head.xRot += rotationAmount * 0.4F;
+            this.neck.xRot += rotationAmount * 0.3F;
+            this.pelvis.y += -rotationAmount * 12.0F;
+            this.rightArm.arm.xRot += -rotationAmount * 0.4F;
+            this.rightArm.arm.yRot += rotationAmount * 0.4F;
+            this.rightArm.arm.zRot += rotationAmount * 0.6F;
+            this.rightArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.leftArm.arm.xRot += -rotationAmount * 0.4F;
+            this.leftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.leftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.leftArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.lowerRightArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerRightArm.arm.yRot += rotationAmount * 0.4F;
+            this.lowerRightArm.arm.zRot += rotationAmount * 0.6F;
+            this.lowerRightArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.lowerLeftArm.arm.xRot += -rotationAmount * 0.4F;
+            this.lowerLeftArm.arm.yRot += -rotationAmount * 0.2F;
+            this.lowerLeftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.lowerLeftArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.leg1.xRot += -rotationAmount * 0.9F;
+            this.leg1.yRot += rotationAmount * 0.3F;
+            this.leg2.xRot += -rotationAmount * 0.9F;
+            this.leg2.yRot += -rotationAmount * 0.3F;
+            this.foreLeg1.xRot += rotationAmount * 1.6F;
+            this.foreLeg2.xRot += rotationAmount * 1.6F;
+        } else if (renderState.deathTime < 84.0F) {
+            animationProgress = (renderState.deathTime - 80.0F) / 4.0F;
+            rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            float f1 = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.head.xRot += rotationAmount * 0.4F;
             this.mouth.xRot += f1 * 0.6F;
-            this.neck.xRot += f * 0.4F - 0.1F;
+            this.neck.xRot += rotationAmount * 0.4F - 0.1F;
             this.chest.xRot += -f1 * 0.8F;
             this.abdomen.xRot += -f1 * 0.2F;
             this.pelvis.y += -12.0F;
-            this.rightArm.arm.xRot += -f * 0.4F;
-            this.rightArm.arm.yRot += -f * 1.4F + 1.8F;
-            this.rightArm.arm.zRot += f * 0.6F;
-            this.rightArm.foreArm.xRot += -f * 1.2F;
-            this.leftArm.arm.xRot += -f * 0.4F;
-            this.leftArm.arm.yRot += f * 1.6F - 1.8F;
-            this.leftArm.arm.zRot += -f * 0.6F;
-            this.leftArm.foreArm.xRot += -f * 1.2F;
-            this.lowerRightArm.arm.xRot += -f * 0.5F + 0.1F;
-            this.lowerRightArm.arm.yRot += -f * 1.1F + 1.5F;
-            this.lowerRightArm.arm.zRot += f * 0.6F;
-            this.lowerRightArm.foreArm.xRot += -f * 1.2F;
-            this.lowerLeftArm.arm.xRot += -f * 0.5F + 0.1F;
-            this.lowerLeftArm.arm.yRot += f * 1.1F - 1.5F;
-            this.lowerLeftArm.arm.zRot += -f * 0.6F;
-            this.lowerLeftArm.foreArm.xRot += -f * 1.2F;
-            this.leg1.xRot += -f * 1.7F + 0.8F;
-            this.leg1.yRot += f * 0.3F;
+            this.rightArm.arm.xRot += -rotationAmount * 0.4F;
+            this.rightArm.arm.yRot += -rotationAmount * 1.4F + 1.8F;
+            this.rightArm.arm.zRot += rotationAmount * 0.6F;
+            this.rightArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.leftArm.arm.xRot += -rotationAmount * 0.4F;
+            this.leftArm.arm.yRot += rotationAmount * 1.6F - 1.8F;
+            this.leftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.leftArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.lowerRightArm.arm.xRot += -rotationAmount * 0.5F + 0.1F;
+            this.lowerRightArm.arm.yRot += -rotationAmount * 1.1F + 1.5F;
+            this.lowerRightArm.arm.zRot += rotationAmount * 0.6F;
+            this.lowerRightArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.lowerLeftArm.arm.xRot += -rotationAmount * 0.5F + 0.1F;
+            this.lowerLeftArm.arm.yRot += rotationAmount * 1.1F - 1.5F;
+            this.lowerLeftArm.arm.zRot += -rotationAmount * 0.6F;
+            this.lowerLeftArm.foreArm.xRot += -rotationAmount * 1.2F;
+            this.leg1.xRot += -rotationAmount * 1.7F + 0.8F;
+            this.leg1.yRot += rotationAmount * 0.3F;
             this.leg1.zRot += f1 * 0.2F;
-            this.leg2.xRot += -f * 1.7F + 0.8F;
-            this.leg2.yRot += -f * 0.3F;
+            this.leg2.xRot += -rotationAmount * 1.7F + 0.8F;
+            this.leg2.yRot += -rotationAmount * 0.3F;
             this.leg2.zRot += -f1 * 0.2F;
-            this.foreLeg1.xRot += f * 1.6F;
-            this.foreLeg2.xRot += f * 1.6F;
+            this.foreLeg1.xRot += rotationAmount * 1.6F;
+            this.foreLeg2.xRot += rotationAmount * 1.6F;
         } else {
             this.mouth.xRot += 0.6F;
             this.neck.xRot += -0.1F;
@@ -881,23 +777,17 @@ public class MutantEndermanModel extends EntityModel<MutantEnderman> {
             this.leg2.xRot += 0.8F;
             this.leg2.zRot += -0.2F;
         }
-
     }
 
-    private Arm getArmFromID(int armID) {
-        return armID == 0 ? this.rightArm : (armID == 1 ? this.leftArm : (armID == 2 ? this.lowerRightArm : this.lowerLeftArm));
+    private Arm getArmFromId(int id) {
+        return id == 0 ? this.rightArm : (id == 1 ? this.leftArm : (id == 2 ? this.lowerRightArm : this.lowerLeftArm));
     }
 
-    public void translateRotateArm(PoseStack matrixStackIn, int armID) {
-        this.pelvis.translateAndRotate(matrixStackIn);
-        this.abdomen.translateAndRotate(matrixStackIn);
-        this.chest.translateAndRotate(matrixStackIn);
-        this.getArmFromID(armID).translateRotate(matrixStackIn);
-    }
-
-    @Override
-    public void prepareMobModel(MutantEnderman entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
-        this.partialTick = partialTick;
+    public void translateRotateArm(PoseStack poseStack, int id) {
+        this.pelvis.translateAndRotate(poseStack);
+        this.abdomen.translateAndRotate(poseStack);
+        this.chest.translateAndRotate(poseStack);
+        this.getArmFromId(id).translateRotate(poseStack);
     }
 
     static class Arm {

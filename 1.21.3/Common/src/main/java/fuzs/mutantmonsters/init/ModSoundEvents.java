@@ -75,7 +75,7 @@ public class ModSoundEvents {
     public static final Holder.Reference<SoundEvent> ENTITY_SPIDER_PIG_HURT_SOUND_EVENT = ModRegistry.REGISTRIES.registerSoundEvent(
             "entity.spider_pig.hurt");
 
-    public static void touch() {
+    public static void bootstrap() {
         // NO-OP
     }
 }

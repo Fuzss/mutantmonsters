@@ -4,9 +4,9 @@ import fuzs.mutantmonsters.world.item.HulkHammerItem;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-public class HulkHammerNeoForgeItem extends HulkHammerItem {
+public class NeoForgeHulkHammerItem extends HulkHammerItem {
 
-    public HulkHammerNeoForgeItem(Properties properties) {
+    public NeoForgeHulkHammerItem(Properties properties) {
         super(properties);
     }
 

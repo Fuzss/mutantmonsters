@@ -78,11 +78,12 @@ public class MutantCreeper extends AbstractMutantMonster {
                 new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(200)
         );
         this.targetSelector.addGoal(2,
-                new NearestAttackableTargetGoal<>(this, Animal.class, 100, true, true, EntityUtil::isFeline)
+                new NearestAttackableTargetGoal<>(this, Animal.class, 100, true, true,
+                        (LivingEntity livingEntity, ServerLevel serverLevel) -> EntityUtil.isFeline(livingEntity))
         );
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return createMonsterAttributes().add(Attributes.MAX_HEALTH, 120.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(
                 Attributes.MOVEMENT_SPEED, 0.26).add(Attributes.KNOCKBACK_RESISTANCE, 1.0).add(Attributes.STEP_HEIGHT,
                 1.0
@@ -128,10 +129,10 @@ public class MutantCreeper extends AbstractMutantMonster {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        DamageSource damageSource = this.level().damageSources().mobAttack(this);
-        boolean hurt = target.hurt(damageSource, (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue());
-        if (hurt && this.level() instanceof ServerLevel serverLevel) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
+        DamageSource damageSource = serverLevel.damageSources().mobAttack(this);
+        boolean hurt = target.hurtServer(serverLevel, damageSource, (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue());
+        if (hurt) {
             EnchantmentHelper.doPostAttackEffects(serverLevel, target, damageSource);
         }
 
@@ -145,26 +146,26 @@ public class MutantCreeper extends AbstractMutantMonster {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        if (this.isInvulnerableTo(serverLevel, damageSource)) {
             return false;
-        } else if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-            float healAmount = amount / 2.0F;
+        } else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+            float healAmount = damageAmount / 2.0F;
             if (this.isAlive() && this.getHealth() < this.getMaxHealth() &&
-                    !(source.getEntity() instanceof MutantCreeper)) {
+                    !(damageSource.getEntity() instanceof MutantCreeper)) {
                 this.heal(healAmount);
                 EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int) (healAmount / 2.0F));
             }
 
             return false;
         } else {
-            boolean takenDamage = super.hurt(source, amount);
+            boolean takenDamage = super.hurtServer(serverLevel, damageSource, damageAmount);
             if (this.isCharging()) {
-                if (!source.is(DamageTypeTags.WITCH_RESISTANT_TO) && source.getDirectEntity() instanceof LivingEntity) {
-                    source.getDirectEntity().hurt(this.damageSources().thorns(this), 2.0F);
+                if (!damageSource.is(DamageTypeTags.WITCH_RESISTANT_TO) && damageSource.getDirectEntity() instanceof LivingEntity) {
+                    damageSource.getDirectEntity().hurt(this.damageSources().thorns(this), 2.0F);
                 }
 
-                if (takenDamage && amount > 0.0F) {
+                if (takenDamage && damageAmount > 0.0F) {
                     --this.chargeHits;
                 }
             }
@@ -298,13 +299,13 @@ public class MutantCreeper extends AbstractMutantMonster {
                 this.getZ() + (double) (this.random.nextFloat() * 0.2F) - 0.10000000149011612
         );
         if (this.deathTime >= 100) {
-            if (!this.level().isClientSide) {
+            if (this.level() instanceof ServerLevel serverLevel) {
                 boolean causesFireIn = this.isOnFire();
                 MutatedExplosionHelper.explode(this, power, causesFireIn, Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
-                if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null &&
+                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null &&
                         this.lastHurtByPlayerTime > 0) {
-                    this.level().addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
+                    serverLevel.addFreshEntity(new CreeperMinionEgg(this, this.lastHurtByPlayer));
                 }
             }
 
@@ -446,7 +447,7 @@ public class MutantCreeper extends AbstractMutantMonster {
             if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null &&
                     MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0 &&
                     MutantCreeper.this.level().canSeeSky(MutantCreeper.this.blockPosition())) {
-                LightningBolt lightningBoltEntity = EntityType.LIGHTNING_BOLT.create(MutantCreeper.this.level());
+                LightningBolt lightningBoltEntity = EntityType.LIGHTNING_BOLT.create(MutantCreeper.this.level(), EntitySpawnReason.EVENT);
                 lightningBoltEntity.moveTo(MutantCreeper.this.getX(), MutantCreeper.this.getY(),
                         MutantCreeper.this.getZ()
                 );
@@ -485,7 +486,7 @@ public class MutantCreeper extends AbstractMutantMonster {
             for (int i = (int) Math.ceil(
                     (double) (MutantCreeper.this.getHealth() / MutantCreeper.this.getMaxHealth()) * 4.0); i > 0; --i) {
                 CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value().create(
-                        MutantCreeper.this.level());
+                        MutantCreeper.this.level(), EntitySpawnReason.MOB_SUMMONED);
                 double x = MutantCreeper.this.getX() + (double) MutantCreeper.this.random.nextFloat() -
                         (double) MutantCreeper.this.random.nextFloat();
                 double y = MutantCreeper.this.getY() + (double) (MutantCreeper.this.random.nextFloat() * 0.5F);

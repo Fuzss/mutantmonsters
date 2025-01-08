@@ -2,8 +2,7 @@ package fuzs.mutantmonsters.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
+import fuzs.mutantmonsters.client.renderer.entity.state.MutantSnowGolemRenderState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -12,7 +11,7 @@ import net.minecraft.util.Mth;
 
 import java.util.List;
 
-public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
+public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState> {
     private final List<ModelPart> parts;
     private final ModelPart pelvis;
     private final ModelPart abdomen;
@@ -38,6 +37,7 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
     private float partialTick;
 
     public MutantSnowGolemModel(ModelPart modelPart) {
+        super(modelPart);
         this.parts = modelPart.getAllParts().collect(ImmutableList.toImmutableList());
         this.pelvis = modelPart.getChild("pelvis");
         this.abdomen = this.pelvis.getChild("abdomen");
@@ -63,7 +63,7 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
     }
 
     public MutantSnowGolemModel setRenderHeadOnly() {
-        this.parts.forEach(t -> t.skipDraw = true);
+        this.parts.forEach((ModelPart modelPart) -> modelPart.skipDraw = true);
         this.head.skipDraw = this.innerHead.skipDraw = false;
         return this;
     }
@@ -72,34 +72,84 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
 
-        PartDefinition pelvis = root.addOrReplaceChild("pelvis", CubeListBuilder.create().texOffs(0, 0), PartPose.offset(0.0F, 13.5F, 5.0F));
-        PartDefinition abdomen = pelvis.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F), PartPose.ZERO);
-        PartDefinition chest = abdomen.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(24, 36).addBox(-8.0F, -12.0F, -6.0F, 16.0F, 12.0F, 12.0F), PartPose.offset(0.0F, -6.0F, 0.0F));
+        PartDefinition pelvis = root.addOrReplaceChild("pelvis",
+                CubeListBuilder.create().texOffs(0, 0),
+                PartPose.offset(0.0F, 13.5F, 5.0F));
+        PartDefinition abdomen = pelvis.addOrReplaceChild("abdomen",
+                CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F),
+                PartPose.ZERO);
+        PartDefinition chest = abdomen.addOrReplaceChild("chest",
+                CubeListBuilder.create().texOffs(24, 36).addBox(-8.0F, -12.0F, -6.0F, 16.0F, 12.0F, 12.0F),
+                PartPose.offset(0.0F, -6.0F, 0.0F));
 
-        PartDefinition head = chest.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0), PartPose.offset(0.0F, -12.0F, -2.0F));
+        PartDefinition head = chest.addOrReplaceChild("head",
+                CubeListBuilder.create().texOffs(0, 0),
+                PartPose.offset(0.0F, -12.0F, -2.0F));
         // texture size for inner head is decreased to 64, 32 in original, doesn't really work with new system
-        PartDefinition innerHead = head.addOrReplaceChild("inner_head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO);
-        innerHead.addOrReplaceChild("head_core", CubeListBuilder.create().texOffs(64, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F).texOffs(80, 46).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition innerHead = head.addOrReplaceChild("inner_head",
+                CubeListBuilder.create()
+                        .texOffs(0, 0)
+                        .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)),
+                PartPose.ZERO);
+        innerHead.addOrReplaceChild("head_core",
+                CubeListBuilder.create()
+                        .texOffs(64, 0)
+                        .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F)
+                        .texOffs(80, 46)
+                        .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.5F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition arm1 = chest.addOrReplaceChild("arm1", CubeListBuilder.create().texOffs(68, 16), PartPose.offset(-9.0F, -11.0F, 0.0F));
-        PartDefinition innerArm1 = arm1.addOrReplaceChild("inner_arm1", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
-        PartDefinition foreArm1 = innerArm1.addOrReplaceChild("fore_arm1", CubeListBuilder.create().texOffs(96, 0), PartPose.offset(0.0F, 10.0F, 0.0F));
-        foreArm1.addOrReplaceChild("inner_fore_arm1", CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F), PartPose.ZERO);
+        PartDefinition arm1 = chest.addOrReplaceChild("arm1",
+                CubeListBuilder.create().texOffs(68, 16),
+                PartPose.offset(-9.0F, -11.0F, 0.0F));
+        PartDefinition innerArm1 = arm1.addOrReplaceChild("inner_arm1",
+                CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F),
+                PartPose.ZERO);
+        PartDefinition foreArm1 = innerArm1.addOrReplaceChild("fore_arm1",
+                CubeListBuilder.create().texOffs(96, 0),
+                PartPose.offset(0.0F, 10.0F, 0.0F));
+        foreArm1.addOrReplaceChild("inner_fore_arm1",
+                CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F),
+                PartPose.ZERO);
 
-        PartDefinition arm2 = chest.addOrReplaceChild("arm2", CubeListBuilder.create().texOffs(68, 16).mirror(), PartPose.offset(9.0F, -11.0F, 0.0F));
-        PartDefinition innerArm2 = arm2.addOrReplaceChild("inner_arm2", CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F), PartPose.ZERO);
-        PartDefinition foreArm2 = innerArm2.addOrReplaceChild("fore_arm2", CubeListBuilder.create().texOffs(96, 0).mirror(), PartPose.offset(0.0F, 10.0F, 0.0F));
-        foreArm2.addOrReplaceChild("inner_fore_arm2", CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F), PartPose.ZERO);
+        PartDefinition arm2 = chest.addOrReplaceChild("arm2",
+                CubeListBuilder.create().texOffs(68, 16).mirror(),
+                PartPose.offset(9.0F, -11.0F, 0.0F));
+        PartDefinition innerArm2 = arm2.addOrReplaceChild("inner_arm2",
+                CubeListBuilder.create().texOffs(68, 16).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 10.0F, 5.0F),
+                PartPose.ZERO);
+        PartDefinition foreArm2 = innerArm2.addOrReplaceChild("fore_arm2",
+                CubeListBuilder.create().texOffs(96, 0).mirror(),
+                PartPose.offset(0.0F, 10.0F, 0.0F));
+        foreArm2.addOrReplaceChild("inner_fore_arm2",
+                CubeListBuilder.create().texOffs(96, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 12.0F, 6.0F),
+                PartPose.ZERO);
 
-        PartDefinition leg1 = pelvis.addOrReplaceChild("leg1", CubeListBuilder.create().texOffs(88, 18), PartPose.offset(-4.0F, -1.0F, -3.0F));
-        PartDefinition innerLeg1 = leg1.addOrReplaceChild("inner_leg1", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
-        PartDefinition foreLeg1 = innerLeg1.addOrReplaceChild("fore_leg1", CubeListBuilder.create().texOffs(88, 32), PartPose.offset(-1.0F, 6.0F, -0.0F));
-        foreLeg1.addOrReplaceChild("inner_fore_leg1", CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
+        PartDefinition leg1 = pelvis.addOrReplaceChild("leg1",
+                CubeListBuilder.create().texOffs(88, 18),
+                PartPose.offset(-4.0F, -1.0F, -3.0F));
+        PartDefinition innerLeg1 = leg1.addOrReplaceChild("inner_leg1",
+                CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F),
+                PartPose.ZERO);
+        PartDefinition foreLeg1 = innerLeg1.addOrReplaceChild("fore_leg1",
+                CubeListBuilder.create().texOffs(88, 32),
+                PartPose.offset(-1.0F, 6.0F, -0.0F));
+        foreLeg1.addOrReplaceChild("inner_fore_leg1",
+                CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F),
+                PartPose.ZERO);
 
-        PartDefinition leg2 = pelvis.addOrReplaceChild("leg2", CubeListBuilder.create().texOffs(88, 18).mirror(), PartPose.offset(4.0F, -1.0F, -3.0F));
-        PartDefinition innerLeg2 = leg2.addOrReplaceChild("inner_leg2", CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
-        PartDefinition foreLeg2 = innerLeg2.addOrReplaceChild("fore_leg2", CubeListBuilder.create().texOffs(88, 32).mirror(), PartPose.offset(1.0F, 6.0F, -0.0F));
-        foreLeg2.addOrReplaceChild("inner_fore_leg2", CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
+        PartDefinition leg2 = pelvis.addOrReplaceChild("leg2",
+                CubeListBuilder.create().texOffs(88, 18).mirror(),
+                PartPose.offset(4.0F, -1.0F, -3.0F));
+        PartDefinition innerLeg2 = leg2.addOrReplaceChild("inner_leg2",
+                CubeListBuilder.create().texOffs(88, 18).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F),
+                PartPose.ZERO);
+        PartDefinition foreLeg2 = innerLeg2.addOrReplaceChild("fore_leg2",
+                CubeListBuilder.create().texOffs(88, 32).mirror(),
+                PartPose.offset(1.0F, 6.0F, -0.0F));
+        foreLeg2.addOrReplaceChild("inner_fore_leg2",
+                CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F),
+                PartPose.ZERO);
         return LayerDefinition.create(mesh, textureWidth, textureHeight);
     }
 
@@ -110,17 +160,18 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        this.pelvis.render(poseStack, buffer, packedLight, packedOverlay, color);
+    public void setupAnim(MutantSnowGolemRenderState renderState) {
+        super.setupAnim(renderState);
+        this.setupInitialAngles();
+        this.animate(renderState,
+                renderState.walkAnimationPos,
+                renderState.walkAnimationSpeed,
+                renderState.ageInTicks,
+                renderState.yRot,
+                renderState.xRot);
     }
 
-    @Override
-    public void setupAnim(MutantSnowGolem entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.setAngles();
-        this.animate(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    private void setAngles() {
+    private void setupInitialAngles() {
         this.pelvis.y = 13.5F;
         this.abdomen.xRot = 0.1308997F;
         this.chest.xRot = 0.1308997F;
@@ -154,17 +205,17 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
         this.innerForeLeg2.xRot = 0.69813174F;
     }
 
-    private void animate(MutantSnowGolem golem, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        float temp = 0.5F;
+    private void animate(MutantSnowGolemRenderState renderState, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        float walkSpeed = 0.5F;
         float walkAnim = Mth.sin(limbSwing * 0.45F) * limbSwingAmount;
-        float walkAnim1 = (Mth.cos((limbSwing - temp) * 0.45F) + temp) * limbSwingAmount;
-        float walkAnim2 = (Mth.cos((limbSwing - temp + 6.2831855F) * 0.45F) + temp) * limbSwingAmount;
+        float walkAnim1 = (Mth.cos((limbSwing - walkSpeed) * 0.45F) + walkSpeed) * limbSwingAmount;
+        float walkAnim2 = (Mth.cos((limbSwing - walkSpeed + 6.2831855F) * 0.45F) + walkSpeed) * limbSwingAmount;
         float breatheAnim = Mth.sin(ageInTicks * 0.11F);
         float faceYaw = netHeadYaw * 3.1415927F / 180.0F;
         float facePitch = headPitch * 3.1415927F / 180.0F;
-        if (golem.isThrowing()) {
-            this.animateThrow(golem.getThrowingTick());
-            float scale = 1.0F - Mth.clamp((float)golem.getThrowingTick() / 4.0F, 0.0F, 1.0F);
+        if (renderState.isThrowing) {
+            this.animateThrow(renderState);
+            float scale = 1.0F - Mth.clamp(renderState.throwingTime / 4.0F, 0.0F, 1.0F);
             walkAnim *= scale;
         }
 
@@ -188,67 +239,58 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolem> {
         this.innerForeLeg2.xRot -= walkAnim * 0.2F;
     }
 
-    private void animateThrow(int fullTick) {
-        float tick;
-        float f;
-        if (fullTick < 7) {
-            tick = ((float)fullTick + this.partialTick) / 7.0F;
-            f = Mth.sin(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += -f * 0.2F;
-            this.chest.xRot += -f * 0.4F;
-            this.arm1.xRot += -f * 1.6F;
-            this.arm1.zRot += f * 0.8F;
-            this.arm2.xRot += -f * 1.6F;
-            this.arm2.zRot += -f * 0.8F;
-        } else if (fullTick < 10) {
-            tick = ((float)(fullTick - 7) + this.partialTick) / 3.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += -f * 0.4F + 0.2F;
-            this.chest.xRot += -f * 0.6F + 0.2F;
-            this.arm1.xRot += -f * 0.8F - 0.8F;
+    private void animateThrow(MutantSnowGolemRenderState renderState) {
+        if (renderState.throwingTime < 7.0F) {
+            float animationProgress = renderState.throwingTime / 7.0F;
+            float rotationAmount = Mth.sin(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += -rotationAmount * 0.2F;
+            this.chest.xRot += -rotationAmount * 0.4F;
+            this.arm1.xRot += -rotationAmount * 1.6F;
+            this.arm1.zRot += rotationAmount * 0.8F;
+            this.arm2.xRot += -rotationAmount * 1.6F;
+            this.arm2.zRot += -rotationAmount * 0.8F;
+        } else if (renderState.throwingTime < 10.0F) {
+            float animationProgress = (renderState.throwingTime - 7.0F) / 3.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += -rotationAmount * 0.4F + 0.2F;
+            this.chest.xRot += -rotationAmount * 0.6F + 0.2F;
+            this.arm1.xRot += -rotationAmount * 0.8F - 0.8F;
             this.arm1.zRot += 0.8F;
-            this.arm2.xRot += -f * 0.8F - 0.8F;
+            this.arm2.xRot += -rotationAmount * 0.8F - 0.8F;
             this.arm2.zRot += -0.8F;
-        } else if (fullTick < 14) {
+        } else if (renderState.throwingTime < 14.0F) {
             this.abdomen.xRot += 0.2F;
             this.chest.xRot += 0.2F;
             this.arm1.xRot += -0.8F;
             this.arm1.zRot += 0.8F;
             this.arm2.xRot += -0.8F;
             this.arm2.zRot += -0.8F;
-        } else if (fullTick < 20) {
-            tick = ((float)(fullTick - 14) + this.partialTick) / 6.0F;
-            f = Mth.cos(tick * 3.1415927F / 2.0F);
-            this.abdomen.xRot += f * 0.2F;
-            this.chest.xRot += f * 0.2F;
-            this.arm1.xRot += -f * 0.8F;
-            this.arm1.zRot += f * 0.8F;
-            this.arm2.xRot += -f * 0.8F;
-            this.arm2.zRot += -f * 0.8F;
+        } else if (renderState.throwingTime < 20.0F) {
+            float animationProgress = (renderState.throwingTime - 14.0F) / 6.0F;
+            float rotationAmount = Mth.cos(animationProgress * 3.1415927F / 2.0F);
+            this.abdomen.xRot += rotationAmount * 0.2F;
+            this.chest.xRot += rotationAmount * 0.2F;
+            this.arm1.xRot += -rotationAmount * 0.8F;
+            this.arm1.zRot += rotationAmount * 0.8F;
+            this.arm2.xRot += -rotationAmount * 0.8F;
+            this.arm2.zRot += -rotationAmount * 0.8F;
         }
-
     }
 
-    @Override
-    public void prepareMobModel(MutantSnowGolem entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
-        this.partialTick = partialTick;
-    }
-
-    public void translateArm(boolean leftHanded, PoseStack matrixStackIn) {
-        this.pelvis.translateAndRotate(matrixStackIn);
-        this.abdomen.translateAndRotate(matrixStackIn);
-        this.chest.translateAndRotate(matrixStackIn);
+    public void translateArm(PoseStack poseStack, boolean leftHanded) {
+        this.pelvis.translateAndRotate(poseStack);
+        this.abdomen.translateAndRotate(poseStack);
+        this.chest.translateAndRotate(poseStack);
         if (leftHanded) {
-            this.arm2.translateAndRotate(matrixStackIn);
-            this.innerArm2.translateAndRotate(matrixStackIn);
-            this.foreArm2.translateAndRotate(matrixStackIn);
-            this.innerForeArm2.translateAndRotate(matrixStackIn);
+            this.arm2.translateAndRotate(poseStack);
+            this.innerArm2.translateAndRotate(poseStack);
+            this.foreArm2.translateAndRotate(poseStack);
+            this.innerForeArm2.translateAndRotate(poseStack);
         } else {
-            this.arm1.translateAndRotate(matrixStackIn);
-            this.innerArm1.translateAndRotate(matrixStackIn);
-            this.foreArm1.translateAndRotate(matrixStackIn);
-            this.innerForeArm1.translateAndRotate(matrixStackIn);
+            this.arm1.translateAndRotate(poseStack);
+            this.innerArm1.translateAndRotate(poseStack);
+            this.foreArm1.translateAndRotate(poseStack);
+            this.innerForeArm1.translateAndRotate(poseStack);
         }
-
     }
 }

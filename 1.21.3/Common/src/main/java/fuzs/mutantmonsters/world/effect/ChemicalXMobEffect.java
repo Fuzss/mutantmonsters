@@ -5,6 +5,7 @@ import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffects;
@@ -14,14 +15,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Predicate;
-
 public class ChemicalXMobEffect extends InstantenousMobEffect {
-    public static final Predicate<LivingEntity> IS_APPLICABLE = (target) -> {
-        EntityType<?> entityType = target.getType();
+    public static final TargetingConditions.Selector IS_APPLICABLE = (LivingEntity livingEntity, ServerLevel serverLevel) -> {
+        EntityType<?> entityType = livingEntity.getType();
         return !CommonAbstractions.INSTANCE.isBossMob(entityType) &&
                 !MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsValue(entityType) &&
                 entityType != ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value() &&
@@ -34,13 +32,12 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
     }
 
     @Override
-    public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity indirectSource, LivingEntity livingEntity, int amplifier, double health) {
-        Level level = livingEntity.level();
+    public void applyInstantenousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity indirectSource, LivingEntity livingEntity, int amplifier, double health) {
         Player player = indirectSource instanceof Player ? (Player) indirectSource : null;
-        if (!level.isClientSide && livingEntity instanceof Mob mob && TARGET_PREDICATE.test(player, livingEntity)) {
-            SkullSpirit skullSpirit = new SkullSpirit(level, mob, player != null ? player.getUUID() : null);
+        if (livingEntity instanceof Mob mob && TARGET_PREDICATE.test(serverLevel, player, livingEntity)) {
+            SkullSpirit skullSpirit = new SkullSpirit(serverLevel, mob, player != null ? player.getUUID() : null);
             skullSpirit.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-            level.addFreshEntity(skullSpirit);
+            serverLevel.addFreshEntity(skullSpirit);
         }
     }
 

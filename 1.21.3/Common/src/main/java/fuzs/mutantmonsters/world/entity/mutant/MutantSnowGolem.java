@@ -7,6 +7,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.FleeRainGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -81,12 +83,12 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Mob.class, 6.0F));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false, (entity) -> {
-            return entity instanceof Enemy && (!(entity instanceof Creeper) || ((Creeper) entity).getTarget() == this);
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Mob.class, 10, true, false, (LivingEntity livingEntity, ServerLevel serverLevel) -> {
+            return livingEntity instanceof Enemy && (!(livingEntity instanceof Creeper) || ((Creeper) livingEntity).getTarget() == this);
         }));
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return createMobAttributes().add(Attributes.MAX_HEALTH, 80.0).add(Attributes.MOVEMENT_SPEED, 0.26);
     }
 
@@ -189,8 +191,8 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             this.heal(1.0F);
         }
 
-        if (!this.level().isClientSide && this.onGround() && !this.level().dimensionType().ultraWarm() &&
-                CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
+        if (this.level() instanceof ServerLevel serverLevel && this.onGround() && !serverLevel.dimensionType().ultraWarm() &&
+                CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, this)) {
             x = Mth.floor(this.getX());
             int y = Mth.floor(this.getBoundingBox().minY);
             int z = Mth.floor(this.getZ());
@@ -201,17 +203,17 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                         BlockPos pos = new BlockPos(x + i, y, z + j);
                         BlockPos posDown = pos.below();
                         BlockPos posAbove = pos.above();
-                        boolean placeSnow = this.level().isEmptyBlock(pos) &&
-                                Blocks.SNOW.defaultBlockState().canSurvive(this.level(), pos);
-                        boolean placeIce = this.level().isWaterAt(posDown) && this.level()
+                        boolean placeSnow = serverLevel.isEmptyBlock(pos) &&
+                                Blocks.SNOW.defaultBlockState().canSurvive(serverLevel, pos);
+                        boolean placeIce = serverLevel.isWaterAt(posDown) && serverLevel
                                 .getBlockState(posDown)
                                 .getBlock() instanceof LiquidBlock;
-                        if (this.level().getFluidState(pos).getType() == Fluids.FLOWING_WATER) {
-                            this.level().setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
+                        if (serverLevel.getFluidState(pos).getType() == Fluids.FLOWING_WATER) {
+                            serverLevel.setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
                         }
 
-                        if (this.level().getFluidState(posAbove).getType() == Fluids.FLOWING_WATER) {
-                            this.level().setBlockAndUpdate(posAbove, Blocks.ICE.defaultBlockState());
+                        if (serverLevel.getFluidState(posAbove).getType() == Fluids.FLOWING_WATER) {
+                            serverLevel.setBlockAndUpdate(posAbove, Blocks.ICE.defaultBlockState());
                         }
 
                         if ((!placeSnow || (Math.abs(i) != 2 && Math.abs(j) != 2 || this.random.nextInt(20) == 0) &&
@@ -219,11 +221,11 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                                 (!placeIce || (Math.abs(i) != 2 && Math.abs(j) != 2 || this.random.nextInt(14) == 0) &&
                                         (Math.abs(i) != 1 && Math.abs(j) != 1 || this.random.nextInt(6) == 0))) {
                             if (placeSnow) {
-                                this.level().setBlockAndUpdate(pos, Blocks.SNOW.defaultBlockState());
+                                serverLevel.setBlockAndUpdate(pos, Blocks.SNOW.defaultBlockState());
                             }
 
                             if (placeIce) {
-                                this.level().setBlockAndUpdate(posDown, Blocks.ICE.defaultBlockState());
+                                serverLevel.setBlockAndUpdate(posDown, Blocks.ICE.defaultBlockState());
                             }
                         }
                     }
@@ -233,15 +235,15 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     }
 
-    private boolean isSnowingAt(BlockPos position) {
+    private boolean isSnowingAt(BlockPos blockPos) {
         if (!this.level().isRaining()) {
             return false;
-        } else if (!this.level().canSeeSky(position)) {
+        } else if (!this.level().canSeeSky(blockPos)) {
             return false;
-        } else if (this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, position).getY() > position.getY()) {
+        } else if (this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()) {
             return false;
         } else {
-            return this.level().getBiome(position).value().getPrecipitationAt(position) == Biome.Precipitation.SNOW;
+            return this.level().getBiome(blockPos).value().getPrecipitationAt(blockPos, this.level().getSeaLevel()) == Biome.Precipitation.SNOW;
         }
     }
 
@@ -256,16 +258,14 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     }
 
     @Override
-    public void shear(SoundSource source) {
-        this.level().playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, source, 1.0F, 1.0F);
-        if (!this.level().isClientSide()) {
-            this.setJackOLantern(false);
-            this.spawnAtLocation(new ItemStack(Items.JACK_O_LANTERN), 1.7F);
-        }
+    public void shear(ServerLevel serverLevel, SoundSource soundSource, ItemStack itemStack) {
+        serverLevel.playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+        this.setJackOLantern(false);
+        this.spawnAtLocation(serverLevel, new ItemStack(Items.JACK_O_LANTERN), 1.7F);
     }
 
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(ServerLevel serverLevel) {
         if (!this.isLeashed()) {
             Player owner = this.getOwner();
             if (owner != null && owner.isAlive()) {
@@ -273,8 +273,8 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             } else if (this.hasRestriction()) {
                 this.restrictTo(BlockPos.ZERO, -1);
             }
-
         }
+        super.customServerAiStep(serverLevel);
     }
 
     public boolean isThrowing() {
@@ -314,10 +314,10 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        if (this.isInvulnerableTo(serverLevel, damageSource)) {
             return false;
-        } else if (source.getDirectEntity() instanceof Snowball) {
+        } else if (damageSource.getDirectEntity() instanceof Snowball) {
             if (this.isAlive() && this.getHealth() < this.getMaxHealth()) {
                 this.heal(1.0F);
                 double d0 = this.random.nextGaussian() * 0.02;
@@ -330,7 +330,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
             return false;
         } else {
-            return super.hurt(source, amount);
+            return super.hurtServer(serverLevel, damageSource, damageAmount);
         }
     }
 
@@ -365,7 +365,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                 this.setOwnerId(!this.getOwnerId().isPresent() ? player.getUUID() : null);
             }
 
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
         } else {
             return InteractionResult.PASS;
         }
@@ -378,9 +378,9 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public void die(DamageSource cause) {
-        if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) &&
-                this.getOwner() instanceof ServerPlayer) {
-            this.getOwner().sendSystemMessage(this.getCombatTracker().getDeathMessage());
+        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) &&
+                this.getOwner() instanceof ServerPlayer serverPlayer) {
+            serverPlayer.sendSystemMessage(this.getCombatTracker().getDeathMessage());
         }
 
         super.die(cause);
@@ -499,7 +499,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         public void tick() {
             --this.jumpTick;
             if (!this.waterReplaced && !this.golem.isInWater() && this.jumpTick < 17 &&
-                    CommonAbstractions.INSTANCE.getMobGriefingRule(this.golem.level(), this.golem)) {
+                    CommonAbstractions.INSTANCE.getMobGriefingRule((ServerLevel) this.golem.level(), this.golem)) {
                 this.prevPos.setY(this.getWaterSurfaceHeight(this.golem.level(), this.prevPos));
                 if ((double) this.prevPos.getY() > this.golem.getY()) {
                     return;

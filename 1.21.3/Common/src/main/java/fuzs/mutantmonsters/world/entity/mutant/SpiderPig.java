@@ -11,6 +11,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, Saddleable, NeutralMob {
     private static final ResourceLocation STEP_HEIGHT_MODIFIER_WITH_PASSENGER_ID = MutantMonsters.id("with_passenger");
@@ -92,8 +94,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         super(type, level);
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
-        return createMobAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(
+    public static AttributeSupplier.Builder createAttributes() {
+        return createAnimalAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(
                 Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.STEP_HEIGHT);
     }
 
@@ -117,7 +119,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt)
         );
         this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Mob.class, true,
-                livingEntity -> livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)
+                (LivingEntity livingEntity, ServerLevel serverLevel) -> livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)
         ));
         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, true));
     }
@@ -164,15 +166,15 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
         }
 
         this.chargeExhaustion = Math.max(0, this.chargeExhaustion - 1);
-        if (!this.level().isClientSide) {
-            this.updatePersistentAnger((ServerLevel) this.level(), true);
+        if (this.level() instanceof ServerLevel serverLevel) {
+            this.updatePersistentAnger(serverLevel, true);
             this.leapCooldown = Math.max(0, this.leapCooldown - 1);
             if (this.leapTick > 10 && this.onGround()) {
                 this.isLeaping = false;
             }
 
-            this.updateWebList(false);
-            this.updateChargeState();
+            this.updateWebList(serverLevel, false);
+            this.updateChargeState(serverLevel);
             if (this.isAlive() && this.isTame() && this.tickCount % 600 == 0) {
                 this.heal(1.0F);
             }
@@ -180,7 +182,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
 
     }
 
-    private void updateWebList(boolean onlyCheckSize) {
+    private void updateWebList(ServerLevel serverLevel, boolean onlyCheckSize) {
         WebPos first;
         if (!onlyCheckSize) {
             for (int i = 0; i < this.webs.size(); ++i) {
@@ -197,34 +199,34 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 first = this.webs.get(0);
                 if (first.timeLeft < 0) {
                     this.webs.remove(0);
-                    this.removeWeb(first);
+                    this.removeWeb(serverLevel, first);
                 }
             }
         }
 
         while (this.webs.size() > 12) {
             first = this.webs.remove(0);
-            this.removeWeb(first);
+            this.removeWeb(serverLevel, first);
         }
 
     }
 
-    private void removeWeb(BlockPos pos) {
+    private void removeWeb(ServerLevel serverLevel, BlockPos pos) {
         if (this.level().getBlockState(pos).is(Blocks.COBWEB) &&
-                fuzs.puzzleslib.api.core.v1.CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
+                fuzs.puzzleslib.api.core.v1.CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, this)) {
             this.level().destroyBlock(pos, false, this);
         }
 
     }
 
-    private void updateChargeState() {
+    private void updateChargeState(ServerLevel serverLevel) {
         if (this.chargingTick > 0) {
 
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox(),
                     EntitySelector.notRiding(this)
             )) {
                 if (livingEntity != this && livingEntity != this.getOwner() && livingEntity.attackable()) {
-                    this.doHurtTarget(livingEntity);
+                    this.doHurtTarget(serverLevel, livingEntity);
                 }
             }
         }
@@ -243,13 +245,13 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                     playerEntity.startRiding(this);
                 }
 
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else if (itemstack.getItem() == Items.SADDLE) {
                 return itemstack.interactLivingEntity(playerEntity, this, hand);
             } else if (itemstack.has(DataComponents.FOOD) && isBreedingItem && this.getHealth() < this.getMaxHealth()) {
                 this.usePlayerItem(playerEntity, hand, itemstack);
                 this.heal((float) itemstack.get(DataComponents.FOOD).nutrition());
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
@@ -264,36 +266,36 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
         this.isLeaping = false;
         if (this.random.nextInt(2) == 0 && fuzs.puzzleslib.api.core.v1.CommonAbstractions.INSTANCE.getMobGriefingRule(
-                this.level(), this)) {
+                serverLevel, this)) {
             double dx = target.getX() - target.xo;
             double dz = target.getZ() - target.zo;
             BlockPos pos = new BlockPos((int) (target.getX() + dx * 0.5), Mth.floor(this.getBoundingBox().minY),
                     (int) (target.getZ() + dz * 0.5)
             );
-            BlockState state = this.level().getBlockState(pos);
+            BlockState state = serverLevel.getBlockState(pos);
             if (!state.isSolid() && !state.liquid() && !(state.getBlock() instanceof WebBlock)) {
-                this.level().setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
+                serverLevel.setBlockAndUpdate(pos, Blocks.COBWEB.defaultBlockState());
                 this.webs.add(new WebPos(pos, this.chargingTick > 0 ? 600 : 1200));
-                this.updateWebList(true);
+                this.updateWebList(serverLevel, true);
                 this.setDeltaMovement(0.0, Math.max(0.25, this.getDeltaMovement().y), 0.0);
                 this.fallDistance = 0.0F;
             }
         }
 
-        float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damageAmount = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         if (!(target instanceof Spider) && !(target instanceof SpiderPig)) {
             if (this.level().getBlockStates(target.getBoundingBox()).anyMatch(
                     Blocks.COBWEB.defaultBlockState()::equals)) {
-                damage += 4.0F;
+                damageAmount += 4.0F;
             }
         }
 
         DamageSource damageSource = this.level().damageSources().mobAttack(this);
-        boolean hurt = target.hurt(damageSource, damage);
-        if (hurt && this.level() instanceof ServerLevel serverLevel) {
+        boolean hurt = target.hurtServer(serverLevel, damageSource, damageAmount);
+        if (hurt) {
             EnchantmentHelper.doPostAttackEffects(serverLevel, target, damageSource);
         }
 
@@ -455,22 +457,23 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public boolean killedEntity(ServerLevel serverWorld, LivingEntity livingEntity) {
+    public boolean killedEntity(ServerLevel serverLevel, LivingEntity livingEntity) {
         if (livingEntity instanceof CreeperMinion minion && !this.isTame()) {
             LivingEntity owner = minion.getOwner();
             if (owner instanceof Player && !CommonAbstractions.INSTANCE.onAnimalTame(this, (Player) owner)) {
-                serverWorld.broadcastEntityEvent(this, (byte) 7);
+                serverLevel.broadcastEntityEvent(this, EntityEvent.TAMING_SUCCEEDED);
                 this.tame((Player) owner);
                 minion.discard();
                 return false;
             } else {
-                serverWorld.broadcastEntityEvent(this, (byte) 6);
+                serverLevel.broadcastEntityEvent(this, EntityEvent.TAMING_FAILED);
             }
         }
 
         if (livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) &&
                 livingEntity instanceof Mob mob) {
-            return mob.convertTo(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), true) == null;
+            return mob.convertTo(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), ConversionParams.single(this, false, false),
+                    Function.identity()::apply) == null;
         }
 
         return true;
@@ -494,11 +497,11 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    public AgeableMob getBreedOffspring(ServerLevel serverWorld, AgeableMob ageableEntity) {
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableEntity) {
         if (this.random.nextInt(20) == 0) {
-            return EntityType.PIG.create(serverWorld);
+            return EntityType.PIG.create(serverLevel, EntitySpawnReason.BREEDING);
         } else {
-            SpiderPig spiderPig = ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value().create(serverWorld);
+            SpiderPig spiderPig = ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value().create(serverLevel, EntitySpawnReason.BREEDING);
             UUID uuid = this.getOwnerUUID();
             if (uuid != null) {
                 spiderPig.setOwnerUUID(uuid);
@@ -510,9 +513,9 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     }
 
     @Override
-    protected void dropEquipment() {
+    protected void dropEquipment(ServerLevel serverLevel) {
         if (this.isSaddled()) {
-            this.spawnAtLocation(Items.SADDLE);
+            this.spawnAtLocation(serverLevel, Items.SADDLE);
             this.setSaddled(false);
         }
     }
@@ -520,9 +523,9 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
     @Override
     public void die(DamageSource damageSource) {
         super.die(damageSource);
-        if (this.dead && !this.level().isClientSide && !this.webs.isEmpty()) {
+        if (this.dead && this.level() instanceof ServerLevel serverLevel && !this.webs.isEmpty()) {
             for (WebPos webPos : this.webs) {
-                this.removeWeb(webPos);
+                this.removeWeb(serverLevel, webPos);
             }
         }
     }

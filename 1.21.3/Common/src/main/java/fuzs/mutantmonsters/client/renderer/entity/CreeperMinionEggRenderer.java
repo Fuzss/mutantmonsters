@@ -3,52 +3,67 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ClientModRegistry;
+import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.CreeperMinionEggModel;
-import fuzs.mutantmonsters.client.renderer.MutantRenderTypes;
-import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperChargeLayer;
+import fuzs.mutantmonsters.client.renderer.ModRenderType;
+import fuzs.mutantmonsters.client.renderer.entity.layers.PowerableLayer;
+import fuzs.mutantmonsters.client.renderer.entity.state.CreeperMinionEggRenderState;
 import fuzs.mutantmonsters.world.entity.CreeperMinionEgg;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
-public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEgg> {
+public class CreeperMinionEggRenderer extends EntityRenderer<CreeperMinionEgg, CreeperMinionEggRenderState> {
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/creeper_minion_egg.png");
 
-    private final CreeperMinionEggModel eggModel;
-    private final CreeperMinionEggModel chargedModel;
+    private final CreeperMinionEggModel model;
+    private final CreeperMinionEggModel armorModel;
 
     public CreeperMinionEggRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.eggModel = new CreeperMinionEggModel(context.bakeLayer(ClientModRegistry.CREEPER_MINION_EGG));
-        this.chargedModel = new CreeperMinionEggModel(context.bakeLayer(ClientModRegistry.CREEPER_MINION_EGG_ARMOR));
+        this.model = new CreeperMinionEggModel(context.bakeLayer(ModelLayerLocations.CREEPER_MINION_EGG));
+        this.armorModel = new CreeperMinionEggModel(context.bakeLayer(ModelLayerLocations.CREEPER_MINION_EGG_ARMOR));
         this.shadowRadius = 0.4F;
     }
 
     @Override
-    public void render(CreeperMinionEgg creeperMinionEgg, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
-        super.render(creeperMinionEgg, entityYaw, partialTick, poseStack, multiBufferSource, packedLight);
+    public void render(CreeperMinionEggRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        super.render(renderState, poseStack, bufferSource, packedLight);
         poseStack.pushPose();
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.scale(1.5F, 1.5F, 1.5F);
-        poseStack.translate(0.0, -1.5, 0.0);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.eggModel.renderType(this.getTextureLocation(creeperMinionEgg)));
-        this.eggModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
-        if (creeperMinionEgg.isCharged()) {
-            float ageInTicks = (float)creeperMinionEgg.tickCount + partialTick;
-            vertexConsumer = multiBufferSource.getBuffer(MutantRenderTypes.energySwirl(CreeperChargeLayer.LIGHTNING_TEXTURE, ageInTicks * 0.01F, ageInTicks * 0.01F));
-            int color = FastColor.ARGB32.colorFromFloat(1.0F, 0.5F, 0.5F, 0.5F);
-            this.chargedModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+        poseStack.translate(0.0F, -1.5F, 0.0F);
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
+        this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
+        if (renderState.isCharged) {
+            this.renderArmor(renderState, poseStack, bufferSource, packedLight);
         }
 
         poseStack.popPose();
     }
 
+    protected void renderArmor(CreeperMinionEggRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        VertexConsumer vertexConsumer;
+        RenderType renderType = ModRenderType.energySwirl(PowerableLayer.LIGHTNING_TEXTURE,
+                renderState.ageInTicks * 0.01F,
+                renderState.ageInTicks * 0.01F);
+        vertexConsumer = bufferSource.getBuffer(renderType);
+        int color = ARGB.colorFromFloat(1.0F, 0.5F, 0.5F, 0.5F);
+        this.armorModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+    }
+
     @Override
-    public ResourceLocation getTextureLocation(CreeperMinionEgg creeperMinionEgg) {
-        return TEXTURE_LOCATION;
+    public void extractRenderState(CreeperMinionEgg entity, CreeperMinionEggRenderState reusedState, float partialTick) {
+        super.extractRenderState(entity, reusedState, partialTick);
+        reusedState.isCharged = entity.isCharged();
+    }
+
+    @Override
+    public CreeperMinionEggRenderState createRenderState() {
+        return new CreeperMinionEggRenderState();
     }
 }

@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.world.item;
 
 import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -84,10 +85,10 @@ public class HulkHammerItem extends Item {
             level.playSound(player, context.getClickedPos(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS,
                     0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F
             );
-            player.getCooldowns().addCooldown(this, 25);
+            player.getCooldowns().addCooldown(context.getItemInHand(), 25);
             player.awardStat(Stats.ITEM_USED.get(this));
             ItemHelper.hurtAndBreak(context.getItemInHand(), 1, player, context.getHand());
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResultHelper.sidedSuccess(level.isClientSide);
         }
     }
 }

@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.monster.Zombie;
@@ -103,9 +103,9 @@ public class ZombieResurrection extends BlockPos {
             }
 
             if (--this.tick <= 0) {
-                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level);
+                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level, EntitySpawnReason.MOB_SUMMONED);
                 if (level instanceof ServerLevelAccessor) {
-                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), MobSpawnType.MOB_SUMMONED, null);
+                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), EntitySpawnReason.MOB_SUMMONED, null);
                     if (ilivingentitydata instanceof Zombie.ZombieGroupData) {
                         new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) ilivingentitydata).isBaby, false);
                     }

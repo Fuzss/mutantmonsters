@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters.world.entity.ai.goal;
 
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
@@ -58,6 +59,6 @@ public class OwnerTargetGoal extends TargetGoal {
 
     @Override
     protected boolean canAttack(LivingEntity potentialTarget, TargetingConditions targetPredicate) {
-        return potentialTarget != null && targetPredicate.test(this.mob, potentialTarget);
+        return potentialTarget != null && targetPredicate.test((ServerLevel) this.mob.level(), this.mob, potentialTarget);
     }
 }

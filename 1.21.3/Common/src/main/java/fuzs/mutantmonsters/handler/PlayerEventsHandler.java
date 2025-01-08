@@ -7,12 +7,14 @@ import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.EndersoulFragment;
 import fuzs.mutantmonsters.world.level.SeismicWave;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
 import fuzs.puzzleslib.api.init.v3.registry.LookupHelper;
+import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,25 +62,27 @@ public class PlayerEventsHandler {
     public static void onEndPlayerTick(Player player) {
         playShoulderEntitySound(player, player.getShoulderEntityLeft());
         playShoulderEntitySound(player, player.getShoulderEntityRight());
-        if (!player.level().isClientSide) {
+        if (player.level() instanceof ServerLevel serverLevel) {
             SeismicWave seismicWave = SeismicWave.poll(player);
             if (seismicWave != null) {
-                handleSeismicWave(player, seismicWave);
+                handleSeismicWave(serverLevel, player, seismicWave);
             }
         }
     }
 
-    private static void handleSeismicWave(Player player, @NotNull SeismicWave seismicWave) {
-        seismicWave.affectBlocks(player.level(), player);
+    private static void handleSeismicWave(ServerLevel serverLevel, Player player, @NotNull SeismicWave seismicWave) {
+        seismicWave.affectBlocks(serverLevel, player);
         AABB box = new AABB(seismicWave.getX(), (double) seismicWave.getY() + 1.0, seismicWave.getZ(),
                 (double) seismicWave.getX() + 1.0, (double) seismicWave.getY() + 2.0, (double) seismicWave.getZ() + 1.0
         );
 
-        for (LivingEntity livingEntity : player.level().getEntitiesOfClass(LivingEntity.class, box)) {
+        for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
-                livingEntity.hurt(
-                        DamageSourcesHelper.source(player.level(), ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE, player),
-                        (float) (6 + player.getRandom().nextInt(3))
+                DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
+                        ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE,
+                        player);
+                livingEntity.hurtServer(serverLevel, damageSource,
+                        6.0F + player.getRandom().nextInt(3)
                 );
             }
         }

@@ -69,7 +69,7 @@ public class MutantMonsters implements ModConstructor {
 
     @Override
     public void onConstructMod() {
-        ModRegistry.touch();
+        ModRegistry.bootstrap();
         registerEventHandlers();
     }
 
@@ -98,27 +98,27 @@ public class MutantMonsters implements ModConstructor {
     @Override
     public void onEntityAttributeCreation(EntityAttributesCreateContext context) {
         context.registerEntityAttributes(ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
-                CreeperMinion.registerAttributes()
+                CreeperMinion.createAttributes()
         );
         context.registerEntityAttributes(ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
-                EndersoulClone.registerAttributes()
+                EndersoulClone.createAttributes()
         );
         context.registerEntityAttributes(ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value(),
-                MutantCreeper.registerAttributes()
+                MutantCreeper.createAttributes()
         );
         context.registerEntityAttributes(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(),
-                MutantEnderman.registerAttributes()
+                MutantEnderman.createAttributes()
         );
         context.registerEntityAttributes(ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value(),
-                MutantSnowGolem.registerAttributes()
+                MutantSnowGolem.createAttributes()
         );
-        context.registerEntityAttributes(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), SpiderPig.registerAttributes());
+        context.registerEntityAttributes(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), SpiderPig.createAttributes());
         if (ModLoaderEnvironment.INSTANCE.getModLoader().isFabricLike()) {
             context.registerEntityAttributes(ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE.value(),
-                    MutantSkeleton.registerAttributes()
+                    MutantSkeleton.createAttributes()
             );
             context.registerEntityAttributes(ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE.value(),
-                    MutantZombie.registerAttributes()
+                    MutantZombie.createAttributes()
             );
         }
     }
@@ -135,7 +135,7 @@ public class MutantMonsters implements ModConstructor {
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules
         );
         context.registerSpawnPlacement(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(), SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MutantEnderman::canSpawn
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MutantEnderman::checkMutantEndermanSpawnRules
         );
         context.registerSpawnPlacement(ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE.value(), SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules

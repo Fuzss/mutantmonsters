@@ -62,7 +62,7 @@ public class ModEntityTypes {
             "throwable_block", () -> EntityType.Builder.<ThrowableBlock>of(ThrowableBlock::new, MobCategory.MISC).sized(
                     1.0F, 1.0F).clientTrackingRange(6).updateInterval(Integer.MAX_VALUE));
 
-    public static void touch() {
+    public static void bootstrap() {
         // NO-OP
     }
 }

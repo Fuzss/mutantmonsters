@@ -106,7 +106,7 @@ public class SeismicWave extends BlockPos {
         return wave;
     }
 
-    public void affectBlocks(Level level, Entity entity) {
+    public void affectBlocks(ServerLevel level, Entity entity) {
         if (this.affectsTerrain) {
             BlockPos posAbove = this.above();
             BlockState blockstate = level.getBlockState(this);

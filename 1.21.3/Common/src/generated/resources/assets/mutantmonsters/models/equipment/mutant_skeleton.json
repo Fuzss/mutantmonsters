@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "mutantmonsters:mutant_skeleton"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "mutantmonsters:mutant_skeleton"
+      }
+    ]
+  }
+}

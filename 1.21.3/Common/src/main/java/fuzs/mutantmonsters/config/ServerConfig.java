@@ -38,7 +38,7 @@ public class ServerConfig implements ConfigCore {
             }
 
             public EntityType<?> convertsToType() {
-                return BuiltInRegistries.ENTITY_TYPE.get(this.convertsTo);
+                return BuiltInRegistries.ENTITY_TYPE.getValue(this.convertsTo);
             }
         };
         ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.from(Registries.ENTITY_TYPE, this.mutantXConversionsRaw, (integer, o) -> true, String.class);

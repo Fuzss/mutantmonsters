@@ -5,7 +5,6 @@ import fuzs.puzzleslib.fabric.api.event.v1.FabricLivingEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -29,10 +28,5 @@ public class FabricAbstractions implements CommonAbstractions {
     @Override
     public BlockParticleOption setBlockParticlePos(BlockParticleOption particleOption, BlockPos pos) {
         return particleOption;
-    }
-
-    @Override
-    public boolean shouldRiderSit(Entity vehicle) {
-        return true;
     }
 }

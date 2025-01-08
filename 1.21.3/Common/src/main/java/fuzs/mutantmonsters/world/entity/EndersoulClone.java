@@ -40,7 +40,7 @@ public class EndersoulClone extends Monster {
         this.goalSelector.addGoal(1, new MutantMeleeAttackGoal(this, 1.2));
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return createMonsterAttributes().add(Attributes.MAX_HEALTH, 1.0).add(Attributes.ATTACK_DAMAGE, 1.0).add(
                 Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.STEP_HEIGHT, 1.0);
     }
@@ -79,33 +79,33 @@ public class EndersoulClone extends Monster {
     }
 
     @Override
-    public boolean doHurtTarget(Entity entityIn) {
-        boolean flag = super.doHurtTarget(entityIn);
-        if (!this.level().isClientSide && this.random.nextInt(3) != 0) {
-            this.teleportToEntity(entityIn);
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
+        boolean doHurtTarget = super.doHurtTarget(serverLevel, entity);
+        if (this.random.nextInt(3) != 0) {
+            this.teleportToEntity(entity);
         }
 
-        if (flag) {
+        if (doHurtTarget) {
             this.heal(2.0F);
         }
 
         this.swing(InteractionHand.MAIN_HAND);
-        return flag;
+        return doHurtTarget;
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float amount) {
-        if (this.isInvulnerableTo(damageSource)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        if (this.isInvulnerableTo(serverLevel, damageSource)) {
             return false;
         } else if (damageSource.getEntity() instanceof EnderDragon) {
             return false;
         } else {
-            if (this.level() instanceof ServerLevel serverLevel && this.isAlive() && this.tickCount > 10) {
+            if (this.isAlive() && this.tickCount > 10) {
                 if (damageSource.getEntity() instanceof Player) {
                     this.setLastHurtByPlayer((Player) damageSource.getEntity());
                 }
                 this.dropAllDeathLoot(serverLevel, damageSource);
-                this.dropExperience(damageSource.getEntity());
+                this.dropExperience(serverLevel, damageSource.getEntity());
                 this.remove(Entity.RemovalReason.KILLED);
                 this.gameEvent(GameEvent.ENTITY_DIE);
                 return true;
@@ -116,7 +116,7 @@ public class EndersoulClone extends Monster {
     }
 
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(ServerLevel serverLevel) {
         Entity entity = this.getTarget();
         if (this.random.nextInt(10) == 0 && entity != null && (this.isInWater() || this.isPassengerOfSameVehicle(
                 entity) || this.distanceToSqr(entity) > 1024.0 || !this.isPathFinding())) {
@@ -126,6 +126,7 @@ public class EndersoulClone extends Monster {
         if (this.cloner != null && entity != this.cloner.getTarget()) {
             this.setTarget(this.cloner.getTarget());
         }
+        super.customServerAiStep(serverLevel);
     }
 
     private boolean teleportToEntity(Entity entity) {
@@ -165,9 +166,9 @@ public class EndersoulClone extends Monster {
     }
 
     @Override
-    public void kill() {
-        super.kill();
-        this.level().broadcastEntityEvent(this, (byte) 0);
+    public void kill(ServerLevel serverLevel) {
+        super.kill(serverLevel);
+        serverLevel.broadcastEntityEvent(this, (byte) 0);
         this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
     }
 
@@ -182,9 +183,8 @@ public class EndersoulClone extends Monster {
     }
 
     @Override
-    public boolean isAlliedTo(Entity entityIn) {
-        return this.cloner != null && (this.cloner == entityIn || this.cloner.isAlliedTo(entityIn)) || super.isAlliedTo(
-                entityIn);
+    public boolean considersEntityAsAlly(Entity entity) {
+        return this.cloner != null && (this.cloner == entity || this.cloner.considersEntityAsAlly(entity)) || super.considersEntityAsAlly(entity);
     }
 
     @Override

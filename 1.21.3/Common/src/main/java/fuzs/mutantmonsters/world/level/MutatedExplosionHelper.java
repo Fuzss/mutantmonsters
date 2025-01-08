@@ -7,27 +7,30 @@ import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerExplosion;
 
 import java.util.List;
 
 public class MutatedExplosionHelper {
 
-    public static void onExplosionDetonate(Level level, Explosion explosion, List<BlockPos> affectedBlocks, List<Entity> affectedEntities) {
+    public static void onExplosionDetonate(ServerLevel serverLevel, ServerExplosion explosion, List<BlockPos> affectedBlocks, List<Entity> affectedEntities) {
         if (explosion.damageCalculator instanceof MutatedExplosionDamageCalculator) {
             affectedEntities.removeIf(entity -> {
-                return !isAffectedByExplosion(explosion, entity);
+                return !isAffectedByExplosion(serverLevel, explosion, entity);
             });
         }
     }
 
-    private static boolean isAffectedByExplosion(Explosion explosion, Entity entity) {
+    private static boolean isAffectedByExplosion(ServerLevel serverLevel, ServerExplosion explosion, Entity entity) {
         if (entity.ignoreExplosion(explosion)) {
             return false;
         } else if (entity instanceof MutantCreeper) {
@@ -37,42 +40,64 @@ public class MutatedExplosionHelper {
                 return !skullSpirit.isAttached();
             } else {
                 return !(entity instanceof LivingEntity livingEntity) ||
-                        ChemicalXMobEffect.IS_APPLICABLE.test(livingEntity);
+                        ChemicalXMobEffect.IS_APPLICABLE.test(livingEntity, serverLevel);
             }
         } else {
             return true;
         }
     }
 
-    public static Explosion explode(Entity source, float radius, boolean fire, Level.ExplosionInteraction explosionInteraction) {
-        return source.level()
-                .explode(source, Explosion.getDefaultDamageSource(source.level(), source),
-                        new MutatedExplosionDamageCalculator(), source.getX(), source.getY(), source.getZ(), radius,
-                        fire, explosionInteraction, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER,
-                        SoundEvents.GENERIC_EXPLODE
-                );
+    public static void explode(Entity entity, float radius, boolean fire, Level.ExplosionInteraction explosionInteraction) {
+        DamageSource damageSource = Explosion.getDefaultDamageSource(entity.level(), entity);
+        MutatedExplosionDamageCalculator damageCalculator = new MutatedExplosionDamageCalculator();
+        entity.level()
+                .explode(entity,
+                        damageSource,
+                        damageCalculator,
+                        entity.getX(),
+                        entity.getY(),
+                        entity.getZ(),
+                        radius,
+                        fire,
+                        explosionInteraction,
+                        ParticleTypes.EXPLOSION,
+                        ParticleTypes.EXPLOSION_EMITTER,
+                        SoundEvents.GENERIC_EXPLODE);
     }
 
     public static class MutatedExplosionDamageCalculator extends ExplosionDamageCalculator {
 
         @Override
         public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
-            if (entity instanceof Player player && player.isBlocking() &&
+            if (explosion instanceof ServerExplosion serverExplosion && entity instanceof ServerPlayer serverPlayer &&
+                    serverPlayer.isBlocking() &&
                     explosion.getDirectSourceEntity() instanceof MutantCreeper mutantCreeper) {
-                float entityDamageAmount = this.getEntityDamageAmount(explosion, entity);
-                if (!entity.hurt(explosion.damageSource, entityDamageAmount)) {
+                float seenPercent = this.getSeenPercent(explosion, entity);
+                float entityDamageAmount = this.getEntityDamageAmount(explosion, entity, seenPercent);
+                if (!entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, entityDamageAmount)) {
                     if (mutantCreeper.isJumpAttacking()) {
-                        EntityUtil.disableShield(player, mutantCreeper.isCharged() ? 200 : 100);
+                        EntityUtil.disableShield(serverPlayer, mutantCreeper.isCharged() ? 200 : 100);
                     } else {
-                        ItemHelper.hurtAndBreak(player.getUseItem(), (int) entityDamageAmount * 2, player, player.getUsedItemHand());
+                        ItemHelper.hurtAndBreak(serverPlayer.getUseItem(),
+                                (int) (entityDamageAmount * 2.0F),
+                                serverPlayer,
+                                serverPlayer.getUsedItemHand());
                     }
-                    entity.hurt(explosion.damageSource, entityDamageAmount * 0.5F);
+                    entity.hurtServer(serverPlayer.serverLevel(),
+                            serverExplosion.damageSource,
+                            entityDamageAmount * 0.5F);
                 }
 
                 return false;
             }
 
             return super.shouldDamageEntity(explosion, entity);
+        }
+
+        private float getSeenPercent(Explosion explosion, Entity entity) {
+            boolean bl = this.shouldDamageEntity(explosion, entity);
+            float p = this.getKnockbackMultiplier(entity);
+            return !bl && p == 0.0F ? 0.0F : ServerExplosion.getSeenPercent(explosion.center(), entity);
         }
     }
 }

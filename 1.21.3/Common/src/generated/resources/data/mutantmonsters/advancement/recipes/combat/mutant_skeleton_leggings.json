@@ -1,14 +1,21 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_mutant_skeleton_pelvis_or_mutant_skeleton_limb": {
+    "has_mutant_skeleton_limb": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "mutantmonsters:mutant_skeleton_pelvis",
-              "mutantmonsters:mutant_skeleton_limb"
-            ]
+            "items": "mutantmonsters:mutant_skeleton_limb"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_mutant_skeleton_pelvis": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mutantmonsters:mutant_skeleton_pelvis"
           }
         ]
       },
@@ -24,7 +31,8 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_mutant_skeleton_pelvis_or_mutant_skeleton_limb"
+      "has_mutant_skeleton_pelvis",
+      "has_mutant_skeleton_limb"
     ]
   ],
   "rewards": {

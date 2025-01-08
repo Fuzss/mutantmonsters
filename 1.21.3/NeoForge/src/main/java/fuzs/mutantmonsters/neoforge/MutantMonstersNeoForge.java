@@ -25,25 +25,30 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 public class MutantMonstersNeoForge {
 
     public MutantMonstersNeoForge(ModContainer modContainer) {
-        NeoForgeModRegistry.touch();
+        NeoForgeModRegistry.bootstrap();
         ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new);
         registerLoadingHandlers(modContainer.getEventBus());
-        DataProviderHelper.registerDataProviders(MutantMonsters.MOD_ID, ModDamageTypeRegistryProvider::new,
-                ModBlockLootProvider::new, ModBodyPartLootProvider::new, ModEntityLootProvider::new,
-                ModEntityTypeLootProvider::new, ModBiomeTagProvider::new, ModBlockTagProvider::new,
-                ModDamageTypeTagProvider::new, ModEntityTypeTagProvider::new, ModItemTagProvider::new,
-                ModRecipeProvider::new, ModAdvancementProvider::new
-        );
+        DataProviderHelper.registerDataProviders(MutantMonsters.MOD_ID,
+                ModDamageTypeRegistryProvider::new,
+                ModBlockLootProvider::new,
+                ModBodyPartLootProvider::new,
+                ModEntityLootProvider::new,
+                ModEntityTypeLootProvider::new,
+                ModBiomeTagProvider::new,
+                ModBlockTagProvider::new,
+                ModDamageTypeTagProvider::new,
+                ModEntityTypeTagProvider::new,
+                ModItemTagProvider::new,
+                ModRecipeProvider::new,
+                ModAdvancementProvider::new);
     }
 
     private static void registerLoadingHandlers(IEventBus eventBus) {
         eventBus.addListener((final EntityAttributeCreationEvent evt) -> {
             evt.put(ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE.value(),
-                    MutantSkeleton.registerAttributes().add(NeoForgeMod.SWIM_SPEED, 5.0).build()
-            );
+                    MutantSkeleton.createAttributes().add(NeoForgeMod.SWIM_SPEED, 5.0).build());
             evt.put(ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE.value(),
-                    MutantZombie.registerAttributes().add(NeoForgeMod.SWIM_SPEED, 4.0).build()
-            );
+                    MutantZombie.createAttributes().add(NeoForgeMod.SWIM_SPEED, 4.0).build());
         });
     }
 }

@@ -3,7 +3,6 @@ package fuzs.mutantmonsters.util;
 import com.google.common.collect.ImmutableMap;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.mixin.accessor.RavagerAccessor;
 import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
 import fuzs.puzzleslib.api.network.v3.PlayerSet;
 import net.minecraft.core.BlockPos;
@@ -68,20 +67,20 @@ public final class EntityUtil {
     }
 
     public static void stunRavager(LivingEntity livingEntity) {
-        if (livingEntity instanceof Ravager) {
-            if (((RavagerAccessor) livingEntity).mutantmonsters$getStunnedTick() == 0) {
-                ((RavagerAccessor) livingEntity).mutantmonsters$setStunnedTick(40);
+        if (livingEntity instanceof Ravager ravager) {
+            if (ravager.getStunnedTick() == 0) {
+                ravager.handleEntityEvent(EntityEvent.RAVAGER_STUNNED);
                 livingEntity.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-                livingEntity.level().broadcastEntityEvent(livingEntity, (byte) 39);
+                livingEntity.level().broadcastEntityEvent(livingEntity, EntityEvent.RAVAGER_STUNNED);
             }
         }
     }
 
     public static void disableShield(LivingEntity livingEntity, int ticks) {
         if (livingEntity instanceof Player player && livingEntity.isBlocking()) {
-            player.getCooldowns().addCooldown(livingEntity.getUseItem().getItem(), ticks);
+            player.getCooldowns().addCooldown(livingEntity.getUseItem(), ticks);
             livingEntity.stopUsingItem();
-            livingEntity.level().broadcastEntityEvent(livingEntity, (byte) 30);
+            livingEntity.level().broadcastEntityEvent(livingEntity, EntityEvent.SHIELD_DISABLED);
         }
     }
 
@@ -146,7 +145,7 @@ public final class EntityUtil {
         if (mob.level().isLoaded(pos)) {
             while (true) {
                 pos.move(Direction.DOWN);
-                if (pos.getY() <= mob.level().getMinBuildHeight() || mob.level().getBlockState(pos).blocksMotion()) {
+                if (pos.getY() <= mob.level().getMinY() || mob.level().getBlockState(pos).blocksMotion()) {
                     pos.move(Direction.UP);
                     AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double) pos.getX() + 0.5, pos.getY(),
                             (double) pos.getZ() + 0.5

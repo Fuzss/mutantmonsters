@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "R": {
-      "item": "mutantmonsters:mutant_skeleton_rib"
-    }
+    "R": "mutantmonsters:mutant_skeleton_rib"
   },
   "pattern": [
     "R R",

@@ -11,11 +11,13 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
+import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +57,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         this.xpReward = 30;
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FOLLOW_RANGE, 48.0).add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.75).add(Attributes.STEP_HEIGHT, 1.0);
     }
 
@@ -100,7 +102,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     @Override
-    public boolean doHurtTarget(Entity entityIn) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
         if (!this.isAnimationPlaying()) {
             if (this.random.nextInt(4) != 0) {
                 this.animation = MELEE_ANIMATION;
@@ -113,8 +115,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return !(source.getEntity() instanceof MutantSkeleton) && super.hurt(source, amount);
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        return !(damageSource.getEntity() instanceof MutantSkeleton) && super.hurtServer(serverLevel, damageSource, damageAmount);
     }
 
     @Override
@@ -160,10 +162,13 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     @Override
     public void die(DamageSource cause) {
         super.die(cause);
-        if (!this.level().isClientSide) {
+        if (this.level() instanceof ServerLevel serverLevel) {
 
-            for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
-                livingEntity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE, this), 7.0F);
+            for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
+                DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
+                        ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE,
+                        this);
+                livingEntity.hurtServer(serverLevel, damageSource, 7.0F);
             }
 
             for (int i = 0; i < 18; ++i) {
@@ -221,9 +226,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                     ++j;
                 }
 
-                MutantSkeletonBodyPart part = new MutantSkeletonBodyPart(this.level(), this, j);
-                part.setDeltaMovement(part.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
-                this.level().addFreshEntity(part);
+                MutantSkeletonBodyPart bodyPart = new MutantSkeletonBodyPart(serverLevel, this, j);
+                bodyPart.setDeltaMovement(bodyPart.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
+                serverLevel.addFreshEntity(bodyPart);
             }
         }
 
@@ -426,7 +431,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
                 if (this.mob.animationTick == 6) {
                     float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                    if (!target.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                    DamageSources damageSources = this.mob.level().damageSources();
+                    if (!target.hurtServer((ServerLevel) this.mob.level(), damageSources.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
                         EntityUtil.disableShield(target, 100);
                     }
 

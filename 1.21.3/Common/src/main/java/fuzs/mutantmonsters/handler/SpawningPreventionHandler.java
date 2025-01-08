@@ -7,8 +7,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.StreamSupport;
@@ -24,13 +24,14 @@ public class SpawningPreventionHandler {
         SPAWN_LIMITS_PER_ENTITY_TYPE = Object2IntMaps.unmodifiable(map);
     }
 
-    public static EventResult onEntitySpawn(Entity entity, ServerLevel level, @Nullable MobSpawnType spawnType) {
+    public static EventResult onEntitySpawn(Entity entity, ServerLevel serverLevel, @Nullable EntitySpawnReason entitySpawnReason) {
         int spawnLimit = SPAWN_LIMITS_PER_ENTITY_TYPE.getOrDefault(entity.getType(), -1);
         if (spawnLimit != -1) {
-            long entitiesOfType = StreamSupport.stream(level.getAllEntities().spliterator(), false)
+            long entitiesOfType = StreamSupport.stream(serverLevel.getAllEntities().spliterator(), false)
                     .filter((Entity currentEntity) -> {
                         return currentEntity.getType() == entity.getType();
-                    }).count();
+                    })
+                    .count();
             if (entitiesOfType >= spawnLimit) {
                 return EventResult.INTERRUPT;
             }

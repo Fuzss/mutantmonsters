@@ -1,7 +1,5 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.animation.Animator;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
@@ -17,7 +15,7 @@ public class EndersoulHandModel extends Model {
     private final boolean right;
 
     public EndersoulHandModel(ModelPart root, boolean right) {
-        super(RenderType::entitySolid);
+        super(root, RenderType::entitySolid);
         this.right = right;
         this.hand = root.getChild("hand");
         for (int i = 0; i < this.finger.length; i++) {
@@ -81,11 +79,5 @@ public class EndersoulHandModel extends Model {
             this.thumb.xRot = -0.62831855F;
             this.thumb.zRot = 0.3926991F;
         }
-
-    }
-
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        this.hand.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 }

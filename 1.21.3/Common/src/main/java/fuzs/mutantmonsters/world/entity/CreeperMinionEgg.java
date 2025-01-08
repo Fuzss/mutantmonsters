@@ -8,6 +8,7 @@ import fuzs.mutantmonsters.services.CommonAbstractions;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -107,7 +108,7 @@ public class CreeperMinionEgg extends Entity {
     }
 
     private void hatch() {
-        CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value().create(this.level());
+        CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value().create(this.level(), EntitySpawnReason.BREEDING);
         if (this.owner != null) {
             Player playerEntity = this.level().getPlayerByUUID(this.owner);
             if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
@@ -184,7 +185,7 @@ public class CreeperMinionEgg extends Entity {
             if (this.level().isClientSide) {
                 Proxy.INSTANCE.showDismountMessage();
             }
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
         }
         return InteractionResult.PASS;
     }
@@ -199,29 +200,29 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        if (this.isInvulnerableToBase(damageSource)) {
             return false;
-        } else if (!this.level().isClientSide && this.isAlive()) {
+        } else if (this.isAlive()) {
             this.markHurt();
-            if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-                this.age = (int) ((float) this.age - amount * 80.0F);
-                EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int) (amount / 2.0F));
+            if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+                this.age = (int) ((float) this.age - damageAmount * 80.0F);
+                EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int) (damageAmount / 2.0F));
                 return false;
             } else {
                 this.recentlyHit = this.tickCount;
                 this.setDeltaMovement(0.0, 0.2, 0.0);
-                this.health = (int) ((float) this.health - amount);
+                this.health = (int) ((float) this.health - damageAmount);
                 if (this.health <= 0) {
                     float sizeIn = this.isCharged() ? 2.0F : 0.0F;
                     MutatedExplosionHelper.explode(this, sizeIn, false, Level.ExplosionInteraction.TNT);
-                    if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for (int i = 5 + this.random.nextInt(6); i > 0; --i) {
-                                this.spawnAtLocation(Items.GUNPOWDER);
+                                this.spawnAtLocation(serverLevel, Items.GUNPOWDER);
                             }
                         } else {
-                            this.spawnAtLocation(ModItems.CREEPER_SHARD_ITEM.value());
+                            this.spawnAtLocation(serverLevel, ModItems.CREEPER_SHARD_ITEM.value());
                         }
                     }
 

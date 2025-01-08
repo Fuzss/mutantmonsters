@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -159,13 +160,13 @@ public class CreeperMinionTrackerScreen extends Screen {
     public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 166, 146, 5);
+        guiGraphics.blit(RenderType::guiTextured, TEXTURE_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+        guiGraphics.blit(RenderType::guiTextured, TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 166, 146, 5, 256, 256);
         float healthProgress = Mth.clamp(this.creeperMinion.getHealth() / this.creeperMinion.getMaxHealth(), 0.0F,
                 1.0F
         );
-        guiGraphics.blit(TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 171, (int) (healthProgress * 146.0F),
-                5
+        guiGraphics.blit(RenderType::guiTextured, TEXTURE_LOCATION, this.leftPos + 15, this.topPos + 16, 0, 171, (int) (healthProgress * 146.0F),
+                5, 256, 256
         );
     }
 

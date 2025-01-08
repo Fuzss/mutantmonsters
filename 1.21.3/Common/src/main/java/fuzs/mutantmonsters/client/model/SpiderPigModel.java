@@ -1,15 +1,14 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.google.common.collect.ImmutableList;
 import fuzs.mutantmonsters.client.animation.Animator;
-import fuzs.mutantmonsters.world.entity.mutant.SpiderPig;
-import net.minecraft.client.model.AgeableListModel;
+import fuzs.mutantmonsters.client.renderer.entity.state.SpiderPigRenderState;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class SpiderPigModel extends AgeableListModel<SpiderPig> {
+public class SpiderPigModel extends EntityModel<SpiderPigRenderState> {
     private final ModelPart head;
     private final ModelPart innerHead;
     private final ModelPart base;
@@ -42,6 +41,7 @@ public class SpiderPigModel extends AgeableListModel<SpiderPig> {
     private final ModelPart innerLowerBackLeg2;
 
     public SpiderPigModel(ModelPart modelPart) {
+        super(modelPart);
         this.base = modelPart.getChild("base");
         this.body2 = this.base.getChild("body2");
         this.body1 = this.body2.getChild("body1");
@@ -113,22 +113,18 @@ public class SpiderPigModel extends AgeableListModel<SpiderPig> {
     }
 
     @Override
-    protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of();
+    public void setupAnim(SpiderPigRenderState renderState) {
+        super.setupAnim(renderState);
+        this.setupInitialAngles();
+        float limbSwing = renderState.walkAnimationPos;
+        float limbSwingAmount = renderState.walkAnimationSpeed;
+        float ageInTicks = renderState.ageInTicks;
+        float netHeadYaw = renderState.yRot;
+        float headPitch = renderState.xRot;
+        this.animate(renderState, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
     }
 
-    @Override
-    protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.base);
-    }
-
-    @Override
-    public void setupAnim(SpiderPig entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.setAngles();
-        this.animate(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
-    private void setAngles() {
+    private void setupInitialAngles() {
         Animator.resetAngles(this.head, this.innerHead, this.body1, this.body2, this.butt);
         Animator.resetAngles(this.frontLeg1, this.innerFrontLeg1, this.lowerFrontLeg1, this.innerLowerFrontLeg1, this.frontLeg2, this.innerFrontLeg2, this.lowerFrontLeg2, this.innerLowerFrontLeg2);
         Animator.resetAngles(this.middleLeg1, this.innerMiddleLeg1, this.lowerMiddleLeg1, this.innerLowerMiddleLeg1, this.middleLeg2, this.innerMiddleLeg2, this.lowerMiddleLeg2, this.innerLowerMiddleLeg2);
@@ -163,7 +159,7 @@ public class SpiderPigModel extends AgeableListModel<SpiderPig> {
         this.innerLowerBackLeg2.xRot += 0.5711987F;
     }
 
-    private void animate(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    private void animate(SpiderPigRenderState renderState, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         float moveAnim = Mth.sin(limbSwing * 0.9F) * limbSwingAmount;
         float moveAnim1 = Mth.sin(limbSwing * 0.9F + 0.3F) * limbSwingAmount;
         float moveAnim1d = Mth.sin(limbSwing * 0.9F + 0.3F + 0.5F) * limbSwingAmount;
@@ -197,8 +193,8 @@ public class SpiderPigModel extends AgeableListModel<SpiderPig> {
         this.backLeg2.xRot += -moveAnim1 * 3.1415927F / 5.0F + 0.2617994F * limbSwingAmount;
         this.body2.xRot += -moveAnim * 3.1415927F / 20.0F;
         this.head.xRot += moveAnim * 3.1415927F / 20.0F;
-        if (this.attackTime > 0.0F) {
-            float swingAnim = Mth.sin(this.attackTime * 3.1415927F);
+        if (renderState.attackTime > 0.0F) {
+            float swingAnim = Mth.sin(renderState.attackTime * 3.1415927F);
             this.body1.xRot -= swingAnim * 3.1415927F / 2.5F;
             this.innerFrontLeg1.zRot += swingAnim * 3.1415927F / 5.0F;
             this.innerFrontLeg2.zRot -= swingAnim * 3.1415927F / 5.0F;

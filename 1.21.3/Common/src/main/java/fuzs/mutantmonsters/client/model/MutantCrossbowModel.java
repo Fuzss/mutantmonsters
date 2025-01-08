@@ -1,7 +1,5 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -21,7 +19,7 @@ public class MutantCrossbowModel extends Model {
     public final ModelPart rope2;
 
     public MutantCrossbowModel(ModelPart modelPart) {
-        super(RenderType::entityCutoutNoCull);
+        super(modelPart, RenderType::entityCutoutNoCull);
         this.armWear = modelPart.getChild("arm_wear");
         this.middle = this.armWear.getChild("middle");
         this.middle1 = this.middle.getChild("middle1");
@@ -62,10 +60,5 @@ public class MutantCrossbowModel extends Model {
     public void rotateRope() {
         this.rope1.xRot = -(this.middle1.xRot + this.side1.xRot + this.side3.xRot);
         this.rope2.xRot = -(this.middle2.xRot + this.side2.xRot + this.side4.xRot);
-    }
-
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        this.armWear.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 }

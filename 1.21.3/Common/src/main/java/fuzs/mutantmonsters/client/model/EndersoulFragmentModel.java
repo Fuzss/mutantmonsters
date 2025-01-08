@@ -1,21 +1,19 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import fuzs.mutantmonsters.world.entity.EndersoulFragment;
+import fuzs.mutantmonsters.client.renderer.entity.state.EndersoulFragmentRenderState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
-public class EndersoulFragmentModel extends EntityModel<EndersoulFragment> {
-    private final ModelPart base;
+public class EndersoulFragmentModel extends EntityModel<EndersoulFragmentRenderState> {
     private final ModelPart[] sticks = new ModelPart[8];
 
     public EndersoulFragmentModel(ModelPart root) {
-        this.base = root.getChild("base");
+        super(root);
+        ModelPart base = root.getChild("base");
         for (int i = 0; i < this.sticks.length; i++) {
-            this.sticks[i] = this.base.getChild("stick" + i);
+            this.sticks[i] = base.getChild("stick" + i);
         }
     }
 
@@ -36,17 +34,12 @@ public class EndersoulFragmentModel extends EntityModel<EndersoulFragment> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        this.base.render(poseStack, buffer, packedLight, packedOverlay, color);
-    }
-
-    @Override
-    public void setupAnim(EndersoulFragment entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(EndersoulFragmentRenderState renderState) {
+        super.setupAnim(renderState);
         for(int i = 0; i < this.sticks.length; ++i) {
-            this.sticks[i].xRot = entityIn.stickRotations[i][0];
-            this.sticks[i].yRot = entityIn.stickRotations[i][1];
-            this.sticks[i].zRot = entityIn.stickRotations[i][2];
+            this.sticks[i].xRot = renderState.stickRotations[i][0];
+            this.sticks[i].yRot = renderState.stickRotations[i][1];
+            this.sticks[i].zRot = renderState.stickRotations[i][2];
         }
-
     }
 }

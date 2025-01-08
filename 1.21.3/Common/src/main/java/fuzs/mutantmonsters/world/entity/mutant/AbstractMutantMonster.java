@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -54,8 +55,8 @@ public abstract class AbstractMutantMonster extends Monster {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.isAlive() && this.getTarget() != null) {
-            if (this.horizontalCollision && CommonAbstractions.INSTANCE.getMobGriefingRule(this.level(), this)) {
+        if (this.isAlive() && this.getTarget() != null && this.level() instanceof ServerLevel serverLevel) {
+            if (this.horizontalCollision && CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, this)) {
                 boolean hasDestroyedBlock = false;
                 AABB aabb = this.getBoundingBox().inflate(0.2D);
 

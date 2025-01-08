@@ -23,27 +23,33 @@ public class ModEntityTypeLootProvider extends AbstractLootProvider.EntityTypes 
     @Override
     public void addLootTables() {
         this.add(ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
-                LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.GUNPOWDER)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-                        .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries(),
-                                UniformGenerator.between(0.0F, 1.0F)
-                        ))))
-        );
+                LootTable.lootTable()
+                        .withPool(LootPool.lootPool()
+                                .add(LootItem.lootTableItem(Items.GUNPOWDER)
+                                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
+                                        .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries(),
+                                                UniformGenerator.between(0.0F, 1.0F))))));
         this.add(ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(), LootTable.lootTable());
         this.add(ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value(), LootTable.lootTable());
         this.add(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(), LootTable.lootTable());
         this.add(ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE.value(), LootTable.lootTable());
-        this.add(ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value(), LootTable.lootTable()
-                .withPool(LootPool.lootPool()
-                        .add(LootItem.lootTableItem(Items.SNOWBALL)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(32.0F, 48.0F))))));
-        this.add(ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE.value(), LootTable.lootTable()
-                .withPool(LootPool.lootPool().add(LootItem.lootTableItem(ModItems.HULK_HAMMER_ITEM.value()))));
+        this.add(ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value(),
+                LootTable.lootTable()
+                        .withPool(LootPool.lootPool()
+                                .add(LootItem.lootTableItem(Items.SNOWBALL)
+                                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(32.0F,
+                                                48.0F))))));
+        this.add(ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE.value(),
+                LootTable.lootTable()
+                        .withPool(LootPool.lootPool().add(LootItem.lootTableItem(ModItems.HULK_HAMMER_ITEM.value()))));
         this.skipValidation(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value());
-        this.add(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), LootTable.lootTable()
-                .withPool(LootPool.lootPool()
-                        .add(NestedLootTable.lootTableReference(EntityType.PIG.getDefaultLootTable()))
-                        .add(NestedLootTable.lootTableReference(EntityType.SPIDER.getDefaultLootTable()))));
+        this.add(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(),
+                LootTable.lootTable()
+                        .withPool(LootPool.lootPool()
+                                .add(NestedLootTable.lootTableReference(EntityType.PIG.getDefaultLootTable()
+                                        .orElseThrow()))
+                                .add(NestedLootTable.lootTableReference(EntityType.SPIDER.getDefaultLootTable()
+                                        .orElseThrow()))));
     }
 
     @Override

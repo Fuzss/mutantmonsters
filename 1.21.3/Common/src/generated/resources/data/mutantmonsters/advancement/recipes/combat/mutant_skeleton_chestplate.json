@@ -1,14 +1,21 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_mutant_skeleton_arms_or_mutant_skeleton_rib_cage": {
+    "has_mutant_skeleton_arms": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "mutantmonsters:mutant_skeleton_arms",
-              "mutantmonsters:mutant_skeleton_rib_cage"
-            ]
+            "items": "mutantmonsters:mutant_skeleton_arms"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_mutant_skeleton_rib_cage": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mutantmonsters:mutant_skeleton_rib_cage"
           }
         ]
       },
@@ -24,7 +31,8 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_mutant_skeleton_arms_or_mutant_skeleton_rib_cage"
+      "has_mutant_skeleton_arms",
+      "has_mutant_skeleton_rib_cage"
     ]
   ],
   "rewards": {

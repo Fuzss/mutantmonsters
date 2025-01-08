@@ -1,8 +1,6 @@
 package fuzs.mutantmonsters.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -15,7 +13,7 @@ public class MutantSkeletonPartModel extends Model {
     private final List<ModelPart> parts;
 
     public MutantSkeletonPartModel(ModelPart modelPart, ModelPart spineModelPart) {
-        super(RenderType::entityCutoutNoCull);
+        super(modelPart, RenderType::entityCutoutNoCull);
         // do this weird order thing because of order, index is somehow important
         ImmutableList.Builder<ModelPart> builder = ImmutableList.builder();
         builder.add(modelPart.getChild("pelvis"));
@@ -59,11 +57,6 @@ public class MutantSkeletonPartModel extends Model {
         root.addOrReplaceChild("shoulder1", CubeListBuilder.create().texOffs(28, 16).addBox(-4.0F, -1.5F, -3.0F, 8.0F, 3.0F, 6.0F), PartPose.ZERO);
         root.addOrReplaceChild("shoulder2", CubeListBuilder.create().texOffs(28, 16).mirror().addBox(-4.0F, -1.5F, -3.0F, 8.0F, 3.0F, 6.0F), PartPose.ZERO);
         return LayerDefinition.create(mesh, 128, 128);
-    }
-
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-        // NO-OP
     }
 
     public ModelPart getPart(int index) {

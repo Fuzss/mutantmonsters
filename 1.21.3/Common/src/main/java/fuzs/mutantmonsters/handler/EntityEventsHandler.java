@@ -11,6 +11,7 @@ import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.core.EventResultHolder;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
@@ -71,15 +72,15 @@ public class EntityEventsHandler {
                 }
 
                 pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600));
-                return EventResultHolder.interrupt(InteractionResult.sidedSuccess(level.isClientSide));
+                return EventResultHolder.interrupt(InteractionResultHelper.sidedSuccess(level.isClientSide));
             }
         }
         return EventResultHolder.pass();
     }
 
-    public static EventResult onLivingHurt(LivingEntity entity, DamageSource source, MutableFloat amount) {
+    public static EventResult onLivingHurt(LivingEntity entity, DamageSource damageSource, MutableFloat damageAmount) {
         if (entity instanceof Player && entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ArmorBlockItem) {
-            float damage = amount.getAsFloat();
+            float damage = damageAmount.getAsFloat();
             if (!(damage <= 0.0F)) {
                 damage /= 4.0F;
                 if (damage < 1.0F) {
@@ -87,7 +88,7 @@ public class EntityEventsHandler {
                 }
 
                 ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
-                if (!source.is(DamageTypeTags.IS_FIRE) || !itemStack.has(DataComponents.FIRE_RESISTANT)) {
+                if (!itemStack.has(DataComponents.DAMAGE_RESISTANT) || !itemStack.get(DataComponents.DAMAGE_RESISTANT).isResistantTo(damageSource)) {
                     ItemHelper.hurtAndBreak(itemStack, (int) damage, entity, EquipmentSlot.HEAD);
                 }
             }

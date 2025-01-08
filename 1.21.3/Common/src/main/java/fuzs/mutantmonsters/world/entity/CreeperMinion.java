@@ -11,6 +11,7 @@ import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -97,7 +98,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
         this.targetSelector.addGoal(2, new NonTameRandomTargetGoal<>(this, Player.class, true, null));
     }
 
-    public static AttributeSupplier.Builder registerAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return createMobAttributes().add(Attributes.MAX_HEALTH, 4.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
@@ -255,15 +256,15 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
             if (this.timeSinceIgnited >= TOTAL_FUSE_TIME) {
                 this.timeSinceIgnited = 0;
-                if (!this.level().isClientSide) {
+                if (this.level() instanceof ServerLevel serverLevel) {
                     float sizeIn = this.getExplosionRadius() + (this.isCharged() ? 2.0F : 0.0F);
                     Level.ExplosionInteraction interaction =
                             this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
                     MutatedExplosionHelper.explode(this, sizeIn, false, interaction);
                     if (!this.canExplodeContinuously()) {
-                        if (this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) &&
-                                this.getOwner() instanceof ServerPlayer) {
-                            this.getOwner().sendSystemMessage(
+                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) &&
+                                this.getOwner() instanceof ServerPlayer serverPlayer) {
+                            serverPlayer.sendSystemMessage(
                                     Component.translatable("death.attack.explosion", this.getDisplayName()));
                         }
 
@@ -299,7 +300,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 if (this.level().isClientSide) {
                     Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
                 }
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else {
                 if (this.isOwnedBy(player)) {
                     if (itemInHand.is(Items.GUNPOWDER)) {
@@ -315,7 +316,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(),
                                     this.getRandomZ(1.0), d0, d1, d2
                             );
-                            return InteractionResult.sidedSuccess(this.level().isClientSide);
+                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
 
                         if (this.getMaxHealth() < 20.0F) {
@@ -327,7 +328,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY(),
                                     this.getRandomZ(1.0), d0, d1, d2
                             );
-                            return InteractionResult.sidedSuccess(this.level().isClientSide);
+                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
                     } else {
                         if (!itemInHand.is(Items.TNT)) {
@@ -337,14 +338,14 @@ public class CreeperMinion extends ShoulderRidingEntity {
                                 this.setTarget(null);
                             }
 
-                            return InteractionResult.sidedSuccess(this.level().isClientSide);
+                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
 
                         if (!this.canExplodeContinuously()) {
                             this.forcedAgeTimer += 15;
                             this.setCanExplodeContinuously(true);
                             itemInHand.shrink(1);
-                            return InteractionResult.sidedSuccess(this.level().isClientSide);
+                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
 
                         float explosionRadius = this.getExplosionRadius();
@@ -352,7 +353,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.forcedAgeTimer += 10;
                             this.setExplosionRadius(explosionRadius + 0.11F);
                             itemInHand.shrink(1);
-                            return InteractionResult.sidedSuccess(this.level().isClientSide);
+                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
                     }
                 }
@@ -373,19 +374,19 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 }
             }
 
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
         } else if (player.isCreative() && itemInHand.is(ModItems.CREEPER_MINION_TRACKER_ITEM.value()) &&
                 this.getOwner() == null) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
                 this.setTame(true, true);
                 this.setOwnerUUID(player.getUUID());
-                player.sendSystemMessage(Component.translatable(
+                serverPlayer.sendSystemMessage(Component.translatable(
                         ModItems.CREEPER_MINION_TRACKER_ITEM.value().getDescriptionId() + ".tame_success",
                         this.getDisplayName(), player.getDisplayName()
                 ));
             }
 
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
         } else {
             return InteractionResult.PASS;
         }
@@ -397,27 +398,27 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
         return true;
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
+        if (this.isInvulnerableTo(serverLevel, damageSource)) {
             return false;
         } else {
-            if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+            if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
                 if (this.isTame()) {
                     return false;
                 }
 
-                if (amount >= 2.0F) {
-                    amount = 2.0F;
+                if (damageAmount >= 2.0F) {
+                    damageAmount = 2.0F;
                 }
             }
 
             this.setOrderedToSit(false);
-            return super.hurt(source, amount);
+            return super.hurtServer(serverLevel, damageSource, damageAmount);
         }
     }
 
@@ -456,12 +457,6 @@ public class CreeperMinion extends ShoulderRidingEntity {
     public PlayerTeam getTeam() {
         LivingEntity owner = this.getOwner();
         return owner != null ? owner.getTeam() : super.getTeam();
-    }
-
-    @Override
-    public boolean isAlliedTo(Entity entity) {
-        LivingEntity owner = this.getOwner();
-        return owner != null && (entity == owner || owner.isAlliedTo(entity)) || super.isAlliedTo(entity);
     }
 
     @Override

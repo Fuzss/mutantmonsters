@@ -6,11 +6,13 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.puzzleslib.api.entity.v1.DamageSourcesHelper;
+import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -112,9 +114,9 @@ public class EndersoulFragment extends Entity {
             this.owner = null;
         }
 
-        if (!this.level().isClientSide) {
+        if (this.level() instanceof ServerLevel serverLevel) {
             if (!this.isTamed() && --this.explodeTick == 0) {
-                this.explode();
+                this.explode(serverLevel);
             }
 
             if (this.owner != null && this.distanceToSqr(this.owner) > 9.0) {
@@ -131,11 +133,11 @@ public class EndersoulFragment extends Entity {
             if (this.owner == null && !player.isSecondaryUseActive()) {
                 this.owner = player;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else if (this.owner == player && player.isSecondaryUseActive()) {
                 this.owner = null;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else {
                 return InteractionResult.PASS;
             }
@@ -146,28 +148,28 @@ public class EndersoulFragment extends Entity {
 
             this.owner = player;
             this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.5F);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
         }
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float amount) {
+        if (this.isInvulnerableToBase(damageSource)) {
             return false;
         } else {
-            if (!this.level().isClientSide && this.isAlive() && this.tickCount > 0) {
-                this.explode();
+            if (this.isAlive() && this.tickCount > 0) {
+                this.explode(serverLevel);
             }
 
             return true;
         }
     }
 
-    private void explode() {
+    private void explode(ServerLevel serverLevel) {
         this.playSound(ModSoundEvents.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.value(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-        this.level().broadcastEntityEvent(this, (byte) 3);
+        serverLevel.broadcastEntityEvent(this, (byte) 3);
 
-        for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
+        for (Entity entity : serverLevel.getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
             if (this.distanceToSqr(entity) <= 25.0) {
                 boolean hitChance = this.random.nextInt(3) != 0;
                 if (isProtected(entity)) {
@@ -181,7 +183,11 @@ public class EndersoulFragment extends Entity {
                 }
 
                 if (hitChance) {
-                    entity.hurt(DamageSourcesHelper.source(this.level(), ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE, this, this.spawner != null ? this.spawner.get() : this), 1.0F);
+                    DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
+                            ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE,
+                            this,
+                            this.spawner != null ? this.spawner.get() : this);
+                    entity.hurtServer(serverLevel, damageSource, 1.0F);
                 }
             }
         }

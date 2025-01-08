@@ -7,13 +7,14 @@ import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
+import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,23 +37,19 @@ public class EndersoulHandItem extends Item {
     }
 
     public static ItemAttributeModifiers createAttributes() {
-        return ItemAttributeModifiers.builder().add(Attributes.ATTACK_DAMAGE,
-                new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 5.0, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.MAINHAND
-        ).add(Attributes.ATTACK_SPEED,
-                new AttributeModifier(BASE_ATTACK_SPEED_ID, -2.4F, AttributeModifier.Operation.ADD_VALUE),
-                EquipmentSlotGroup.MAINHAND
-        ).build();
+        return ItemAttributeModifiers.builder()
+                .add(Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 5.0, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_SPEED,
+                        new AttributeModifier(BASE_ATTACK_SPEED_ID, -2.4F, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.MAINHAND)
+                .build();
     }
 
     @Override
     public boolean canAttackBlock(BlockState state, Level worldIn, BlockPos pos, Player player) {
         return !player.isCreative();
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return 20;
     }
 
     @Override
@@ -64,9 +61,10 @@ public class EndersoulHandItem extends Item {
         Player player = context.getPlayer();
         if (context.isSecondaryUseActive()) {
             return InteractionResult.PASS;
-        } else if (!MutantEnderman.canBlockBeHeld(level, pos, blockState,
-                ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG
-        )) {
+        } else if (!MutantEnderman.canBlockBeHeld(level,
+                pos,
+                blockState,
+                ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG)) {
             return InteractionResult.PASS;
         } else if (!level.mayInteract(player, pos)) {
             return InteractionResult.PASS;
@@ -78,24 +76,24 @@ public class EndersoulHandItem extends Item {
                 level.removeBlock(pos, false);
             }
 
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResultHelper.sidedSuccess(level.isClientSide);
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+    public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemInHand = player.getItemInHand(interactionHand);
         if (!player.isSecondaryUseActive()) {
-            return InteractionResultHolder.pass(itemInHand);
+            return InteractionResultHelper.pass(itemInHand);
         } else {
             HitResult result = player.pick(MutantMonsters.CONFIG.get(ServerConfig.class).endersoulHandTeleportDistance,
-                    1.0F, false
-            );
+                    1.0F,
+                    false);
             if (result.getType() != HitResult.Type.BLOCK) {
                 player.displayClientMessage(Component.translatable(this.getDescriptionId() + ".teleport_failed"), true);
-                return InteractionResultHolder.fail(itemInHand);
+                return InteractionResultHelper.fail(itemInHand);
             } else {
-                if (!level.isClientSide) {
+                if (level instanceof ServerLevel serverLevel) {
                     BlockPos startPos = ((BlockHitResult) result).getBlockPos();
                     BlockPos endPos = startPos.relative(((BlockHitResult) result).getDirection());
                     BlockPos posDown = startPos.below();
@@ -109,23 +107,31 @@ public class EndersoulHandItem extends Item {
                         }
                     }
 
-                    level.playSound(null, player.xo, player.yo, player.zo, SoundEvents.CHORUS_FRUIT_TELEPORT,
-                            player.getSoundSource(), 1.0F, 1.0F
-                    );
+                    level.playSound(null,
+                            player.xo,
+                            player.yo,
+                            player.zo,
+                            SoundEvents.CHORUS_FRUIT_TELEPORT,
+                            player.getSoundSource(),
+                            1.0F,
+                            1.0F);
                     player.teleportTo((double) endPos.getX() + 0.5, endPos.getY(), (double) endPos.getZ() + 0.5);
-                    level.playSound(null, endPos, SoundEvents.CHORUS_FRUIT_TELEPORT, player.getSoundSource(), 1.0F,
-                            1.0F
-                    );
-                    MutantEnderman.teleportAttack(player);
+                    level.playSound(null,
+                            endPos,
+                            SoundEvents.CHORUS_FRUIT_TELEPORT,
+                            player.getSoundSource(),
+                            1.0F,
+                            1.0F);
+                    MutantEnderman.teleportAttack(serverLevel, player);
                     EntityUtil.sendParticlePacket(player, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
-                    player.getCooldowns().addCooldown(this, 200);
+                    player.getCooldowns().addCooldown(itemInHand, 200);
                     ItemHelper.hurtAndBreak(itemInHand, 4, player, interactionHand);
                 }
 
                 player.fallDistance = 0.0F;
                 player.swing(interactionHand);
                 player.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.sidedSuccess(itemInHand, level.isClientSide);
+                return InteractionResultHelper.sidedSuccess(itemInHand, level.isClientSide);
             }
         }
     }
