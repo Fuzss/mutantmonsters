@@ -1,11 +1,9 @@
 package fuzs.mutantmonsters.client.renderer.entity.state;
 
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 
-public class CreeperMinionRenderState extends LivingEntityRenderState implements PowerableRenderState {
+public class CreeperMinionRenderState extends CreeperRenderState implements PowerableRenderState {
     public boolean inSittingPose;
-    public float flashIntensity;
-    public boolean isPowered;
 
     @Override
     public boolean isPowered() {

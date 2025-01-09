@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -59,7 +60,7 @@ public class MutantCreeper extends AbstractMutantMonster {
     public MutantCreeper(EntityType<? extends MutantCreeper> type, Level worldIn) {
         super(type, worldIn);
         this.chargeHits = 3 + this.random.nextInt(3);
-        this.xpReward = 30;
+        this.xpReward = Enemy.XP_REWARD_HUGE;
     }
 
     @Override
@@ -508,7 +509,6 @@ public class MutantCreeper extends AbstractMutantMonster {
 
                 MutantCreeper.this.level().addFreshEntity(minion);
             }
-
         }
     }
 }

@@ -57,6 +57,7 @@ import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Endermite;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -121,12 +122,12 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     private int angerTime;
     private UUID angerTarget;
 
-    public MutantEnderman(EntityType<? extends MutantEnderman> type, Level worldIn) {
-        super(type, worldIn);
+    public MutantEnderman(EntityType<? extends MutantEnderman> entityType, Level level) {
+        super(entityType, level);
         this.animation = EntityAnimation.NONE;
         this.heldBlocks = new int[4];
         this.heldBlockTicks = new int[4];
-        this.xpReward = 40;
+        this.xpReward = Enemy.XP_REWARD_BOSS;
     }
 
     @Override

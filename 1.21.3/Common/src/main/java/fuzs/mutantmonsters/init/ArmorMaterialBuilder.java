@@ -19,6 +19,7 @@ import java.util.Objects;
 /**
  * A builder class for {@link ArmorMaterial}.
  */
+@Deprecated(forRemoval = true)
 public final class ArmorMaterialBuilder {
     private static final ResourceLocation NO_RENDER_MODEL_ID = MutantMonsters.id("no_render");
 

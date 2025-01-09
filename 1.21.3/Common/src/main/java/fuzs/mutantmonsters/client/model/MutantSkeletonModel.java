@@ -722,6 +722,10 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
         public final ModelPart[] side1 = new ModelPart[3];
         public final ModelPart[] side2 = new ModelPart[3];
 
+        public Spine(ModelPart modelPart) {
+            this(modelPart, "");
+        }
+
         public Spine(ModelPart modelPart, String indexString) {
             this.middle = modelPart.getChild("middle" + indexString);
             modelPart = this.middle;

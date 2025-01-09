@@ -1,43 +1,43 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 
-import java.util.List;
+import java.util.Map;
 
 public class MutantSkeletonPartModel extends Model {
-    private final List<ModelPart> parts;
+    private final Map<MutantSkeletonBodyPart.BodyPart, ModelPart> bodyParts;
 
     public MutantSkeletonPartModel(ModelPart modelPart, ModelPart spineModelPart) {
         super(modelPart, RenderType::entityCutoutNoCull);
-        // do this weird order thing because of order, index is somehow important
-        ImmutableList.Builder<ModelPart> builder = ImmutableList.builder();
-        builder.add(modelPart.getChild("pelvis"));
-        for (int i = 0; i < 3; ++i) {
-            MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart, "");
-            spine.setAngles(i == 1);
-            for (int j = 0; j < 3; j++) {
-                builder.add(spine.side1[i], spine.side2[i]);
-            }
-        }
-        ModelPart head = modelPart.getChild("head");
-        builder.add(head);
-        builder.add(head.getChild("jaw"));
-        builder.add(modelPart.getChild("arm1"));
-        builder.add(modelPart.getChild("arm2"));
-        builder.add(modelPart.getChild("forearm1"));
-        builder.add(modelPart.getChild("forearm2"));
-        builder.add(modelPart.getChild("leg1"));
-        builder.add(modelPart.getChild("leg2"));
-        builder.add(modelPart.getChild("foreleg1"));
-        builder.add(modelPart.getChild("foreleg2"));
-        builder.add(modelPart.getChild("shoulder1"));
-        builder.add(modelPart.getChild("shoulder2"));
-        this.parts = builder.build();
+        ImmutableMap.Builder<MutantSkeletonBodyPart.BodyPart, ModelPart> builder = ImmutableMap.builder();
+        builder.put(MutantSkeletonBodyPart.BodyPart.PELVIS, modelPart.getChild("pelvis"));
+        MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart);
+        spine.setAngles(false);
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_UPPER_RIB, spine.side1[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_UPPER_RIB, spine.side2[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_MIDDLE_RIB, spine.side1[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_MIDDLE_RIB, spine.side2[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_LOWER_RIB, spine.side1[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_LOWER_RIB, spine.side2[0]);
+        builder.put(MutantSkeletonBodyPart.BodyPart.HEAD, modelPart.getChild("head"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_ARM, modelPart.getChild("arm1"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_ARM, modelPart.getChild("arm2"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_FORE_ARM, modelPart.getChild("forearm1"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_FORE_ARM, modelPart.getChild("forearm2"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_LEG, modelPart.getChild("leg1"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_LEG, modelPart.getChild("leg2"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_FORE_LEG, modelPart.getChild("foreleg1"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_FORE_LEG, modelPart.getChild("foreleg2"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_SHOULDER, modelPart.getChild("shoulder1"));
+        builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_SHOULDER, modelPart.getChild("shoulder2"));
+        this.bodyParts = Maps.immutableEnumMap(builder.build());
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -59,7 +59,7 @@ public class MutantSkeletonPartModel extends Model {
         return LayerDefinition.create(mesh, 128, 128);
     }
 
-    public ModelPart getPart(int index) {
-        return this.parts.get(index);
+    public ModelPart getBodyPart(MutantSkeletonBodyPart.BodyPart bodyPart) {
+        return this.bodyParts.get(bodyPart);
     }
 }

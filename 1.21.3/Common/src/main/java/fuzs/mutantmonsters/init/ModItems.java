@@ -10,6 +10,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.level.block.Block;
 
 public class ModItems {
     public static final ArmorMaterial MUTANT_SKELETON_ARMOR_MATERIAL = ArmorMaterialBuilder.of(MutantMonsters.id(
@@ -84,9 +85,9 @@ public class ModItems {
             "mutant_skeleton_rib_cage");
     public static final Holder.Reference<Item> MUTANT_SKELETON_SHOULDER_PAD_ITEM = ModRegistry.REGISTRIES.registerItem(
             "mutant_skeleton_shoulder_pad");
-    public static final Holder.Reference<Item> MUTANT_SKELETON_SKULL_ITEM = ModRegistry.REGISTRIES.registerItem(
-            "mutant_skeleton_skull",
-            (Item.Properties properties) -> new ArmorBlockItem(ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(),
+    public static final Holder.Reference<Item> MUTANT_SKELETON_SKULL_ITEM = ModRegistry.REGISTRIES.registerBlockItem(
+            ModRegistry.MUTANT_SKELETON_SKULL_BLOCK,
+            (Block block, Item.Properties properties) -> new ArmorBlockItem(block,
                     ModRegistry.MUTANT_SKELETON_WALL_SKULL_BLOCK.value(),
                     MUTANT_SKELETON_HELMET_ARMOR_MATERIAL,
                     properties),

@@ -32,6 +32,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,7 +55,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     public MutantSkeleton(EntityType<? extends MutantSkeleton> type, Level worldIn) {
         super(type, worldIn);
         this.animation = EntityAnimation.NONE;
-        this.xpReward = 30;
+        this.xpReward = Enemy.XP_REWARD_HUGE;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -171,64 +172,10 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 livingEntity.hurtServer(serverLevel, damageSource, 7.0F);
             }
 
-            for (int i = 0; i < 18; ++i) {
-
-                int j = i;
-                if (i >= 3) {
-                    j = i + 1;
-                }
-
-                if (j >= 4) {
-                    ++j;
-                }
-
-                if (j >= 5) {
-                    ++j;
-                }
-
-                if (j >= 6) {
-                    ++j;
-                }
-
-                if (j >= 9) {
-                    ++j;
-                }
-
-                if (j >= 10) {
-                    ++j;
-                }
-
-                if (j >= 11) {
-                    ++j;
-                }
-
-                if (j >= 12) {
-                    ++j;
-                }
-
-                if (j >= 15) {
-                    ++j;
-                }
-
-                if (j >= 16) {
-                    ++j;
-                }
-
-                if (j >= 17) {
-                    ++j;
-                }
-
-                if (j >= 18) {
-                    ++j;
-                }
-
-                if (j >= 20) {
-                    ++j;
-                }
-
-                MutantSkeletonBodyPart bodyPart = new MutantSkeletonBodyPart(serverLevel, this, j);
-                bodyPart.setDeltaMovement(bodyPart.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
-                serverLevel.addFreshEntity(bodyPart);
+            for (MutantSkeletonBodyPart.BodyPart bodyPart : MutantSkeletonBodyPart.BodyPart.values()) {
+                MutantSkeletonBodyPart mutantSkeletonBodyPart = new MutantSkeletonBodyPart(serverLevel, this, bodyPart);
+                mutantSkeletonBodyPart.setDeltaMovement(mutantSkeletonBodyPart.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
+                serverLevel.addFreshEntity(mutantSkeletonBodyPart);
             }
         }
 

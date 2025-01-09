@@ -26,7 +26,7 @@ public class BodyPartRenderer extends EntityRenderer<MutantSkeletonBodyPart, Bod
         super.extractRenderState(entity, reusedState, partialTick);
         reusedState.xRot = entity.getXRot(partialTick);
         reusedState.yRot = entity.getYRot(partialTick);
-        reusedState.partId = entity.getPart();
+        reusedState.bodyPart = entity.getBodyPart();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BodyPartRenderer extends EntityRenderer<MutantSkeletonBodyPart, Bod
         poseStack.mulPose(Axis.XP.rotationDegrees(renderState.xRot));
         poseStack.scale(1.2F, -1.2F, -1.2F);
         VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(MutantSkeletonRenderer.TEXTURE_LOCATION));
-        this.model.getPart(renderState.partId)
+        this.model.getBodyPart(renderState.bodyPart)
                 .render(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

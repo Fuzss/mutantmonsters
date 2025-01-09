@@ -8,7 +8,11 @@ import net.minecraft.client.renderer.entity.layers.EnergySwirlLayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 
-public class PowerableLayer<S extends EntityRenderState & PowerableRenderState, M extends EntityModel<S>> extends EnergySwirlLayer<S, M> {
+/**
+ * We cannot use our {@link PowerableRenderState} as type parameter, as we rely on the vanilla creeper model, which does
+ * not permit a custom render state type parameter for the model class.
+ */
+public class PowerableLayer<S extends EntityRenderState, M extends EntityModel<S>> extends EnergySwirlLayer<S, M> {
     public static final ResourceLocation LIGHTNING_TEXTURE = ResourceLocationHelper.withDefaultNamespace(
             "textures/entity/creeper/creeper_armor.png");
 
@@ -21,7 +25,7 @@ public class PowerableLayer<S extends EntityRenderState & PowerableRenderState, 
 
     @Override
     protected boolean isPowered(S renderState) {
-        return renderState.isPowered();
+        return ((PowerableRenderState) renderState).isPowered();
     }
 
     @Override

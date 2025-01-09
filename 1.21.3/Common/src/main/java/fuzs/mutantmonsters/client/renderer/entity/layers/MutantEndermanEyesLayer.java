@@ -27,7 +27,7 @@ public class MutantEndermanEyesLayer extends RenderLayer<MutantEndermanRenderSta
         if (!renderState.isClone) {
             VertexConsumer vertexConsumer = bufferSource.getBuffer(EYES_RENDER_TYPE);
             float alpha =
-                    renderState.deathTime > 80 ? 1.0F - MutantEndermanRenderer.getDeathProgress(renderState) : 1.0F;
+                    renderState.deathTime > 80.0F ? 1.0F - MutantEndermanRenderer.getDeathProgress(renderState) : 1.0F;
             int color = ARGB.colorFromFloat(alpha, 1.0F, 1.0F, 1.0F);
             this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY, color);
         }

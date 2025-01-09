@@ -2,6 +2,7 @@ package fuzs.mutantmonsters.init;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
+import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
 import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.mutantmonsters.world.level.block.SkullWithItemComponentsBlock;
 import fuzs.mutantmonsters.world.level.block.WallSkullWithItemComponentsBlock;
@@ -13,6 +14,7 @@ import fuzs.puzzleslib.api.init.v3.tags.TagFactory;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -74,6 +76,10 @@ public class ModRegistry {
     public static final Holder.Reference<SimpleParticleType> SKULL_SPIRIT_PARTICLE_TYPE = REGISTRIES.register(Registries.PARTICLE_TYPE,
             "skull_spirit",
             () -> new SimpleParticleType(true));
+    public static final Holder.Reference<EntityDataSerializer<MutantSkeletonBodyPart.BodyPart>> BODY_PART_ENTITY_DATA_SERIALIZER = REGISTRIES.registerEntityDataSerializer(
+            "body_part",
+            () -> EntityDataSerializer.forValueType(
+                    MutantSkeletonBodyPart.BodyPart.STREAM_CODEC));
 
     public static final DataAttachmentType<Entity, List<SeismicWave>> SEISMIC_WAVE_ATTACHMENT_TYPE = DataAttachmentRegistry.<List<SeismicWave>>entityBuilder()
             .defaultValue(EntityType.PLAYER, Collections.emptyList())

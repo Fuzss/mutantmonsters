@@ -1,7 +1,8 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
+import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ModelLayerLocations;
-import fuzs.mutantmonsters.client.renderer.entity.layers.EndersoulLayer;
+import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.state.EndersoulCloneRenderState;
 import fuzs.mutantmonsters.world.entity.EndersoulClone;
 import net.minecraft.client.model.EndermanModel;
@@ -10,13 +11,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.phys.Vec3;
 
 public class EndersoulCloneRenderer extends MobRenderer<EndersoulClone, EndersoulCloneRenderState, EndermanModel<EndersoulCloneRenderState>> {
+    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/endersoul.png");
 
     public EndersoulCloneRenderer(EntityRendererProvider.Context context) {
         super(context, new EndermanModel<>(context.bakeLayer(ModelLayerLocations.ENDERSOUL_CLONE)), 0.5F);
-        this.addLayer(new EndersoulLayer<>(this));
         this.shadowStrength = 0.5F;
     }
 
@@ -41,9 +43,10 @@ public class EndersoulCloneRenderer extends MobRenderer<EndersoulClone, Endersou
     }
 
     @Override
-    protected RenderType getRenderType(EndersoulCloneRenderState endersoulClone, boolean bodyVisible, boolean translucent, boolean glowing) {
-        // TODO set parent model to invisible instead
-        return null;
+    protected RenderType getRenderType(EndersoulCloneRenderState renderState, boolean bodyVisible, boolean translucent, boolean glowing) {
+        return ModRenderType.energySwirl(this.getTextureLocation(renderState),
+                renderState.ageInTicks * 0.008F,
+                renderState.ageInTicks * 0.008F);
     }
 
     @Override
@@ -53,6 +56,11 @@ public class EndersoulCloneRenderer extends MobRenderer<EndersoulClone, Endersou
 
     @Override
     public ResourceLocation getTextureLocation(EndersoulCloneRenderState renderState) {
-        return EndersoulLayer.TEXTURE_LOCATION;
+        return TEXTURE_LOCATION;
+    }
+
+    @Override
+    protected int getModelTint(EndersoulCloneRenderState renderState) {
+        return ARGB.colorFromFloat(1.0F, 0.9F, 0.3F, 1.0F);
     }
 }

@@ -48,6 +48,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -96,7 +97,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         this.throwFinishTick = -1;
         this.seismicWaveList = new ArrayList<>();
         this.resurrectionList = new ArrayList<>();
-        this.xpReward = 30;
+        this.xpReward = Enemy.XP_REWARD_HUGE;
     }
 
     public static AttributeSupplier.Builder createAttributes() {

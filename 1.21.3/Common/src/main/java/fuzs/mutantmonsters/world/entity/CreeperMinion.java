@@ -287,7 +287,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
         super.tick();
     }
 
-    public float getFlashIntensity(float partialTicks) {
+    public float getSwelling(float partialTicks) {
         return Mth.lerp(partialTicks, (float) this.lastActiveTime, (float) this.timeSinceIgnited) /
                 (float) (TOTAL_FUSE_TIME - 2);
     }

@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -28,7 +29,7 @@ public class EndersoulClone extends Monster {
 
     public EndersoulClone(EntityType<? extends EndersoulClone> type, Level worldIn) {
         super(type, worldIn);
-        this.xpReward = this.random.nextInt(2);
+        this.xpReward = Enemy.XP_REWARD_SMALL;
         this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
         this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
         this.setPathfindingMalus(PathType.DAMAGE_OTHER, -1.0F);

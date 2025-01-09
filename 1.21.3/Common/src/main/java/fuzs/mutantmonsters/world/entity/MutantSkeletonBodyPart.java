@@ -1,27 +1,32 @@
 package fuzs.mutantmonsters.world.entity;
 
+import com.mojang.serialization.DataResult;
+import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ByIdMap;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -30,24 +35,28 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Locale;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
-public class MutantSkeletonBodyPart extends Entity {
-    public static final String TAG_PART = "Part";
+public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
+    public static final String TAG_BODY_PART = "BodyPart";
     public static final String TAG_DESPAWN_TIMER = "DespawnTimer";
-    private static final EntityDataAccessor<Byte> PART = SynchedEntityData.defineId(MutantSkeletonBodyPart.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<BodyPart> BODY_PART = SynchedEntityData.defineId(MutantSkeletonBodyPart.class,
+            ModRegistry.BODY_PART_ENTITY_DATA_SERIALIZER.value());
 
     private final boolean yawPositive;
     private final boolean pitchPositive;
-    private WeakReference<Mob> owner;
+    @Nullable
+    private Mob owner;
     private double velocityX;
     private double velocityY;
     private double velocityZ;
     private int despawnTimer;
 
-    public MutantSkeletonBodyPart(EntityType<? extends MutantSkeletonBodyPart> type, Level world) {
-        super(type, world);
+    public MutantSkeletonBodyPart(EntityType<? extends MutantSkeletonBodyPart> type, Level level) {
+        super(type, level);
         this.setYRot(this.random.nextFloat() * 360.0F);
         this.yRotO = this.getYRot();
         this.setXRot(this.random.nextFloat() * 360.0F);
@@ -56,25 +65,25 @@ public class MutantSkeletonBodyPart extends Entity {
         this.pitchPositive = this.random.nextBoolean();
     }
 
-    public MutantSkeletonBodyPart(Level level, Mob owner, int part) {
+    public MutantSkeletonBodyPart(Level level, Mob owner, BodyPart bodyPart) {
         this(ModEntityTypes.BODY_PART_ENTITY_TYPE.value(), level);
-        this.owner = new WeakReference<>(owner);
-        this.setPart(part);
-        this.setPos(owner.getX(), owner.getY() + (double) (3.2F * (0.25F + this.random.nextFloat() * 0.5F)), owner.getZ());
+        this.owner = owner;
+        this.setBodyPart(bodyPart);
+        this.setPos(owner.getX(), owner.getY() + 3.2F * (0.25F + this.random.nextFloat() * 0.5F), owner.getZ());
         this.setRemainingFireTicks(owner.getRemainingFireTicks());
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(PART, (byte) 0);
+        builder.define(BODY_PART, BodyPart.PELVIS);
     }
 
-    public int getPart() {
-        return this.entityData.get(PART);
+    public BodyPart getBodyPart() {
+        return this.entityData.get(BODY_PART);
     }
 
-    private void setPart(int id) {
-        this.entityData.set(PART, (byte) id);
+    private void setBodyPart(BodyPart bodyPart) {
+        this.entityData.set(BODY_PART, bodyPart);
     }
 
     @Override
@@ -112,6 +121,14 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     @Override
+    public void restoreFrom(Entity entity) {
+        super.restoreFrom(entity);
+        if (entity instanceof MutantSkeletonBodyPart mutantSkeletonBodyPart) {
+            this.owner = mutantSkeletonBodyPart.owner;
+        }
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (!this.isNoGravity()) {
@@ -130,9 +147,8 @@ public class MutantSkeletonBodyPart extends Entity {
 
             if (this.level() instanceof ServerLevel serverLevel) {
                 for (Entity entity : serverLevel.getEntities(this, this.getBoundingBox(), this::canHarm)) {
-                    DamageSource damageSource = serverLevel
-                            .damageSources()
-                            .thrown(this, this.owner != null ? this.owner.get() : this);
+                    DamageSource damageSource = serverLevel.damageSources()
+                            .thrown(this, this.owner != null ? this.owner : this);
                     float damageAmount = 4.0F + (float) this.random.nextInt(4);
                     if (entity.hurtServer(serverLevel, damageSource, damageAmount)) {
                         entity.igniteForSeconds(this.getRemainingFireTicks() / 20.0F);
@@ -154,17 +170,16 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (this.level() instanceof ServerLevel serverLevel &&
+                serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ResourceKey<LootTable> resourceKey = this.getItemPartLootTableId();
-            if (resourceKey != null) {
-                LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
-                LootParams lootParams = new LootParams.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY,
-                        this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET);
-                List<ItemStack> list = lootTable.getRandomItems(lootParams);
-                for (ItemStack item : list) {
-                    if (!item.isEmpty()) {
-                        this.spawnAtLocation(serverLevel, item).setNoPickUpDelay();
-                    }
+            LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
+            LootParams lootParams = new LootParams.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY,
+                    this).create(ModRegistry.BODY_PART_LOOT_CONTEXT_PARAM_SET);
+            List<ItemStack> list = lootTable.getRandomItems(lootParams);
+            for (ItemStack item : list) {
+                if (!item.isEmpty()) {
+                    this.spawnAtLocation(serverLevel, item).setNoPickUpDelay();
                 }
             }
         }
@@ -182,34 +197,11 @@ public class MutantSkeletonBodyPart extends Entity {
     }
 
     private Item getLegacyItemByPart() {
-        int part = this.getPart();
-        if (part == 0) {
-            return ModItems.MUTANT_SKELETON_PELVIS_ITEM.value();
-        } else if (part >= 1 && part < 19) {
-            return ModItems.MUTANT_SKELETON_RIB_ITEM.value();
-        } else if (part == 19) {
-            return ModItems.MUTANT_SKELETON_SKULL_ITEM.value();
-        } else if (part >= 21 && part < 29) {
-            return ModItems.MUTANT_SKELETON_LIMB_ITEM.value();
-        } else {
-            return part != 29 && part != 30 ? Items.AIR : ModItems.MUTANT_SKELETON_SHOULDER_PAD_ITEM.value();
-        }
+        return this.getBodyPart().group.item.get().value();
     }
 
-    @Nullable
-    public ResourceKey<LootTable> getItemPartLootTableId() {
-        int part = this.getPart();
-        if (part == 0) {
-            return ModRegistry.MUTANT_SKELETON_PELVIS_LOOT_TABLE;
-        } else if (part >= 1 && part < 19) {
-            return ModRegistry.MUTANT_SKELETON_RIB_LOOT_TABLE;
-        } else if (part == 19) {
-            return ModRegistry.MUTANT_SKELETON_SKULL_LOOT_TABLE;
-        } else if (part >= 21 && part < 29) {
-            return ModRegistry.MUTANT_SKELETON_LIMB_LOOT_TABLE;
-        } else {
-            return part != 29 && part != 30 ? null : ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_LOOT_TABLE;
-        }
+    private ResourceKey<LootTable> getItemPartLootTableId() {
+        return this.getBodyPart().group.lootTable.get();
     }
 
     public int getMaxAge() {
@@ -218,13 +210,84 @@ public class MutantSkeletonBodyPart extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putByte(TAG_PART, (byte) this.getPart());
+        BodyPart.CODEC.encodeStart(NbtOps.INSTANCE, this.getBodyPart()).ifError((DataResult.Error<Tag> error) -> {
+            MutantMonsters.LOGGER.warn("Error saving body part {}: {}", this.getBodyPart(), error);
+        }).ifSuccess((Tag tag) -> {
+            compound.put(TAG_BODY_PART, tag);
+        });
         compound.putShort(TAG_DESPAWN_TIMER, (short) this.despawnTimer);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setPart(compound.getByte(TAG_PART));
+        BodyPart.CODEC.parse(NbtOps.INSTANCE, compound.get(TAG_BODY_PART))
+                .ifError((DataResult.Error<BodyPart> error) -> {
+                    MutantMonsters.LOGGER.warn("Error loading body part {}: {}", compound.get(TAG_BODY_PART), error);
+                })
+                .ifSuccess(this::setBodyPart);
         this.despawnTimer = compound.getShort(TAG_DESPAWN_TIMER);
+    }
+
+    @Override
+    public @Nullable Entity getOwner() {
+        return this.owner;
+    }
+
+    public enum BodyPart implements StringRepresentable {
+        PELVIS(BodyPartGroup.PELVIS),
+        LEFT_UPPER_RIB(BodyPartGroup.RIB),
+        RIGHT_UPPER_RIB(BodyPartGroup.RIB),
+        LEFT_MIDDLE_RIB(BodyPartGroup.RIB),
+        RIGHT_MIDDLE_RIB(BodyPartGroup.RIB),
+        LEFT_LOWER_RIB(BodyPartGroup.RIB),
+        RIGHT_LOWER_RIB(BodyPartGroup.RIB),
+        HEAD(BodyPartGroup.SKULL),
+        LEFT_ARM(BodyPartGroup.LIMB),
+        RIGHT_ARM(BodyPartGroup.LIMB),
+        LEFT_FORE_ARM(BodyPartGroup.LIMB),
+        RIGHT_FORE_ARM(BodyPartGroup.LIMB),
+        LEFT_LEG(BodyPartGroup.LIMB),
+        RIGHT_LEG(BodyPartGroup.LIMB),
+        LEFT_FORE_LEG(BodyPartGroup.LIMB),
+        RIGHT_FORE_LEG(BodyPartGroup.LIMB),
+        LEFT_SHOULDER(BodyPartGroup.SHOULDER),
+        RIGHT_SHOULDER(BodyPartGroup.SHOULDER);
+
+        private static final BodyPart[] VALUES = values();
+        public static final StringRepresentable.StringRepresentableCodec<BodyPart> CODEC = StringRepresentable.fromEnum(
+                () -> VALUES);
+        public static final IntFunction<BodyPart> BY_ID = ByIdMap.continuous(BodyPart::ordinal,
+                VALUES,
+                ByIdMap.OutOfBoundsStrategy.ZERO);
+        public static final StreamCodec<ByteBuf, BodyPart> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID,
+                BodyPart::ordinal);
+
+        public final BodyPartGroup group;
+
+        BodyPart(BodyPartGroup group) {
+            this.group = group;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    public enum BodyPartGroup {
+        PELVIS(() -> ModItems.MUTANT_SKELETON_PELVIS_ITEM, () -> ModRegistry.MUTANT_SKELETON_PELVIS_LOOT_TABLE),
+        RIB(() -> ModItems.MUTANT_SKELETON_RIB_ITEM, () -> ModRegistry.MUTANT_SKELETON_RIB_LOOT_TABLE),
+        SKULL(() -> ModItems.MUTANT_SKELETON_SKULL_ITEM, () -> ModRegistry.MUTANT_SKELETON_SKULL_LOOT_TABLE),
+        LIMB(() -> ModItems.MUTANT_SKELETON_LIMB_ITEM, () -> ModRegistry.MUTANT_SKELETON_LIMB_LOOT_TABLE),
+        SHOULDER(() -> ModItems.MUTANT_SKELETON_SHOULDER_PAD_ITEM,
+                () -> ModRegistry.MUTANT_SKELETON_SHOULDER_PAD_LOOT_TABLE);
+
+        public final Supplier<Holder.Reference<Item>> item;
+        public final Supplier<ResourceKey<LootTable>> lootTable;
+
+        BodyPartGroup(Supplier<Holder.Reference<Item>> item, Supplier<ResourceKey<LootTable>> lootTable) {
+            this.item = item;
+            this.lootTable = lootTable;
+        }
     }
 }

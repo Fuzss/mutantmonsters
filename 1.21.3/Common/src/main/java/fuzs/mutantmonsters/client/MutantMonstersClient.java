@@ -18,6 +18,7 @@ import fuzs.puzzleslib.api.client.event.v1.renderer.ExtractRenderStateCallbackV2
 import fuzs.puzzleslib.api.client.init.v1.ItemModelDisplayOverrides;
 import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
+import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -111,16 +112,16 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_EGG_ARMOR,
                 () -> CreeperMinionEggModel.createBodyLayer(new CubeDeformation(1.0F)));
         context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION,
-                () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(0.0F))
+                () -> CreeperModel.createBodyLayer(new CubeDeformation(0.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
         context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_ARMOR,
-                () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(2.0F))
+                () -> CreeperModel.createBodyLayer(new CubeDeformation(2.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
         context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_SHOULDER,
-                () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(0.0F))
+                () -> CreeperModel.createBodyLayer(new CubeDeformation(0.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
         context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_SHOULDER_ARMOR,
-                () -> CreeperMinionModel.createBodyLayer(new CubeDeformation(2.0F))
+                () -> CreeperModel.createBodyLayer(new CubeDeformation(2.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
         context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_CLONE, EndermanModel::createBodyLayer);
         context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_FRAGMENT,
