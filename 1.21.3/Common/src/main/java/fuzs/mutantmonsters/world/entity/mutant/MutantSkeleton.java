@@ -43,10 +43,10 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEntity {
-    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation(14);
-    public static final EntityAnimation CONSTRICT_RIBS_ANIMATION = new EntityAnimation(20);
-    public static final EntityAnimation SHOOT_ANIMATION = new EntityAnimation(32);
-    public static final EntityAnimation MULTI_SHOT_ANIMATION = new EntityAnimation(30);
+    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation("mutant_skeleton_melee", 14);
+    public static final EntityAnimation CONSTRICT_RIBS_ANIMATION = new EntityAnimation("mutant_skeleton_constrict_ribs", 20);
+    public static final EntityAnimation SHOOT_ANIMATION = new EntityAnimation("mutant_skeleton_shoot", 32);
+    public static final EntityAnimation MULTI_SHOT_ANIMATION = new EntityAnimation("mutant_skeleton_multi_shot", 30);
     private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{MELEE_ANIMATION, CONSTRICT_RIBS_ANIMATION, SHOOT_ANIMATION, MULTI_SHOT_ANIMATION};
 
     private EntityAnimation animation;

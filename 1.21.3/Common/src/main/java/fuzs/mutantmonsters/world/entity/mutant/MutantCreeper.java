@@ -253,9 +253,9 @@ public class MutantCreeper extends AbstractMutantMonster {
 
     public float getOverlayColor(float partialTicks) {
         if (this.deathTime > 0) {
-            return (float) this.deathTime / 100.0F;
+            return (this.deathTime + partialTicks) / 100.0F;
         } else if (this.isCharging()) {
-            return this.tickCount % 20 < 10 ? 0.6F : 0.0F;
+            return (this.tickCount + partialTicks) % 20.0F < 10.0F ? 0.6F : 0.0F;
         } else {
             return Mth.lerp(partialTicks, (float) this.lastJumpTick, (float) this.jumpTick) / 28.0F;
         }

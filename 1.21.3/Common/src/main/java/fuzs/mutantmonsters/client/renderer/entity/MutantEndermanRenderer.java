@@ -4,14 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
-import fuzs.mutantmonsters.client.renderer.entity.layers.MutantEndermanDeathLayer;
-import fuzs.mutantmonsters.client.renderer.entity.layers.MutantEndermanEyesLayer;
-import fuzs.mutantmonsters.client.renderer.entity.layers.MutantEndermanHeldBlocksLayer;
-import fuzs.mutantmonsters.client.renderer.entity.layers.MutantEndermanSoulLayer;
+import fuzs.mutantmonsters.client.renderer.entity.layers.*;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import net.minecraft.client.model.EndermanModel;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -23,23 +18,21 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEndermanRenderState, EntityModel<MutantEndermanRenderState>> {
+public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEndermanRenderState, MutantEndermanModel> {
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_enderman/mutant_enderman.png");
 
-    private final EntityModel<MutantEndermanRenderState> endermanModel;
-    private final EntityModel<MutantEndermanRenderState> cloneModel;
-    private final MutantEndermanSoulLayer soulLayer;
+    private final MutantEndermanTeleportLayer teleportLayer;
 
     public MutantEndermanRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantEndermanModel(context.bakeLayer(ModelLayerLocations.MUTANT_ENDERMAN)), 0.8F);
-        this.endermanModel = this.model;
-        this.cloneModel = new EndermanModel<>(context.bakeLayer(ModelLayerLocations.ENDERMAN_CLONE));
-        // order is important here, death layer must come first
+        // order is important here, death layer must come first, will break eyes rendering if not
         this.addLayer(new MutantEndermanDeathLayer(this));
         this.addLayer(new MutantEndermanEyesLayer(this));
-        this.soulLayer = new MutantEndermanSoulLayer(this);
-        this.addLayer(this.soulLayer);
+        this.addLayer(new MutantEndermanCloneLayer(this, context.getModelSet()));
+        this.teleportLayer = new MutantEndermanTeleportLayer(this);
+        this.addLayer(this.teleportLayer);
+        this.addLayer(new MutantEndermanScreamLayer(this));
         this.addLayer(new MutantEndermanHeldBlocksLayer(this, context.getBlockRenderDispatcher()));
     }
 
@@ -61,28 +54,25 @@ public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEn
     @Override
     public void render(MutantEndermanRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         if (renderState.isClone) {
-            this.model = this.cloneModel;
             this.shadowRadius = 0.5F;
             this.shadowStrength = 0.5F;
         } else {
-            this.model = this.endermanModel;
             this.shadowRadius = 0.8F;
             this.shadowStrength = renderState.deathTime > 80.0F ? 1.0F - getDeathProgress(renderState) : 1.0F;
         }
 
-        this.soulLayer.setTeleportAttack(false);
         super.render(renderState, poseStack, bufferSource, packedLight);
-        if (renderState.animation == MutantEnderman.TELEPORT_ANIMATION) {
-            this.soulLayer.setTeleportAttack(true);
-            if (renderState.teleportPosition != null) {
-                poseStack.pushPose();
-                // tried moving this to a separate layer, pose stack manipulations don't add up anymore though when run from layer rendering
-                poseStack.translate(renderState.teleportPosition.getX() + 0.5 - renderState.x,
-                        renderState.teleportPosition.getY() - renderState.y,
-                        renderState.teleportPosition.getZ() + 0.5 - renderState.z);
-                super.render(renderState, poseStack, bufferSource, packedLight);
-                poseStack.popPose();
-            }
+
+        if (renderState.animation == MutantEnderman.TELEPORT_ANIMATION && renderState.teleportPosition != null) {
+            poseStack.pushPose();
+            // tried moving this to a separate layer, pose stack manipulations don't add up anymore though when run from layer rendering
+            poseStack.translate(renderState.teleportPosition.getX() + 0.5 - renderState.x,
+                    renderState.teleportPosition.getY() - renderState.y,
+                    renderState.teleportPosition.getZ() + 0.5 - renderState.z);
+            this.teleportLayer.setShrinking(true);
+            super.render(renderState, poseStack, bufferSource, packedLight);
+            this.teleportLayer.setShrinking(false);
+            poseStack.popPose();
         }
     }
 
@@ -98,6 +88,7 @@ public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEn
     @Override
     public void extractRenderState(MutantEnderman entity, MutantEndermanRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
+        reusedState.hasRedOverlay = entity.hurtTime > 0;
         reusedState.isCreepy = entity.isAggressive();
         reusedState.animationTime =
                 entity.getAnimationTick() > 0 ? entity.getAnimationTick() + partialTick : entity.getAnimationTick();

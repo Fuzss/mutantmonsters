@@ -69,7 +69,7 @@ public class CreeperMinionOnShoulderLayer extends RenderLayer<PlayerRenderState,
     private void renderOnShoulder(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, PlayerRenderState renderState, float yRot, float xRot, boolean isLeftShoulder, boolean isPowered) {
         this.extractRenderState(renderState, yRot, xRot);
         poseStack.pushPose();
-        poseStack.translate(isLeftShoulder ? 0.42 : -0.42, renderState.isCrouching ? -0.55 : -0.75, 0.0);
+        poseStack.translate(0.42F * (isLeftShoulder ? 1.0F : -1.0F), renderState.isCrouching ? -0.55F : -0.75F, 0.0F);
         poseStack.scale(0.5F, 0.5F, 0.5F);
         this.model.setupAnim(this.renderState);
         VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(CreeperMinionRenderer.TEXTURE_LOCATION));

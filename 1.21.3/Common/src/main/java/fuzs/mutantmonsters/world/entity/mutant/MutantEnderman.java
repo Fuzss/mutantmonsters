@@ -86,14 +86,14 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
     private static final EntityDataAccessor<Boolean> CLONE = SynchedEntityData.defineId(MutantEnderman.class,
             EntityDataSerializers.BOOLEAN
     );
-    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation(10);
-    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation(14);
-    public static final EntityAnimation STARE_ANIMATION = new EntityAnimation(100);
-    public static final EntityAnimation TELEPORT_ANIMATION = new EntityAnimation(10);
-    public static final EntityAnimation SCREAM_ANIMATION = new EntityAnimation(165);
-    public static final EntityAnimation CLONE_ANIMATION = new EntityAnimation(600);
-    public static final EntityAnimation TELESMASH_ANIMATION = new EntityAnimation(30);
-    public static final EntityAnimation DEATH_ANIMATION = new EntityAnimation(280);
+    public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation("mutant_enderman_melee", 10);
+    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation("mutant_enderman_throw", 14);
+    public static final EntityAnimation STARE_ANIMATION = new EntityAnimation("mutant_enderman_stare", 100);
+    public static final EntityAnimation TELEPORT_ANIMATION = new EntityAnimation("mutant_enderman_teleport", 10);
+    public static final EntityAnimation SCREAM_ANIMATION = new EntityAnimation("mutant_enderman_scream", 165);
+    public static final EntityAnimation CLONE_ANIMATION = new EntityAnimation("mutant_enderman_clone", 600);
+    public static final EntityAnimation TELESMASH_ANIMATION = new EntityAnimation("mutant_enderman_telesmash", 30);
+    public static final EntityAnimation DEATH_ANIMATION = new EntityAnimation("mutant_enderman_death", 280);
     private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{
             MELEE_ANIMATION,
             THROW_ANIMATION,

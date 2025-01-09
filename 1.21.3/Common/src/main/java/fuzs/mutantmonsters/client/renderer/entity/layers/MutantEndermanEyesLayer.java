@@ -3,10 +3,10 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.MutantEndermanRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -14,11 +14,11 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ARGB;
 
-public class MutantEndermanEyesLayer extends RenderLayer<MutantEndermanRenderState, EntityModel<MutantEndermanRenderState>> {
+public class MutantEndermanEyesLayer extends RenderLayer<MutantEndermanRenderState, MutantEndermanModel> {
     private static final RenderType EYES_RENDER_TYPE = ModRenderType.eyes(MutantMonsters.id(
             "textures/entity/mutant_enderman/eyes.png"));
 
-    public MutantEndermanEyesLayer(RenderLayerParent<MutantEndermanRenderState, EntityModel<MutantEndermanRenderState>> renderer) {
+    public MutantEndermanEyesLayer(RenderLayerParent<MutantEndermanRenderState, MutantEndermanModel> renderer) {
         super(renderer);
     }
 

@@ -69,9 +69,9 @@ import java.util.Optional;
 public class MutantZombie extends AbstractMutantMonster implements AnimatedEntity {
     public static final int MAX_VANISH_TIME = 100;
     public static final int MAX_DEATH_TIME = 140;
-    public static final EntityAnimation SLAM_GROUND_ANIMATION = new EntityAnimation(25);
-    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation(15);
-    public static final EntityAnimation ROAR_ANIMATION = new EntityAnimation(120);
+    public static final EntityAnimation SLAM_GROUND_ANIMATION = new EntityAnimation("mutant_zombie_slam_ground", 25);
+    public static final EntityAnimation THROW_ANIMATION = new EntityAnimation("mutant_zombie_throw", 15);
+    public static final EntityAnimation ROAR_ANIMATION = new EntityAnimation("mutant_zombie_roar", 120);
     private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class,
             EntityDataSerializers.INT
     );

@@ -3,9 +3,9 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
+import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.entity.MutantEndermanRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -14,12 +14,12 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 
-public class MutantEndermanDeathLayer extends RenderLayer<MutantEndermanRenderState, EntityModel<MutantEndermanRenderState>> {
+public class MutantEndermanDeathLayer extends RenderLayer<MutantEndermanRenderState, MutantEndermanModel> {
     private static final ResourceLocation DEATH_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_enderman/death.png");
     private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(MutantEndermanRenderer.TEXTURE_LOCATION);
 
-    public MutantEndermanDeathLayer(RenderLayerParent<MutantEndermanRenderState, EntityModel<MutantEndermanRenderState>> renderer) {
+    public MutantEndermanDeathLayer(RenderLayerParent<MutantEndermanRenderState, MutantEndermanModel> renderer) {
         super(renderer);
     }
 
