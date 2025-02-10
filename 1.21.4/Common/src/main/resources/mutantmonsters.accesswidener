@@ -1,0 +1,4 @@
+accessWidener   v2  named
+transitive-accessible   field   net/minecraft/world/level/storage/loot/parameters/LootContextParamSets  REGISTRY    Lcom/google/common/collect/BiMap;
+transitive-accessible   field   net/minecraft/world/entity/Mob  lootTable   Ljava/util/Optional;
+transitive-accessible   method  net/minecraft/world/entity/Entity   considersEntityAsAlly   (Lnet/minecraft/world/entity/Entity;)Z
