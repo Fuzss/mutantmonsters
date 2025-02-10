@@ -9,6 +9,7 @@ import fuzs.mutantmonsters.client.renderer.entity.state.MutantSnowGolemRenderSta
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 
 public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, MutantSnowGolemRenderState, MutantSnowGolemModel> {
@@ -24,6 +25,7 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
     @Override
     public void extractRenderState(MutantSnowGolem entity, MutantSnowGolemRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
+        ArmedEntityRenderState.extractArmedEntityRenderState(entity, reusedState, this.itemModelResolver);
         reusedState.isThrowing = entity.isThrowing();
         reusedState.throwingTime = entity.getThrowingTick() > 0 ? entity.getThrowingTick() + partialTick : 0;
         reusedState.hasJackOLantern = entity.hasJackOLantern();

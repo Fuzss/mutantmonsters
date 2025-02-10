@@ -4,6 +4,7 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
+import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.network.S2CMutantEndermanHeldBlockMessage;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.*;
@@ -458,7 +459,7 @@ public class MutantEnderman extends AbstractMutantMonster implements NeutralMob,
                 );
                 BlockState blockState = serverLevel.getBlockState(pos);
                 if (index != -1 && canBlockBeHeld(serverLevel, pos, blockState,
-                        ModRegistry.MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG
+                        ModTags.MUTANT_ENDERMAN_HOLDABLE_IMMUNE_BLOCK_TAG
                 )) {
                     this.setHeldBlock(index, Block.getId(blockState), 0);
                     if (CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, this)) {

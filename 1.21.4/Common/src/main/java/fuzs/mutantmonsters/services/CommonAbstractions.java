@@ -4,6 +4,7 @@ import fuzs.puzzleslib.api.core.v1.ServiceProviderHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -19,5 +20,5 @@ public interface CommonAbstractions {
 
     boolean onAnimalTame(Animal animal, Player tamer);
 
-    BlockParticleOption setBlockParticlePos(BlockParticleOption particleOption, BlockPos pos);
+    BlockParticleOption createBlockParticle(ParticleType<BlockParticleOption> particleType, BlockState blockState, BlockPos blockPos);
 }

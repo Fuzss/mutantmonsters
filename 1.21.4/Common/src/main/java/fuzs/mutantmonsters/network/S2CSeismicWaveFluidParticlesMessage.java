@@ -4,7 +4,6 @@ import fuzs.mutantmonsters.services.CommonAbstractions;
 import fuzs.puzzleslib.api.network.v2.WritableMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -36,8 +35,9 @@ public class S2CSeismicWaveFluidParticlesMessage implements WritableMessage<S2CS
             public void handle(S2CSeismicWaveFluidParticlesMessage message, Player player, Object gameInstance) {
                 Level level = ((Minecraft) gameInstance).level;
                 BlockState blockState = level.getBlockState(message.blockPos);
-                blockState.getFluidState().getShape(level, message.blockPos).forAllBoxes(
-                        (double minX, double minY, double minZ, double maxX, double maxY, double maxZ) -> {
+                blockState.getFluidState()
+                        .getShape(level, message.blockPos)
+                        .forAllBoxes((double minX, double minY, double minZ, double maxX, double maxY, double maxZ) -> {
                             double d1 = Math.min(1.0, maxX - minX);
                             double d2 = Math.min(1.0, maxY - minY);
                             double d3 = Math.min(1.0, maxZ - minZ);
@@ -54,13 +54,17 @@ public class S2CSeismicWaveFluidParticlesMessage implements WritableMessage<S2CS
                                         double d7 = d4 * d1 + minX;
                                         double d8 = d5 * d2 + minY;
                                         double d9 = d6 * d3 + minZ;
-                                        level.addAlwaysVisibleParticle(CommonAbstractions.INSTANCE.setBlockParticlePos(
-                                                        new BlockParticleOption(ParticleTypes.BLOCK, blockState),
-                                                        S2CSeismicWaveFluidParticlesMessage.this.blockPos
-                                                ), true, (double) message.blockPos.getX() + d7,
+                                        level.addAlwaysVisibleParticle(CommonAbstractions.INSTANCE.createBlockParticle(
+                                                        ParticleTypes.BLOCK,
+                                                        blockState,
+                                                        S2CSeismicWaveFluidParticlesMessage.this.blockPos),
+                                                true,
+                                                (double) message.blockPos.getX() + d7,
                                                 (double) message.blockPos.getY() + d8,
-                                                (double) message.blockPos.getZ() + d9, d4 - 0.5, d5 - 0.5, d6 - 0.5
-                                        );
+                                                (double) message.blockPos.getZ() + d9,
+                                                d4 - 0.5,
+                                                d5 - 0.5,
+                                                d6 - 0.5);
                                     }
                                 }
                             }

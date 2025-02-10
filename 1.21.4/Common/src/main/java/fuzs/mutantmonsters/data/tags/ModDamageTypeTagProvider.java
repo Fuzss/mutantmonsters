@@ -16,10 +16,12 @@ public class ModDamageTypeTagProvider extends AbstractTagProvider<DamageType> {
 
     @Override
     public void addTags(HolderLookup.Provider provider) {
-        this.add(DamageTypeTags.BYPASSES_ARMOR).add(ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE,
-                ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE,
-                ModRegistry.MUTANT_ZOMBIE_SEISMIC_WAVE_DAMAGE_TYPE, ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE
-        );
-        this.add(DamageTypeTags.IS_EXPLOSION).add(ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE);
+        this.tag(DamageTypeTags.BYPASSES_ARMOR)
+                .add(ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE,
+                        ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE,
+                        ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE,
+                        ModRegistry.MUTANT_ZOMBIE_SEISMIC_WAVE_DAMAGE_TYPE,
+                        ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE);
+        this.tag(DamageTypeTags.IS_EXPLOSION).add(ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE);
     }
 }

@@ -66,8 +66,8 @@ public class EndersoulParticle extends TextureSheetParticle {
     public static class Factory implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet spriteSet;
 
-        public Factory(SpriteSet sprite) {
-            this.spriteSet = sprite;
+        public Factory(SpriteSet spriteSet) {
+            this.spriteSet = spriteSet;
         }
 
         @Override

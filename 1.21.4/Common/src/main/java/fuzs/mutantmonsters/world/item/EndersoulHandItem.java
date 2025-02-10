@@ -3,6 +3,7 @@ package fuzs.mutantmonsters.world.item;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
@@ -64,7 +65,7 @@ public class EndersoulHandItem extends Item {
         } else if (!MutantEnderman.canBlockBeHeld(level,
                 pos,
                 blockState,
-                ModRegistry.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG)) {
+                ModTags.ENDERSOUL_HAND_HOLDABLE_IMMUNE_BLOCK_TAG)) {
             return InteractionResult.PASS;
         } else if (!level.mayInteract(player, pos)) {
             return InteractionResult.PASS;

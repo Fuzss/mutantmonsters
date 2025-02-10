@@ -1,4 +1,4 @@
-// 1.21.3	2025-01-08T20:34:36.817432	Mod Body Part Loot Provider
+// 1.21.4	2025-02-10T21:54:32.64973	Mod Body Part Loot Provider
 0ec1ab23732120a85c8380e02fe351b86e9d6def data/mutantmonsters/loot_table/entities/mutant_skeleton/limb.json
 c568776acd0709f8f19bf240c3a55a5bedd0916e data/mutantmonsters/loot_table/entities/mutant_skeleton/pelvis.json
 374885f2b69de897649b7f77f830047b7147a977 data/mutantmonsters/loot_table/entities/mutant_skeleton/rib.json

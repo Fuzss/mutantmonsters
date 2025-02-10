@@ -9,32 +9,39 @@ import net.minecraft.client.model.geom.builders.*;
 
 public class ModelLayerLocations {
     static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);
-    public static final ModelLayerLocation MUTANT_SKELETON_SKULL = REGISTRY.register("mutant_skeleton_skull");
-    public static final ModelLayerLocation CREEPER_MINION_EGG = REGISTRY.register("creeper_minion_egg");
-    public static final ModelLayerLocation CREEPER_MINION_EGG_ARMOR = REGISTRY.register("creeper_minion_egg", "armor");
-    public static final ModelLayerLocation CREEPER_MINION = REGISTRY.register("creeper_minion");
-    public static final ModelLayerLocation CREEPER_MINION_ARMOR = REGISTRY.register("creeper_minion", "armor");
-    public static final ModelLayerLocation CREEPER_MINION_SHOULDER = REGISTRY.register("creeper_minion_shoulder");
-    public static final ModelLayerLocation CREEPER_MINION_SHOULDER_ARMOR = REGISTRY.register("creeper_minion_shoulder",
+    public static final ModelLayerLocation MUTANT_SKELETON_SKULL = REGISTRY.registerModelLayer("mutant_skeleton_skull");
+    public static final ModelLayerLocation CREEPER_MINION_EGG = REGISTRY.registerModelLayer("creeper_minion_egg");
+    public static final ModelLayerLocation CREEPER_MINION_EGG_ARMOR = REGISTRY.registerModelLayer("creeper_minion_egg",
             "armor");
-    public static final ModelLayerLocation ENDERSOUL_CLONE = REGISTRY.register("endersoul_clone");
-    public static final ModelLayerLocation ENDERSOUL_FRAGMENT = REGISTRY.register("endersoul_fragment");
-    public static final ModelLayerLocation ENDERSOUL_HAND_LEFT = REGISTRY.register("endersoul_hand", "left");
-    public static final ModelLayerLocation ENDERSOUL_HAND_RIGHT = REGISTRY.register("endersoul_hand", "right");
-    public static final ModelLayerLocation MUTANT_ARROW = REGISTRY.register("mutant_arrow");
-    public static final ModelLayerLocation MUTANT_CREEPER = REGISTRY.register("mutant_creeper");
-    public static final ModelLayerLocation MUTANT_CREEPER_ARMOR = REGISTRY.register("mutant_creeper", "armor");
-    public static final ModelLayerLocation MUTANT_CROSSBOW = REGISTRY.register("mutant_crossbow");
-    public static final ModelLayerLocation MUTANT_ENDERMAN = REGISTRY.register("mutant_enderman");
-    public static final ModelLayerLocation ENDERMAN_CLONE = REGISTRY.register("enderman_clone");
-    public static final ModelLayerLocation MUTANT_SKELETON = REGISTRY.register("mutant_skeleton");
-    public static final ModelLayerLocation MUTANT_SKELETON_PART = REGISTRY.register("mutant_skeleton_part");
-    public static final ModelLayerLocation MUTANT_SKELETON_PART_SPINE = REGISTRY.register("mutant_skeleton_part",
+    public static final ModelLayerLocation CREEPER_MINION = REGISTRY.registerModelLayer("creeper_minion");
+    public static final ModelLayerLocation CREEPER_MINION_ARMOR = REGISTRY.registerModelLayer("creeper_minion",
+            "armor");
+    public static final ModelLayerLocation CREEPER_MINION_SHOULDER = REGISTRY.registerModelLayer(
+            "creeper_minion_shoulder");
+    public static final ModelLayerLocation CREEPER_MINION_SHOULDER_ARMOR = REGISTRY.registerModelLayer(
+            "creeper_minion_shoulder",
+            "armor");
+    public static final ModelLayerLocation ENDERSOUL_CLONE = REGISTRY.registerModelLayer("endersoul_clone");
+    public static final ModelLayerLocation ENDERSOUL_FRAGMENT = REGISTRY.registerModelLayer("endersoul_fragment");
+    public static final ModelLayerLocation ENDERSOUL_HAND_LEFT = REGISTRY.registerModelLayer("endersoul_hand", "left");
+    public static final ModelLayerLocation ENDERSOUL_HAND_RIGHT = REGISTRY.registerModelLayer("endersoul_hand",
+            "right");
+    public static final ModelLayerLocation MUTANT_ARROW = REGISTRY.registerModelLayer("mutant_arrow");
+    public static final ModelLayerLocation MUTANT_CREEPER = REGISTRY.registerModelLayer("mutant_creeper");
+    public static final ModelLayerLocation MUTANT_CREEPER_ARMOR = REGISTRY.registerModelLayer("mutant_creeper",
+            "armor");
+    public static final ModelLayerLocation MUTANT_CROSSBOW = REGISTRY.registerModelLayer("mutant_crossbow");
+    public static final ModelLayerLocation MUTANT_ENDERMAN = REGISTRY.registerModelLayer("mutant_enderman");
+    public static final ModelLayerLocation ENDERMAN_CLONE = REGISTRY.registerModelLayer("enderman_clone");
+    public static final ModelLayerLocation MUTANT_SKELETON = REGISTRY.registerModelLayer("mutant_skeleton");
+    public static final ModelLayerLocation MUTANT_SKELETON_PART = REGISTRY.registerModelLayer("mutant_skeleton_part");
+    public static final ModelLayerLocation MUTANT_SKELETON_PART_SPINE = REGISTRY.registerModelLayer(
+            "mutant_skeleton_part",
             "spine");
-    public static final ModelLayerLocation MUTANT_SNOW_GOLEM = REGISTRY.register("mutant_snow_golem");
-    public static final ModelLayerLocation MUTANT_SNOW_GOLEM_HEAD = REGISTRY.register("mutant_snow_golem_head");
-    public static final ModelLayerLocation MUTANT_ZOMBIE = REGISTRY.register("mutant_zombie");
-    public static final ModelLayerLocation SPIDER_PIG = REGISTRY.register("spider_pig");
+    public static final ModelLayerLocation MUTANT_SNOW_GOLEM = REGISTRY.registerModelLayer("mutant_snow_golem");
+    public static final ModelLayerLocation MUTANT_SNOW_GOLEM_HEAD = REGISTRY.registerModelLayer("mutant_snow_golem_head");
+    public static final ModelLayerLocation MUTANT_ZOMBIE = REGISTRY.registerModelLayer("mutant_zombie");
+    public static final ModelLayerLocation SPIDER_PIG = REGISTRY.registerModelLayer("spider_pig");
 
     public static LayerDefinition createSkullModelLayer() {
         MeshDefinition mesh = SkullModel.createHeadModel();

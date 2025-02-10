@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.neoforge;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.data.ModAdvancementProvider;
-import fuzs.mutantmonsters.data.ModDamageTypeRegistryProvider;
+import fuzs.mutantmonsters.data.ModDatapackRegistriesProvider;
 import fuzs.mutantmonsters.data.ModRecipeProvider;
 import fuzs.mutantmonsters.data.loot.ModBlockLootProvider;
 import fuzs.mutantmonsters.data.loot.ModBodyPartLootProvider;
@@ -29,7 +29,7 @@ public class MutantMonstersNeoForge {
         ModConstructor.construct(MutantMonsters.MOD_ID, MutantMonsters::new);
         registerLoadingHandlers(modContainer.getEventBus());
         DataProviderHelper.registerDataProviders(MutantMonsters.MOD_ID,
-                ModDamageTypeRegistryProvider::new,
+                ModDatapackRegistriesProvider::new,
                 ModBlockLootProvider::new,
                 ModBodyPartLootProvider::new,
                 ModEntityLootProvider::new,

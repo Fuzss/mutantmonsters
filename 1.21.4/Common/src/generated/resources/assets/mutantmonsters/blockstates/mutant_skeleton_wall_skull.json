@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "mutantmonsters:block/skull"
+      "model": "minecraft:block/skull"
     }
   }
 }

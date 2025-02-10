@@ -2,11 +2,14 @@ package fuzs.mutantmonsters.init;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.world.item.*;
+import fuzs.puzzleslib.api.item.v2.ArmorMaterialBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -14,13 +17,13 @@ import net.minecraft.world.level.block.Block;
 
 public class ModItems {
     public static final ArmorMaterial MUTANT_SKELETON_ARMOR_MATERIAL = ArmorMaterialBuilder.of(MutantMonsters.id(
-                    "mutant_skeleton"), ModRegistry.REPAIRS_SKELETON_ARMOR_ITEM_TAG)
+                    "mutant_skeleton"), ModTags.REPAIRS_SKELETON_ARMOR_ITEM_TAG)
             .setDurability(15)
             .setDefense(2, 5, 6, 2)
             .setEnchantmentValue(9)
             .build();
     public static final ArmorMaterial MUTANT_SKELETON_HELMET_ARMOR_MATERIAL = ArmorMaterialBuilder.copyOf(
-            MUTANT_SKELETON_ARMOR_MATERIAL).setNoModelId().build();
+            MUTANT_SKELETON_ARMOR_MATERIAL).setNoAssetId().build();
 
     public static final Holder.Reference<Item> CREEPER_MINION_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
             ModEntityTypes.CREEPER_MINION_ENTITY_TYPE,
@@ -107,6 +110,14 @@ public class ModItems {
             (Item.Properties properties) -> new SkeletonArmorItem(MUTANT_SKELETON_ARMOR_MATERIAL,
                     ArmorType.BOOTS,
                     properties));
+    public static final Holder.Reference<Item> CHEMICAL_X_ITEM = ModRegistry.REGISTRIES.registerItem("chemical_x",
+            ChemicalXItem::new,
+            () -> new Item.Properties().stacksTo(16)
+                    .useCooldown(0.5F)
+                    .component(DataComponents.POTION_CONTENTS,
+                            PotionContents.EMPTY.withEffectAdded(new MobEffectInstance(ModRegistry.CHEMICAL_X_MOB_EFFECT,
+                                    1)))
+                    .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
 
     public static void bootstrap() {
         // NO-OP

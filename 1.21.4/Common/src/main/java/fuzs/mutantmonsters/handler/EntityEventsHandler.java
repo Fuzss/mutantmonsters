@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.handler;
 
-import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
@@ -98,7 +98,7 @@ public class EntityEventsHandler {
 
     public static EventResult onLivingDrops(LivingEntity entity, DamageSource damageSource, Collection<ItemEntity> itemDrops, boolean recentlyHit) {
         Entity attacker = damageSource.getEntity();
-        if (entity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) && attacker instanceof SpiderPig) {
+        if (entity.getType().is(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) && attacker instanceof SpiderPig) {
             return EventResult.INTERRUPT;
         } else if ((attacker instanceof MutantCreeper && ((MutantCreeper) attacker).isCharged() ||
                 attacker instanceof CreeperMinion && ((CreeperMinion) attacker).isCharged()) && damageSource.is(

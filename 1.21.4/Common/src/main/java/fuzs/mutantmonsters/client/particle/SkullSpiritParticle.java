@@ -61,14 +61,20 @@ public class SkullSpiritParticle extends TextureSheetParticle {
     public static class Factory implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet spriteSet;
 
-        public Factory(SpriteSet sprite) {
-            this.spriteSet = sprite;
+        public Factory(SpriteSet spriteSet) {
+            this.spriteSet = spriteSet;
         }
 
         @Override
         @Nullable
         public Particle createParticle(SimpleParticleType typeIn, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SkullSpiritParticle skullSpiritParticle = new SkullSpiritParticle(clientLevel, x, y, z, xSpeed, ySpeed, zSpeed);
+            SkullSpiritParticle skullSpiritParticle = new SkullSpiritParticle(clientLevel,
+                    x,
+                    y,
+                    z,
+                    xSpeed,
+                    ySpeed,
+                    zSpeed);
             skullSpiritParticle.pickSprite(this.spriteSet);
             return skullSpiritParticle;
         }

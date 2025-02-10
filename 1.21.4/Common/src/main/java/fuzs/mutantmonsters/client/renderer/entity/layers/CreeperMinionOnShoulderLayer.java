@@ -9,7 +9,7 @@ import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.CreeperMinionRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.CreeperMinionRenderState;
 import fuzs.mutantmonsters.init.ModEntityTypes;
-import fuzs.puzzleslib.api.client.util.v1.RenderPropertyKey;
+import fuzs.puzzleslib.api.client.renderer.v1.RenderPropertyKey;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

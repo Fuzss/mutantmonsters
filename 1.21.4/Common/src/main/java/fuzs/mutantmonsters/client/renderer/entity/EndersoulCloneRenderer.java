@@ -25,7 +25,7 @@ public class EndersoulCloneRenderer extends MobRenderer<EndersoulClone, Endersou
     @Override
     public void extractRenderState(EndersoulClone entity, EndersoulCloneRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
-        HumanoidMobRenderer.extractHumanoidRenderState(entity, reusedState, partialTick);
+        HumanoidMobRenderer.extractHumanoidRenderState(entity, reusedState, partialTick, this.itemModelResolver);
         reusedState.isCreepy = entity.isAggressive();
         reusedState.renderOffset = new Vec3(entity.getRandom().nextGaussian() * 0.02,
                 0.0,

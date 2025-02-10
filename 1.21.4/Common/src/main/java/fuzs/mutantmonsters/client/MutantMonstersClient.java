@@ -5,35 +5,27 @@ import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.*;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
-import fuzs.mutantmonsters.client.renderer.EndersoulHandRenderer;
-import fuzs.mutantmonsters.client.renderer.HulkHammerModels;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionOnShoulderLayer;
+import fuzs.mutantmonsters.client.renderer.special.EndersoulHandSpecialRenderer;
 import fuzs.mutantmonsters.init.ModEntityTypes;
-import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.*;
-import fuzs.puzzleslib.api.client.event.v1.renderer.ExtractRenderStateCallbackV2;
-import fuzs.puzzleslib.api.client.init.v1.ItemModelDisplayOverrides;
-import fuzs.puzzleslib.api.core.v1.ContentRegistrationFlags;
+import fuzs.puzzleslib.api.client.event.v1.renderer.ExtractRenderStateCallback;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.SkullModel;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
 
 public class MutantMonstersClient implements ClientModConstructor {
-    public static final ResourceLocation CHEMICAL_X_MODEL_PROPERTY = MutantMonsters.id("chemical_x");
 
     @Override
     public void onConstructMod() {
@@ -41,17 +33,13 @@ public class MutantMonstersClient implements ClientModConstructor {
     }
 
     private static void registerEventHandlers() {
-        ExtractRenderStateCallbackV2.EVENT.register(CreeperMinionOnShoulderLayer::onExtractRenderState);
+        ExtractRenderStateCallback.EVENT.register(CreeperMinionOnShoulderLayer::onExtractRenderState);
     }
 
     @Override
     public void onClientSetup() {
         SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
                 MutantMonsters.id("textures/entity/mutant_skeleton.png"));
-        ItemModelDisplayOverrides.INSTANCE.register(EndersoulHandRenderer.ENDERSOUL_ITEM_MODEL,
-                EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL);
-        ItemModelDisplayOverrides.INSTANCE.register(HulkHammerModels.HULK_HAMMER_ITEM_MODEL,
-                HulkHammerModels.HULK_HAMMER_IN_HAND_MODEL);
     }
 
     @Override
@@ -86,14 +74,9 @@ public class MutantMonstersClient implements ClientModConstructor {
     }
 
     @Override
-    public void onRegisterAdditionalModels(AdditionalModelsContext context) {
-        context.registerAdditionalModel(EndersoulHandRenderer.ENDERSOUL_BUILT_IN_MODEL,
-                HulkHammerModels.HULK_HAMMER_IN_HAND_MODEL);
-    }
-
-    @Override
-    public void onRegisterBuiltinModelItemRenderers(BuiltinModelItemRendererContext context) {
-        context.registerItemRenderer(new EndersoulHandRenderer(), ModItems.ENDERSOUL_HAND_ITEM.value());
+    public void onRegisterItemModels(ItemModelsContext context) {
+        context.registerSpecialModelRenderer(MutantMonsters.id("endersoul_hand"),
+                EndersoulHandSpecialRenderer.Unbaked.MAP_CODEC);
     }
 
     @Override
@@ -157,30 +140,18 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterSkullRenderers(SkullRenderersContext context) {
-        context.registerSkullRenderer((entityModelSet, context1) -> context1.accept(ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
-                new SkullModel(entityModelSet.bakeLayer(ModelLayerLocations.MUTANT_SKELETON_SKULL))));
+        context.registerSkullRenderer(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, (EntityModelSet entityModelSet) -> {
+            return new SkullModel(entityModelSet.bakeLayer(ModelLayerLocations.MUTANT_SKELETON_SKULL));
+        });
     }
 
     @Override
-    public void onRegisterEntitySpectatorShaders(EntitySpectatorShaderContext context) {
+    public void onRegisterEntitySpectatorShaders(EntitySpectatorShadersContext context) {
         context.registerSpectatorShader(ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"),
                 ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
                 ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value());
         context.registerSpectatorShader(ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"),
                 ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
                 ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value());
-    }
-
-    @Override
-    public void onRegisterItemModelProperties(ItemModelPropertiesContext context) {
-        context.registerItemProperty(CHEMICAL_X_MODEL_PROPERTY, (itemStack, clientLevel, livingEntity, i) -> {
-            return itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY)
-                    .is(ModRegistry.CHEMICAL_X_POTION) ? 1.0F : 0.0F;
-        }, Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION);
-    }
-
-    @Override
-    public ContentRegistrationFlags[] getContentRegistrationFlags() {
-        return new ContentRegistrationFlags[]{ContentRegistrationFlags.DYNAMIC_RENDERERS};
     }
 }

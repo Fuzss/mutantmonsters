@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "predicates": {
-              "minecraft:potion_contents": "mutantmonsters:chemical_x"
-            }
+            "items": "mutantmonsters:chemical_x"
           }
         ]
       },

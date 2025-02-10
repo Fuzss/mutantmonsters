@@ -7,6 +7,8 @@ import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
+import fuzs.mutantmonsters.world.item.ArmorBlockItem;
+import fuzs.mutantmonsters.world.item.SkeletonArmorItem;
 import fuzs.puzzleslib.api.client.data.v2.AbstractLanguageProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 
@@ -64,8 +66,16 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM.value(), "Mutant Skeleton Chestplate");
         builder.add(ModItems.MUTANT_SKELETON_LEGGINGS_ITEM.value(), "Mutant Skeleton Leggings");
         builder.add(ModItems.MUTANT_SKELETON_BOOTS_ITEM.value(), "Mutant Skeleton Boots");
+        builder.add(ModItems.CHEMICAL_X_ITEM.value(), "Chemical X");
+        builder.add(((ArmorBlockItem) ModItems.MUTANT_SKELETON_SKULL_ITEM.value()).getDescriptionComponent(),
+                "Unlocks multishot for bows.");
+        builder.add(((SkeletonArmorItem) ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM.value()).getDescriptionComponent(),
+                "Unlocks quick draw for bows.");
+        builder.add(((SkeletonArmorItem) ModItems.MUTANT_SKELETON_LEGGINGS_ITEM.value()).getDescriptionComponent(),
+                "Grants increased speed to the wearer.");
+        builder.add(((SkeletonArmorItem) ModItems.MUTANT_SKELETON_BOOTS_ITEM.value()).getDescriptionComponent(),
+                "Grants increased jump height to the wearer.");
         builder.add(ModRegistry.CHEMICAL_X_MOB_EFFECT.value(), "Chemical X");
-        builder.addPotion(ModRegistry.CHEMICAL_X_POTION, "Chemical X");
         builder.add(ModSoundEvents.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(), "Creeper Minion hisses");
         builder.add(ModSoundEvents.ENTITY_CREEPER_MINION_DEATH_SOUND_EVENT.value(), "Creeper Minion dies");
         builder.add(ModSoundEvents.ENTITY_CREEPER_MINION_HURT_SOUND_EVENT.value(), "Creeper Minion hurts");
@@ -73,7 +83,8 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(ModSoundEvents.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(), "Creeper Minion Egg hatches");
         builder.add(ModSoundEvents.ENTITY_ENDERSOUL_CLONE_DEATH_SOUND_EVENT.value(), "Endersoul Clone dies");
         builder.add(ModSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(), "Endersoul Clone teleports");
-        builder.add(ModSoundEvents.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.value(), "Endersoul Fragment explodes");
+        builder.add(ModSoundEvents.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.value(),
+                "Endersoul Fragment explodes");
         builder.add(ModSoundEvents.ENTITY_MUTANT_CREEPER_AMBIENT_SOUND_EVENT.value(), "Mutant Creeper hisses");
         builder.add(ModSoundEvents.ENTITY_MUTANT_CREEPER_CHARGE_SOUND_EVENT.value(), "Mutant Creeper charges");
         builder.add(ModSoundEvents.ENTITY_MUTANT_CREEPER_DEATH_SOUND_EVENT.value(), "Mutant Creeper dies");
@@ -103,35 +114,27 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(ModSoundEvents.ENTITY_SPIDER_PIG_HURT_SOUND_EVENT.value(), "Spider Pig hurts");
         builder.add(ModAdvancementProvider.ROOT_ADVANCEMENT.title(), MutantMonsters.MOD_NAME);
         builder.add(ModAdvancementProvider.ROOT_ADVANCEMENT.description(),
-                "Mutant creatures and beasts to face off against. Will you triumph, or will you perish?"
-        );
+                "Mutant creatures and beasts to face off against. Will you triumph, or will you perish?");
         builder.add(ModAdvancementProvider.BURN_ZOMBIE_BURN_ADVANCEMENT.title(), "Burn Zombie Burn");
         builder.add(ModAdvancementProvider.BURN_ZOMBIE_BURN_ADVANCEMENT.description(),
-                "Use a flint and steel to light a mutant zombie on fire when it's down"
-        );
+                "Use a flint and steel to light a mutant zombie on fire when it's down");
         builder.add(ModAdvancementProvider.FROSTY_THE_SNOW_GOLEM_ADVANCEMENT.title(), "Frosty the Snow Golem");
         builder.add(ModAdvancementProvider.FROSTY_THE_SNOW_GOLEM_ADVANCEMENT.description(),
-                "Create a Mutant Snow Golem using Chemical X"
-        );
+                "Create a Mutant Snow Golem using Chemical X");
         builder.add(ModAdvancementProvider.GUNPOWDER_SPICE_ADVANCEMENT.title(), "Gunpowder, spice...");
         builder.add(ModAdvancementProvider.GUNPOWDER_SPICE_ADVANCEMENT.description(),
-                "...and everything nice. Obtain a potion of Chemical X."
-        );
+                "...and everything nice. Obtain a potion of Chemical X.");
         builder.add(ModAdvancementProvider.HULK_SMASH_ADVANCEMENT.title(), "Hulk Smash!");
         builder.add(ModAdvancementProvider.HULK_SMASH_ADVANCEMENT.description(),
-                "Kill a Mutant Zombie using a Hulk Hammer"
-        );
+                "Kill a Mutant Zombie using a Hulk Hammer");
         builder.add(ModAdvancementProvider.NO_BONES_ABOUT_IT_ADVANCEMENT.title(), "No Bones About It");
         builder.add(ModAdvancementProvider.NO_BONES_ABOUT_IT_ADVANCEMENT.description(),
-                "Kill a Mutant Skeleton using a crossbow while wearing a full set of Mutant Skeleton armor"
-        );
+                "Kill a Mutant Skeleton using a crossbow while wearing a full set of Mutant Skeleton armor");
         builder.add(ModAdvancementProvider.SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.title(), "Spider-Pig, Spider-Pig...");
         builder.add(ModAdvancementProvider.SPIDER_PIG_SPIDER_PIG_ADVANCEMENT.description(),
-                "Feed a Pig a Fermented Spider Eye and throw Chemical X at it"
-        );
+                "Feed a Pig a Fermented Spider Eye and throw Chemical X at it");
         builder.add(ModAdvancementProvider.YOU_DA_BOMBY_ADVANCEMENT.title(), "You da Bomby");
         builder.add(ModAdvancementProvider.YOU_DA_BOMBY_ADVANCEMENT.description(),
-                "Hatch a Creeper Minion from its egg"
-        );
+                "Hatch a Creeper Minion from its egg");
     }
 }

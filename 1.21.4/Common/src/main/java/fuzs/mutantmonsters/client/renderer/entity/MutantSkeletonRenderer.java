@@ -25,7 +25,10 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
     @Override
     public void extractRenderState(MutantSkeleton entity, MutantSkeletonRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
-        AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity, reusedState, partialTick);
+        AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity,
+                reusedState,
+                partialTick,
+                this.itemModelResolver);
     }
 
     @Override

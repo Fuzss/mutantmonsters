@@ -4,9 +4,9 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.MutantMonstersClient;
 import fuzs.mutantmonsters.data.client.ModLanguageProvider;
 import fuzs.mutantmonsters.data.client.ModModelProvider;
-import fuzs.mutantmonsters.neoforge.data.client.ModEquipmentModelProvider;
-import fuzs.mutantmonsters.neoforge.data.client.ModParticleDescriptionProvider;
-import fuzs.mutantmonsters.neoforge.data.client.ModSoundDefinitionProvider;
+import fuzs.mutantmonsters.neoforge.data.client.ModEquipmentProvider;
+import fuzs.mutantmonsters.neoforge.data.client.ModParticleProvider;
+import fuzs.mutantmonsters.neoforge.data.client.ModSoundProvider;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.neoforge.api.data.v2.core.DataProviderHelper;
 import net.neoforged.api.distmarker.Dist;
@@ -19,9 +19,9 @@ public class MutantMonstersNeoForgeClient {
         ClientModConstructor.construct(MutantMonsters.MOD_ID, MutantMonstersClient::new);
         DataProviderHelper.registerDataProviders(MutantMonsters.MOD_ID,
                 ModLanguageProvider::new,
-                ModParticleDescriptionProvider::new,
+                ModParticleProvider::new,
                 ModModelProvider::new,
-                ModSoundDefinitionProvider::new,
-                ModEquipmentModelProvider::new);
+                ModSoundProvider::new,
+                ModEquipmentProvider::new);
     }
 }

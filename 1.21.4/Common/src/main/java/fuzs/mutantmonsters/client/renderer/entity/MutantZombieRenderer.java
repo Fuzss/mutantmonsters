@@ -33,7 +33,10 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
     public void extractRenderState(MutantZombie entity, MutantZombieRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
         reusedState.hasRedOverlay = entity.hurtTime > 0 || entity.deathTime > 0 && entity.getLives() <= 0;
-        AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity, reusedState, partialTick);
+        AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity,
+                reusedState,
+                partialTick,
+                this.itemModelResolver);
         reusedState.vanishTime = entity.vanishTime > 0 ? entity.vanishTime + partialTick : entity.vanishTime;
         reusedState.throwHitTime = entity.throwHitTick == -1 ? -1.0F : entity.throwHitTick + partialTick;
         reusedState.throwFinishTime = entity.throwFinishTick == -1 ? -1.0F : entity.throwFinishTick + partialTick;

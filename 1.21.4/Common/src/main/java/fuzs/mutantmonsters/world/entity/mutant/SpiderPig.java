@@ -2,8 +2,8 @@ package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModEntityTypes;
-import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
+import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.services.CommonAbstractions;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
@@ -119,7 +119,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
                 new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt)
         );
         this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Mob.class, true,
-                (LivingEntity livingEntity, ServerLevel serverLevel) -> livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)
+                (LivingEntity livingEntity, ServerLevel serverLevel) -> livingEntity.getType().is(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)
         ));
         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, true));
     }
@@ -470,7 +470,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, S
             }
         }
 
-        if (livingEntity.getType().is(ModRegistry.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) &&
+        if (livingEntity.getType().is(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) &&
                 livingEntity instanceof Mob mob) {
             return mob.convertTo(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value(), ConversionParams.single(this, false, false),
                     Function.identity()::apply) == null;
