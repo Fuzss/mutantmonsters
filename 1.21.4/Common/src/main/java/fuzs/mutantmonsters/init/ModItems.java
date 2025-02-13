@@ -6,10 +6,8 @@ import fuzs.puzzleslib.api.item.v2.ArmorMaterialBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -114,9 +112,7 @@ public class ModItems {
             ChemicalXItem::new,
             () -> new Item.Properties().stacksTo(16)
                     .useCooldown(0.5F)
-                    .component(DataComponents.POTION_CONTENTS,
-                            PotionContents.EMPTY.withEffectAdded(new MobEffectInstance(ModRegistry.CHEMICAL_X_MOB_EFFECT,
-                                    1)))
+                    .component(DataComponents.POTION_CONTENTS, ChemicalXItem.createComponent())
                     .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
 
     public static void bootstrap() {

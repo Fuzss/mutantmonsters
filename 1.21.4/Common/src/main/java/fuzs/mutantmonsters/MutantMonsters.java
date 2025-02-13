@@ -7,7 +7,6 @@ import fuzs.mutantmonsters.handler.EntityEventsHandler;
 import fuzs.mutantmonsters.handler.PlayerEventsHandler;
 import fuzs.mutantmonsters.handler.SpawningPreventionHandler;
 import fuzs.mutantmonsters.init.ModEntityTypes;
-import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.*;
 import fuzs.mutantmonsters.network.client.C2SCreeperMinionNameMessage;
@@ -32,16 +31,12 @@ import fuzs.puzzleslib.api.event.v1.entity.player.ItemEntityEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerTickEvents;
 import fuzs.puzzleslib.api.event.v1.level.ExplosionEvents;
-import fuzs.puzzleslib.api.event.v1.server.RegisterPotionBrewingMixesCallback;
 import fuzs.puzzleslib.api.network.v3.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.slf4j.Logger;
@@ -82,18 +77,6 @@ public class MutantMonsters implements ModConstructor {
         ItemEntityEvents.TOSS.register(PlayerEventsHandler::onItemToss);
         ServerEntityLevelEvents.SPAWN.register(SpawningPreventionHandler::onEntitySpawn);
         ExplosionEvents.DETONATE.register(MutatedExplosionHelper::onExplosionDetonate);
-        RegisterPotionBrewingMixesCallback.EVENT.register(MutantMonsters::registerPotionRecipes);
-    }
-
-    private static void registerPotionRecipes(RegisterPotionBrewingMixesCallback.Builder builder) {
-        // this is required so the item can be put into brewing stand slots
-        builder.registerPotionContainer((PotionItem) ModItems.CHEMICAL_X_ITEM.value());
-        builder.registerContainerRecipe((PotionItem) Items.SPLASH_POTION,
-                Ingredient.of(ModItems.ENDERSOUL_HAND_ITEM.value(),
-                        ModItems.HULK_HAMMER_ITEM.value(),
-                        ModItems.CREEPER_SHARD_ITEM.value(),
-                        ModItems.MUTANT_SKELETON_SKULL_ITEM.value()),
-                (PotionItem) ModItems.CHEMICAL_X_ITEM.value());
     }
 
     @Override
