@@ -72,32 +72,29 @@ public class MutatedExplosionHelper {
             if (explosion instanceof ServerExplosion serverExplosion && entity instanceof ServerPlayer serverPlayer &&
                     serverPlayer.isBlocking() &&
                     explosion.getDirectSourceEntity() instanceof MutantCreeper mutantCreeper) {
-                float seenPercent = this.getSeenPercent(explosion, entity);
-                float entityDamageAmount = this.getEntityDamageAmount(explosion, entity, seenPercent);
-                if (!entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, entityDamageAmount)) {
+                float seenPercent;
+                if (this.getKnockbackMultiplier(entity) == 0.0F) {
+                    seenPercent = 0.0F;
+                } else {
+                    seenPercent = ServerExplosion.getSeenPercent(explosion.center(), entity);
+                }
+                float damageAmount = this.getEntityDamageAmount(explosion, entity, seenPercent);
+                if (!entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, damageAmount)) {
                     if (mutantCreeper.isJumpAttacking()) {
                         EntityUtil.disableShield(serverPlayer, mutantCreeper.isCharged() ? 200 : 100);
                     } else {
                         ItemHelper.hurtAndBreak(serverPlayer.getUseItem(),
-                                (int) (entityDamageAmount * 2.0F),
+                                (int) (damageAmount * 2.0F),
                                 serverPlayer,
                                 serverPlayer.getUsedItemHand());
                     }
-                    entity.hurtServer(serverPlayer.serverLevel(),
-                            serverExplosion.damageSource,
-                            entityDamageAmount * 0.5F);
+                    entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, damageAmount * 0.5F);
                 }
 
                 return false;
             }
 
             return super.shouldDamageEntity(explosion, entity);
-        }
-
-        private float getSeenPercent(Explosion explosion, Entity entity) {
-            boolean bl = this.shouldDamageEntity(explosion, entity);
-            float p = this.getKnockbackMultiplier(entity);
-            return !bl && p == 0.0F ? 0.0F : ServerExplosion.getSeenPercent(explosion.center(), entity);
         }
     }
 }
