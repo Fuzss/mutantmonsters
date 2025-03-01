@@ -52,7 +52,7 @@
 	"item.mutantmonsters.mutant_snow_golem_spawn_egg": "Generar Golem de Nieve Mutante",
 	"item.mutantmonsters.mutant_zombie_spawn_egg": "Generar Zombie Mutante",
 	"item.mutantmonsters.mutant_zombie_villager_spawn_egg": "Generar Aldeano Zombie Mutante",
-	"item.mutantmonsters.spider_pig_spawn_egg": "Generar Spider-Pig",
+	"item.mutantmonsters.spider_pig_spawn_egg": "Generar Cerdo-Araña",
 	"item.mutantmonsters.creeper_minion_tracker": "Rastreador de Minion Creeper",
 	"item.mutantmonsters.creeper_minion_tracker.tame_success": "%1$s fue domesticado por %2$s",
 	"item.mutantmonsters.creeper_shard": "Fragmento de Creeper",
@@ -107,8 +107,8 @@
 	"subtitles.mutantmonsters.entity.mutant_zombie.grunt": "Zombie Mutante gruñe",
 	"subtitles.mutantmonsters.entity.mutant_zombie.hurt": "Zombie Mutante se lastima",
 	"subtitles.mutantmonsters.entity.mutant_zombie.roar": "Zombie Mutante ruge",
-	"subtitles.mutantmonsters.entity.spider_pig.ambient": "Spider-Pig gruñe",
-	"subtitles.mutantmonsters.entity.spider_pig.charge": "Spider-Pig se carga",
-	"subtitles.mutantmonsters.entity.spider_pig.death": "Spider-Pig muere",
-	"subtitles.mutantmonsters.entity.spider_pig.hurt": "Spider-Pig se lastima"
+	"subtitles.mutantmonsters.entity.spider_pig.ambient": "Cerdo-Araña gruñe",
+	"subtitles.mutantmonsters.entity.spider_pig.charge": "Cerdo-Araña se carga",
+	"subtitles.mutantmonsters.entity.spider_pig.death": "Cerdo-Araña muere",
+	"subtitles.mutantmonsters.entity.spider_pig.hurt": "Cerdo-Araña se lastima"
 }
