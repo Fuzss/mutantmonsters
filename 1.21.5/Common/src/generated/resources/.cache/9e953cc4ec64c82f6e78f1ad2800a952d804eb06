@@ -1,0 +1,10 @@
+// 1.21.4	2025-02-10T21:54:32.64874	Tags for minecraft:entity_type mod id vanilla
+1e772bfea9bfc94d8dd91f2b35621c3ae3346039 data/enderzoology/tags/entity_type/concussion_immune.json
+e5a8ec2f43036495bb95f251aabbbae976b92553 data/minecraft/tags/entity_type/arthropod.json
+f0428a015f1e67c4f6b6c34f2ff61ab2b42faf04 data/minecraft/tags/entity_type/fall_damage_immune.json
+69804e7d53efc224a7b0fec5e285fcf2e0e7925b data/minecraft/tags/entity_type/freeze_immune_entity_types.json
+6a7a0d483c991e3e2ccc8793c6bea5f67684440a data/minecraft/tags/entity_type/impact_projectiles.json
+1b89c042c04a200a23a8eda70e1507ff3ea39323 data/minecraft/tags/entity_type/skeletons.json
+a4730c5785dab119d55af8374911299010f0bfdf data/minecraft/tags/entity_type/undead.json
+d7c9ba57130326b03ed79c69df452468d39f73e3 data/mutantmonsters/tags/entity_type/mutants.json
+4f7199632b4cad574610ebc7e17621e7798bb62d data/mutantmonsters/tags/entity_type/spider_pig_targets.json

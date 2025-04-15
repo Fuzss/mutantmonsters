@@ -1,0 +1,11 @@
+// 1.21.4	2025-02-10T21:54:32.650551	Tags for minecraft:item mod id vanilla
+18c314b0e975a8d5ce36bb09bcee5ce3567f1d65 data/minecraft/tags/item/chest_armor.json
+1b3936fe09b4bc28c2942a39e9bea3370bc6eb12 data/minecraft/tags/item/enchantable/durability.json
+78d95257d1e0c292efe70e8ea38e99c652c7b433 data/minecraft/tags/item/enchantable/fire_aspect.json
+78d95257d1e0c292efe70e8ea38e99c652c7b433 data/minecraft/tags/item/enchantable/sharp_weapon.json
+cf6185c36122d050f4289245d8b0199ea4c81fd4 data/minecraft/tags/item/foot_armor.json
+6dd07004f9bc609fca2c0eee47766640ea537759 data/minecraft/tags/item/head_armor.json
+7399d1ea4a9ad4ed160a8b18150afd1eda910d7d data/minecraft/tags/item/leg_armor.json
+6dd07004f9bc609fca2c0eee47766640ea537759 data/minecraft/tags/item/skulls.json
+b67bdd8cb2cf4c8678211530e59657a5e9269849 data/minecraft/tags/item/trimmable_armor.json
+501ae1378d9cff3372f83d2e93dd37c842c314a4 data/mutantmonsters/tags/item/repairs_skeleton_armor.json

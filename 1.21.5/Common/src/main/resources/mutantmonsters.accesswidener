@@ -1,0 +1,2 @@
+accessWidener   v2  named
+accessible  method  net/minecraft/world/item/equipment/ArmorMaterial    createAttributes    (Lnet/minecraft/world/item/equipment/ArmorType;)Lnet/minecraft/world/item/component/ItemAttributeModifiers;
