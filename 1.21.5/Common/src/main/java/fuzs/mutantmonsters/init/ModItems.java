@@ -9,6 +9,8 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.DamageResistant;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.component.Weapon;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.block.Block;
@@ -25,8 +27,7 @@ public class ModItems {
 
     public static final Holder.Reference<Item> CREEPER_MINION_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
             ModEntityTypes.CREEPER_MINION_ENTITY_TYPE,
-            894731,
-            12040119);
+            0x0DA70B);
     public static final Holder.Reference<Item> MUTANT_CREEPER_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
             ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE,
             5349438,
@@ -59,6 +60,7 @@ public class ModItems {
             () -> new Item.Properties().durability(16)
                     .rarity(Rarity.UNCOMMON)
                     .attributes(CreeperShardItem.createAttributes())
+                    .component(DataComponents.TOOL, CreeperShardItem.createToolProperties())
                     .component(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_EXPLOSION)));
     public static final Holder.Reference<Item> ENDERSOUL_HAND_ITEM = ModRegistry.REGISTRIES.registerItem(
             "endersoul_hand",
@@ -66,14 +68,18 @@ public class ModItems {
             () -> new Item.Properties().durability(240)
                     .rarity(Rarity.EPIC)
                     .enchantable(20)
-                    .attributes(EndersoulHandItem.createAttributes()));
-    public static final Holder.Reference<Item> HULK_HAMMER_ITEM = ModRegistry.REGISTRIES.whenOnFabricLike()
-            .registerItem("hulk_hammer",
-                    HulkHammerItem::new,
-                    () -> new Item.Properties().durability(64)
-                            .rarity(Rarity.UNCOMMON)
-                            .attributes(HulkHammerItem.createAttributes())
-                            .component(DataComponents.TOOL, HulkHammerItem.createToolProperties()));
+                    .attributes(EndersoulHandItem.createAttributes())
+                    .component(DataComponents.TOOL, EndersoulHandItem.createToolProperties())
+                    .component(DataComponents.WEAPON, new Weapon(1))
+                    .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    public static final Holder.Reference<Item> HULK_HAMMER_ITEM = ModRegistry.REGISTRIES.registerItem("hulk_hammer",
+            HulkHammerItem::new,
+            () -> new Item.Properties().durability(150)
+                    .rarity(Rarity.UNCOMMON)
+                    .attributes(HulkHammerItem.createAttributes())
+                    .component(DataComponents.TOOL, HulkHammerItem.createToolProperties())
+                    .enchantable(15)
+                    .component(DataComponents.WEAPON, new Weapon(1, 10.0F)));
     public static final Holder.Reference<Item> MUTANT_SKELETON_ARMS_ITEM = ModRegistry.REGISTRIES.registerItem(
             "mutant_skeleton_arms");
     public static final Holder.Reference<Item> MUTANT_SKELETON_LIMB_ITEM = ModRegistry.REGISTRIES.registerItem(
@@ -113,7 +119,9 @@ public class ModItems {
             () -> new Item.Properties().stacksTo(16)
                     .useCooldown(0.5F)
                     .component(DataComponents.POTION_CONTENTS, ChemicalXItem.createComponent())
-                    .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+                    .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                    .component(DataComponents.TOOLTIP_DISPLAY,
+                            TooltipDisplay.DEFAULT.withHidden(DataComponents.POTION_CONTENTS, true)));
 
     public static void bootstrap() {
         // NO-OP

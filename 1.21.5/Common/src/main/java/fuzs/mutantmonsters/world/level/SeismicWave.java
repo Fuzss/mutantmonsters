@@ -1,11 +1,13 @@
 package fuzs.mutantmonsters.world.level;
 
 import com.google.common.collect.ImmutableList;
-import fuzs.mutantmonsters.MutantMonsters;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.network.S2CSeismicWaveFluidParticlesMessage;
+import fuzs.mutantmonsters.network.ClientboundSeismicWaveFluidParticlesMessage;
 import fuzs.mutantmonsters.services.CommonAbstractions;
-import fuzs.puzzleslib.api.network.v3.PlayerSet;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -23,18 +25,32 @@ import java.util.List;
 
 public class SeismicWave extends BlockPos {
     private static final int MAX_SEISMIC_WAVES_PER_PLAYER = 64;
+    public static final Codec<SeismicWave> CODEC = RecordCodecBuilder.create(instance -> instance.group(BlockPos.CODEC.fieldOf(
+                            "block_pos").forGetter(SeismicWave::getBlockPos),
+                    Codec.BOOL.fieldOf("initial").forGetter(SeismicWave::isInitial),
+                    Codec.BOOL.fieldOf("affects_terrain").forGetter(SeismicWave::affectsTerrain))
+            .apply(instance, SeismicWave::new));
+    public static final Codec<List<SeismicWave>> LIST_CODEC = CODEC.listOf();
 
-    private final boolean first;
+    private final boolean initial;
     private final boolean affectsTerrain;
 
-    public SeismicWave(int x, int y, int z, boolean first, boolean affectsTerrain) {
+    public SeismicWave(BlockPos blockPos, boolean initial, boolean affectsTerrain) {
+        this(blockPos.getX(), blockPos.getY(), blockPos.getZ(), initial, affectsTerrain);
+    }
+
+    public SeismicWave(int x, int y, int z, boolean initial, boolean affectsTerrain) {
         super(x, y, z);
-        this.first = first;
+        this.initial = initial;
         this.affectsTerrain = affectsTerrain;
     }
 
-    public boolean isFirst() {
-        return this.first;
+    private BlockPos getBlockPos() {
+        return this;
+    }
+
+    public boolean isInitial() {
+        return this.initial;
     }
 
     public boolean affectsTerrain() {
@@ -112,10 +128,11 @@ public class SeismicWave extends BlockPos {
             BlockState blockstate = level.getBlockState(this);
             Block block = blockstate.getBlock();
             Player playerEntity = entity instanceof Player ? (Player) entity : null;
-            if (playerEntity != null && playerEntity.mayBuild() || level.getGameRules().getBoolean(
-                    GameRules.RULE_MOBGRIEFING)) {
-                if (blockstate.is(Blocks.GRASS_BLOCK) || blockstate.is(Blocks.DIRT_PATH) || blockstate.is(
-                        Blocks.FARMLAND) || blockstate.is(Blocks.PODZOL) || blockstate.is(Blocks.MYCELIUM)) {
+            if (playerEntity != null && playerEntity.mayBuild() ||
+                    level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                if (blockstate.is(Blocks.GRASS_BLOCK) || blockstate.is(Blocks.DIRT_PATH) ||
+                        blockstate.is(Blocks.FARMLAND) || blockstate.is(Blocks.PODZOL) ||
+                        blockstate.is(Blocks.MYCELIUM)) {
                     level.setBlockAndUpdate(this, Blocks.DIRT.defaultBlockState());
                 }
 
@@ -141,10 +158,11 @@ public class SeismicWave extends BlockPos {
             }
 
             if (block instanceof BellBlock) {
-                ((BellBlock) block).onHit(level, blockstate,
+                ((BellBlock) block).onHit(level,
+                        blockstate,
                         new BlockHitResult(Vec3.atLowerCornerOf(this), entity.getDirection(), this, false),
-                        playerEntity, true
-                );
+                        playerEntity,
+                        true);
             }
 
             if (blockstate.is(Blocks.REDSTONE_ORE)) {
@@ -154,12 +172,13 @@ public class SeismicWave extends BlockPos {
             if (blockstate.getFluidState().isEmpty()) {
                 level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, posAbove, Block.getId(blockstate));
             } else {
-                PlayerSet playerSet = PlayerSet.nearPosition(null, this.getX() + 0.5, this.getY(), this.getZ() + 0.5,
-                        1024.0, (ServerLevel) entity.level()
-                );
-                MutantMonsters.NETWORK.sendMessage(playerSet,
-                        new S2CSeismicWaveFluidParticlesMessage(this).toClientboundMessage()
-                );
+                PlayerSet playerSet = PlayerSet.nearPosition(null,
+                        this.getX() + 0.5,
+                        this.getY(),
+                        this.getZ() + 0.5,
+                        1024.0,
+                        (ServerLevel) entity.level());
+                MessageSender.broadcast(playerSet, new ClientboundSeismicWaveFluidParticlesMessage(this));
             }
         }
     }
@@ -175,8 +194,7 @@ public class SeismicWave extends BlockPos {
         List<SeismicWave> seismicWaves = ModRegistry.SEISMIC_WAVE_ATTACHMENT_TYPE.get(player);
         if (seismicWaves.size() > MAX_SEISMIC_WAVES_PER_PLAYER) {
             seismicWaves = seismicWaves.subList(seismicWaves.size() - MAX_SEISMIC_WAVES_PER_PLAYER,
-                    seismicWaves.size()
-            );
+                    seismicWaves.size());
         }
         if (!seismicWaves.isEmpty()) {
             SeismicWave seismicWave = seismicWaves.getFirst();

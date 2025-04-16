@@ -3,26 +3,19 @@ package fuzs.mutantmonsters.world.entity.projectile;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.mutantmonsters.world.entity.AdditionalSpawnDataEntity;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
-import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
+import fuzs.puzzleslib.api.entity.v1.EntityHelper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -36,44 +29,47 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalInt;
 
-public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpawnDataEntity {
-    private static final EntityDataAccessor<OptionalInt> OWNER_ENTITY_ID = SynchedEntityData.defineId(ThrowableBlock.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
-    private static final EntityDataAccessor<Boolean> HELD = SynchedEntityData.defineId(ThrowableBlock.class, EntityDataSerializers.BOOLEAN);
-    private BlockState blockState;
-    @Nullable
-    private EntityType<?> ownerType;
+public class ThrowableBlock extends ThrowableProjectile {
+    private static final EntityDataAccessor<OptionalInt> DATA_OWNER_ENTITY_ID = SynchedEntityData.defineId(
+            ThrowableBlock.class,
+            EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
+    private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE_ID = SynchedEntityData.defineId(ThrowableBlock.class,
+            EntityDataSerializers.BLOCK_STATE);
+    private static final EntityDataAccessor<Boolean> DATA_IS_HELD = SynchedEntityData.defineId(ThrowableBlock.class,
+            EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_IS_LARGE = SynchedEntityData.defineId(ThrowableBlock.class,
+            EntityDataSerializers.BOOLEAN);
 
-    public ThrowableBlock(EntityType<? extends ThrowableBlock> type, Level worldIn) {
-        super(type, worldIn);
-        this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
+    public ThrowableBlock(EntityType<? extends ThrowableBlock> type, Level level) {
+        super(type, level);
     }
 
-    public ThrowableBlock(double x, double y, double z, LivingEntity entity) {
-        super(ModEntityTypes.THROWABLE_BLOCK_ENTITY_TYPE.value(), x, y, z, entity.level());
-        this.blockState = Blocks.GRASS_BLOCK.defaultBlockState();
-        this.setOwner(entity);
-        this.ownerType = entity.getType();
+    public ThrowableBlock(double x, double y, double z, LivingEntity livingEntity) {
+        super(ModEntityTypes.THROWABLE_BLOCK_ENTITY_TYPE.value(), x, y, z, livingEntity.level());
+        this.setOwner(livingEntity);
     }
 
-    public ThrowableBlock(MutantEnderman enderman, int id) {
-        this(enderman.getX(), enderman.getY() + 4.7, enderman.getZ(), enderman);
-        this.blockState = Block.stateById(enderman.getHeldBlock(id));
-        boolean outer = id <= 1;
-        boolean right = (id & 1) == 0;
-        LivingEntity attackTarget = enderman.getTarget();
+    public ThrowableBlock(MutantEnderman mutantEnderman, int armIndex) {
+        this(mutantEnderman.getX(), mutantEnderman.getY() + 4.7, mutantEnderman.getZ(), mutantEnderman);
+        this.setBlockState(mutantEnderman.getHeldBlock(armIndex).orElseGet(Blocks.AIR::defaultBlockState));
+        boolean outer = armIndex <= 1;
+        boolean right = (armIndex & 1) == 0;
+        LivingEntity attackTarget = mutantEnderman.getTarget();
         Vec3 forward = EntityUtil.getDirVector(this.getYRot(), outer ? 2.7F : 1.4F);
         Vec3 strafe = EntityUtil.getDirVector(this.getYRot() + (right ? 90.0F : -90.0F), outer ? 2.2F : 2.0F);
-        this.setPos(this.getX() + forward.x + strafe.x, this.getY() + (double) (outer ? 2.8F : 1.1F) - 4.8, this.getZ() + forward.z + strafe.z);
+        this.setPos(this.getX() + forward.x + strafe.x,
+                this.getY() + (double) (outer ? 2.8F : 1.1F) - 4.8,
+                this.getZ() + forward.z + strafe.z);
         if (attackTarget != null) {
             double d0 = attackTarget.getX() - this.getX();
             double d1 = attackTarget.getY(0.33) - this.getY();
@@ -81,60 +77,73 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
             double d3 = Mth.sqrt((float) (d0 * d0 + d2 * d2));
             this.shoot(d0, d1 + d3 * 0.1, d2, 1.4F, 1.0F);
         } else {
-            this.throwBlock(enderman);
+            this.throwBlock(mutantEnderman);
         }
-
     }
 
     public ThrowableBlock(MutantSnowGolem mutantSnowGolem) {
-        this(mutantSnowGolem.getX(), mutantSnowGolem.getY() + 1.955 - 0.1 + 1.0, mutantSnowGolem.getZ(), mutantSnowGolem);
+        this(mutantSnowGolem.getX(),
+                mutantSnowGolem.getY() + 1.955 - 0.1 + 1.0,
+                mutantSnowGolem.getZ(),
+                mutantSnowGolem);
         this.setYRot(mutantSnowGolem.getYRot());
-        this.blockState = Blocks.ICE.defaultBlockState();
+        this.setBlockState(Blocks.ICE.defaultBlockState());
     }
 
-    public ThrowableBlock(Player player, BlockState blockState, BlockPos pos) {
-        this((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5, player);
-        this.blockState = blockState;
+    public ThrowableBlock(Player player, BlockState blockState, BlockPos blockPos) {
+        this(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5, player);
+        this.setBlockState(blockState);
         this.setHeld(true);
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(OWNER_ENTITY_ID, OptionalInt.empty());
-        builder.define(HELD, false);
+        builder.define(DATA_OWNER_ENTITY_ID, OptionalInt.empty());
+        builder.define(DATA_BLOCK_STATE_ID, Blocks.GRASS_BLOCK.defaultBlockState());
+        builder.define(DATA_IS_HELD, false);
+        builder.define(DATA_IS_LARGE, false);
     }
 
     public BlockState getBlockState() {
-        return this.blockState;
+        return this.entityData.get(DATA_BLOCK_STATE_ID);
     }
 
-    @Nullable
-    public EntityType<?> getOwnerType() {
-        return this.ownerType;
+    private void setBlockState(BlockState blockState) {
+        this.entityData.set(DATA_BLOCK_STATE_ID, blockState);
     }
 
     public boolean isHeld() {
-        return this.entityData.get(HELD);
+        return this.entityData.get(DATA_IS_HELD);
     }
 
     private void setHeld(boolean held) {
-        this.entityData.set(HELD, held);
+        this.entityData.set(DATA_IS_HELD, held);
+    }
+
+    public boolean isLarge() {
+        return this.entityData.get(DATA_IS_LARGE);
     }
 
     @Override
-    public void setOwner(Entity entityIn) {
-        super.setOwner(entityIn);
-        if (entityIn != null) {
-            this.entityData.set(OWNER_ENTITY_ID, OptionalInt.of(entityIn.getId()));
+    public void setOwner(Entity entity) {
+        super.setOwner(entity);
+        if (entity != null) {
+            this.entityData.set(DATA_OWNER_ENTITY_ID, OptionalInt.of(entity.getId()));
+            this.entityData.set(DATA_IS_LARGE, this.isThrownBySnowGolem());
         }
+    }
 
+    public boolean isThrownBySnowGolem() {
+        return this.getOwner() != null &&
+                this.getOwner().getType() == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
     }
 
     @Override
     protected double getDefaultGravity() {
-        if (this.ownerType == EntityType.PLAYER) {
+        EntityType<?> entityType = this.getOwner() != null ? this.getOwner().getType() : null;
+        if (entityType == EntityType.PLAYER) {
             return 0.04;
-        } else if (this.ownerType == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
+        } else if (entityType == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
             return 0.06;
         } else {
             return 0.01;
@@ -148,7 +157,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
 
     @Override
     public boolean isPickable() {
-        return this.isAlive() && this.ownerType != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
+        return this.isAlive() && !this.isThrownBySnowGolem();
     }
 
     @Override
@@ -167,13 +176,20 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
     public void handleEntityEvent(byte id) {
         if (id == 3) {
             for (int i = 0; i < 60; ++i) {
-                double x = this.getX() + (double) (this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double) this.getBbWidth();
-                double y = this.getY() + 0.5 + (double) (this.random.nextFloat() * this.getBbHeight());
-                double z = this.getZ() + (double) (this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double) this.getBbWidth();
+                double x = this.getX() + (this.random.nextFloat() * this.getBbWidth() * 2.0F) - this.getBbWidth();
+                double y = this.getY() + 0.5 + (this.random.nextFloat() * this.getBbHeight());
+                double z = this.getZ() + (this.random.nextFloat() * this.getBbWidth() * 2.0F) - this.getBbWidth();
                 double motx = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
                 double moty = 0.5F + this.random.nextFloat() * 2.0F;
                 double motz = (this.random.nextFloat() - this.random.nextFloat()) * 3.0F;
-                this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.blockState), x, y, z, motx, moty, motz);
+                this.level()
+                        .addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.getBlockState()),
+                                x,
+                                y,
+                                z,
+                                motx,
+                                moty,
+                                motz);
             }
         }
     }
@@ -188,7 +204,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
             this.baseTick();
             Entity thrower = this.getOwner();
             if (thrower == null) {
-                OptionalInt optionalInt = this.entityData.get(OWNER_ENTITY_ID);
+                OptionalInt optionalInt = this.entityData.get(DATA_OWNER_ENTITY_ID);
                 if (optionalInt.isPresent()) {
                     Entity entity = this.level().getEntity(optionalInt.getAsInt());
                     if (entity instanceof LivingEntity) {
@@ -204,11 +220,11 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
                 double x = thrower.getX() + vec.x * 1.6 - this.getX();
                 double y = thrower.getEyeY() + vec.y * 1.6 - this.getY();
                 double z = thrower.getZ() + vec.z * 1.6 - this.getZ();
-                float offset = 0.6F;
-                this.setDeltaMovement(x * (double) offset, y * (double) offset, z * (double) offset);
+                double offset = 0.6;
+                this.setDeltaMovement(x * offset, y * offset, z * offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() || !((LivingEntity) thrower).isHolding(
-                        ModItems.ENDERSOUL_HAND_ITEM.value()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() ||
+                        !((LivingEntity) thrower).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value()))) {
                     this.setHeld(false);
                 }
             }
@@ -226,7 +242,7 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
         if (!super.canHitEntity(entity)) {
             return false;
         } else {
-            return this.ownerType != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value() || MutantSnowGolem.canHarm(this.getOwner(), entity);
+            return !this.isThrownBySnowGolem() || MutantSnowGolem.canHarm(this.getOwner(), entity);
         }
     }
 
@@ -263,29 +279,33 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
         this.setYRot(thrower.getYRot());
         this.setXRot(thrower.getXRot());
         float f = 0.4F;
-        this.shoot(-Mth.sin(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f, -Mth.sin(this.getXRot() / 180.0F * 3.1415927F) * f, Mth.cos(this.getYRot() / 180.0F * 3.1415927F) * Mth.cos(this.getXRot() / 180.0F * 3.1415927F) * f, 1.4F, 1.0F);
+        this.shoot(-Mth.sin(this.getYRot() * Mth.DEG_TO_RAD) * Mth.cos(this.getXRot() * Mth.DEG_TO_RAD) * f,
+                -Mth.sin(this.getXRot() * Mth.DEG_TO_RAD) * f,
+                Mth.cos(this.getYRot() * Mth.DEG_TO_RAD) * Mth.cos(this.getXRot() * Mth.DEG_TO_RAD) * f,
+                1.4F,
+                1.0F);
     }
 
     @Override
     protected void onHit(HitResult hitResult) {
         Entity thrower = this.getOwner();
         LivingEntity livingEntity = thrower instanceof LivingEntity ? (LivingEntity) thrower : null;
-        if (this.ownerType == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
-
+        if (this.isThrownBySnowGolem()) {
             if (this.level() instanceof ServerLevel serverLevel) {
-                for (Mob mob : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(2.5, 2.0, 2.5), this::canHitEntity)) {
+                for (Mob mob : this.level()
+                        .getEntitiesOfClass(Mob.class,
+                                this.getBoundingBox().inflate(2.5, 2.0, 2.5),
+                                this::canHitEntity)) {
                     if (this.distanceToSqr(mob) <= 6.25) {
                         DamageSource damageSource = this.level().damageSources().mobProjectile(this, livingEntity);
-                        mob.hurtServer(serverLevel, damageSource, 4.0F + (float) this.random.nextInt(3));
+                        mob.hurtServer(serverLevel, damageSource, 4.0F + this.random.nextInt(3));
                     }
                 }
 
                 if (hitResult.getType() == HitResult.Type.ENTITY) {
                     Entity entity = ((EntityHitResult) hitResult).getEntity();
                     DamageSource damageSource = this.level().damageSources().thrown(this, livingEntity);
-                    if (entity.hurtServer(serverLevel, damageSource, 4.0F) && entity.getType() == EntityType.ENDERMAN) {
-                        return;
-                    }
+                    entity.hurtServer(serverLevel, damageSource, 4.0F);
                 }
 
                 if (!this.level().isClientSide) {
@@ -294,88 +314,99 @@ public class ThrowableBlock extends ThrowableProjectile implements AdditionalSpa
                 }
             }
 
-            this.playSound(this.blockState.getSoundType().getBreakSound(), 0.8F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.8F);
+            this.playSound(this.getBlockState().getSoundType().getBreakSound(),
+                    0.8F,
+                    (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.8F);
         } else {
-            boolean canOwnerPlace = livingEntity instanceof Player && ((Player) livingEntity).mayBuild() || livingEntity instanceof Mob && (!(this.level() instanceof ServerLevel serverLevel) || CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, livingEntity));
+            boolean throwerAllowedToPlace = isThrowerAllowedToPlace(livingEntity);
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockHitResult blockHitResult = (BlockHitResult) hitResult;
                 this.onHitBlock(blockHitResult);
                 if (this.level() instanceof ServerLevel serverLevel) {
                     BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    if (canOwnerPlace && this.level().getBlockState(blockPos).canBeReplaced() && this.blockState.canSurvive(this.level(), blockPos)) {
-                        this.level().setBlockAndUpdate(blockPos, this.blockState);
-                        this.blockState.getBlock().setPlacedBy(this.level(), blockPos, this.blockState, livingEntity, ItemStack.EMPTY);
-                        SoundType soundType = this.blockState.getSoundType();
-                        this.playSound(soundType.getPlaceSound(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+                    if (throwerAllowedToPlace && this.level().getBlockState(blockPos).canBeReplaced() &&
+                            this.getBlockState().canSurvive(this.level(), blockPos)) {
+                        this.level().setBlockAndUpdate(blockPos, this.getBlockState());
+                        this.getBlockState()
+                                .getBlock()
+                                .setPlacedBy(this.level(),
+                                        blockPos,
+                                        this.getBlockState(),
+                                        livingEntity,
+                                        ItemStack.EMPTY);
+                        SoundType soundType = this.getBlockState().getSoundType();
+                        this.playSound(soundType.getPlaceSound(),
+                                (soundType.getVolume() + 1.0F) / 2.0F,
+                                soundType.getPitch() * 0.8F);
                     } else {
-                        this.level().levelEvent(2001, blockPos, Block.getId(this.blockState));
-                        if (canOwnerPlace && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                            this.spawnAtLocation(serverLevel, this.blockState.getBlock());
+                        this.level()
+                                .levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK,
+                                        blockPos,
+                                        Block.getId(this.getBlockState()));
+                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                            Block.dropResources(this.getBlockState(), serverLevel, this.blockPosition());
                         }
                     }
                 }
-            } else if (this.level() instanceof ServerLevel serverLevel && hitResult.getType() == HitResult.Type.ENTITY) {
+            } else if (this.level() instanceof ServerLevel serverLevel &&
+                    hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) hitResult).getEntity();
                 DamageSource damageSource = serverLevel.damageSources().thrown(this, livingEntity);
-                if (entity.hurtServer(serverLevel, damageSource, 4.0F) && entity.getType() == EntityType.ENDERMAN) {
-                    return;
-                }
+                entity.hurtServer(serverLevel, damageSource, 4.0F);
 
-                this.level().levelEvent(2001, this.blockPosition(), Block.getId(this.blockState));
-                if (canOwnerPlace && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                    this.spawnAtLocation(serverLevel, this.blockState.getBlock());
-                }
-            }
-
-            for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
-                if (!entity.is(livingEntity) && this.distanceToSqr(entity) <= 4.0) {
-                    entity.hurt(this.level().damageSources().mobProjectile(this, livingEntity), (float) (6 + this.random.nextInt(3)));
+                this.level()
+                        .levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK,
+                                this.blockPosition(),
+                                Block.getId(this.getBlockState()));
+                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    Block.dropResources(this.getBlockState(), serverLevel, this.blockPosition());
                 }
             }
 
-            if (!this.level().isClientSide) {
+            if (this.level() instanceof ServerLevel serverLevel) {
+                for (Entity entity : this.level()
+                        .getEntities(this, this.getBoundingBox().inflate(2.0), this::canHitEntity)) {
+                    if (!entity.is(livingEntity) && this.distanceToSqr(entity) <= 4.0) {
+                        entity.hurtServer(serverLevel,
+                                this.level().damageSources().mobProjectile(this, livingEntity),
+                                (float) (6 + this.random.nextInt(3)));
+                    }
+                }
+
                 this.discard();
             }
+        }
+    }
+
+    public static boolean isThrowerAllowedToPlace(LivingEntity livingEntity) {
+        if (livingEntity instanceof Player player) {
+            return player.mayBuild();
+        } else if (livingEntity instanceof Mob mob) {
+            if (!(mob.level() instanceof ServerLevel serverLevel)) {
+                return true;
+            } else {
+                return EntityHelper.isMobGriefingAllowed(serverLevel, livingEntity);
+            }
+        } else {
+            return false;
         }
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        compound.put("BlockState", NbtUtils.writeBlockState(this.blockState));
         compound.putBoolean("Held", this.isHeld());
-        if (this.ownerType != null) {
-            compound.putString("OwnerType", BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
-        }
+        compound.store("BlockState",
+                BlockState.CODEC,
+                this.registryAccess().createSerializationContext(NbtOps.INSTANCE),
+                this.getBlockState());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        this.setHeld(compound.getBoolean("Held"));
-        if (compound.contains("BlockState", 10)) {
-            this.blockState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), compound.getCompound("BlockState"));
-        }
-
-        if (compound.contains("OwnerType")) {
-            this.ownerType = EntityType.byString(compound.getString("OwnerType")).orElse(null);
-        }
-    }
-
-    @Override
-    public void writeAdditionalAddEntityData(FriendlyByteBuf buffer) {
-        buffer.writeVarInt(Block.getId(this.blockState));
-        buffer.writeUtf(this.ownerType == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(this.ownerType).toString());
-    }
-
-    @Override
-    public void readAdditionalAddEntityData(FriendlyByteBuf additionalData) {
-        this.blockState = Block.stateById(additionalData.readVarInt());
-        this.ownerType = EntityType.byString(additionalData.readUtf(32767)).orElse(null);
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
-        return AdditionalSpawnDataEntity.getPacket(this, serverEntity);
+        this.setHeld(compound.getBooleanOr("Held", false));
+        compound.read("BlockState", BlockState.CODEC, this.registryAccess().createSerializationContext(NbtOps.INSTANCE))
+                .ifPresent(this::setBlockState);
     }
 }

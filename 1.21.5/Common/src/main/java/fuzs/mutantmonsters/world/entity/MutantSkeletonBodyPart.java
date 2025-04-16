@@ -1,7 +1,5 @@
 package fuzs.mutantmonsters.world.entity;
 
-import com.mojang.serialization.DataResult;
-import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModRegistry;
@@ -9,8 +7,6 @@ import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -41,18 +37,16 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
-    public static final String TAG_BODY_PART = "BodyPart";
-    public static final String TAG_DESPAWN_TIMER = "DespawnTimer";
-    private static final EntityDataAccessor<BodyPart> BODY_PART = SynchedEntityData.defineId(MutantSkeletonBodyPart.class,
+    static final String TAG_BODY_PART = "BodyPart";
+    static final String TAG_DESPAWN_TIMER = "DespawnTimer";
+    private static final EntityDataAccessor<BodyPart> DATA_BODY_PART = SynchedEntityData.defineId(MutantSkeletonBodyPart.class,
             ModRegistry.BODY_PART_ENTITY_DATA_SERIALIZER.value());
 
+    private final InterpolationHandler interpolation = new InterpolationHandler(this);
     private final boolean yawPositive;
     private final boolean pitchPositive;
     @Nullable
     private Mob owner;
-    private double velocityX;
-    private double velocityY;
-    private double velocityZ;
     private int despawnTimer;
 
     public MutantSkeletonBodyPart(EntityType<? extends MutantSkeletonBodyPart> type, Level level) {
@@ -75,15 +69,15 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(BODY_PART, BodyPart.PELVIS);
+        builder.define(DATA_BODY_PART, BodyPart.PELVIS);
     }
 
     public BodyPart getBodyPart() {
-        return this.entityData.get(BODY_PART);
+        return this.entityData.get(DATA_BODY_PART);
     }
 
     private void setBodyPart(BodyPart bodyPart) {
-        this.entityData.set(BODY_PART, bodyPart);
+        this.entityData.set(DATA_BODY_PART, bodyPart);
     }
 
     @Override
@@ -107,17 +101,8 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
-        this.setPos(x, y, z);
-        this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
-    }
-
-    @Override
-    public void lerpMotion(double x, double y, double z) {
-        this.velocityX = x;
-        this.velocityY = y;
-        this.velocityZ = z;
-        this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
+    public InterpolationHandler getInterpolation() {
+        return this.interpolation;
     }
 
     @Override
@@ -210,22 +195,14 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        BodyPart.CODEC.encodeStart(NbtOps.INSTANCE, this.getBodyPart()).ifError((DataResult.Error<Tag> error) -> {
-            MutantMonsters.LOGGER.warn("Error saving body part {}: {}", this.getBodyPart(), error);
-        }).ifSuccess((Tag tag) -> {
-            compound.put(TAG_BODY_PART, tag);
-        });
-        compound.putShort(TAG_DESPAWN_TIMER, (short) this.despawnTimer);
+        compound.store(TAG_BODY_PART, BodyPart.CODEC, this.getBodyPart());
+        compound.putInt(TAG_DESPAWN_TIMER, this.despawnTimer);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        BodyPart.CODEC.parse(NbtOps.INSTANCE, compound.get(TAG_BODY_PART))
-                .ifError((DataResult.Error<BodyPart> error) -> {
-                    MutantMonsters.LOGGER.warn("Error loading body part {}: {}", compound.get(TAG_BODY_PART), error);
-                })
-                .ifSuccess(this::setBodyPart);
-        this.despawnTimer = compound.getShort(TAG_DESPAWN_TIMER);
+        compound.read(TAG_BODY_PART, BodyPart.CODEC).ifPresent(this::setBodyPart);
+        this.despawnTimer = compound.getIntOr(TAG_DESPAWN_TIMER, 0);
     }
 
     @Override

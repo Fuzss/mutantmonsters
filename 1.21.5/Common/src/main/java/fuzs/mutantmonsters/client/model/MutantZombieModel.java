@@ -20,8 +20,6 @@ public class MutantZombieModel extends EntityModel<MutantZombieRenderState> {
     private final ModelPart forearm2;
     private final ModelPart leg1;
     private final ModelPart leg2;
-    private final ModelPart foreleg1;
-    private final ModelPart foreleg2;
 
     public MutantZombieModel(ModelPart modelPart) {
         super(modelPart);
@@ -35,107 +33,85 @@ public class MutantZombieModel extends EntityModel<MutantZombieRenderState> {
         this.forearm2 = this.arm2.getChild("fore_arm2");
         this.leg1 = this.pelvis.getChild("leg1");
         this.leg2 = this.pelvis.getChild("leg2");
-        this.foreleg1 = this.leg1.getChild("fore_leg1");
-        this.foreleg2 = this.leg2.getChild("fore_leg2");
     }
 
     public static LayerDefinition createBodyLayer() {
+
         MeshDefinition mesh = new MeshDefinition();
-        PartDefinition root = mesh.getRoot();
-        PartDefinition pelvis = root.addOrReplaceChild("pelvis",
-                CubeListBuilder.create().texOffs(0, 0),
+        PartDefinition partDefinition = mesh.getRoot();
+
+        PartDefinition pelvis = partDefinition.addOrReplaceChild("pelvis",
+                CubeListBuilder.create(),
                 PartPose.offset(0.0F, 10.0F, 6.0F));
+
         PartDefinition waist = pelvis.addOrReplaceChild("waist",
                 CubeListBuilder.create().texOffs(0, 44).addBox(-7.0F, -16.0F, -6.0F, 14.0F, 16.0F, 12.0F),
-                PartPose.ZERO);
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.19634955F, 0.0F, 0.0F));
+
         PartDefinition chest = waist.addOrReplaceChild("chest",
                 CubeListBuilder.create().texOffs(0, 16).addBox(-12.0F, -12.0F, -8.0F, 24.0F, 12.0F, 16.0F),
-                PartPose.offset(0.0F, -12.0F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, -12.0F, 0.0F, 0.5235988F, 0.0F, 0.0F));
+
         chest.addOrReplaceChild("head",
                 CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F),
-                PartPose.offset(0.0F, -11.0F, -4.0F));
+                PartPose.offsetAndRotation(0.0F, -11.0F, -4.0F, -0.71994835F, 0.0F, 0.0F));
+
         PartDefinition arm1 = chest.addOrReplaceChild("arm1",
                 CubeListBuilder.create().texOffs(104, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 16.0F, 6.0F),
-                PartPose.offset(-11.0F, -8.0F, 2.0F));
+                PartPose.offsetAndRotation(-11.0F, -8.0F, 2.0F, -0.32724923F, 0.0F, 0.3926991F));
+
         PartDefinition arm2 = chest.addOrReplaceChild("arm2",
                 CubeListBuilder.create().texOffs(104, 0).mirror().addBox(-3.0F, 0.0F, -3.0F, 6.0F, 16.0F, 6.0F),
-                PartPose.offset(11.0F, -8.0F, 2.0F));
+                PartPose.offsetAndRotation(11.0F, -8.0F, 2.0F, -0.32724923F, 0.0F, -0.3926991F));
+
         arm1.addOrReplaceChild("fore_arm1",
                 CubeListBuilder.create()
                         .texOffs(104, 22)
                         .addBox(-3.0F, 0.0F, -3.0F, 6.0F, 16.0F, 6.0F, new CubeDeformation(0.1F)),
-                PartPose.offset(0.0F, 14.0F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, 14.0F, 0.0F, -1.0471976F, 0.0F, 0.0F));
+
         arm2.addOrReplaceChild("fore_arm2",
                 CubeListBuilder.create()
                         .texOffs(104, 22)
                         .mirror()
                         .addBox(-3.0F, 0.0F, -3.0F, 6.0F, 16.0F, 6.0F, new CubeDeformation(0.1F)),
-                PartPose.offset(0.0F, 14.0F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, 14.0F, 0.0F, -1.0471976F, 0.0F, 0.0F));
+
         PartDefinition leg1 = pelvis.addOrReplaceChild("leg1",
                 CubeListBuilder.create().texOffs(80, 0).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 11.0F, 6.0F),
-                PartPose.offset(-5.0F, -2.0F, 0.0F));
+                PartPose.offsetAndRotation(-5.0F, -2.0F, 0.0F, -0.7853982F, 0.0F, 0.0F));
+
         PartDefinition leg2 = pelvis.addOrReplaceChild("leg2",
                 CubeListBuilder.create().texOffs(80, 0).mirror().addBox(-3.0F, 0.0F, -3.0F, 6.0F, 11.0F, 6.0F),
-                PartPose.offset(5.0F, -2.0F, 0.0F));
+                PartPose.offsetAndRotation(5.0F, -2.0F, 0.0F, -0.7853982F, 0.0F, 0.0F));
+
         leg1.addOrReplaceChild("fore_leg1",
                 CubeListBuilder.create()
                         .texOffs(80, 17)
                         .addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F, new CubeDeformation(0.1F)),
-                PartPose.offset(0.0F, 9.5F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, 9.5F, 0.0F, 0.7853982F, 0.0F, 0.0F));
+
         leg2.addOrReplaceChild("fore_leg2",
                 CubeListBuilder.create()
                         .texOffs(80, 17)
                         .mirror()
                         .addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F, new CubeDeformation(0.1F)),
-                PartPose.offset(0.0F, 9.5F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, 9.5F, 0.0F, 0.7853982F, 0.0F, 0.0F));
+
         return LayerDefinition.create(mesh, 128, 128);
     }
 
     @Override
     public void setupAnim(MutantZombieRenderState renderState) {
         super.setupAnim(renderState);
-        this.setupInitialAngles();
-        this.animate(renderState,
-                renderState.walkAnimationPos,
-                renderState.walkAnimationSpeed,
-                renderState.ageInTicks,
-                renderState.yRot,
-                renderState.xRot);
-    }
-
-    private void setupInitialAngles() {
-        this.pelvis.y = 10.0F;
-        this.waist.xRot = 0.19634955F;
-        this.chest.xRot = 0.5235988F;
-        this.chest.yRot = 0.0F;
-        this.head.xRot = -0.71994835F;
-        this.head.yRot = 0.0F;
-        this.head.zRot = 0.0F;
-        this.arm1.xRot = -0.32724923F;
-        this.arm1.yRot = 0.0F;
-        this.arm1.zRot = 0.3926991F;
-        this.arm2.xRot = -0.32724923F;
-        this.arm2.yRot = 0.0F;
-        this.arm2.zRot = -0.3926991F;
-        this.forearm1.xRot = -1.0471976F;
-        this.forearm2.xRot = -1.0471976F;
-        this.leg1.xRot = -0.7853982F;
-        this.leg1.yRot = 0.0F;
-        this.leg1.zRot = 0.0F;
-        this.leg2.xRot = -0.7853982F;
-        this.leg2.yRot = 0.0F;
-        this.leg2.zRot = 0.0F;
-        this.foreleg1.xRot = 0.7853982F;
-        this.foreleg2.xRot = 0.7853982F;
-    }
-
-    private void animate(MutantZombieRenderState renderState, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        float walkAnim1 = (Mth.sin((limbSwing - 0.7F) * 0.4F) + 0.7F) * limbSwingAmount;
-        float walkAnim2 = -(Mth.sin((limbSwing + 0.7F) * 0.4F) - 0.7F) * limbSwingAmount;
-        float walkAnim = Mth.sin(limbSwing * 0.4F) * limbSwingAmount;
-        float breatheAnim = Mth.sin(ageInTicks * 0.1F);
-        float faceYaw = netHeadYaw * 3.1415927F / 180.0F;
-        float facePitch = headPitch * 3.1415927F / 180.0F;
+        float walkAnim1 = (Mth.sin((renderState.walkAnimationPos - 0.7F) * 0.4F) + 0.7F) *
+                renderState.walkAnimationSpeed;
+        float walkAnim2 = -(Mth.sin((renderState.walkAnimationPos + 0.7F) * 0.4F) - 0.7F) *
+                renderState.walkAnimationSpeed;
+        float walkAnim = Mth.sin(renderState.walkAnimationPos * 0.4F) * renderState.walkAnimationSpeed;
+        float breatheAnim = Mth.sin(renderState.ageInTicks * 0.1F);
+        float faceYaw = renderState.yRot * 3.1415927F / 180.0F;
+        float facePitch = renderState.xRot * 3.1415927F / 180.0F;
         float scale;
         if (renderState.deathTime <= 0) {
             if (renderState.animation == MutantZombie.SLAM_GROUND_ANIMATION) {
@@ -178,7 +154,7 @@ public class MutantZombieModel extends EntityModel<MutantZombieRenderState> {
         this.head.zRot -= faceYaw * 0.2F;
         this.chest.xRot += facePitch * 0.4F;
         this.chest.yRot += faceYaw * 0.2F;
-        this.pelvis.y += Mth.sin(limbSwing * 0.8F) * limbSwingAmount * 0.5F;
+        this.pelvis.y += Mth.sin(renderState.walkAnimationPos * 0.8F) * renderState.walkAnimationSpeed * 0.5F;
         this.chest.yRot -= walkAnim * 0.1F;
         this.arm1.xRot -= walkAnim * 0.6F;
         this.arm2.xRot += walkAnim * 0.6F;

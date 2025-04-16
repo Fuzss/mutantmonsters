@@ -15,66 +15,70 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.lang.ref.WeakReference;
-import java.util.function.Predicate;
 
 public class EndersoulFragment extends Entity {
-    public static final Predicate<Entity> IS_VALID_TARGET = EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(
-            (Entity entity) -> {
-        EntityType<?> type = entity.getType();
-        return type != EntityType.ITEM && type != EntityType.EXPERIENCE_ORB && type != EntityType.END_CRYSTAL && type != EntityType.ENDER_DRAGON && type != EntityType.ENDERMAN && type != ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value() && type != ModEntityTypes.ENDERSOUL_FRAGMENT_ENTITY_TYPE.value() && type != ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value();
-    });
-    private static final EntityDataAccessor<Boolean> TAMED = SynchedEntityData.defineId(EndersoulFragment.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_TAMED = SynchedEntityData.defineId(EndersoulFragment.class,
+            EntityDataSerializers.BOOLEAN);
+
     public final float[][] stickRotations;
     private int explodeTick;
     private WeakReference<MutantEnderman> spawner;
     private Player owner;
 
-    public EndersoulFragment(EntityType<? extends EndersoulFragment> type, Level world) {
-        super(type, world);
+    public EndersoulFragment(EntityType<? extends EndersoulFragment> type, Level level) {
+        super(type, level);
         this.stickRotations = new float[8][3];
         this.explodeTick = 20 + this.random.nextInt(20);
 
         for (int i = 0; i < this.stickRotations.length; ++i) {
             for (int j = 0; j < this.stickRotations[i].length; ++j) {
-                this.stickRotations[i][j] = this.random.nextFloat() * 2.0F * 3.1415927F;
+                this.stickRotations[i][j] = this.random.nextFloat() * 2.0F * Mth.PI;
             }
         }
-
     }
 
-    public EndersoulFragment(Level world, MutantEnderman spawner) {
-        this(ModEntityTypes.ENDERSOUL_FRAGMENT_ENTITY_TYPE.value(), world);
-        this.spawner = new WeakReference<>(spawner);
+    public EndersoulFragment(Level level, MutantEnderman mutantEnderman) {
+        this(ModEntityTypes.ENDERSOUL_FRAGMENT_ENTITY_TYPE.value(), level);
+        this.spawner = new WeakReference<>(mutantEnderman);
     }
 
     public static boolean isProtected(Entity entity) {
-        return entity instanceof LivingEntity && ((LivingEntity) entity).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value());
+        return entity instanceof LivingEntity &&
+                ((LivingEntity) entity).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value());
+    }
+
+    private void setExplodeTick(int explodeTick) {
+        this.explodeTick = explodeTick;
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(TAMED, false);
+        builder.define(DATA_TAMED, false);
     }
 
     public Player getOwner() {
         return this.owner;
     }
 
-    public boolean isTamed() {
-        return this.entityData.get(TAMED);
+    public boolean isCollected() {
+        return this.entityData.get(DATA_TAMED);
     }
 
-    public void setTamed(boolean tamed) {
-        this.entityData.set(TAMED, tamed);
+    public void setCollected(boolean tamed) {
+        this.entityData.set(DATA_TAMED, tamed);
     }
 
     @Override
@@ -97,15 +101,14 @@ public class EndersoulFragment extends Entity {
         if (id == 3) {
             EntityUtil.spawnEndersoulParticles(this, this.random, 64, 0.8F);
         }
-
     }
 
     @Override
     public void tick() {
         super.tick();
         Vec3 vec3d = this.getDeltaMovement();
-        if (this.owner == null && vec3d.y > -0.05000000074505806 && !this.isNoGravity()) {
-            this.setDeltaMovement(vec3d.x, Math.max(-0.05000000074505806, vec3d.y - 0.10000000149011612), vec3d.z);
+        if (this.owner == null && vec3d.y > -0.05 && !this.isNoGravity()) {
+            this.setDeltaMovement(vec3d.x, Math.max(-0.05, vec3d.y - 0.1), vec3d.z);
         }
 
         this.move(MoverType.SELF, this.getDeltaMovement());
@@ -115,13 +118,16 @@ public class EndersoulFragment extends Entity {
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {
-            if (!this.isTamed() && --this.explodeTick == 0) {
+            if (!this.isCollected() && --this.explodeTick == 0) {
                 this.explode(serverLevel);
             }
 
             if (this.owner != null && this.distanceToSqr(this.owner) > 9.0) {
                 float scale = 0.05F;
-                this.push((this.owner.getX() - this.getX()) * (double) scale, (this.owner.getY() + (double) (this.owner.getEyeHeight() / 3.0F) - this.getY()) * (double) scale, (this.owner.getZ() - this.getZ()) * (double) scale);
+                this.push((this.owner.getX() - this.getX()) * (double) scale,
+                        (this.owner.getY() + (double) (this.owner.getEyeHeight() / 3.0F) - this.getY()) *
+                                (double) scale,
+                        (this.owner.getZ() - this.getZ()) * (double) scale);
             }
         }
 
@@ -129,7 +135,7 @@ public class EndersoulFragment extends Entity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.isTamed()) {
+        if (this.isCollected()) {
             if (this.owner == null && !player.isSecondaryUseActive()) {
                 this.owner = player;
                 this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
@@ -143,7 +149,7 @@ public class EndersoulFragment extends Entity {
             }
         } else {
             if (!this.level().isClientSide) {
-                this.setTamed(true);
+                this.setCollected(true);
             }
 
             this.owner = player;
@@ -166,10 +172,14 @@ public class EndersoulFragment extends Entity {
     }
 
     private void explode(ServerLevel serverLevel) {
-        this.playSound(ModSoundEvents.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.value(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+        this.playSound(ModSoundEvents.ENTITY_ENDERSOUL_FRAGMENT_EXPLODE_SOUND_EVENT.value(),
+                1.0F,
+                (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
         serverLevel.broadcastEntityEvent(this, (byte) 3);
 
-        for (Entity entity : serverLevel.getEntities(this, this.getBoundingBox().inflate(5.0), IS_VALID_TARGET)) {
+        for (Entity entity : serverLevel.getEntities(this,
+                this.getBoundingBox().inflate(5.0),
+                MutantEnderman.ENDER_TARGETS)) {
             if (this.distanceToSqr(entity) <= 25.0) {
                 boolean hitChance = this.random.nextInt(3) != 0;
                 if (isProtected(entity)) {
@@ -197,20 +207,18 @@ public class EndersoulFragment extends Entity {
 
     @Override
     public SoundSource getSoundSource() {
-        return this.isTamed() ? SoundSource.NEUTRAL : SoundSource.HOSTILE;
+        return this.isCollected() ? SoundSource.NEUTRAL : SoundSource.HOSTILE;
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putBoolean("Tamed", this.isTamed());
+        compound.putBoolean("Collected", this.isCollected());
         compound.putInt("ExplodeTick", this.explodeTick);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setTamed(compound.getBoolean("Collected") || compound.getBoolean("Tamed"));
-        if (compound.contains("ExplodeTick")) {
-            this.explodeTick = compound.getInt("ExplodeTick");
-        }
+        this.setCollected(compound.getBooleanOr("Collected", false));
+        compound.getInt("ExplodeTick").ifPresent(this::setExplodeTick);
     }
 }

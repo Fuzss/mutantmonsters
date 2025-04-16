@@ -1,7 +1,7 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "minecraft:item/template_spawn_egg",
+    "model": "mutantmonsters:item/creeper_minion_spawn_egg",
     "tints": [
       {
         "type": "minecraft:constant",
@@ -9,7 +9,7 @@
       },
       {
         "type": "minecraft:constant",
-        "value": -4737097
+        "value": -16614144
       }
     ]
   }

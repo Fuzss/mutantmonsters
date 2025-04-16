@@ -6,6 +6,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ThrowableBlockRenderState extends EntityRenderState {
     public BlockState blockState;
-    public EntityType<?> ownerType;
+    public boolean isLarge;
     public float yRot;
 }

@@ -1,5 +1,7 @@
 package fuzs.mutantmonsters.world.level;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.mutantmonsters.world.entity.ai.goal.TrackSummonerGoal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import net.minecraft.core.BlockPos;
@@ -17,7 +19,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.scores.Scoreboard;
 
+import java.util.List;
+
 public class ZombieResurrection extends BlockPos {
+    public static final Codec<ZombieResurrection> CODEC = RecordCodecBuilder.create(instance -> instance.group(BlockPos.CODEC.fieldOf(
+                            "block_pos").forGetter(ZombieResurrection::getBlockPos),
+                    Codec.INT.fieldOf("current_tick").forGetter(ZombieResurrection::getCurrentTick))
+            .apply(instance, ZombieResurrection::new));
+    public static final Codec<List<ZombieResurrection>> LIST_CODEC = CODEC.listOf();
+
     private int tick;
 
     public ZombieResurrection(Level level, int x, int y, int z) {
@@ -49,19 +59,22 @@ public class ZombieResurrection extends BlockPos {
                 return -1;
             }
 
-            if ((!checkDay || world.getFluidState(startPos).is(FluidTags.LAVA)) && !world.getFluidState(startPos).isEmpty()) {
+            if ((!checkDay || world.getFluidState(startPos).is(FluidTags.LAVA)) &&
+                    !world.getFluidState(startPos).isEmpty()) {
                 break;
             }
 
             if (world.isEmptyBlock(startPos)) {
                 --i;
             } else {
-                if (!world.isEmptyBlock(startPos) && world.isEmptyBlock(posUp) && blockState.getCollisionShape(world, startPos).isEmpty()) {
+                if (!world.isEmptyBlock(startPos) && world.isEmptyBlock(posUp) &&
+                        blockState.getCollisionShape(world, startPos).isEmpty()) {
                     --i;
                     break;
                 }
 
-                if (world.isEmptyBlock(startPos) || world.isEmptyBlock(posUp) || world.getBlockState(posUp).getCollisionShape(world, posUp).isEmpty()) {
+                if (world.isEmptyBlock(startPos) || world.isEmptyBlock(posUp) ||
+                        world.getBlockState(posUp).getCollisionShape(world, posUp).isEmpty()) {
                     break;
                 }
 
@@ -69,7 +82,7 @@ public class ZombieResurrection extends BlockPos {
             }
         }
 
-        if (checkDay && world.isDay()) {
+        if (checkDay && world.isBrightOutside()) {
             BlockPos lightPos = new BlockPos(x, y + 1, z);
             float f = world.getPathfindingCostFromLightLevels(lightPos);
             if (f > 0.0F && world.canSeeSkyFromBelowWater(lightPos) && world.random.nextInt(3) != 0) {
@@ -81,17 +94,22 @@ public class ZombieResurrection extends BlockPos {
     }
 
     public static EntityType<? extends Zombie> getZombieByLocation(Level level, BlockPos pos) {
-        if ((level.getBiome(pos).is(BiomeTags.IS_OCEAN) || level.getBiome(pos).is(BiomeTags.IS_RIVER)) && level.isWaterAt(pos)) {
+        if ((level.getBiome(pos).is(BiomeTags.IS_OCEAN) || level.getBiome(pos).is(BiomeTags.IS_RIVER)) &&
+                level.isWaterAt(pos)) {
             return EntityType.DROWNED;
-        } else if (level.isDay() && level.canSeeSky(pos)) {
+        } else if (level.isBrightOutside() && level.canSeeSky(pos)) {
             return EntityType.HUSK;
         } else {
             return level.random.nextFloat() < 0.05F ? EntityType.ZOMBIE_VILLAGER : EntityType.ZOMBIE;
         }
     }
 
-    public int getTick() {
+    public int getCurrentTick() {
         return this.tick;
+    }
+
+    private BlockPos getBlockPos() {
+        return this;
     }
 
     public boolean update(MutantZombie mutantZombie) {
@@ -103,19 +121,24 @@ public class ZombieResurrection extends BlockPos {
             }
 
             if (--this.tick <= 0) {
-                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level, EntitySpawnReason.MOB_SUMMONED);
+                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level,
+                        EntitySpawnReason.MOB_SUMMONED);
                 if (level instanceof ServerLevelAccessor) {
-                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(this), EntitySpawnReason.MOB_SUMMONED, null);
+                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level,
+                            level.getCurrentDifficultyAt(this),
+                            EntitySpawnReason.MOB_SUMMONED,
+                            null);
                     if (ilivingentitydata instanceof Zombie.ZombieGroupData) {
                         new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) ilivingentitydata).isBaby, false);
                     }
                 }
 
-                zombieEntity.setHealth(zombieEntity.getMaxHealth() * (0.6F + 0.4F * zombieEntity.getRandom().nextFloat()));
+                zombieEntity.setHealth(
+                        zombieEntity.getMaxHealth() * (0.6F + 0.4F * zombieEntity.getRandom().nextFloat()));
                 zombieEntity.playAmbientSound();
                 level.levelEvent(2001, abovePos, Block.getId(level.getBlockState(this)));
                 if (!level.isClientSide) {
-                    zombieEntity.moveTo(abovePos, mutantZombie.getYRot(), 0.0F);
+                    zombieEntity.snapTo(abovePos, mutantZombie.getYRot(), 0.0F);
                     zombieEntity.goalSelector.addGoal(0, new TrackSummonerGoal(zombieEntity, mutantZombie));
                     zombieEntity.goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(zombieEntity, 1.0));
                     level.addFreshEntity(zombieEntity);
@@ -123,7 +146,8 @@ public class ZombieResurrection extends BlockPos {
 
                 if (mutantZombie.getTeam() != null) {
                     Scoreboard scoreboard = level.getScoreboard();
-                    scoreboard.addPlayerToTeam(zombieEntity.getScoreboardName(), scoreboard.getPlayerTeam(mutantZombie.getTeam().getName()));
+                    scoreboard.addPlayerToTeam(zombieEntity.getScoreboardName(),
+                            scoreboard.getPlayerTeam(mutantZombie.getTeam().getName()));
                 }
 
                 return false;

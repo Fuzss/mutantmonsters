@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class MutantArrow extends Arrow {
-    private static final EntityDataAccessor<Integer> CLONES = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_CLONES = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
 
     public MutantArrow(EntityType<? extends MutantArrow> type, Level level) {
         super(type, level);
@@ -56,15 +56,15 @@ public class MutantArrow extends Arrow {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(CLONES, 1);
+        builder.define(DATA_CLONES, 1);
     }
 
     public int getClones() {
-        return this.entityData.get(CLONES);
+        return this.entityData.get(DATA_CLONES);
     }
 
     public void setClones(int clones) {
-        this.entityData.set(CLONES, clones);
+        this.entityData.set(DATA_CLONES, clones);
     }
 
     @Override

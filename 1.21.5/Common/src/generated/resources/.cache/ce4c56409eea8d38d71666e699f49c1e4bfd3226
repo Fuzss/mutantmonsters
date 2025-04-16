@@ -1,3 +1,4 @@
-// 1.21.4	2025-02-10T21:54:32.65071	Tags for minecraft:damage_type mod id vanilla
+// 1.21.5	2025-04-16T19:18:38.568062	Tags for minecraft:damage_type mod id vanilla
 2511a77b6d887e9b1dd61ab206a9d91a153317dc data/minecraft/tags/damage_type/bypasses_armor.json
 a112f65879259784f333894ee7801f4d747f4cf6 data/minecraft/tags/damage_type/is_explosion.json
+3c2bba1e4dc680dca07d6e6480119b7a1850d1fa data/mutantmonsters/tags/damage_type/mutant_enderman_dodge.json

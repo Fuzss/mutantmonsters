@@ -3,7 +3,6 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.renderer.entity.state.ThrowableBlockRenderState;
-import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -24,7 +23,7 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock, Throw
     public void extractRenderState(ThrowableBlock entity, ThrowableBlockRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
         reusedState.blockState = entity.getBlockState();
-        reusedState.ownerType = entity.getOwnerType();
+        reusedState.isLarge = entity.isLarge();
         reusedState.yRot = entity.getYRot(partialTick);
     }
 
@@ -38,10 +37,10 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock, Throw
         super.render(renderState, poseStack, bufferSource, packedLight);
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5, 0.0);
-        if (renderState.ownerType != ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value()) {
-            poseStack.scale(-0.75F, -0.75F, 0.75F);
-        } else {
+        if (renderState.isLarge) {
             poseStack.mulPose(Axis.YP.rotationDegrees(renderState.yRot));
+        } else {
+            poseStack.scale(-0.75F, -0.75F, 0.75F);
         }
 
         poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));

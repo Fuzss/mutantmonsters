@@ -5,14 +5,18 @@ import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.*;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
+import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionOnShoulderLayer;
 import fuzs.mutantmonsters.client.renderer.special.EndersoulHandSpecialRenderer;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
+import fuzs.mutantmonsters.world.item.ArmorBlockItem;
+import fuzs.mutantmonsters.world.item.SkeletonArmorItem;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.*;
 import fuzs.puzzleslib.api.client.event.v1.renderer.ExtractRenderStateCallback;
+import fuzs.puzzleslib.api.client.gui.v2.tooltip.ItemTooltipRegistry;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.EndermanModel;
@@ -38,8 +42,8 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onClientSetup() {
-        SkullBlockRenderer.SKIN_BY_TYPE.put(ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
-                MutantMonsters.id("textures/entity/mutant_skeleton.png"));
+        ItemTooltipRegistry.registerItemTooltip(ArmorBlockItem.class, ArmorBlockItem::getDescriptionComponent);
+        ItemTooltipRegistry.registerItemTooltip(SkeletonArmorItem.class, SkeletonArmorItem::getDescriptionComponent);
     }
 
     @Override
@@ -135,14 +139,24 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ModelLayerLocations.MUTANT_SNOW_GOLEM_HEAD,
                 () -> MutantSnowGolemModel.createBodyLayer(64, 32));
         context.registerLayerDefinition(ModelLayerLocations.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG, SpiderPigModel::createBodyLayer);
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG,
+                () -> SpiderPigModel.createBodyLayer());
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY,
+                () -> SpiderPigModel.createBodyLayer().apply(SpiderPigModel.BABY_TRANSFORMER));
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_SADDLE,
+                () -> SpiderPigModel.createBodyLayer());
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY_SADDLE,
+                () -> SpiderPigModel.createBodyLayer()
+                        .apply(SpiderPigModel.BABY_TRANSFORMER));
     }
 
     @Override
     public void onRegisterSkullRenderers(SkullRenderersContext context) {
-        context.registerSkullRenderer(ModRegistry.MUTANT_SKELETON_SKULL_TYPE, (EntityModelSet entityModelSet) -> {
-            return new SkullModel(entityModelSet.bakeLayer(ModelLayerLocations.MUTANT_SKELETON_SKULL));
-        });
+        context.registerSkullRenderer(ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
+                MutantSkeletonRenderer.TEXTURE_LOCATION,
+                (EntityModelSet entityModelSet) -> {
+                    return new SkullModel(entityModelSet.bakeLayer(ModelLayerLocations.MUTANT_SKELETON_SKULL));
+                });
     }
 
     @Override
@@ -153,5 +167,10 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerSpectatorShader(ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"),
                 ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
                 ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value());
+    }
+
+    @Override
+    public void onRegisterRenderPipelines(RenderPipelinesContext context) {
+        context.registerRenderPipeline(ModRenderType.ENERGY_SWIRL_RENDER_PIPELINE);
     }
 }

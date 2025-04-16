@@ -1,14 +1,9 @@
 package fuzs.mutantmonsters.client.renderer.entity.state;
 
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.client.renderer.entity.state.SaddleableRenderState;
+import net.minecraft.world.item.ItemStack;
 
-public class SpiderPigRenderState extends LivingEntityRenderState implements SaddleableRenderState {
+public class SpiderPigRenderState extends LivingEntityRenderState {
     public float attackTime;
-    public boolean isSaddled;
-
-    @Override
-    public boolean isSaddled() {
-        return this.isSaddled;
-    }
+    public ItemStack saddle = ItemStack.EMPTY;
 }

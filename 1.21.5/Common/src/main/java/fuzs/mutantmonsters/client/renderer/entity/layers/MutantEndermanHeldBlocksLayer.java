@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class MutantEndermanHeldBlocksLayer extends RenderLayer<MutantEndermanRenderState, MutantEndermanModel> {
     private final BlockRenderDispatcher blockRenderer;
@@ -25,7 +25,8 @@ public class MutantEndermanHeldBlocksLayer extends RenderLayer<MutantEndermanRen
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
         if (renderState.animation != MutantEnderman.CLONE_ANIMATION) {
             for (int i = 0; i < 4; ++i) {
-                if (renderState.heldBlocks[i] > 0) {
+                BlockState blockState = renderState.heldBlocks[i];
+                if (blockState != null) {
                     poseStack.pushPose();
                     this.getParentModel().translateRotateArm(poseStack, i);
                     poseStack.translate(0.0, 1.2, 0.0);
@@ -36,7 +37,7 @@ public class MutantEndermanHeldBlocksLayer extends RenderLayer<MutantEndermanRen
                     poseStack.scale(-0.75F, -0.75F, 0.75F);
                     poseStack.translate(-0.5, -0.5, 0.5);
                     poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-                    this.blockRenderer.renderSingleBlock(Block.stateById(renderState.heldBlocks[i]),
+                    this.blockRenderer.renderSingleBlock(blockState,
                             poseStack,
                             bufferSource,
                             packedLight,

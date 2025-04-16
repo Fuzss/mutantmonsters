@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
+import fuzs.puzzleslib.api.entity.v1.EntityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -16,9 +16,9 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 
-public abstract class AbstractMutantMonster extends Monster {
+public abstract class MutantMonster extends Monster {
 
-    protected AbstractMutantMonster(EntityType<? extends Monster> entityType, Level level) {
+    protected MutantMonster(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         this.getNavigation().setCanFloat(true);
         this.setPathfindingMalus(PathType.UNPASSABLE_RAIL, 0.0F);
@@ -56,15 +56,18 @@ public abstract class AbstractMutantMonster extends Monster {
     public void aiStep() {
         super.aiStep();
         if (this.isAlive() && this.getTarget() != null && this.level() instanceof ServerLevel serverLevel) {
-            if (this.horizontalCollision && CommonAbstractions.INSTANCE.getMobGriefingRule(serverLevel, this)) {
+            if (this.horizontalCollision && EntityHelper.isMobGriefingAllowed(serverLevel, this)) {
                 boolean hasDestroyedBlock = false;
                 AABB aabb = this.getBoundingBox().inflate(0.2D);
 
-                for (BlockPos blockpos : BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY),
-                        Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)
-                )) {
-                    if (this.level().getBlockState(blockpos).getBlock() instanceof LeavesBlock) {
-                        hasDestroyedBlock |= this.level().destroyBlock(blockpos, true, this);
+                for (BlockPos blockPos : BlockPos.betweenClosed(Mth.floor(aabb.minX),
+                        Mth.floor(aabb.minY),
+                        Mth.floor(aabb.minZ),
+                        Mth.floor(aabb.maxX),
+                        Mth.floor(aabb.maxY),
+                        Mth.floor(aabb.maxZ))) {
+                    if (this.level().getBlockState(blockPos).getBlock() instanceof LeavesBlock) {
+                        hasDestroyedBlock |= this.level().destroyBlock(blockPos, true, this);
                     }
                 }
 

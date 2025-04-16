@@ -25,10 +25,11 @@ import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.Nullable;
 
 public class EndersoulClone extends Monster {
+    @Nullable
     private MutantEnderman cloner;
 
-    public EndersoulClone(EntityType<? extends EndersoulClone> type, Level worldIn) {
-        super(type, worldIn);
+    public EndersoulClone(EntityType<? extends EndersoulClone> entityType, Level level) {
+        super(entityType, level);
         this.xpReward = Enemy.XP_REWARD_SMALL;
         this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
         this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
@@ -48,7 +49,7 @@ public class EndersoulClone extends Monster {
 
     public void setCloner(MutantEnderman cloner) {
         this.cloner = cloner;
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double) cloner.getMaxHealth());
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(cloner.getMaxHealth());
         this.setHealth(cloner.getHealth());
         if (cloner.hasCustomName()) {
             this.setCustomName(cloner.getCustomName());
@@ -102,8 +103,8 @@ public class EndersoulClone extends Monster {
             return false;
         } else {
             if (this.isAlive() && this.tickCount > 10) {
-                if (damageSource.getEntity() instanceof Player) {
-                    this.setLastHurtByPlayer((Player) damageSource.getEntity());
+                if (damageSource.getEntity() instanceof Player player) {
+                    this.setLastHurtByPlayer(player, 100);
                 }
                 this.dropAllDeathLoot(serverLevel, damageSource);
                 this.dropExperience(serverLevel, damageSource.getEntity());

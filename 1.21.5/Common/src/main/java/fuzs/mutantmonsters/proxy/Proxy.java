@@ -7,6 +7,4 @@ public interface Proxy {
     Proxy INSTANCE = ModLoaderEnvironment.INSTANCE.isClient() ? new ClientProxy() : new ServerProxy();
 
     void displayCreeperMinionTrackerGUI(CreeperMinion creeperMinion);
-
-    void showDismountMessage();
 }

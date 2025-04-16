@@ -20,7 +20,7 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
 
     @Override
     public void addTranslations(TranslationBuilder builder) {
-        builder.addCreativeModeTab(MutantMonsters.MOD_ID, MutantMonsters.MOD_NAME);
+        builder.add(ModRegistry.CREATIVE_MODE_TAB.value(), MutantMonsters.MOD_NAME);
         builder.add(ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(), "Mutant Skeleton Skull");
         builder.add(ModEntityTypes.BODY_PART_ENTITY_TYPE.value(), "Body Part");
         builder.add(ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(), "Creeper Minion");

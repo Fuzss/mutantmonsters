@@ -3,8 +3,8 @@ package fuzs.mutantmonsters.world.effect;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.config.ServerConfig;
 import fuzs.mutantmonsters.init.ModEntityTypes;
+import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.world.entity.SkullSpirit;
-import fuzs.puzzleslib.api.core.v1.CommonAbstractions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -20,12 +20,13 @@ import org.jetbrains.annotations.Nullable;
 public class ChemicalXMobEffect extends InstantenousMobEffect {
     public static final TargetingConditions.Selector IS_APPLICABLE = (LivingEntity livingEntity, ServerLevel serverLevel) -> {
         EntityType<?> entityType = livingEntity.getType();
-        return !CommonAbstractions.INSTANCE.isBossMob(entityType) &&
+        return !entityType.is(ModTags.BOSSES_ENTITY_TYPE_TAG) &&
                 !MutantMonsters.CONFIG.get(ServerConfig.class).mutantXConversions.containsValue(entityType) &&
                 entityType != ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value() &&
                 entityType != ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value();
     };
-    public static final TargetingConditions TARGET_PREDICATE = TargetingConditions.forNonCombat().selector(IS_APPLICABLE);
+    public static final TargetingConditions TARGET_PREDICATE = TargetingConditions.forNonCombat()
+            .selector(IS_APPLICABLE);
 
     public ChemicalXMobEffect(MobEffectCategory mobEffectCategory, int effectColor) {
         super(mobEffectCategory, effectColor);
@@ -36,7 +37,7 @@ public class ChemicalXMobEffect extends InstantenousMobEffect {
         Player player = indirectSource instanceof Player ? (Player) indirectSource : null;
         if (livingEntity instanceof Mob mob && TARGET_PREDICATE.test(serverLevel, player, livingEntity)) {
             SkullSpirit skullSpirit = new SkullSpirit(serverLevel, mob, player != null ? player.getUUID() : null);
-            skullSpirit.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            skullSpirit.snapTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             serverLevel.addFreshEntity(skullSpirit);
         }
     }

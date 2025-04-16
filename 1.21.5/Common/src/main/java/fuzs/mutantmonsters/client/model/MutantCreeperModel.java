@@ -38,73 +38,87 @@ public class MutantCreeperModel extends EntityModel<MutantCreeperRenderState> {
     }
 
     public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
+
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
+
         PartDefinition pelvis = root.addOrReplaceChild("pelvis",
                 CubeListBuilder.create()
                         .texOffs(0, 0)
                         .addBox(-5.0F, -14.0F, -4.0F, 10.0F, 14.0F, 8.0F, cubeDeformation),
-                PartPose.offset(0.0F, 14.0F, -3.0F));
+                PartPose.offsetAndRotation(0.0F, 14.0F, -3.0F, -0.7853982F, 0.0F, 0.0F));
+
         PartDefinition body = pelvis.addOrReplaceChild("body",
                 CubeListBuilder.create()
                         .texOffs(36, 0)
                         .addBox(-4.5F, -14.0F, -3.5F, 9.0F, 16.0F, 7.0F, cubeDeformation),
-                PartPose.offset(0.0F, -12.0F, 0.0F));
+                PartPose.offsetAndRotation(0.0F, -12.0F, 0.0F, 0.9424778F, 0.0F, 0.0F));
+
         PartDefinition neck = body.addOrReplaceChild("neck",
                 CubeListBuilder.create()
                         .texOffs(68, 0)
                         .addBox(-4.0F, -14.0F, -3.0F, 8.0F, 14.0F, 6.0F, cubeDeformation),
-                PartPose.offset(0.0F, -11.0F, 1.0F));
+                PartPose.offsetAndRotation(0.0F, -11.0F, 1.0F, 1.0471976F, 0.0F, 0.0F));
+
         neck.addOrReplaceChild("head",
                 CubeListBuilder.create()
                         .texOffs(0, 22)
                         .addBox(-5.0F, -12.0F, -5.0F, 10.0F, 12.0F, 10.0F, cubeDeformation),
-                PartPose.offset(0.0F, -12.0F, 1.0F));
+                PartPose.offsetAndRotation(0.0F, -12.0F, 1.0F, 0.5235988F, 0.0F, 0.0F));
+
         PartDefinition frontRightLeg = pelvis.addOrReplaceChild("front_right_leg",
                 CubeListBuilder.create()
                         .texOffs(40, 24)
                         .addBox(-3.0F, -4.0F, -14.0F, 6.0F, 4.0F, 14.0F, cubeDeformation),
-                PartPose.offset(3.0F, 0.0F, 0.0F));
+                PartPose.offsetAndRotation(3.0F, 0.0F, 0.0F, 0.31415927F, -0.7853982F, 0.0F));
+
         frontRightLeg.addOrReplaceChild("front_right_fore_leg",
                 CubeListBuilder.create().texOffs(96, 0).addBox(-3.5F, 0.0F, -4.0F, 7.0F, 20.0F, 8.0F, cubeDeformation),
-                PartPose.offset(0.0F, -4.0F, -14.0F));
+                PartPose.offsetAndRotation(0.0F, -4.0F, -14.0F, -0.20943952F, 0.3926991F, 0.0F));
+
         PartDefinition frontLeftLeg = pelvis.addOrReplaceChild("front_left_leg",
                 CubeListBuilder.create()
                         .texOffs(40, 24)
                         .mirror()
                         .addBox(-3.0F, -4.0F, -14.0F, 6.0F, 4.0F, 14.0F, cubeDeformation),
-                PartPose.offset(-3.0F, 0.0F, 0.0F));
+                PartPose.offsetAndRotation(-3.0F, 0.0F, 0.0F, 0.31415927F, 0.7853982F, 0.0F));
+
         frontLeftLeg.addOrReplaceChild("front_left_fore_leg",
                 CubeListBuilder.create()
                         .texOffs(96, 0)
                         .mirror()
                         .addBox(-3.5F, 0.0F, -4.0F, 7.0F, 20.0F, 8.0F, cubeDeformation),
-                PartPose.offset(0.0F, -4.0F, -14.0F));
+                PartPose.offsetAndRotation(0.0F, -4.0F, -14.0F, -0.20943952F, -0.3926991F, 0.0F));
+
         PartDefinition backRightLeg = pelvis.addOrReplaceChild("back_right_leg",
                 CubeListBuilder.create().texOffs(0, 44).addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation),
-                PartPose.offset(2.0F, -2.0F, 4.0F));
+                PartPose.offsetAndRotation(2.0F, -2.0F, 4.0F, 0.9F, 0.62831855F, 0.0F));
+
         backRightLeg.addOrReplaceChild("back_right_fore_leg",
                 CubeListBuilder.create().texOffs(80, 28).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation),
-                PartPose.offset(0.0F, -4.0F, 14.0F));
+                PartPose.offsetAndRotation(0.0F, -4.0F, 14.0F, 0.48332196F, 0.0F, 0.0F));
+
         PartDefinition backLeftLeg = pelvis.addOrReplaceChild("back_left_leg",
                 CubeListBuilder.create()
                         .texOffs(0, 44)
                         .mirror()
                         .addBox(-2.0F, -4.0F, 0.0F, 4.0F, 4.0F, 14.0F, cubeDeformation),
-                PartPose.offset(-2.0F, -2.0F, 4.0F));
+                PartPose.offsetAndRotation(-2.0F, -2.0F, 4.0F, 0.9F, -0.62831855F, 0.0F));
+
         backLeftLeg.addOrReplaceChild("back_left_fore_leg",
                 CubeListBuilder.create()
                         .texOffs(80, 28)
                         .mirror()
                         .addBox(-3.0F, 0.0F, -3.0F, 6.0F, 18.0F, 6.0F, cubeDeformation),
-                PartPose.offset(0.0F, -4.0F, 14.0F));
+                PartPose.offsetAndRotation(0.0F, -4.0F, 14.0F, 0.48332196F, 0.0F, 0.0F));
+
         return LayerDefinition.create(mesh, 128, 64);
     }
 
     @Override
     public void setupAnim(MutantCreeperRenderState renderState) {
         super.setupAnim(renderState);
-        this.setupInitialAngles();
+//        this.setupInitialAngles();
         this.animate(renderState,
                 renderState.walkAnimationPos,
                 renderState.walkAnimationSpeed,

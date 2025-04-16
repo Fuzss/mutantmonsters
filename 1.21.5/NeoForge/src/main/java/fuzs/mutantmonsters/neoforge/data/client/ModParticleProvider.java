@@ -2,12 +2,12 @@ package fuzs.mutantmonsters.neoforge.data.client;
 
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
-import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 import fuzs.puzzleslib.neoforge.api.client.data.v2.AbstractParticleProvider;
+import fuzs.puzzleslib.neoforge.api.data.v2.core.NeoForgeDataProviderContext;
 
 public class ModParticleProvider extends AbstractParticleProvider {
 
-    public ModParticleProvider(DataProviderContext context) {
+    public ModParticleProvider(NeoForgeDataProviderContext context) {
         super(context);
     }
 

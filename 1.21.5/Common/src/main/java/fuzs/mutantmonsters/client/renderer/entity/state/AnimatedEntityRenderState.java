@@ -1,9 +1,8 @@
 package fuzs.mutantmonsters.client.renderer.entity.state;
 
-import fuzs.mutantmonsters.world.entity.AnimatedEntity;
-import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.animation.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.animation.EntityAnimation;
 import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.world.entity.LivingEntity;
 

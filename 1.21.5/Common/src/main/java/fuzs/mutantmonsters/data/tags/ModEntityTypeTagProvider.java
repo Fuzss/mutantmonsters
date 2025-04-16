@@ -27,6 +27,14 @@ public class ModEntityTypeTagProvider extends AbstractTagProvider<EntityType<?>>
                         ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value(),
                         ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE.value());
         this.tag(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG).add(EntityType.SPIDER, EntityType.PIG);
+        this.tag(ModTags.SPIDER_PIG_FRIENDS_ENTITY_TYPE_TAG)
+                .add(EntityType.SPIDER, EntityType.CAVE_SPIDER, ModEntityTypes.SKULL_SPIRIT_ENTITY_TYPE.value());
+        this.tag(ModTags.ENDER_FRIENDS_ENTITY_TYPE_TAG)
+                .addTag("c:bosses")
+                .add(EntityType.ENDERMAN,
+                        ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
+                        ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value());
+        this.tag(EntityTypeTags.CAN_EQUIP_SADDLE).add(ModEntityTypes.SPIDER_PIG_ENTITY_TYPE.value());
         this.tag("enderzoology:concussion_immune")
                 .add(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(),
                         ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value());

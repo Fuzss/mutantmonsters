@@ -6,6 +6,7 @@ import fuzs.mutantmonsters.world.effect.ChemicalXMobEffect;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,18 +22,19 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.OptionalInt;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
 public class SkullSpirit extends Entity {
-    private static final EntityDataAccessor<OptionalInt> TARGET_ENTITY_ID = SynchedEntityData.defineId(SkullSpirit.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
-    private static final EntityDataAccessor<Boolean> ATTACHED = SynchedEntityData.defineId(SkullSpirit.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_TARGETUUID_ID = SynchedEntityData.defineId(
+            SkullSpirit.class,
+            EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
+    private static final EntityDataAccessor<Boolean> DATA_ATTACHED = SynchedEntityData.defineId(SkullSpirit.class,
+            EntityDataSerializers.BOOLEAN);
 
-    private Mob target;
     private int startTick;
     private int attachedTick;
-    private UUID targetUUID;
     @Nullable
     private UUID conversionStarter;
 
@@ -45,26 +47,40 @@ public class SkullSpirit extends Entity {
 
     public SkullSpirit(Level level, Mob target, @Nullable UUID conversionStarter) {
         this(ModEntityTypes.SKULL_SPIRIT_ENTITY_TYPE.value(), level);
-        this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(target.getId()));
+        this.setTarget(target);
         this.conversionStarter = conversionStarter;
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(TARGET_ENTITY_ID, OptionalInt.empty());
-        builder.define(ATTACHED, false);
+        builder.define(DATA_TARGETUUID_ID, Optional.empty());
+        builder.define(DATA_ATTACHED, false);
+    }
+
+    @Nullable
+    public LivingEntity getTarget() {
+        return EntityReference.get(this.getTargetReference(), this.level(), LivingEntity.class);
+    }
+
+    @Nullable
+    public EntityReference<LivingEntity> getTargetReference() {
+        return this.entityData.get(DATA_TARGETUUID_ID).orElse(null);
+    }
+
+    public void setTarget(@Nullable LivingEntity livingEntity) {
+        this.entityData.set(DATA_TARGETUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::new));
+    }
+
+    public void setTargetReference(@Nullable EntityReference<LivingEntity> entityReference) {
+        this.entityData.set(DATA_TARGETUUID_ID, Optional.ofNullable(entityReference));
     }
 
     public boolean isAttached() {
-        return this.entityData.get(ATTACHED);
+        return this.entityData.get(DATA_ATTACHED);
     }
 
     private void setAttached(boolean attached) {
-        this.entityData.set(ATTACHED, attached);
-    }
-
-    public Mob getTarget() {
-        return this.target;
+        this.entityData.set(DATA_ATTACHED, attached);
     }
 
     @Override
@@ -73,45 +89,30 @@ public class SkullSpirit extends Entity {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-        super.onSyncedDataUpdated(key);
-        if (TARGET_ENTITY_ID.equals(key)) {
-            this.entityData.get(TARGET_ENTITY_ID).ifPresent((id) -> {
-                Entity entity = this.level().getEntity(id);
-                if (entity instanceof Mob mob) {
-                    this.target = mob;
-                }
-            });
-        }
-    }
-
-    @Override
     public void tick() {
-        if (this.targetUUID != null && this.level() instanceof ServerLevel) {
-            Entity entity = ((ServerLevel) this.level()).getEntity(this.targetUUID);
-            if (entity instanceof Mob mob) {
-                this.entityData.set(TARGET_ENTITY_ID, OptionalInt.of(mob.getId()));
-                this.targetUUID = null;
-            }
-        }
-
-        if (this.target != null && this.target.isAlive()) {
+        if (this.getTarget() instanceof Mob target && target.isAlive()) {
             if (this.isAttached()) {
                 if (!this.level().isClientSide) {
-                    this.target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, this.target.getDeltaMovement().y, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+                    target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F,
+                            target.getDeltaMovement().y,
+                            (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
                     if (--this.attachedTick <= 0) {
-                        EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(this.target);
+                        EntityType<?> mutantType = ChemicalXMobEffect.getMutantOf(target);
                         if (mutantType != null && this.random.nextInt(4) != 0) {
-                            MutatedExplosionHelper.explode(this, 2.0F, false,
-                                    Level.ExplosionInteraction.NONE
-                            );
-                            Mob mob = this.target.convertTo((EntityType<? extends Mob>) mutantType, ConversionParams.single(this.target, true, true),
+                            MutatedExplosionHelper.explode(this, 2.0F, false, Level.ExplosionInteraction.NONE);
+                            Mob mob = target.convertTo((EntityType<? extends Mob>) mutantType,
+                                    ConversionParams.single(target, true, true),
                                     Function.identity()::apply);
                             if (mob != null) {
                                 mob.setPersistenceRequired();
                                 AABB boundingBox = mob.getBoundingBox();
 
-                                for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(boundingBox.minX), Mth.floor(mob.getY()), Mth.floor(boundingBox.minZ), Mth.floor(boundingBox.maxX), Mth.floor(boundingBox.maxY), Mth.floor(boundingBox.maxZ))) {
+                                for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(boundingBox.minX),
+                                        Mth.floor(mob.getY()),
+                                        Mth.floor(boundingBox.minZ),
+                                        Mth.floor(boundingBox.maxX),
+                                        Mth.floor(boundingBox.maxY),
+                                        Mth.floor(boundingBox.maxZ))) {
                                     if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) > -1.0F) {
                                         this.level().destroyBlock(pos, true);
                                     }
@@ -126,23 +127,23 @@ public class SkullSpirit extends Entity {
                             }
                         } else {
                             this.setAttached(false);
-                            MutatedExplosionHelper.explode(this, 2.0F, false,
-                                    Level.ExplosionInteraction.NONE
-                            );
+                            MutatedExplosionHelper.explode(this, 2.0F, false, Level.ExplosionInteraction.NONE);
                         }
                         this.discard();
                     }
                 }
 
-                this.setPos(this.target.getX(), this.target.getY(), this.target.getZ());
+                this.setPos(target.getX(), target.getY(), target.getZ());
                 if (this.random.nextInt(8) == 0) {
-                    this.target.hurt(this.level().damageSources().magic(), 0.0F);
+                    target.hurt(this.level().damageSources().magic(), 0.0F);
                 }
 
                 for (int i = 0; i < 3; ++i) {
-                    double posX = this.target.getX() + (double) (this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double) this.target.getBbWidth();
-                    double posY = this.target.getY() + 0.5 + (double) (this.random.nextFloat() * this.target.getBbHeight());
-                    double posZ = this.target.getZ() + (double) (this.random.nextFloat() * this.target.getBbWidth() * 2.0F) - (double) this.target.getBbWidth();
+                    double posX = target.getX() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F) -
+                            (double) target.getBbWidth();
+                    double posY = target.getY() + 0.5 + (double) (this.random.nextFloat() * target.getBbHeight());
+                    double posZ = target.getZ() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F) -
+                            (double) target.getBbWidth();
                     double x = this.random.nextGaussian() * 0.02;
                     double y = this.random.nextGaussian() * 0.02;
                     double z = this.random.nextGaussian() * 0.02;
@@ -157,15 +158,15 @@ public class SkullSpirit extends Entity {
                     this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3F * (float) this.startTick / 15.0F, 0.0));
                 }
 
-                double x = this.target.getX() - this.getX();
-                double y = this.target.getY() - this.getY();
-                double z = this.target.getZ() - this.getZ();
+                double x = target.getX() - this.getX();
+                double y = target.getY() - this.getY();
+                double z = target.getZ() - this.getZ();
                 double d = Math.sqrt(x * x + y * y + z * z);
                 if (d != 0.0) {
                     this.setDeltaMovement(this.getDeltaMovement().add(x / d * 0.2, y / d * 0.2, z / d * 0.2));
                     this.move(MoverType.SELF, this.getDeltaMovement());
                 }
-                if (!this.level().isClientSide && this.distanceToSqr(this.target) < 1.0) {
+                if (!this.level().isClientSide && this.distanceToSqr(target) < 1.0) {
                     this.setAttached(true);
                 }
 
@@ -173,7 +174,14 @@ public class SkullSpirit extends Entity {
                     float xx = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float yy = (this.random.nextFloat() - 0.5F) * 1.2F;
                     float zz = (this.random.nextFloat() - 0.5F) * 1.2F;
-                    this.level().addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.value(), this.getX() + (double) xx, this.getY() + (double) yy, this.getZ() + (double) zz, 0.0, 0.0, 0.0);
+                    this.level()
+                            .addParticle(ModRegistry.SKULL_SPIRIT_PARTICLE_TYPE.value(),
+                                    this.getX() + (double) xx,
+                                    this.getY() + (double) yy,
+                                    this.getZ() + (double) zz,
+                                    0.0,
+                                    0.0,
+                                    0.0);
                 }
             }
         } else {
@@ -190,23 +198,18 @@ public class SkullSpirit extends Entity {
     protected void addAdditionalSaveData(CompoundTag compound) {
         compound.putBoolean("Attached", this.isAttached());
         compound.putInt("AttachedTick", this.attachedTick);
-        if (this.target != null) {
-            compound.putUUID("Target", this.target.getUUID());
+        EntityReference<LivingEntity> entityReference = this.getTargetReference();
+        if (entityReference != null) {
+            entityReference.store(compound, "Target");
         }
-        if (this.conversionStarter != null) {
-            compound.putUUID("ConversionPlayer", this.conversionStarter);
-        }
+        compound.storeNullable("ConversionPlayer", UUIDUtil.CODEC, this.conversionStarter);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setAttached(compound.getBoolean("Attached"));
-        this.attachedTick = compound.getInt("AttachedTick");
-        if (compound.hasUUID("Target")) {
-            this.targetUUID = compound.getUUID("Target");
-        }
-        if (compound.hasUUID("ConversionPlayer")) {
-            this.conversionStarter = compound.getUUID("ConversionPlayer");
-        }
+        compound.getBoolean("Attached").ifPresent(this::setAttached);
+        this.attachedTick = compound.getIntOr("AttachedTick", 0);
+        this.setTargetReference(EntityReference.read(compound, "Target"));
+        this.conversionStarter = compound.read("ConversionPlayer", UUIDUtil.CODEC).orElse(null);
     }
 }

@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.animation;
 
 import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
-import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.animation.EntityAnimation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 

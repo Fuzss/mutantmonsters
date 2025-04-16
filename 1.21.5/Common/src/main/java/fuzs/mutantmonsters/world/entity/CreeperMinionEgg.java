@@ -3,18 +3,20 @@ package fuzs.mutantmonsters.world.entity;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModSoundEvents;
-import fuzs.mutantmonsters.proxy.Proxy;
 import fuzs.mutantmonsters.services.CommonAbstractions;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -26,51 +28,71 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
-public class CreeperMinionEgg extends Entity {
-    private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(CreeperMinionEgg.class,
-            EntityDataSerializers.BOOLEAN
-    );
+public class CreeperMinionEgg extends Entity implements OwnableEntity {
+    private static final EntityDataAccessor<Boolean> DATA_CHARGED = SynchedEntityData.defineId(CreeperMinionEgg.class,
+            EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(
+            CreeperMinionEgg.class,
+            EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
 
+    private final InterpolationHandler interpolation = new InterpolationHandler(this);
     private int health;
     private int age;
     private int recentlyHit;
-    private double velocityX;
-    private double velocityY;
-    private double velocityZ;
-    private UUID owner;
     private int dismountTicks;
 
-    public CreeperMinionEgg(EntityType<? extends CreeperMinionEgg> type, Level world) {
-        super(type, world);
+    public CreeperMinionEgg(EntityType<? extends CreeperMinionEgg> entityType, Level level) {
+        super(entityType, level);
         this.health = 8;
         this.age = (60 + this.random.nextInt(40)) * 1200;
         this.blocksBuilding = true;
     }
 
-    public CreeperMinionEgg(MutantCreeper spawner, Entity owner) {
+    public CreeperMinionEgg(MutantCreeper spawner) {
         this(ModEntityTypes.CREEPER_MINION_EGG_ENTITY_TYPE.value(), spawner.level());
-        this.owner = owner.getUUID();
         this.setPos(spawner.getX(), spawner.getY(), spawner.getZ());
-        if (spawner.isCharged()) {
-            this.setCharged(true);
-        }
+        this.setCharged(spawner.isCharged());
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(CHARGED, false);
+        builder.define(DATA_CHARGED, false);
+        builder.define(DATA_OWNERUUID_ID, Optional.empty());
+    }
+
+    private void setHealth(int health) {
+        this.health = health;
+    }
+
+    private void setAge(int age) {
+        this.age = age;
+    }
+
+    @Nullable
+    @Override
+    public EntityReference<LivingEntity> getOwnerReference() {
+        return this.entityData.get(DATA_OWNERUUID_ID).orElse(null);
+    }
+
+    public void setOwner(@Nullable Player livingEntity) {
+        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::new));
+    }
+
+    public void setOwnerReference(@Nullable EntityReference<LivingEntity> entityReference) {
+        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(entityReference));
     }
 
     public boolean isCharged() {
-        return this.entityData.get(CHARGED);
+        return this.entityData.get(DATA_CHARGED);
     }
 
     public void setCharged(boolean charged) {
-        this.entityData.set(CHARGED, charged);
+        this.entityData.set(DATA_CHARGED, charged);
     }
 
     @Override
@@ -94,44 +116,13 @@ public class CreeperMinionEgg extends Entity {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps) {
-        super.lerpTo(x, y, z, yaw, pitch, steps);
-        this.setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
+    public InterpolationHandler getInterpolation() {
+        return this.interpolation;
     }
 
     @Override
-    public void lerpMotion(double x, double y, double z) {
-        super.lerpMotion(x, y, z);
-        this.velocityX = x;
-        this.velocityY = y;
-        this.velocityZ = z;
-    }
-
-    private void hatch() {
-        CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value().create(this.level(), EntitySpawnReason.BREEDING);
-        if (this.owner != null) {
-            Player playerEntity = this.level().getPlayerByUUID(this.owner);
-            if (playerEntity != null && !CommonAbstractions.INSTANCE.onAnimalTame(minion, playerEntity)) {
-                minion.tame(playerEntity);
-                minion.setOrderedToSit(true);
-            }
-        }
-
-        if (this.isCharged()) {
-            minion.setCharged(true);
-        }
-
-        minion.setPos(this.getX(), this.getY(), this.getZ());
-        this.level().addFreshEntity(minion);
-        this.playSound(ModSoundEvents.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(), 0.7F,
-                0.9F + this.random.nextFloat() * 0.1F
-        );
-        this.discard();
-    }
-
-    @Override
-    public void thunderHit(ServerLevel serverWorld, LightningBolt lightningBoltEntity) {
-        super.thunderHit(serverWorld, lightningBoltEntity);
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+        super.thunderHit(serverLevel, lightningBolt);
         this.setCharged(true);
     }
 
@@ -158,45 +149,109 @@ public class CreeperMinionEgg extends Entity {
             if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) ||
                     this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
                 this.stopRiding();
-                this.playMountSound(false);
+                this.playMountingSound(false);
             }
         }
 
-        if (!this.level().isClientSide) {
+        if (this.level() instanceof ServerLevel serverLevel) {
             if (this.health < 8 && this.tickCount - this.recentlyHit > 80 && this.tickCount % 20 == 0) {
                 ++this.health;
             }
 
-            if (--this.age <= 0 && this.owner != null) {
-                Player player = this.level().getPlayerByUUID(this.owner);
-                if (player != null && this.distanceToSqr(player) < 4096.0) {
-                    this.hatch();
+            if (--this.age <= 0) {
+                EntityReference<LivingEntity> entityReference = this.getOwnerReference();
+                if (entityReference != null) {
+                    if (entityReference.getEntity(this.level(), LivingEntity.class) instanceof Player player &&
+                            this.distanceToSqr(player) < 4096.0) {
+                        this.hatch(player);
+                    } else {
+                        this.age = 1200;
+                    }
+                } else {
+                    this.hurtServer(serverLevel, this.damageSources().magic(), 1000.0F);
                 }
             }
         }
     }
 
-    @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
-        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING) && !player.hasPassenger(this)) {
-            Entity topPassenger = this.getTopPassenger(player);
-            this.startRiding(topPassenger, true);
-            this.playMountSound(true);
-            if (this.level().isClientSide) {
-                Proxy.INSTANCE.showDismountMessage();
+    private void hatch(Player player) {
+        CreeperMinion creeperMinion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()
+                .create(this.level(), EntitySpawnReason.BREEDING);
+        if (creeperMinion != null) {
+            if (!CommonAbstractions.INSTANCE.onAnimalTame(creeperMinion, player)) {
+                creeperMinion.tame(player);
+                creeperMinion.setOrderedToSit(true);
             }
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+
+            creeperMinion.setCharged(this.isCharged());
+            creeperMinion.setPos(this.getX(), this.getY(), this.getZ());
+            this.level().addFreshEntity(creeperMinion);
+            this.playSound(ModSoundEvents.ENTITY_CREEPER_MINION_EGG_HATCH_SOUND_EVENT.value(),
+                    0.7F,
+                    0.9F + this.random.nextFloat() * 0.1F);
+            this.discard();
         }
-        return InteractionResult.PASS;
+    }
+
+    @Override
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
+        if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING) && !player.hasPassenger(this)) {
+            if (this.startRiding(this.getTopPassenger(player))) {
+                if (!this.level().isClientSide) {
+                    this.setOwner(player);
+                    this.playMountingSound(true);
+                } else {
+                    player.displayClientMessage(Component.translatable("mount.onboard", Component.keybind("key.sneak")),
+                            true);
+                }
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+            }
+        }
+        return super.interact(player, interactionHand);
     }
 
     private Entity getTopPassenger(Entity entity) {
         List<Entity> list = entity.getPassengers();
-        return !list.isEmpty() ? this.getTopPassenger(list.get(0)) : entity;
+        return !list.isEmpty() ? this.getTopPassenger(list.getFirst()) : entity;
     }
 
-    private void playMountSound(boolean mount) {
-        this.playSound(SoundEvents.ITEM_PICKUP, 0.7F, (mount ? 0.6F : 0.3F) + this.random.nextFloat() * 0.1F);
+    /**
+     * Remove check for entity type being serializable. This will result in all passengers being dropped upon reloading
+     * the level though.
+     */
+    @Override
+    public boolean startRiding(Entity vehicle, boolean force) {
+        if (vehicle == this.vehicle) {
+            return false;
+        } else if (!vehicle.couldAcceptPassenger()) {
+            return false;
+        } else {
+            for (Entity entity = vehicle; entity.vehicle != null; entity = entity.vehicle) {
+                if (entity.vehicle == this) {
+                    return false;
+                }
+            }
+
+            if (force || this.canRide(vehicle) && vehicle.canAddPassenger(this)) {
+                if (this.isPassenger()) {
+                    this.stopRiding();
+                }
+
+                this.setPose(Pose.STANDING);
+                this.vehicle = vehicle;
+                this.vehicle.addPassenger(this);
+                vehicle.getIndirectPassengersStream()
+                        .filter(entityx -> entityx instanceof ServerPlayer)
+                        .forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer) entityx));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private void playMountingSound(boolean isMounting) {
+        this.playSound(SoundEvents.ITEM_PICKUP, 0.7F, (isMounting ? 0.6F : 0.3F) + this.random.nextFloat() * 0.1F);
     }
 
     @Override
@@ -241,32 +296,21 @@ public class CreeperMinionEgg extends Entity {
         compound.putInt("Health", this.health);
         compound.putInt("Age", this.age);
         compound.putInt("RecentlyHit", this.recentlyHit);
-        if (this.isCharged()) {
-            compound.putBoolean("Charged", true);
-        }
-
-        if (this.owner != null) {
-            compound.putUUID("Owner", this.owner);
-        }
+        compound.putBoolean("Charged", this.isCharged());
         compound.putByte("DismountTicks", (byte) this.dismountTicks);
-
+        EntityReference<LivingEntity> entityReference = this.getOwnerReference();
+        if (entityReference != null) {
+            entityReference.store(compound, "Owner");
+        }
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        if (compound.contains("Health")) {
-            this.health = compound.getInt("Health");
-        }
-
-        if (compound.contains("Age")) {
-            this.age = compound.getInt("Age");
-        }
-
-        this.recentlyHit = compound.getInt("RecentlyHit");
-        this.setCharged(compound.getBoolean("Charged"));
-        if (compound.hasUUID("Owner")) {
-            this.owner = compound.getUUID("Owner");
-        }
-        this.dismountTicks = compound.getByte("DismountTicks");
+        compound.getInt("Health").ifPresent(this::setHealth);
+        compound.getInt("Age").ifPresent(this::setAge);
+        this.recentlyHit = compound.getIntOr("RecentlyHit", 0);
+        this.setCharged(compound.getBooleanOr("Charged", false));
+        this.dismountTicks = compound.getByteOr("DismountTicks", (byte) 0);
+        this.setOwnerReference(EntityReference.readWithOldOwnerConversion(compound, "Owner", this.level()));
     }
 }

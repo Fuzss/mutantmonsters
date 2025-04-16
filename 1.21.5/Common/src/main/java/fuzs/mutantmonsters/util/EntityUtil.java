@@ -1,14 +1,16 @@
 package fuzs.mutantmonsters.util;
 
 import com.google.common.collect.ImmutableMap;
-import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModRegistry;
-import fuzs.mutantmonsters.network.S2CMutantLevelParticlesMessage;
-import fuzs.puzzleslib.api.network.v3.PlayerSet;
+import fuzs.mutantmonsters.network.ClientboundMutantLevelParticlesMessage;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -34,9 +36,15 @@ import java.util.Map;
 
 public final class EntityUtil {
     private static final Map<EntityType<?>, Item> VANILLA_SKULLS_MAP = ImmutableMap.of(EntityType.CREEPER,
-            Items.CREEPER_HEAD, EntityType.ZOMBIE, Items.ZOMBIE_HEAD, EntityType.SKELETON, Items.SKELETON_SKULL,
-            EntityType.WITHER_SKELETON, Items.WITHER_SKELETON_SKULL, EntityType.ENDER_DRAGON, Items.DRAGON_HEAD
-    );
+            Items.CREEPER_HEAD,
+            EntityType.ZOMBIE,
+            Items.ZOMBIE_HEAD,
+            EntityType.SKELETON,
+            Items.SKELETON_SKULL,
+            EntityType.WITHER_SKELETON,
+            Items.WITHER_SKELETON_SKULL,
+            EntityType.ENDER_DRAGON,
+            Items.DRAGON_HEAD);
 
     private EntityUtil() {
 
@@ -49,9 +57,10 @@ public final class EntityUtil {
     public static void spawnLingeringCloud(LivingEntity livingEntity) {
         Collection<MobEffectInstance> collection = livingEntity.getActiveEffects();
         if (!collection.isEmpty()) {
-            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(livingEntity.level(), livingEntity.getX(),
-                    livingEntity.getY(), livingEntity.getZ()
-            );
+            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(livingEntity.level(),
+                    livingEntity.getX(),
+                    livingEntity.getY(),
+                    livingEntity.getZ());
             areaEffectCloud.setRadius(1.5F);
             areaEffectCloud.setRadiusOnUse(-0.5F);
             areaEffectCloud.setWaitTime(10);
@@ -77,10 +86,12 @@ public final class EntityUtil {
     }
 
     public static void disableShield(LivingEntity livingEntity, int ticks) {
-        if (livingEntity instanceof Player player && livingEntity.isBlocking()) {
-            player.getCooldowns().addCooldown(livingEntity.getUseItem(), ticks);
-            livingEntity.stopUsingItem();
-            livingEntity.level().broadcastEntityEvent(livingEntity, EntityEvent.SHIELD_DISABLED);
+        if (livingEntity.level() instanceof ServerLevel serverLevel) {
+            ItemStack itemStack = livingEntity.getItemBlockingWith();
+            if (itemStack != null && itemStack.has(DataComponents.BLOCKS_ATTACKS)) {
+                itemStack.get(DataComponents.BLOCKS_ATTACKS)
+                        .disable(serverLevel, livingEntity, ticks / 20.0F, itemStack);
+            }
         }
     }
 
@@ -122,16 +133,19 @@ public final class EntityUtil {
         }
     }
 
-    public static void sendParticlePacket(Entity entity, ParticleOptions particleData, int amount) {
+    public static void sendParticlePacket(Entity entity, ParticleOptions particle, int amount) {
         double x = entity.getX();
         double y = entity.getY();
         double z = entity.getZ();
-        PlayerSet playerSet = PlayerSet.nearEntity(entity);
-        MutantMonsters.NETWORK.sendMessage(playerSet,
-                new S2CMutantLevelParticlesMessage(particleData, x, y, z, entity.getBbWidth(), entity.getBbHeight(),
-                        entity.getBbWidth(), amount
-                ).toClientboundMessage()
-        );
+        MessageSender.broadcast(PlayerSet.nearEntity(entity),
+                new ClientboundMutantLevelParticlesMessage(particle,
+                        x,
+                        y,
+                        z,
+                        entity.getBbWidth(),
+                        entity.getBbHeight(),
+                        entity.getBbWidth(),
+                        amount));
     }
 
     public static Vec3 getDirVector(float rotation, float scale) {
@@ -147,9 +161,8 @@ public final class EntityUtil {
                 pos.move(Direction.DOWN);
                 if (pos.getY() <= mob.level().getMinY() || mob.level().getBlockState(pos).blocksMotion()) {
                     pos.move(Direction.UP);
-                    AABB bb = mob.getDimensions(Pose.STANDING).makeBoundingBox((double) pos.getX() + 0.5, pos.getY(),
-                            (double) pos.getZ() + 0.5
-                    );
+                    AABB bb = mob.getDimensions(Pose.STANDING)
+                            .makeBoundingBox((double) pos.getX() + 0.5, pos.getY(), (double) pos.getZ() + 0.5);
                     if (mob.level().noCollision(mob, bb) && !mob.level().containsAnyLiquid(bb)) {
                         success = true;
                     }
@@ -168,9 +181,8 @@ public final class EntityUtil {
     }
 
     public static void divertAttackers(Mob targetedMob, LivingEntity newTarget) {
-        for (Mob attacker : targetedMob.level().getEntitiesOfClass(Mob.class,
-                targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0)
-        )) {
+        for (Mob attacker : targetedMob.level()
+                .getEntitiesOfClass(Mob.class, targetedMob.getBoundingBox().inflate(16.0, 10.0, 16.0))) {
             if (attacker != targetedMob && attacker.getTarget() == targetedMob) {
                 attacker.setTarget(newTarget);
             }

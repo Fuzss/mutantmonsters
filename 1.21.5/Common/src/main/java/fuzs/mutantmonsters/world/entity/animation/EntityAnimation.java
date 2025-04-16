@@ -1,4 +1,4 @@
-package fuzs.mutantmonsters.world.entity;
+package fuzs.mutantmonsters.world.entity.animation;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import net.minecraft.resources.ResourceLocation;

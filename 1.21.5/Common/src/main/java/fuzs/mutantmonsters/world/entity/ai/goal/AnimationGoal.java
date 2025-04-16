@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.world.entity.ai.goal;
 
-import fuzs.mutantmonsters.world.entity.EntityAnimation;
-import fuzs.mutantmonsters.world.entity.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.animation.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.animation.AnimatedEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 

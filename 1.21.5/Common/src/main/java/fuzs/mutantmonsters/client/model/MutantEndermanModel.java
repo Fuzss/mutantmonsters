@@ -133,7 +133,7 @@ public class MutantEndermanModel extends EntityModel<MutantEndermanRenderState> 
         float facePitch = headPitch * 3.1415927F / 180.0F;
 
         for (int i = 0; i < 4; ++i) {
-            if (renderState.heldBlocks[i] > 0) {
+            if (renderState.heldBlocks[i] != null) {
                 this.animateHoldBlock(renderState, i);
                 walkAnim[i] *= 0.4F;
             }

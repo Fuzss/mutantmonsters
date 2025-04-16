@@ -37,5 +37,7 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
                         ModItems.MUTANT_SKELETON_LEGGINGS_ITEM.value(),
                         ModItems.MUTANT_SKELETON_BOOTS_ITEM.value());
         this.tag(ModTags.REPAIRS_SKELETON_ARMOR_ITEM_TAG).add(Items.BONE_BLOCK);
+        this.tag(ModTags.SPIDER_PIG_FOOD_ITEM_TAG)
+                .add(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.PORKCHOP, Items.SPIDER_EYE);
     }
 }

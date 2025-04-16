@@ -3,8 +3,8 @@ package fuzs.mutantmonsters.world.entity.mutant;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.mutantmonsters.world.entity.AnimatedEntity;
-import fuzs.mutantmonsters.world.entity.EntityAnimation;
+import fuzs.mutantmonsters.world.entity.animation.AnimatedEntity;
+import fuzs.mutantmonsters.world.entity.animation.EntityAnimation;
 import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
 import fuzs.mutantmonsters.world.entity.ai.goal.AnimationGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
@@ -30,7 +30,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -42,12 +42,18 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEntity {
+public class MutantSkeleton extends MutantMonster implements AnimatedEntity {
     public static final EntityAnimation MELEE_ANIMATION = new EntityAnimation("mutant_skeleton_melee", 14);
-    public static final EntityAnimation CONSTRICT_RIBS_ANIMATION = new EntityAnimation("mutant_skeleton_constrict_ribs", 20);
+    public static final EntityAnimation CONSTRICT_RIBS_ANIMATION = new EntityAnimation("mutant_skeleton_constrict_ribs",
+            20);
     public static final EntityAnimation SHOOT_ANIMATION = new EntityAnimation("mutant_skeleton_shoot", 32);
     public static final EntityAnimation MULTI_SHOT_ANIMATION = new EntityAnimation("mutant_skeleton_multi_shot", 30);
-    private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{MELEE_ANIMATION, CONSTRICT_RIBS_ANIMATION, SHOOT_ANIMATION, MULTI_SHOT_ANIMATION};
+    private static final EntityAnimation[] ANIMATIONS = new EntityAnimation[]{
+            MELEE_ANIMATION,
+            CONSTRICT_RIBS_ANIMATION,
+            SHOOT_ANIMATION,
+            MULTI_SHOT_ANIMATION
+    };
 
     private EntityAnimation animation;
     private int animationTick;
@@ -59,7 +65,12 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FOLLOW_RANGE, 48.0).add(Attributes.MOVEMENT_SPEED, 0.27).add(Attributes.KNOCKBACK_RESISTANCE, 0.75).add(Attributes.STEP_HEIGHT, 1.0);
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0)
+                .add(Attributes.ATTACK_DAMAGE, 3.0)
+                .add(Attributes.FOLLOW_RANGE, 48.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.27)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.75)
+                .add(Attributes.STEP_HEIGHT, 1.0);
     }
 
     @Override
@@ -74,7 +85,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new HurtByNearestTargetGoal(this, WitherBoss.class));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(1,
+                new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Wolf.class, true));
     }
@@ -96,7 +108,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
             ++this.animationTick;
         }
 
-        if (this.level().isNight() && this.tickCount % 100 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()) {
+        if (this.level().isDarkOutside() && this.tickCount % 100 == 0 && this.isAlive() &&
+                this.getHealth() < this.getMaxHealth()) {
             this.heal(2.0F);
         }
 
@@ -117,7 +130,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
     @Override
     public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
-        return !(damageSource.getEntity() instanceof MutantSkeleton) && super.hurtServer(serverLevel, damageSource, damageAmount);
+        return !(damageSource.getEntity() instanceof MutantSkeleton) &&
+                super.hurtServer(serverLevel, damageSource, damageAmount);
     }
 
     @Override
@@ -131,7 +145,7 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
     }
 
     @Override
-    protected void blockedByShield(LivingEntity livingEntity) {
+    protected void blockedByItem(LivingEntity livingEntity) {
         livingEntity.hurtMarked = true;
     }
 
@@ -165,7 +179,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         super.die(cause);
         if (this.level() instanceof ServerLevel serverLevel) {
 
-            for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
+            for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class,
+                    this.getBoundingBox().inflate(3.0, 2.0, 3.0))) {
                 DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
                         ModRegistry.MUTANT_SKELETON_SHATTER_DAMAGE_TYPE,
                         this);
@@ -174,7 +189,10 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 
             for (MutantSkeletonBodyPart.BodyPart bodyPart : MutantSkeletonBodyPart.BodyPart.values()) {
                 MutantSkeletonBodyPart mutantSkeletonBodyPart = new MutantSkeletonBodyPart(serverLevel, this, bodyPart);
-                mutantSkeletonBodyPart.setDeltaMovement(mutantSkeletonBodyPart.getDeltaMovement().add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F, this.random.nextFloat() * 0.25F + 0.1F, this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
+                mutantSkeletonBodyPart.setDeltaMovement(mutantSkeletonBodyPart.getDeltaMovement()
+                        .add(this.random.nextFloat() * 0.8F * 2.0F - 0.8F,
+                                this.random.nextFloat() * 0.25F + 0.1F,
+                                this.random.nextFloat() * 0.8F * 2.0F - 0.8F));
                 serverLevel.addFreshEntity(mutantSkeletonBodyPart);
             }
         }
@@ -218,7 +236,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         @Override
         public boolean canUse() {
             LivingEntity target = this.mob.getTarget();
-            return target != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && (this.mob.onGround() && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(target) || this.mob.getVehicle() == target);
+            return target != null && this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() &&
+                    (this.mob.onGround() && this.mob.random.nextInt(26) == 0 && this.mob.hasLineOfSight(target) ||
+                            this.mob.getVehicle() == target);
         }
 
         @Override
@@ -239,7 +259,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                     }
 
                     this.mob.stuckSpeedMultiplier = Vec3.ZERO;
-                    this.mob.setDeltaMovement(x * (double) scale, 1.1 * (double) this.mob.getBlockJumpFactor(), z * (double) scale);
+                    this.mob.setDeltaMovement(x * (double) scale,
+                            1.1 * (double) this.mob.getBlockJumpFactor(),
+                            z * (double) scale);
                 }
 
                 if (this.mob.animationTick == 15) {
@@ -247,7 +269,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 }
 
                 if (this.mob.animationTick == 20) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(),
+                            1.0F,
+                            1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
                 }
 
                 if (this.mob.animationTick >= 24 && this.mob.animationTick < 28) {
@@ -268,7 +292,9 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                         this.shots.add(mutantArrow);
                     }
 
-                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT,
+                            1.0F,
+                            1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
                 }
             }
         }
@@ -295,7 +321,8 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
         @Override
         public boolean canUse() {
             LivingEntity target = this.mob.getTarget();
-            return target != null && !this.mob.isAnimationPlaying() && this.mob.random.nextInt(12) == 0 && this.mob.distanceToSqr(target) > 4.0 && this.mob.hasLineOfSight(target);
+            return target != null && !this.mob.isAnimationPlaying() && this.mob.random.nextInt(12) == 0 &&
+                    this.mob.distanceToSqr(target) > 4.0 && this.mob.hasLineOfSight(target);
         }
 
         @Override
@@ -311,13 +338,16 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 }
 
                 if (this.mob.animationTick == 20) {
-                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(), 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_LOADING_END.value(),
+                            1.0F,
+                            1.0F / (this.mob.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
                 }
 
                 if (this.mob.animationTick == 26 && target.isAlive()) {
 
                     float randomization = (float) this.mob.hurtTime / 2.0F;
-                    if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() != null && this.mob.getLastDamageSource().getEntity() != null) {
+                    if (this.mob.hurtTime > 0 && this.mob.lastHurt > 0.0F && this.mob.getLastDamageSource() != null &&
+                            this.mob.getLastDamageSource().getEntity() != null) {
                         randomization = (float) this.mob.hurtTime / 2.0F;
                     } else if (!this.mob.hasLineOfSight(target)) {
                         randomization = 0.5F + this.mob.random.nextFloat();
@@ -328,19 +358,27 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
 //                    arrowEntity.setClones(10);
 
                     if (this.mob.random.nextInt(4) == 0) {
-                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.POISON, 80 + this.mob.random.nextInt(60), 0));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.POISON,
+                                80 + this.mob.random.nextInt(60),
+                                0));
                     }
 
                     if (this.mob.random.nextInt(4) == 0) {
-                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.HUNGER, 120 + this.mob.random.nextInt(60), 1));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.HUNGER,
+                                120 + this.mob.random.nextInt(60),
+                                1));
                     }
 
                     if (this.mob.random.nextInt(4) == 0) {
-                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + this.mob.random.nextInt(60), 1));
+                        mutantArrow.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
+                                120 + this.mob.random.nextInt(60),
+                                1));
                     }
 
                     this.mob.level().addFreshEntity(mutantArrow);
-                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
+                    this.mob.playSound(SoundEvents.CROSSBOW_SHOOT,
+                            1.0F,
+                            1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F) + 0.25F);
                 }
             }
         }
@@ -379,16 +417,22 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
                 if (this.mob.animationTick == 6) {
                     float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
                     DamageSources damageSources = this.mob.level().damageSources();
-                    if (!target.hurtServer((ServerLevel) this.mob.level(), damageSources.mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
+                    if (!target.hurtServer((ServerLevel) this.mob.level(),
+                            damageSources.mobAttack(this.mob),
+                            attackDamage > 0.0F ? attackDamage + 6.0F : 0.0F)) {
                         EntityUtil.disableShield(target, 100);
                     }
 
-                    double motionX = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
+                    double motionX = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) *
+                            (double) (this.mob.random.nextBoolean() ? 1 : -1);
                     double motionY = 0.4F + this.mob.random.nextFloat() * 0.8F;
-                    double motionZ = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) * (double) (this.mob.random.nextBoolean() ? 1 : -1);
+                    double motionZ = (double) (1.0F + this.mob.random.nextFloat() * 0.4F) *
+                            (double) (this.mob.random.nextBoolean() ? 1 : -1);
                     target.setDeltaMovement(motionX, motionY, motionZ);
                     EntityUtil.sendPlayerVelocityPacket(target);
-                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE.value(), 0.5F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                    this.mob.playSound(SoundEvents.GENERIC_EXPLODE.value(),
+                            0.5F,
+                            0.8F + this.mob.random.nextFloat() * 0.4F);
                 }
             }
         }
@@ -416,21 +460,27 @@ public class MutantSkeleton extends AbstractMutantMonster implements AnimatedEnt
             if (this.mob.animationTick == 3) {
                 float attackDamage = (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
 
-                for (LivingEntity livingEntity : this.mob.level().getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
+                for (LivingEntity livingEntity : this.mob.level()
+                        .getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(4.0))) {
                     if (!(livingEntity instanceof MutantSkeleton)) {
                         double dist = this.mob.distanceTo(livingEntity);
                         double x = this.mob.getX() - livingEntity.getX();
                         double z = this.mob.getZ() - livingEntity.getZ();
                         if (dist <= 3.0 && EntityUtil.getHeadAngle(this.mob, x, z) < 60.0F) {
                             float power = 1.8F + (float) this.mob.random.nextInt(5) * 0.15F;
-                            livingEntity.hurt(this.mob.level().damageSources().mobAttack(this.mob), attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
-                            livingEntity.setDeltaMovement(-x / dist * (double) power, Math.max(0.2800000011920929, livingEntity.getDeltaMovement().y), -z / dist * (double) power);
+                            livingEntity.hurt(this.mob.level().damageSources().mobAttack(this.mob),
+                                    attackDamage > 0.0F ? attackDamage + (float) this.mob.random.nextInt(2) : 0.0F);
+                            livingEntity.setDeltaMovement(-x / dist * (double) power,
+                                    Math.max(0.2800000011920929, livingEntity.getDeltaMovement().y),
+                                    -z / dist * (double) power);
                             EntityUtil.sendPlayerVelocityPacket(livingEntity);
                         }
                     }
                 }
 
-                this.mob.playSound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.0F, 1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F));
+                this.mob.playSound(SoundEvents.PLAYER_ATTACK_KNOCKBACK,
+                        1.0F,
+                        1.0F / (this.mob.random.nextFloat() * 0.4F + 1.2F));
             }
 
         }

@@ -14,6 +14,8 @@ import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,8 +37,8 @@ public class PlayerEventsHandler {
     public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
         // quick charge for bows
         if (entity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM)) {
-            if (useItem.getItem() instanceof BowItem && BowItem.getPowerForTime(
-                    useItem.getUseDuration(entity) - useItemRemaining.getAsInt()) < 1.0F) {
+            if (useItem.getItem() instanceof BowItem &&
+                    BowItem.getPowerForTime(useItem.getUseDuration(entity) - useItemRemaining.getAsInt()) < 1.0F) {
                 useItemRemaining.mapInt(i -> i - 2);
             }
         }
@@ -72,54 +74,59 @@ public class PlayerEventsHandler {
 
     private static void handleSeismicWave(ServerLevel serverLevel, Player player, @NotNull SeismicWave seismicWave) {
         seismicWave.affectBlocks(serverLevel, player);
-        AABB box = new AABB(seismicWave.getX(), (double) seismicWave.getY() + 1.0, seismicWave.getZ(),
-                (double) seismicWave.getX() + 1.0, (double) seismicWave.getY() + 2.0, (double) seismicWave.getZ() + 1.0
-        );
+        AABB box = new AABB(seismicWave.getX(),
+                (double) seismicWave.getY() + 1.0,
+                seismicWave.getZ(),
+                (double) seismicWave.getX() + 1.0,
+                (double) seismicWave.getY() + 2.0,
+                (double) seismicWave.getZ() + 1.0);
 
         for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
                 DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
                         ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE,
                         player);
-                livingEntity.hurtServer(serverLevel, damageSource,
-                        6.0F + player.getRandom().nextInt(3)
-                );
+                livingEntity.hurtServer(serverLevel, damageSource, 6.0F + player.getRandom().nextInt(3));
             }
         }
     }
 
-    private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundNBT) {
-        if (compoundNBT != null && !compoundNBT.contains("Silent") || !compoundNBT.getBoolean("Silent")) {
-            EntityType.byString(compoundNBT.getString("id")).filter(
-                    ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()::equals).ifPresent((entityType) -> {
+    private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundTag) {
+        if (compoundTag != null && !compoundTag.isEmpty() && !compoundTag.getBooleanOr("Silent", false)) {
+            EntityType<?> entityType = compoundTag.read("id", EntityType.CODEC).orElse(null);
+            if (entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()) {
                 if (player.level().random.nextInt(500) == 0) {
-                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                            ModSoundEvents.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(), player.getSoundSource(),
-                            1.0F, (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F + 1.5F
-                    );
+                    player.level()
+                            .playSound(null,
+                                    player.getX(),
+                                    player.getY(),
+                                    player.getZ(),
+                                    ModSoundEvents.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(),
+                                    player.getSoundSource(),
+                                    1.0F,
+                                    (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F +
+                                            1.5F);
                 }
-            });
+            }
         }
     }
 
-    public static EventResult onItemToss(Player player, ItemEntity itemEntity) {
-        if (!player.level().isClientSide) {
-            ItemStack itemStack = itemEntity.getItem();
+    public static EventResult onItemToss(ServerPlayer serverPlayer, ItemStack itemStack) {
+        if (!serverPlayer.level().isClientSide) {
             boolean isHand = itemStack.getItem() == ModItems.ENDERSOUL_HAND_ITEM.value() && itemStack.isDamaged();
             if (itemStack.getItem() == Items.ENDER_EYE || isHand) {
                 int endersoulFragments = 0;
 
-                for (EndersoulFragment endersoulFragment : player.level().getEntitiesOfClass(EndersoulFragment.class,
-                        player.getBoundingBox().inflate(8.0)
-                )) {
-                    if (endersoulFragment.getOwner() == player) {
+                for (EndersoulFragment endersoulFragment : serverPlayer.level()
+                        .getEntitiesOfClass(EndersoulFragment.class, serverPlayer.getBoundingBox().inflate(8.0))) {
+                    if (endersoulFragment.getOwner() == serverPlayer) {
                         ++endersoulFragments;
                         endersoulFragment.discard();
                     }
                 }
 
                 if (endersoulFragments > 0) {
-                    EntityUtil.sendParticlePacket(player, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
+                    EntityUtil.sendParticlePacket(serverPlayer, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
                     int additionalDamageValue = endersoulFragments * 60;
                     if (isHand) {
                         int damageValue = itemStack.getDamageValue() - additionalDamageValue;
@@ -127,7 +134,14 @@ public class PlayerEventsHandler {
                     } else {
                         ItemStack newItemStack = new ItemStack(ModItems.ENDERSOUL_HAND_ITEM.value());
                         newItemStack.setDamageValue(newItemStack.getMaxDamage() - additionalDamageValue);
-                        itemEntity.setItem(newItemStack);
+                        ItemEntity itemEntity = serverPlayer.createItemStackToDrop(newItemStack, false, true);
+                        if (itemEntity != null) {
+                            serverPlayer.level().addFreshEntity(itemEntity);
+                            serverPlayer.awardStat(Stats.ITEM_DROPPED.get(newItemStack.getItem()),
+                                    itemStack.getCount());
+                            serverPlayer.awardStat(Stats.DROP);
+                            return EventResult.INTERRUPT;
+                        }
                     }
                 }
             }

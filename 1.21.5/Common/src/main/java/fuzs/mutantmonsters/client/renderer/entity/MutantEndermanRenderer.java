@@ -86,24 +86,27 @@ public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEn
     }
 
     @Override
-    public void extractRenderState(MutantEnderman entity, MutantEndermanRenderState reusedState, float partialTick) {
-        super.extractRenderState(entity, reusedState, partialTick);
-        reusedState.hasRedOverlay = entity.hurtTime > 0;
-        reusedState.isCreepy = entity.isAggressive();
+    public void extractRenderState(MutantEnderman mutantEnderman, MutantEndermanRenderState reusedState, float partialTick) {
+        super.extractRenderState(mutantEnderman, reusedState, partialTick);
+        reusedState.hasRedOverlay = mutantEnderman.hurtTime > 0;
+        reusedState.isCreepy = mutantEnderman.isAggressive();
         reusedState.animationTime =
-                entity.getAnimationTick() > 0 ? entity.getAnimationTick() + partialTick : entity.getAnimationTick();
-        reusedState.animation = entity.getAnimation();
-        reusedState.armScale = entity.getArmScale(partialTick);
-        reusedState.isClone = entity.isClone();
-        System.arraycopy(entity.heldBlocks, 0, reusedState.heldBlocks, 0, entity.heldBlocks.length);
-        reusedState.activeArm = entity.getActiveArm();
-        boolean hasTarget = entity.hasTargetTicks > 0;
-        for (int i = 0; i < entity.heldBlockTicks.length; i++) {
-            reusedState.heldBlockTicks[i] = entity.heldBlockTicks[i] +
-                    (entity.heldBlockTicks[i] > 0 ? (hasTarget ? partialTick : -partialTick) : 0.0F);
+                mutantEnderman.getAnimationTick() > 0 ? mutantEnderman.getAnimationTick() + partialTick :
+                        mutantEnderman.getAnimationTick();
+        reusedState.animation = mutantEnderman.getAnimation();
+        reusedState.armScale = mutantEnderman.getArmScale(partialTick);
+        reusedState.isClone = mutantEnderman.isClone();
+        for (int i = 0; i < reusedState.heldBlocks.length; i++) {
+            reusedState.heldBlocks[i] = mutantEnderman.getHeldBlock(i).orElse(null);
         }
-        reusedState.teleportPosition = entity.getTeleportPosition().orElse(null);
-        reusedState.renderOffset = this.getRenderOffset(entity);
+        reusedState.activeArm = mutantEnderman.getActiveArm();
+        boolean hasTarget = mutantEnderman.hasTargetTicks > 0;
+        for (int i = 0; i < mutantEnderman.heldBlockTicks.length; i++) {
+            reusedState.heldBlockTicks[i] = mutantEnderman.heldBlockTicks[i] +
+                    (mutantEnderman.heldBlockTicks[i] > 0 ? (hasTarget ? partialTick : -partialTick) : 0.0F);
+        }
+        reusedState.teleportPosition = mutantEnderman.getTeleportPosition().orElse(null);
+        reusedState.renderOffset = this.getRenderOffset(mutantEnderman);
     }
 
     @Nullable

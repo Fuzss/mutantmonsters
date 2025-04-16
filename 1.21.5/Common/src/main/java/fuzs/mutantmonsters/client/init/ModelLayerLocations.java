@@ -42,6 +42,10 @@ public class ModelLayerLocations {
     public static final ModelLayerLocation MUTANT_SNOW_GOLEM_HEAD = REGISTRY.registerModelLayer("mutant_snow_golem_head");
     public static final ModelLayerLocation MUTANT_ZOMBIE = REGISTRY.registerModelLayer("mutant_zombie");
     public static final ModelLayerLocation SPIDER_PIG = REGISTRY.registerModelLayer("spider_pig");
+    public static final ModelLayerLocation SPIDER_PIG_BABY = REGISTRY.registerModelLayer("spider_pig_baby");
+    public static final ModelLayerLocation SPIDER_PIG_SADDLE = REGISTRY.registerModelLayer("spider_pig", "saddle");
+    public static final ModelLayerLocation SPIDER_PIG_BABY_SADDLE = REGISTRY.registerModelLayer("spider_pig_baby",
+            "saddle");
 
     public static LayerDefinition createSkullModelLayer() {
         MeshDefinition mesh = SkullModel.createHeadModel();

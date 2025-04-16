@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
-import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantSnowGolemRenderState;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,7 +19,7 @@ import net.minecraft.util.Mth;
 public class MutantSnowGolemJackOLanternLayer extends RenderLayer<MutantSnowGolemRenderState, MutantSnowGolemModel> {
     public static final ResourceLocation JACK_O_LANTERN_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_snow_golem/jack_o_lantern.png");
-    public static final RenderType GLOW_RENDER_TYPE = ModRenderType.eyes(MutantMonsters.id(
+    public static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(MutantMonsters.id(
             "textures/entity/mutant_snow_golem/glow.png"));
 
     private final MutantSnowGolemModel headModel;
@@ -34,7 +33,7 @@ public class MutantSnowGolemJackOLanternLayer extends RenderLayer<MutantSnowGole
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, MutantSnowGolemRenderState renderState, float yRot, float xRot) {
         if (renderState.hasJackOLantern) {
             if (!renderState.isInvisible) {
-                this.getParentModel().copyPropertiesTo(this.headModel);
+                this.headModel.setupAnim(renderState);
                 renderColoredCutoutModel(this.headModel,
                         JACK_O_LANTERN_TEXTURE_LOCATION,
                         poseStack,
