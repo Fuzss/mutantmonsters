@@ -1,7 +1,4 @@
 {
-  "remove": [
-    "minecraft:thrown"
-  ],
   "values": [
     "minecraft:fall",
     "#minecraft:is_projectile",

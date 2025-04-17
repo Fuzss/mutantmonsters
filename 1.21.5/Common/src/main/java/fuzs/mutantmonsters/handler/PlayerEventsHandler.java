@@ -112,36 +112,33 @@ public class PlayerEventsHandler {
     }
 
     public static EventResult onItemToss(ServerPlayer serverPlayer, ItemStack itemStack) {
-        if (!serverPlayer.level().isClientSide) {
-            boolean isHand = itemStack.getItem() == ModItems.ENDERSOUL_HAND_ITEM.value() && itemStack.isDamaged();
-            if (itemStack.getItem() == Items.ENDER_EYE || isHand) {
-                int endersoulFragments = 0;
+        boolean isHoldingEndersoulHand = itemStack.is(ModItems.ENDERSOUL_HAND_ITEM) && itemStack.isDamaged();
+        if (itemStack.is(Items.ENDER_EYE) || isHoldingEndersoulHand) {
+            int endersoulFragments = 0;
 
-                for (EndersoulFragment endersoulFragment : serverPlayer.level()
-                        .getEntitiesOfClass(EndersoulFragment.class, serverPlayer.getBoundingBox().inflate(8.0))) {
-                    if (endersoulFragment.getOwner() == serverPlayer) {
-                        ++endersoulFragments;
-                        endersoulFragment.discard();
-                    }
+            for (EndersoulFragment endersoulFragment : serverPlayer.level()
+                    .getEntitiesOfClass(EndersoulFragment.class, serverPlayer.getBoundingBox().inflate(8.0))) {
+                if (endersoulFragment.ownedBy(serverPlayer)) {
+                    ++endersoulFragments;
+                    endersoulFragment.discard();
                 }
+            }
 
-                if (endersoulFragments > 0) {
-                    EntityUtil.sendParticlePacket(serverPlayer, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
-                    int additionalDamageValue = endersoulFragments * 60;
-                    if (isHand) {
-                        int damageValue = itemStack.getDamageValue() - additionalDamageValue;
-                        itemStack.setDamageValue(Math.max(damageValue, 0));
-                    } else {
-                        ItemStack newItemStack = new ItemStack(ModItems.ENDERSOUL_HAND_ITEM.value());
-                        newItemStack.setDamageValue(newItemStack.getMaxDamage() - additionalDamageValue);
-                        ItemEntity itemEntity = serverPlayer.createItemStackToDrop(newItemStack, false, true);
-                        if (itemEntity != null) {
-                            serverPlayer.level().addFreshEntity(itemEntity);
-                            serverPlayer.awardStat(Stats.ITEM_DROPPED.get(newItemStack.getItem()),
-                                    itemStack.getCount());
-                            serverPlayer.awardStat(Stats.DROP);
-                            return EventResult.INTERRUPT;
-                        }
+            if (endersoulFragments > 0) {
+                EntityUtil.sendParticlePacket(serverPlayer, ModRegistry.ENDERSOUL_PARTICLE_TYPE.value(), 256);
+                int additionalDamageValue = endersoulFragments * 60;
+                if (isHoldingEndersoulHand) {
+                    int damageValue = itemStack.getDamageValue() - additionalDamageValue;
+                    itemStack.setDamageValue(Math.max(damageValue, 0));
+                } else {
+                    ItemStack newItemStack = new ItemStack(ModItems.ENDERSOUL_HAND_ITEM);
+                    newItemStack.setDamageValue(newItemStack.getMaxDamage() - additionalDamageValue);
+                    ItemEntity itemEntity = serverPlayer.createItemStackToDrop(newItemStack, false, true);
+                    if (itemEntity != null) {
+                        serverPlayer.level().addFreshEntity(itemEntity);
+                        serverPlayer.awardStat(Stats.ITEM_DROPPED.get(newItemStack.getItem()), itemStack.getCount());
+                        serverPlayer.awardStat(Stats.DROP);
+                        return EventResult.INTERRUPT;
                     }
                 }
             }

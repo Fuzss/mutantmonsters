@@ -27,7 +27,6 @@ public class ModDamageTypeTagProvider extends AbstractTagProvider<DamageType> {
         this.tag(DamageTypeTags.IS_EXPLOSION).add(ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE);
         this.tag(ModTags.MUTANT_ENDERMAN_DODGE_DAMAGE_TYPE_TAG)
                 .add(DamageTypes.FALL)
-                .addTag(DamageTypeTags.IS_PROJECTILE, DamageTypeTags.IS_EXPLOSION)
-                .remove(DamageTypes.THROWN);
+                .addTag(DamageTypeTags.IS_PROJECTILE, DamageTypeTags.IS_EXPLOSION);
     }
 }

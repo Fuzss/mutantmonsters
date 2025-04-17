@@ -286,7 +286,7 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
         }
 
         float damageAmount = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        if (!target.getType().is(ModTags.SPIDER_PIG_FRIENDS_ENTITY_TYPE_TAG)) {
+        if (target.getType() != this.getType() && !target.getType().is(ModTags.SPIDER_PIG_FRIENDS_ENTITY_TYPE_TAG)) {
             if (this.level()
                     .getBlockStates(target.getBoundingBox())
                     .anyMatch(Blocks.COBWEB.defaultBlockState()::equals)) {
