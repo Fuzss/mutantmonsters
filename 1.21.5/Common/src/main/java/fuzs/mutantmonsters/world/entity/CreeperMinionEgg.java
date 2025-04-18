@@ -8,7 +8,6 @@ import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -213,41 +211,6 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
     private Entity getTopPassenger(Entity entity) {
         List<Entity> list = entity.getPassengers();
         return !list.isEmpty() ? this.getTopPassenger(list.getFirst()) : entity;
-    }
-
-    /**
-     * Remove check for entity type being serializable. This will result in all passengers being dropped upon reloading
-     * the level though.
-     */
-    @Override
-    public boolean startRiding(Entity vehicle, boolean force) {
-        if (vehicle == this.vehicle) {
-            return false;
-        } else if (!vehicle.couldAcceptPassenger()) {
-            return false;
-        } else {
-            for (Entity entity = vehicle; entity.vehicle != null; entity = entity.vehicle) {
-                if (entity.vehicle == this) {
-                    return false;
-                }
-            }
-
-            if (force || this.canRide(vehicle) && vehicle.canAddPassenger(this)) {
-                if (this.isPassenger()) {
-                    this.stopRiding();
-                }
-
-                this.setPose(Pose.STANDING);
-                this.vehicle = vehicle;
-                this.vehicle.addPassenger(this);
-                vehicle.getIndirectPassengersStream()
-                        .filter(entityx -> entityx instanceof ServerPlayer)
-                        .forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer) entityx));
-                return true;
-            } else {
-                return false;
-            }
-        }
     }
 
     private void playMountingSound(boolean isMounting) {

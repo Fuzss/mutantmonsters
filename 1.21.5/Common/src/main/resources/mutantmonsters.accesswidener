@@ -1,8 +1,2 @@
 accessWidener   v2  named
-accessible  method  net/minecraft/world/item/equipment/ArmorMaterial    createAttributes    (Lnet/minecraft/world/item/equipment/ArmorType;)Lnet/minecraft/world/item/component/ItemAttributeModifiers;
 accessible  method  net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer  getColorForLayer    (Lnet/minecraft/client/resources/model/EquipmentClientInfo$Layer;I)I
-accessible  field   net/minecraft/world/entity/Entity   vehicle Lnet/minecraft/world/entity/Entity;
-accessible  method  net/minecraft/world/entity/Entity   couldAcceptPassenger    ()Z
-accessible  method  net/minecraft/world/entity/Entity   addPassenger    (Lnet/minecraft/world/entity/Entity;)V
-accessible  method  net/minecraft/world/entity/Entity   canAddPassenger (Lnet/minecraft/world/entity/Entity;)Z
-accessible  method  net/minecraft/world/entity/Entity   getIndirectPassengersStream    ()Ljava/util/stream/Stream;
