@@ -7,7 +7,6 @@ import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -18,6 +17,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -139,11 +140,11 @@ public class SkullSpirit extends Entity {
                 }
 
                 for (int i = 0; i < 3; ++i) {
-                    double posX = target.getX() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F) -
-                            (double) target.getBbWidth();
+                    double posX = target.getX() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F)
+                            - (double) target.getBbWidth();
                     double posY = target.getY() + 0.5 + (double) (this.random.nextFloat() * target.getBbHeight());
-                    double posZ = target.getZ() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F) -
-                            (double) target.getBbWidth();
+                    double posZ = target.getZ() + (double) (this.random.nextFloat() * target.getBbWidth() * 2.0F)
+                            - (double) target.getBbWidth();
                     double x = this.random.nextGaussian() * 0.02;
                     double y = this.random.nextGaussian() * 0.02;
                     double z = this.random.nextGaussian() * 0.02;
@@ -195,21 +196,21 @@ public class SkullSpirit extends Entity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putBoolean("Attached", this.isAttached());
-        compound.putInt("AttachedTick", this.attachedTick);
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        valueOutput.putBoolean("Attached", this.isAttached());
+        valueOutput.putInt("AttachedTick", this.attachedTick);
         EntityReference<LivingEntity> entityReference = this.getTargetReference();
         if (entityReference != null) {
-            entityReference.store(compound, "Target");
+            entityReference.store(valueOutput, "Target");
         }
-        compound.storeNullable("ConversionPlayer", UUIDUtil.CODEC, this.conversionStarter);
+        valueOutput.storeNullable("ConversionPlayer", UUIDUtil.CODEC, this.conversionStarter);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
-        compound.getBoolean("Attached").ifPresent(this::setAttached);
-        this.attachedTick = compound.getIntOr("AttachedTick", 0);
-        this.setTargetReference(EntityReference.read(compound, "Target"));
-        this.conversionStarter = compound.read("ConversionPlayer", UUIDUtil.CODEC).orElse(null);
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        this.setAttached(valueInput.getBooleanOr("Attached", false));
+        this.attachedTick = valueInput.getIntOr("AttachedTick", 0);
+        this.setTargetReference(EntityReference.read(valueInput, "Target"));
+        this.conversionStarter = valueInput.read("ConversionPlayer", UUIDUtil.CODEC).orElse(null);
     }
 }

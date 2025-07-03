@@ -21,16 +21,17 @@ public class TrackSummonerGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.zombie.getLastHurtByMob() == null && this.mutantZombie.getTarget() != null && this.zombie.getTarget() != this.mutantZombie.getTarget()) {
+        if (this.zombie.getLastHurtByMob() == null && this.mutantZombie.getTarget() != null
+                && this.zombie.getTarget() != this.mutantZombie.getTarget()) {
             this.zombie.setTarget(this.mutantZombie.getTarget());
         }
 
-        this.zombie.restrictTo(this.mutantZombie.blockPosition(), this.zombie.getTarget() == null ? 8 : 16);
+        this.zombie.setHomeTo(this.mutantZombie.blockPosition(), this.zombie.getTarget() == null ? 8 : 16);
     }
 
     @Override
     public void stop() {
         this.mutantZombie = null;
-        this.zombie.restrictTo(BlockPos.ZERO, -1);
+        this.zombie.setHomeTo(BlockPos.ZERO, -1);
     }
 }

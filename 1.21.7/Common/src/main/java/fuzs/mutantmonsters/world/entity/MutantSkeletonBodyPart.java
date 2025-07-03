@@ -6,7 +6,6 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,6 +24,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -155,8 +156,8 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.level() instanceof ServerLevel serverLevel &&
-                serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules()
+                .getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ResourceKey<LootTable> resourceKey = this.getItemPartLootTableId();
             LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
             LootParams lootParams = new LootParams.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY,
@@ -194,15 +195,15 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.store(TAG_BODY_PART, BodyPart.CODEC, this.getBodyPart());
-        compound.putInt(TAG_DESPAWN_TIMER, this.despawnTimer);
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        valueOutput.store(TAG_BODY_PART, BodyPart.CODEC, this.getBodyPart());
+        valueOutput.putInt(TAG_DESPAWN_TIMER, this.despawnTimer);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
-        compound.read(TAG_BODY_PART, BodyPart.CODEC).ifPresent(this::setBodyPart);
-        this.despawnTimer = compound.getIntOr(TAG_DESPAWN_TIMER, 0);
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        valueInput.read(TAG_BODY_PART, BodyPart.CODEC).ifPresent(this::setBodyPart);
+        this.despawnTimer = valueInput.getIntOr(TAG_DESPAWN_TIMER, 0);
     }
 
     @Override

@@ -5,14 +5,12 @@ import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSnowGolem;
-import fuzs.puzzleslib.api.entity.v1.EntityHelper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
+import fuzs.puzzleslib.api.util.v1.EntityHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -32,6 +30,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -134,8 +134,8 @@ public class ThrowableBlock extends ThrowableProjectile {
     }
 
     public boolean isThrownBySnowGolem() {
-        return this.getOwner() != null &&
-                this.getOwner().getType() == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
+        return this.getOwner() != null
+                && this.getOwner().getType() == ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE.value();
     }
 
     @Override
@@ -223,8 +223,8 @@ public class ThrowableBlock extends ThrowableProjectile {
                 double offset = 0.6;
                 this.setDeltaMovement(x * offset, y * offset, z * offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator() ||
-                        !((LivingEntity) thrower).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value()))) {
+                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator()
+                        || !((LivingEntity) thrower).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value()))) {
                     this.setHeld(false);
                 }
             }
@@ -324,8 +324,8 @@ public class ThrowableBlock extends ThrowableProjectile {
                 this.onHitBlock(blockHitResult);
                 if (this.level() instanceof ServerLevel serverLevel) {
                     BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    if (throwerAllowedToPlace && this.level().getBlockState(blockPos).canBeReplaced() &&
-                            this.getBlockState().canSurvive(this.level(), blockPos)) {
+                    if (throwerAllowedToPlace && this.level().getBlockState(blockPos).canBeReplaced()
+                            && this.getBlockState().canSurvive(this.level(), blockPos)) {
                         this.level().setBlockAndUpdate(blockPos, this.getBlockState());
                         this.getBlockState()
                                 .getBlock()
@@ -348,8 +348,8 @@ public class ThrowableBlock extends ThrowableProjectile {
                         }
                     }
                 }
-            } else if (this.level() instanceof ServerLevel serverLevel &&
-                    hitResult.getType() == HitResult.Type.ENTITY) {
+            } else if (this.level() instanceof ServerLevel serverLevel
+                    && hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) hitResult).getEntity();
                 DamageSource damageSource = serverLevel.damageSources().thrown(this, livingEntity);
                 entity.hurtServer(serverLevel, damageSource, 4.0F);
@@ -393,20 +393,16 @@ public class ThrowableBlock extends ThrowableProjectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
-        compound.putBoolean("Held", this.isHeld());
-        compound.store("BlockState",
-                BlockState.CODEC,
-                this.registryAccess().createSerializationContext(NbtOps.INSTANCE),
-                this.getBlockState());
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        valueOutput.putBoolean("Held", this.isHeld());
+        valueOutput.store("BlockState", BlockState.CODEC, this.getBlockState());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
-        this.setHeld(compound.getBooleanOr("Held", false));
-        compound.read("BlockState", BlockState.CODEC, this.registryAccess().createSerializationContext(NbtOps.INSTANCE))
-                .ifPresent(this::setBlockState);
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        this.setHeld(valueInput.getBooleanOr("Held", false));
+        valueInput.read("BlockState", BlockState.CODEC).ifPresent(this::setBlockState);
     }
 }

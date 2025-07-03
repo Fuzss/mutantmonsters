@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.client.animation.Animator;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantSkeletonRenderState;
@@ -12,6 +11,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -49,8 +49,9 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
     public MutantSkeletonModel(ModelPart modelPart, ModelPart crossbowModelPart) {
         super(modelPart);
         this.parts = Stream.of(modelPart, crossbowModelPart)
-                .flatMap(ModelPart::getAllParts)
-                .collect(ImmutableList.toImmutableList());
+                .map(ModelPart::getAllParts)
+                .flatMap(Collection::stream)
+                .toList();
         this.skeleBase = modelPart.getChild("base");
         this.pelvis = this.skeleBase.getChild("pelvis");
         this.waist = this.pelvis.getChild("waist");

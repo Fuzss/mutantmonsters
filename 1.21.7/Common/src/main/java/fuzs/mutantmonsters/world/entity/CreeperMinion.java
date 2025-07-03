@@ -13,7 +13,6 @@ import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -43,6 +42,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
@@ -164,7 +165,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     public void setExplosionRadius(float radius) {
-        this.entityData.set(DATA_EXPLOSION_RADIUS, radius);
+        this.entityData.set(DATA_EXPLOSION_RADIUS, Mth.clamp(radius, 0.0F, 4.0F));
     }
 
     @Override
@@ -188,8 +189,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
 
     @Override
     public boolean canSitOnShoulder() {
-        return super.canSitOnShoulder() && this.canRideOnShoulder() && this.getTarget() == null &&
-                this.getExplodeState() <= 0;
+        return super.canSitOnShoulder() && this.canRideOnShoulder() && this.getTarget() == null
+                && this.getExplodeState() <= 0;
     }
 
     @Override
@@ -242,8 +243,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
                     MutatedExplosionHelper.explode(this, sizeIn, false, interaction);
                     if (!this.canExplodeContinuously()) {
-                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) &&
-                                this.getOwner() instanceof ServerPlayer serverPlayer) {
+                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
+                                && this.getOwner() instanceof ServerPlayer serverPlayer) {
                             serverPlayer.sendSystemMessage(Component.translatable("death.attack.explosion",
                                     this.getDisplayName()));
                         }
@@ -257,11 +258,11 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 this.setExplodeState(-TOTAL_FUSE_TIME);
             }
 
-            if (this.getDeltaMovement().lengthSqr() > 0.800000011920929 && this.getTarget() != null &&
-                    this.getBoundingBox()
-                            .expandTowards(this.getDeltaMovement())
-                            .inflate(0.5)
-                            .intersects(this.getTarget().getBoundingBox())) {
+            if (this.getDeltaMovement().lengthSqr() > 0.800000011920929 && this.getTarget() != null
+                    && this.getBoundingBox()
+                    .expandTowards(this.getDeltaMovement())
+                    .inflate(0.5)
+                    .intersects(this.getTarget().getBoundingBox())) {
                 this.timeSinceIgnited = TOTAL_FUSE_TIME;
             }
         }
@@ -270,8 +271,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     public float getSwelling(float partialTicks) {
-        return Mth.lerp(partialTicks, (float) this.lastActiveTime, (float) this.timeSinceIgnited) /
-                (float) (TOTAL_FUSE_TIME - 2);
+        return Mth.lerp(partialTicks, (float) this.lastActiveTime, (float) this.timeSinceIgnited) / (float) (
+                TOTAL_FUSE_TIME - 2);
     }
 
     @Override
@@ -282,71 +283,53 @@ public class CreeperMinion extends ShoulderRidingEntity {
                 if (this.level().isClientSide) {
                     Proxy.INSTANCE.displayCreeperMinionTrackerGUI(this);
                 }
+
                 return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
             } else {
                 if (this.isOwnedBy(player)) {
                     if (itemInHand.is(Items.GUNPOWDER)) {
-                        double d0;
-                        double d1;
-                        double d2;
-                        if (this.getHealth() < this.getMaxHealth()) {
-                            this.heal(1.0F);
-                            itemInHand.shrink(1);
-                            d0 = this.random.nextGaussian() * 0.02;
-                            d1 = this.random.nextGaussian() * 0.02;
-                            d2 = this.random.nextGaussian() * 0.02;
-                            this.level()
-                                    .addParticle(ParticleTypes.HEART,
-                                            this.getRandomX(1.0),
-                                            this.getRandomY(),
-                                            this.getRandomZ(1.0),
-                                            d0,
-                                            d1,
-                                            d2);
-                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
-                        }
-
-                        if (this.getMaxHealth() < 20.0F) {
-                            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.getMaxHealth() + 1.0F);
-                            itemInHand.shrink(1);
-                            d0 = this.random.nextGaussian() * 0.02;
-                            d1 = this.random.nextGaussian() * 0.02;
-                            d2 = this.random.nextGaussian() * 0.02;
-                            this.level()
-                                    .addParticle(ParticleTypes.HEART,
-                                            this.getRandomX(1.0),
-                                            this.getRandomY(),
-                                            this.getRandomZ(1.0),
-                                            d0,
-                                            d1,
-                                            d2);
-                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
-                        }
-                    } else {
-                        if (!itemInHand.is(Items.TNT)) {
+                        if (this.getHealth() < this.getMaxHealth() || this.getMaxHealth() < 20.0F) {
                             if (!this.level().isClientSide) {
-                                this.setOrderedToSit(!this.isOrderedToSit());
-                                this.setLastHurtByMob(null);
-                                this.setTarget(null);
+                                this.getAttribute(Attributes.MAX_HEALTH)
+                                        .setBaseValue(Math.min(20.0, this.getMaxHealth() + 1.0));
+                                this.heal(1.0F);
+                                itemInHand.consume(1, player);
+                            } else {
+                                double speedX = this.random.nextGaussian() * 0.02;
+                                double speedY = this.random.nextGaussian() * 0.02;
+                                double speedZ = this.random.nextGaussian() * 0.02;
+                                this.level()
+                                        .addParticle(ParticleTypes.HEART,
+                                                this.getRandomX(1.0),
+                                                this.getRandomY(),
+                                                this.getRandomZ(1.0),
+                                                speedX,
+                                                speedY,
+                                                speedZ);
                             }
 
                             return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
-
-                        if (!this.canExplodeContinuously()) {
-                            this.forcedAgeTimer += 15;
-                            this.setCanExplodeContinuously(true);
-                            itemInHand.shrink(1);
-                            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
-                        }
-
+                    } else if (itemInHand.is(Items.TNT)) {
                         float explosionRadius = this.getExplosionRadius();
                         if (explosionRadius < 4.0F) {
-                            this.forcedAgeTimer += 10;
-                            this.setExplosionRadius(explosionRadius + 0.11F);
-                            itemInHand.shrink(1);
+                            this.forcedAgeTimer += 15;
+                            if (!this.level().isClientSide) {
+                                this.setCanExplodeContinuously(true);
+                                this.setExplosionRadius(explosionRadius + 0.2F);
+                                itemInHand.consume(1, player);
+                            }
+
                             return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                         }
+                    } else {
+                        if (!this.level().isClientSide) {
+                            this.setOrderedToSit(!this.isOrderedToSit());
+                            this.setLastHurtByMob(null);
+                            this.setTarget(null);
+                        }
+
+                        return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
                     }
                 }
 
@@ -373,8 +356,8 @@ public class CreeperMinion extends ShoulderRidingEntity {
             }
 
             return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
-        } else if (player.isCreative() && itemInHand.is(ModItems.CREEPER_MINION_TRACKER_ITEM.value()) &&
-                this.getOwner() == null) {
+        } else if (player.isCreative() && itemInHand.is(ModItems.CREEPER_MINION_TRACKER_ITEM.value())
+                && this.getOwner() == null) {
             if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
                 this.setTame(true, true);
                 this.setOwner(player);
@@ -495,27 +478,27 @@ public class CreeperMinion extends ShoulderRidingEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
-        compound.putBoolean("Tamed", this.isTame());
-        compound.putBoolean("ExplodesContinuously", this.canExplodeContinuously());
-        compound.putBoolean("DestroysBlocks", this.canDestroyBlocks());
-        compound.putBoolean("CanRideOnShoulder", this.canRideOnShoulder());
-        compound.putBoolean("Ignited", this.hasIgnited());
-        compound.putFloat("ExplosionRadius", this.getExplosionRadius());
-        compound.putBoolean("Powered", this.isCharged());
+    public void addAdditionalSaveData(ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        valueOutput.putBoolean("Tamed", this.isTame());
+        valueOutput.putBoolean("ExplodesContinuously", this.canExplodeContinuously());
+        valueOutput.putBoolean("DestroysBlocks", this.canDestroyBlocks());
+        valueOutput.putBoolean("CanRideOnShoulder", this.canRideOnShoulder());
+        valueOutput.putBoolean("Ignited", this.hasIgnited());
+        valueOutput.putFloat("ExplosionRadius", this.getExplosionRadius());
+        valueOutput.putBoolean("Powered", this.isCharged());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
-        this.setTame(compound.getBooleanOr("Tamed", false), false);
-        this.setCanExplodeContinuously(compound.getBooleanOr("ExplodesContinuously", false));
-        this.setDestroyBlocks(compound.getBooleanOr("DestroysBlocks", false));
-        this.setCanRideOnShoulder(compound.getBooleanOr("CanRideOnShoulder", false));
-        this.setCharged(compound.getBooleanOr("Powered", false));
-        this.setExplosionRadius(compound.getFloatOr("ExplosionRadius", 0.0F));
-        if (compound.getBooleanOr("Ignited", false)) {
+    public void readAdditionalSaveData(ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        this.setTame(valueInput.getBooleanOr("Tamed", false), false);
+        this.setCanExplodeContinuously(valueInput.getBooleanOr("ExplodesContinuously", false));
+        this.setDestroyBlocks(valueInput.getBooleanOr("DestroysBlocks", false));
+        this.setCanRideOnShoulder(valueInput.getBooleanOr("CanRideOnShoulder", false));
+        this.setCharged(valueInput.getBooleanOr("Powered", false));
+        this.setExplosionRadius(valueInput.getFloatOr("ExplosionRadius", 0.0F));
+        if (valueInput.getBooleanOr("Ignited", false)) {
             this.ignite();
         }
     }
@@ -547,16 +530,16 @@ public class CreeperMinion extends ShoulderRidingEntity {
         @Override
         public boolean canUse() {
             LivingEntity livingentity = CreeperMinion.this.getTarget();
-            return !CreeperMinion.this.isOrderedToSit() && (CreeperMinion.this.getExplodeState() > 0 ||
-                    livingentity != null && CreeperMinion.this.distanceToSqr(livingentity) < 9.0 &&
-                            CreeperMinion.this.hasLineOfSight(livingentity));
+            return !CreeperMinion.this.isOrderedToSit() && (CreeperMinion.this.getExplodeState() > 0
+                    || livingentity != null && CreeperMinion.this.distanceToSqr(livingentity) < 9.0
+                    && CreeperMinion.this.hasLineOfSight(livingentity));
         }
 
         @Override
         public void tick() {
-            CreeperMinion.this.setExplodeState(CreeperMinion.this.getTarget() != null &&
-                    !(CreeperMinion.this.distanceToSqr(CreeperMinion.this.getTarget()) > 36.0) &&
-                    CreeperMinion.this.getSensing().hasLineOfSight(CreeperMinion.this.getTarget()) ? 1 : -1);
+            CreeperMinion.this.setExplodeState(CreeperMinion.this.getTarget() != null && !(
+                    CreeperMinion.this.distanceToSqr(CreeperMinion.this.getTarget()) > 36.0)
+                    && CreeperMinion.this.getSensing().hasLineOfSight(CreeperMinion.this.getTarget()) ? 1 : -1);
         }
 
         @Override

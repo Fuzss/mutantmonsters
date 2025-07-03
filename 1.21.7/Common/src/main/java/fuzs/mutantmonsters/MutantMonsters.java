@@ -69,7 +69,7 @@ public class MutantMonsters implements ModConstructor {
         ServerEntityLevelEvents.LOAD.register(EntityEventsHandler::onEntityLoad);
         LivingDropsCallback.EVENT.register(EntityEventsHandler::onLivingDrops);
         ItemEntityEvents.TOSS.register(PlayerEventsHandler::onItemToss);
-        ServerEntityLevelEvents.SPAWN.register(SpawningPreventionHandler::onEntitySpawn);
+        ServerEntityLevelEvents.LOAD.register(SpawningPreventionHandler::onEntitySpawn);
         ExplosionEvents.DETONATE.register(MutatedExplosionHelper::onExplosionDetonate);
     }
 

@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.client.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantSnowGolemRenderState;
 import net.minecraft.client.model.EntityModel;
@@ -38,7 +37,7 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState
 
     public MutantSnowGolemModel(ModelPart modelPart) {
         super(modelPart);
-        this.parts = modelPart.getAllParts().collect(ImmutableList.toImmutableList());
+        this.parts = modelPart.getAllParts();
         this.pelvis = modelPart.getChild("pelvis");
         this.abdomen = this.pelvis.getChild("abdomen");
         this.chest = this.abdomen.getChild("chest");
@@ -176,8 +175,8 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState
         float walkAnim = Mth.sin(renderState.walkAnimationPos * 0.45F) * renderState.walkAnimationSpeed;
         float walkAnim1 =
                 (Mth.cos((renderState.walkAnimationPos - 0.5F) * 0.45F) + 0.5F) * renderState.walkAnimationSpeed;
-        float walkAnim2 = (Mth.cos((renderState.walkAnimationPos - 0.5F + 6.2831855F) * 0.45F) + 0.5F) *
-                renderState.walkAnimationSpeed;
+        float walkAnim2 = (Mth.cos((renderState.walkAnimationPos - 0.5F + 6.2831855F) * 0.45F) + 0.5F)
+                * renderState.walkAnimationSpeed;
         float breatheAnim = Mth.sin(renderState.ageInTicks * 0.11F);
         float faceYaw = renderState.yRot * 3.1415927F / 180.0F;
         float facePitch = renderState.xRot * 3.1415927F / 180.0F;

@@ -17,6 +17,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemDisplayContext;
+import org.joml.Vector3f;
+
+import java.util.Set;
 
 public class EndersoulHandSpecialRenderer implements NoDataSpecialModelRenderer {
     private static final ResourceLocation ENDERSOUL_HAND_TEXTURE_LOCATION = MutantMonsters.id(
@@ -41,6 +44,13 @@ public class EndersoulHandSpecialRenderer implements NoDataSpecialModelRenderer 
         VertexConsumer vertexConsumer = bufferSource.getBuffer(renderType);
         int color = ARGB.colorFromFloat(1.0F, 0.9F, 0.3F, 1.0F);
         this.enderSoulHandModel.renderToBuffer(poseStack, vertexConsumer, 0XF000F0, OverlayTexture.NO_OVERLAY, color);
+    }
+
+    @Override
+    public void getExtents(Set<Vector3f> output) {
+        PoseStack poseStack = new PoseStack();
+        this.enderSoulHandModel.setAngles();
+        this.enderSoulHandModel.root().getExtentsForGui(poseStack, output);
     }
 
     public record Unbaked() implements SpecialModelRenderer.Unbaked {

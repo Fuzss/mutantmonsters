@@ -24,16 +24,18 @@ public class SpawningPreventionHandler {
         SPAWN_LIMITS_PER_ENTITY_TYPE = Object2IntMaps.unmodifiable(map);
     }
 
-    public static EventResult onEntitySpawn(Entity entity, ServerLevel serverLevel, @Nullable EntitySpawnReason entitySpawnReason) {
-        int spawnLimit = SPAWN_LIMITS_PER_ENTITY_TYPE.getOrDefault(entity.getType(), -1);
-        if (spawnLimit != -1) {
-            long entitiesOfType = StreamSupport.stream(serverLevel.getAllEntities().spliterator(), false)
-                    .filter((Entity currentEntity) -> {
-                        return currentEntity.getType() == entity.getType();
-                    })
-                    .count();
-            if (entitiesOfType >= spawnLimit) {
-                return EventResult.INTERRUPT;
+    public static EventResult onEntitySpawn(Entity entity, ServerLevel serverLevel, boolean isNewlySpawned) {
+        if (isNewlySpawned) {
+            int spawnLimit = SPAWN_LIMITS_PER_ENTITY_TYPE.getOrDefault(entity.getType(), -1);
+            if (spawnLimit != -1) {
+                long entitiesOfType = StreamSupport.stream(serverLevel.getAllEntities().spliterator(), false)
+                        .filter((Entity currentEntity) -> {
+                            return currentEntity.getType() == entity.getType();
+                        })
+                        .count();
+                if (entitiesOfType >= spawnLimit) {
+                    return EventResult.INTERRUPT;
+                }
             }
         }
         return EventResult.PASS;

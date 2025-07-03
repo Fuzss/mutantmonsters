@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DestFactor;
 import com.mojang.blaze3d.platform.SourceFactor;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fuzs.mutantmonsters.MutantMonsters;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.TriState;
 
 public abstract class ModRenderType extends RenderType {
     public static final BlendFunction ALPHA_BLEND_FUNCTION = new BlendFunction(SourceFactor.SRC_ALPHA,
@@ -20,7 +18,7 @@ public abstract class ModRenderType extends RenderType {
     /**
      * @see RenderPipelines#ENERGY_SWIRL
      */
-    public static final RenderPipeline ENERGY_SWIRL_RENDER_PIPELINE = (RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_FOG_SNIPPET)
+    public static final RenderPipeline ENERGY_SWIRL_RENDER_PIPELINE = (RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
             .withLocation(MutantMonsters.id("pipeline/energy_swirl"))
             .withVertexShader("core/entity")
             .withFragmentShader("core/entity")
@@ -30,7 +28,6 @@ public abstract class ModRenderType extends RenderType {
             .withShaderDefine("NO_CARDINAL_LIGHTING")
             .withShaderDefine("APPLY_TEXTURE_MATRIX")
             .withSampler("Sampler0")
-            .withUniform("TextureMat", UniformType.MATRIX4X4)
             .withBlend(ALPHA_BLEND_FUNCTION)
             .withCull(false)
             .withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
@@ -50,9 +47,7 @@ public abstract class ModRenderType extends RenderType {
                 true,
                 ENERGY_SWIRL_RENDER_PIPELINE,
                 RenderType.CompositeState.builder()
-                        .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation,
-                                TriState.FALSE,
-                                false))
+                        .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false))
                         .setTexturingState(new RenderStateShard.OffsetTexturingStateShard(u, v))
                         .setOverlayState(OVERLAY)
                         .createCompositeState(false));

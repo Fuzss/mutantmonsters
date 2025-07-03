@@ -39,8 +39,9 @@ public class MutatedExplosionHelper {
             if (entity == skullSpirit.getTarget()) {
                 return !skullSpirit.isAttached();
             } else {
-                return !(entity instanceof LivingEntity livingEntity) ||
-                        ChemicalXMobEffect.IS_APPLICABLE.test(livingEntity, serverLevel);
+                return !(entity instanceof LivingEntity livingEntity) || ChemicalXMobEffect.IS_APPLICABLE.test(
+                        livingEntity,
+                        serverLevel);
             }
         } else {
             return true;
@@ -69,9 +70,9 @@ public class MutatedExplosionHelper {
 
         @Override
         public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
-            if (explosion instanceof ServerExplosion serverExplosion && entity instanceof ServerPlayer serverPlayer &&
-                    serverPlayer.isBlocking() &&
-                    explosion.getDirectSourceEntity() instanceof MutantCreeper mutantCreeper) {
+            if (explosion instanceof ServerExplosion serverExplosion && entity instanceof ServerPlayer serverPlayer
+                    && serverPlayer.isBlocking()
+                    && explosion.getDirectSourceEntity() instanceof MutantCreeper mutantCreeper) {
                 float seenPercent;
                 if (this.getKnockbackMultiplier(entity) == 0.0F) {
                     seenPercent = 0.0F;
@@ -79,7 +80,7 @@ public class MutatedExplosionHelper {
                     seenPercent = ServerExplosion.getSeenPercent(explosion.center(), entity);
                 }
                 float damageAmount = this.getEntityDamageAmount(explosion, entity, seenPercent);
-                if (!entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, damageAmount)) {
+                if (!entity.hurtServer(serverPlayer.level(), serverExplosion.damageSource, damageAmount)) {
                     if (mutantCreeper.isJumpAttacking()) {
                         EntityUtil.disableShield(serverPlayer, mutantCreeper.isCharged() ? 200 : 100);
                     } else {
@@ -88,7 +89,7 @@ public class MutatedExplosionHelper {
                                 serverPlayer,
                                 serverPlayer.getUsedItemHand());
                     }
-                    entity.hurtServer(serverPlayer.serverLevel(), serverExplosion.damageSource, damageAmount * 0.5F);
+                    entity.hurtServer(serverPlayer.level(), serverExplosion.damageSource, damageAmount * 0.5F);
                 }
 
                 return false;

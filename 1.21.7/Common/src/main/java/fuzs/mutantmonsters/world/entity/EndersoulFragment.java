@@ -6,10 +6,9 @@ import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
+import fuzs.puzzleslib.api.util.v1.DamageHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -20,6 +19,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,8 +61,8 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
     }
 
     public static boolean isProtected(Entity entity) {
-        return entity instanceof LivingEntity livingEntity &&
-                livingEntity.isHolding(ModItems.ENDERSOUL_HAND_ITEM.value());
+        return entity instanceof LivingEntity livingEntity
+                && livingEntity.isHolding(ModItems.ENDERSOUL_HAND_ITEM.value());
     }
 
     private void setExplodeTick(int explodeTick) {
@@ -214,7 +215,7 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
                 }
 
                 if (hitChance) {
-                    DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
+                    DamageSource damageSource = DamageHelper.damageSource(serverLevel,
                             ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE,
                             this,
                             this.spawner != null ? this.spawner : this);
@@ -227,14 +228,14 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.storeNullable("Owner", UUIDUtil.CODEC, this.ownerUUID);
-        compound.putInt("ExplodeTick", this.explodeTick);
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        valueOutput.storeNullable("Owner", UUIDUtil.CODEC, this.ownerUUID);
+        valueOutput.putInt("ExplodeTick", this.explodeTick);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setOwnerThroughUUID(compound.read("Owner", UUIDUtil.CODEC).orElse(null));
-        compound.getInt("ExplodeTick").ifPresent(this::setExplodeTick);
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        this.setOwnerThroughUUID(valueInput.read("Owner", UUIDUtil.CODEC).orElse(null));
+        valueInput.getInt("ExplodeTick").ifPresent(this::setExplodeTick);
     }
 }

@@ -1,7 +1,6 @@
 package fuzs.mutantmonsters.client.gui.screens;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionNameMessage;
 import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionTrackerMessage;
@@ -14,7 +13,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +33,7 @@ public class CreeperMinionTrackerScreen extends Screen {
     public static final Component SHOW_NAME_COMPONENT = createComponent("show_name");
     public static final Component DESTROY_BLOCKS_COMPONENT = createComponent("destroys_blocks");
     public static final Component RIDE_ON_SHOULDER_COMPONENT = createComponent("ride_on_shoulder");
-    private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("#.0"),
+    private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("0.0"),
             (DecimalFormat decimalFormat) -> {
                 decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
             });
@@ -67,16 +66,21 @@ public class CreeperMinionTrackerScreen extends Screen {
                 this.title,
                 this.leftPos + this.titleLabelX,
                 this.topPos + this.titleLabelY,
-                4210752,
+                0xFF404040,
                 false);
         this.name.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, HEALTH_COMPONENT, (this.leftPos + 13), (this.topPos + 31), 4210752, false);
-        guiGraphics.drawString(this.font, EXPLOSION_COMPONENT, (this.leftPos + 13), (this.topPos + 51), 4210752, false);
+        guiGraphics.drawString(this.font, HEALTH_COMPONENT, (this.leftPos + 13), (this.topPos + 31), 0xFF404040, false);
+        guiGraphics.drawString(this.font,
+                EXPLOSION_COMPONENT,
+                (this.leftPos + 13),
+                (this.topPos + 51),
+                0xFF404040,
+                false);
         guiGraphics.drawString(this.font,
                 BLAST_RADIUS_COMPONENT,
                 (this.leftPos + 13),
                 (this.topPos + 71),
-                4210752,
+                0xFF404040,
                 false);
         guiGraphics.drawCenteredString(this.font,
                 String.format("%s / %s",
@@ -84,18 +88,18 @@ public class CreeperMinionTrackerScreen extends Screen {
                         DECIMAL_FORMAT.format(this.creeperMinion.getMaxHealth())),
                 this.leftPos + this.imageWidth / 2 + 38,
                 this.topPos + 31,
-                16777215);
+                -1);
         guiGraphics.drawCenteredString(this.font,
                 this.creeperMinion.canExplodeContinuously() ? CONTINUOUS_EXPLOSION_COMPONENT :
                         ONE_TIME_EXPLOSION_COMPONENT,
                 this.leftPos + this.imageWidth / 2 + 38,
                 this.topPos + 51,
-                16777215);
+                -1);
         guiGraphics.drawCenteredString(this.font,
                 DECIMAL_FORMAT.format(this.creeperMinion.getExplosionRadius()),
                 this.leftPos + this.imageWidth / 2 + 38,
                 this.topPos + 71,
-                16777215);
+                -1);
     }
 
     @Override
@@ -104,8 +108,8 @@ public class CreeperMinionTrackerScreen extends Screen {
             this.onClose();
             return true;
         } else {
-            return this.name.keyPressed(keyCode, scanCode, modifiers) || this.name.canConsumeInput() ||
-                    super.keyPressed(keyCode, scanCode, modifiers);
+            return this.name.keyPressed(keyCode, scanCode, modifiers) || this.name.canConsumeInput()
+                    || super.keyPressed(keyCode, scanCode, modifiers);
         }
     }
 
@@ -168,8 +172,7 @@ public class CreeperMinionTrackerScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        guiGraphics.blit(RenderType::guiTextured,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 TEXTURE_LOCATION,
                 this.leftPos,
                 this.topPos,
@@ -179,7 +182,7 @@ public class CreeperMinionTrackerScreen extends Screen {
                 this.imageHeight,
                 256,
                 256);
-        guiGraphics.blit(RenderType::guiTextured,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 TEXTURE_LOCATION,
                 this.leftPos + 15,
                 this.topPos + 16,
@@ -192,7 +195,7 @@ public class CreeperMinionTrackerScreen extends Screen {
         float healthProgress = Mth.clamp(this.creeperMinion.getHealth() / this.creeperMinion.getMaxHealth(),
                 0.0F,
                 1.0F);
-        guiGraphics.blit(RenderType::guiTextured,
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 TEXTURE_LOCATION,
                 this.leftPos + 15,
                 this.topPos + 16,

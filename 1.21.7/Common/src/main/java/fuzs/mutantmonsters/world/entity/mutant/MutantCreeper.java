@@ -11,7 +11,6 @@ import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -38,6 +37,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -156,8 +157,8 @@ public class MutantCreeper extends MutantMonster {
             return false;
         } else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
             float healAmount = damageAmount / 2.0F;
-            if (this.isAlive() && this.getHealth() < this.getMaxHealth() &&
-                    !(damageSource.getEntity() instanceof MutantCreeper)) {
+            if (this.isAlive() && this.getHealth() < this.getMaxHealth()
+                    && !(damageSource.getEntity() instanceof MutantCreeper)) {
                 this.heal(healAmount);
                 EntityUtil.sendParticlePacket(this, ParticleTypes.HEART, (int) (healAmount / 2.0F));
             }
@@ -166,8 +167,8 @@ public class MutantCreeper extends MutantMonster {
         } else {
             boolean takenDamage = super.hurtServer(serverLevel, damageSource, damageAmount);
             if (this.isCharging()) {
-                if (!damageSource.is(DamageTypeTags.WITCH_RESISTANT_TO) &&
-                        damageSource.getDirectEntity() instanceof LivingEntity) {
+                if (!damageSource.is(DamageTypeTags.WITCH_RESISTANT_TO)
+                        && damageSource.getDirectEntity() instanceof LivingEntity) {
                     damageSource.getDirectEntity().hurt(this.damageSources().thorns(this), 2.0F);
                 }
 
@@ -321,8 +322,8 @@ public class MutantCreeper extends MutantMonster {
                 boolean causesFireIn = this.isOnFire();
                 MutatedExplosionHelper.explode(this, power, causesFireIn, Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
-                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null &&
-                        this.lastHurtByPlayerMemoryTime > 0) {
+                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null
+                        && this.lastHurtByPlayerMemoryTime > 0) {
                     CreeperMinionEgg creeperMinionEgg = new CreeperMinionEgg(this);
                     Player player = EntityReference.get(this.lastHurtByPlayer, this.level(), Player.class);
                     creeperMinionEgg.setOwner(player);
@@ -364,26 +365,26 @@ public class MutantCreeper extends MutantMonster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
-        compound.putBoolean("JumpAttacking", this.isJumpAttacking());
-        compound.putBoolean("Charging", this.isCharging());
-        compound.putInt("ChargeTime", this.chargeTime);
-        compound.putInt("ChargeHits", this.chargeHits);
-        compound.putBoolean("SummonLightning", this.summonLightning);
-        compound.putBoolean("Powered", this.isCharged());
+    public void addAdditionalSaveData(ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        valueOutput.putBoolean("JumpAttacking", this.isJumpAttacking());
+        valueOutput.putBoolean("Charging", this.isCharging());
+        valueOutput.putInt("ChargeTime", this.chargeTime);
+        valueOutput.putInt("ChargeHits", this.chargeHits);
+        valueOutput.putBoolean("SummonLightning", this.summonLightning);
+        valueOutput.putBoolean("Powered", this.isCharged());
 
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
-        this.setCharged(compound.getBooleanOr("Powered", false));
-        this.setJumpAttacking(compound.getBooleanOr("JumpAttacking", false));
-        this.setCharging(compound.getBooleanOr("Charging", false));
-        this.chargeTime = compound.getIntOr("ChargeTime", 0);
-        this.chargeHits = compound.getIntOr("ChargeHits", 0);
-        this.summonLightning = compound.getBooleanOr("SummonLightning", false);
+    public void readAdditionalSaveData(ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        this.setCharged(valueInput.getBooleanOr("Powered", false));
+        this.setJumpAttacking(valueInput.getBooleanOr("JumpAttacking", false));
+        this.setCharging(valueInput.getBooleanOr("Charging", false));
+        this.chargeTime = valueInput.getIntOr("ChargeTime", 0);
+        this.chargeHits = valueInput.getIntOr("ChargeHits", 0);
+        this.summonLightning = valueInput.getBooleanOr("SummonLightning", false);
     }
 
     class JumpAttackGoal extends Goal {
@@ -391,9 +392,9 @@ public class MutantCreeper extends MutantMonster {
         @Override
         public boolean canUse() {
             LivingEntity target = MutantCreeper.this.getTarget();
-            return target != null && MutantCreeper.this.onGround() &&
-                    MutantCreeper.this.distanceToSqr(target) <= 1024.0 && !MutantCreeper.this.isJumpAttacking() &&
-                    !MutantCreeper.this.isCharging() && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
+            return target != null && MutantCreeper.this.onGround() && MutantCreeper.this.distanceToSqr(target) <= 1024.0
+                    && !MutantCreeper.this.isJumpAttacking() && !MutantCreeper.this.isCharging()
+                    && MutantCreeper.this.random.nextFloat() * 100.0F < 0.9F;
         }
 
         @Override
@@ -419,19 +420,19 @@ public class MutantCreeper extends MutantMonster {
         @Override
         public boolean canUse() {
             LivingEntity target = MutantCreeper.this.getTarget();
-            return target != null && !MutantCreeper.this.isJumpAttacking() &&
-                    !(MutantCreeper.this.getMaxHealth() - MutantCreeper.this.getHealth() <
-                            MutantCreeper.this.getMaxHealth() / 6.0F) &&
-                    MutantCreeper.this.distanceToSqr(target) >= 25.0 &&
-                    MutantCreeper.this.distanceToSqr(target) <= 1024.0 &&
-                    MutantCreeper.this.random.nextFloat() * 100.0F < 0.7F || MutantCreeper.this.isCharging();
+            return target != null && !MutantCreeper.this.isJumpAttacking() && !(
+                    MutantCreeper.this.getMaxHealth() - MutantCreeper.this.getHealth()
+                            < MutantCreeper.this.getMaxHealth() / 6.0F)
+                    && MutantCreeper.this.distanceToSqr(target) >= 25.0
+                    && MutantCreeper.this.distanceToSqr(target) <= 1024.0
+                    && MutantCreeper.this.random.nextFloat() * 100.0F < 0.7F || MutantCreeper.this.isCharging();
         }
 
         @Override
         public boolean canContinueToUse() {
             LivingEntity target = MutantCreeper.this.getTarget();
-            if (MutantCreeper.this.summonLightning && target != null &&
-                    MutantCreeper.this.distanceToSqr(target) < 25.0) {
+            if (MutantCreeper.this.summonLightning && target != null
+                    && MutantCreeper.this.distanceToSqr(target) < 25.0) {
                 return false;
             } else {
                 return MutantCreeper.this.chargeTime < 100 && MutantCreeper.this.chargeHits > 0;
@@ -441,8 +442,8 @@ public class MutantCreeper extends MutantMonster {
         @Override
         public void start() {
             MutantCreeper.this.setCharging(true);
-            if (MutantCreeper.this.random.nextInt(MutantCreeper.this.level().isThundering() ? 2 : 6) == 0 &&
-                    !MutantCreeper.this.isCharged()) {
+            if (MutantCreeper.this.random.nextInt(MutantCreeper.this.level().isThundering() ? 2 : 6) == 0
+                    && !MutantCreeper.this.isCharged()) {
                 MutantCreeper.this.summonLightning = true;
             }
 
@@ -463,9 +464,9 @@ public class MutantCreeper extends MutantMonster {
 
         @Override
         public void stop() {
-            if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null &&
-                    MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0 &&
-                    MutantCreeper.this.level().canSeeSky(MutantCreeper.this.blockPosition())) {
+            if (MutantCreeper.this.summonLightning && MutantCreeper.this.getTarget() != null
+                    && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) < 25.0
+                    && MutantCreeper.this.level().canSeeSky(MutantCreeper.this.blockPosition())) {
                 LightningBolt lightningBoltEntity = EntityType.LIGHTNING_BOLT.create(MutantCreeper.this.level(),
                         EntitySpawnReason.EVENT);
                 lightningBoltEntity.snapTo(MutantCreeper.this.getX(),
@@ -488,12 +489,12 @@ public class MutantCreeper extends MutantMonster {
 
         @Override
         public boolean canUse() {
-            float chance = MutantCreeper.this.isPathFinding() && (MutantCreeper.this.getLastDamageSource() == null ||
-                    !MutantCreeper.this.getLastDamageSource().is(DamageTypeTags.IS_PROJECTILE)) ? 0.6F : 0.9F;
-            return MutantCreeper.this.getTarget() != null &&
-                    MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) <= 1024.0 &&
-                    !MutantCreeper.this.isCharging() && !MutantCreeper.this.isJumpAttacking() &&
-                    MutantCreeper.this.random.nextFloat() * 100.0F < chance;
+            float chance = MutantCreeper.this.isPathFinding() && (MutantCreeper.this.getLastDamageSource() == null
+                    || !MutantCreeper.this.getLastDamageSource().is(DamageTypeTags.IS_PROJECTILE)) ? 0.6F : 0.9F;
+            return MutantCreeper.this.getTarget() != null
+                    && MutantCreeper.this.distanceToSqr(MutantCreeper.this.getTarget()) <= 1024.0
+                    && !MutantCreeper.this.isCharging() && !MutantCreeper.this.isJumpAttacking()
+                    && MutantCreeper.this.random.nextFloat() * 100.0F < chance;
         }
 
         @Override
@@ -507,11 +508,11 @@ public class MutantCreeper extends MutantMonster {
                     (double) (MutantCreeper.this.getHealth() / MutantCreeper.this.getMaxHealth()) * 4.0); i > 0; --i) {
                 CreeperMinion minion = ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()
                         .create(MutantCreeper.this.level(), EntitySpawnReason.MOB_SUMMONED);
-                double x = MutantCreeper.this.getX() + (double) MutantCreeper.this.random.nextFloat() -
-                        (double) MutantCreeper.this.random.nextFloat();
+                double x = MutantCreeper.this.getX() + (double) MutantCreeper.this.random.nextFloat()
+                        - (double) MutantCreeper.this.random.nextFloat();
                 double y = MutantCreeper.this.getY() + (double) (MutantCreeper.this.random.nextFloat() * 0.5F);
-                double z = MutantCreeper.this.getZ() + (double) MutantCreeper.this.random.nextFloat() -
-                        (double) MutantCreeper.this.random.nextFloat();
+                double z = MutantCreeper.this.getZ() + (double) MutantCreeper.this.random.nextFloat()
+                        - (double) MutantCreeper.this.random.nextFloat();
                 double xx = MutantCreeper.this.getTarget().getX() - MutantCreeper.this.getX();
                 double yy = MutantCreeper.this.getTarget().getY() - MutantCreeper.this.getY();
                 double zz = MutantCreeper.this.getTarget().getZ() - MutantCreeper.this.getZ();

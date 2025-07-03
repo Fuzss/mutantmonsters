@@ -13,13 +13,12 @@ import fuzs.mutantmonsters.world.entity.ai.goal.AvoidDamageGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.HurtByNearestTargetGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.ai.goal.OwnerTargetGoal;
-import fuzs.puzzleslib.api.entity.v1.EntityHelper;
+import fuzs.puzzleslib.api.util.v1.EntityHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -57,6 +56,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WebBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -235,8 +236,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemInHand = player.getItemInHand(interactionHand);
         if (!this.isVehicle()) {
-            if (this.isFood(itemInHand) && itemInHand.has(DataComponents.FOOD) &&
-                    this.getHealth() < this.getMaxHealth()) {
+            if (this.isFood(itemInHand) && itemInHand.has(DataComponents.FOOD)
+                    && this.getHealth() < this.getMaxHealth()) {
                 this.usePlayerItem(player, interactionHand, itemInHand);
                 this.heal((float) itemInHand.get(DataComponents.FOOD).nutrition());
                 return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
@@ -422,8 +423,9 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
             this.setRot(this.getYRot(), this.getXRot());
             this.yBodyRot = this.getYRot();
             this.yHeadRot = this.yBodyRot;
-            if (this.chargeExhausted || !(this.chargePower > 0.0F) ||
-                    !this.onGround() && this.getInBlockState().getFluidState().isEmpty()) {
+            if (this.chargeExhausted || !(this.chargePower > 0.0F) || !this.onGround() && this.getInBlockState()
+                    .getFluidState()
+                    .isEmpty()) {
                 this.chargePower = 0.0F;
             } else {
                 double power = 1.6 * (double) this.chargePower;
@@ -519,17 +521,17 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
-        this.addPersistentAngerSaveData(compound);
-        compound.store("Webs", WebPos.LIST_CODEC, this.webs);
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        this.addPersistentAngerSaveData(valueOutput);
+        valueOutput.store("Webs", WebPos.LIST_CODEC, this.webs);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
-        this.readPersistentAngerSaveData(this.level(), compound);
-        compound.read("Webs", WebPos.LIST_CODEC).ifPresent(this.webs::addAll);
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        this.readPersistentAngerSaveData(this.level(), valueInput);
+        valueInput.read("Webs", WebPos.LIST_CODEC).ifPresent(this.webs::addAll);
     }
 
     @Override
@@ -579,10 +581,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
         @Override
         public boolean canUse() {
             LivingEntity target = SpiderPig.this.getTarget();
-            return target != null && SpiderPig.this.leapCooldown <= 0 &&
-                    (SpiderPig.this.onGround() || !SpiderPig.this.getInBlockState().getFluidState().isEmpty()) &&
-                    (SpiderPig.this.distanceToSqr(target) < 64.0 && SpiderPig.this.random.nextInt(8) == 0 ||
-                            SpiderPig.this.distanceToSqr(target) < 6.25);
+            return target != null && SpiderPig.this.leapCooldown <= 0 && (SpiderPig.this.onGround()
+                    || !SpiderPig.this.getInBlockState().getFluidState().isEmpty()) && (
+                    SpiderPig.this.distanceToSqr(target) < 64.0 && SpiderPig.this.random.nextInt(8) == 0
+                            || SpiderPig.this.distanceToSqr(target) < 6.25);
         }
 
         @Override

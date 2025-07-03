@@ -35,7 +35,7 @@ import java.util.Collection;
 public class EntityEventsHandler {
     private static final Ingredient PIG_POISON_INGREDIENT = Ingredient.of(Items.FERMENTED_SPIDER_EYE);
 
-    public static EventResult onEntityLoad(Entity entity, ServerLevel level) {
+    public static EventResult onEntityLoad(Entity entity, ServerLevel serverLevel, boolean isNewlySpawned) {
         if (entity instanceof PathfinderMob creature) {
             if (EntityUtil.isFeline(creature)) {
                 creature.goalSelector.addGoal(2,
@@ -60,6 +60,7 @@ public class EntityEventsHandler {
                 creature.goalSelector.addGoal(1, new AvoidEntityGoal<>(creature, MutantZombie.class, 12.0F, 0.5, 0.5));
             }
         }
+
         return EventResult.PASS;
     }
 

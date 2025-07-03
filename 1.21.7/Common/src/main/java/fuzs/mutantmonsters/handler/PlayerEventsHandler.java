@@ -9,8 +9,8 @@ import fuzs.mutantmonsters.world.entity.EndersoulFragment;
 import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableInt;
-import fuzs.puzzleslib.api.init.v3.registry.LookupHelper;
-import fuzs.puzzleslib.api.util.v1.DamageSourcesHelper;
+import fuzs.puzzleslib.api.item.v2.EnchantingHelper;
+import fuzs.puzzleslib.api.util.v1.DamageHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -37,8 +37,8 @@ public class PlayerEventsHandler {
     public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
         // quick charge for bows
         if (entity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM)) {
-            if (useItem.getItem() instanceof BowItem &&
-                    BowItem.getPowerForTime(useItem.getUseDuration(entity) - useItemRemaining.getAsInt()) < 1.0F) {
+            if (useItem.getItem() instanceof BowItem
+                    && BowItem.getPowerForTime(useItem.getUseDuration(entity) - useItemRemaining.getAsInt()) < 1.0F) {
                 useItemRemaining.mapInt(i -> i - 2);
             }
         }
@@ -46,9 +46,9 @@ public class PlayerEventsHandler {
     }
 
     public static EventResult onArrowLoose(Player player, ItemStack weapon, Level level, MutableInt charge, boolean hasAmmo) {
-        if (player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.MUTANT_SKELETON_SKULL_ITEM) &&
-                weapon.getItem() instanceof BowItem) {
-            Holder<Enchantment> enchantment = LookupHelper.lookupEnchantment(level, Enchantments.MULTISHOT);
+        if (player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.MUTANT_SKELETON_SKULL_ITEM)
+                && weapon.getItem() instanceof BowItem) {
+            Holder<Enchantment> enchantment = EnchantingHelper.lookup(level, Enchantments.MULTISHOT);
             if (weapon.getEnchantments().getLevel(enchantment) == 0) {
                 // multi-shot for bows
                 ItemStack itemStack = weapon.copy();
@@ -83,7 +83,7 @@ public class PlayerEventsHandler {
 
         for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, box)) {
             if (livingEntity != player && player.getVehicle() != livingEntity) {
-                DamageSource damageSource = DamageSourcesHelper.source(serverLevel,
+                DamageSource damageSource = DamageHelper.damageSource(serverLevel,
                         ModRegistry.PLAYER_SEISMIC_WAVE_DAMAGE_TYPE,
                         player);
                 livingEntity.hurtServer(serverLevel, damageSource, 6.0F + player.getRandom().nextInt(3));
@@ -104,8 +104,8 @@ public class PlayerEventsHandler {
                                     ModSoundEvents.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(),
                                     player.getSoundSource(),
                                     1.0F,
-                                    (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F +
-                                            1.5F);
+                                    (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F
+                                            + 1.5F);
                 }
             }
         }

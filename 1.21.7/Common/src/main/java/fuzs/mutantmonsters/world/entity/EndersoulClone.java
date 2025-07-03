@@ -4,7 +4,6 @@ import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.ai.goal.MutantMeleeAttackGoal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -22,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class EndersoulClone extends Monster {
@@ -43,8 +43,10 @@ public class EndersoulClone extends Monster {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 1.0).add(Attributes.ATTACK_DAMAGE, 1.0).add(
-                Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.STEP_HEIGHT, 1.0);
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 1.0)
+                .add(Attributes.ATTACK_DAMAGE, 1.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.3)
+                .add(Attributes.STEP_HEIGHT, 1.0);
     }
 
     public void setCloner(MutantEnderman cloner) {
@@ -74,8 +76,8 @@ public class EndersoulClone extends Monster {
     public void aiStep() {
         this.jumping = false;
         super.aiStep();
-        if (this.cloner != null &&
-                (this.cloner.isNoAi() || !this.cloner.isAlive() || this.cloner.level() != this.level())) {
+        if (this.cloner != null && (this.cloner.isNoAi() || !this.cloner.isAlive()
+                || this.cloner.level() != this.level())) {
             this.discard();
         }
     }
@@ -120,8 +122,8 @@ public class EndersoulClone extends Monster {
     @Override
     protected void customServerAiStep(ServerLevel serverLevel) {
         Entity entity = this.getTarget();
-        if (this.random.nextInt(10) == 0 && entity != null && (this.isInWater() || this.isPassengerOfSameVehicle(
-                entity) || this.distanceToSqr(entity) > 1024.0 || !this.isPathFinding())) {
+        if (this.random.nextInt(10) == 0 && entity != null && (this.isInWater() || this.isPassengerOfSameVehicle(entity)
+                || this.distanceToSqr(entity) > 1024.0 || !this.isPathFinding())) {
             this.teleportToEntity(entity);
         }
 
@@ -137,9 +139,15 @@ public class EndersoulClone extends Monster {
         double z = entity.getZ() + (this.random.nextDouble() - 0.5) * 24.0;
         boolean teleport = EntityUtil.teleportTo(this, x, y, z);
         if (teleport) {
-            this.level().playSound(null, this.xo, this.yo, this.zo,
-                    ModSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(), this.getSoundSource(), 1.0F, 1.0F
-            );
+            this.level()
+                    .playSound(null,
+                            this.xo,
+                            this.yo,
+                            this.zo,
+                            ModSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(),
+                            this.getSoundSource(),
+                            1.0F,
+                            1.0F);
             this.playSound(ModSoundEvents.ENTITY_ENDERSOUL_CLONE_TELEPORT_SOUND_EVENT.value(), 1.0F, 1.0F);
             this.stopRiding();
         }
@@ -180,13 +188,14 @@ public class EndersoulClone extends Monster {
     }
 
     @Override
-    public boolean saveAsPassenger(CompoundTag compound) {
-        return this.cloner == null && super.saveAsPassenger(compound);
+    public boolean saveAsPassenger(ValueOutput valueOutput) {
+        return this.cloner == null && super.saveAsPassenger(valueOutput);
     }
 
     @Override
     public boolean considersEntityAsAlly(Entity entity) {
-        return this.cloner != null && (this.cloner == entity || this.cloner.considersEntityAsAlly(entity)) || super.considersEntityAsAlly(entity);
+        return this.cloner != null && (this.cloner == entity || this.cloner.considersEntityAsAlly(entity))
+                || super.considersEntityAsAlly(entity);
     }
 
     @Override

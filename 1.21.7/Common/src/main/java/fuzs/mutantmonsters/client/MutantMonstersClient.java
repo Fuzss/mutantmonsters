@@ -42,8 +42,9 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onClientSetup() {
-        ItemTooltipRegistry.registerItemTooltip(ArmorBlockItem.class, ArmorBlockItem::getDescriptionComponent);
-        ItemTooltipRegistry.registerItemTooltip(SkeletonArmorItem.class, SkeletonArmorItem::getDescriptionComponent);
+        ItemTooltipRegistry.ITEM.registerItemTooltip(ArmorBlockItem.class, ArmorBlockItem::getDescriptionComponent);
+        ItemTooltipRegistry.ITEM.registerItemTooltip(SkeletonArmorItem.class,
+                SkeletonArmorItem::getDescriptionComponent);
     }
 
     @Override
@@ -139,15 +140,12 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerLayerDefinition(ModelLayerLocations.MUTANT_SNOW_GOLEM_HEAD,
                 () -> MutantSnowGolemModel.createBodyLayer(64, 32));
         context.registerLayerDefinition(ModelLayerLocations.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG,
-                () -> SpiderPigModel.createBodyLayer());
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG, () -> SpiderPigModel.createBodyLayer());
         context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY,
                 () -> SpiderPigModel.createBodyLayer().apply(SpiderPigModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_SADDLE,
-                () -> SpiderPigModel.createBodyLayer());
+        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_SADDLE, () -> SpiderPigModel.createBodyLayer());
         context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY_SADDLE,
-                () -> SpiderPigModel.createBodyLayer()
-                        .apply(SpiderPigModel.BABY_TRANSFORMER));
+                () -> SpiderPigModel.createBodyLayer().apply(SpiderPigModel.BABY_TRANSFORMER));
     }
 
     @Override
@@ -161,12 +159,14 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterEntitySpectatorShaders(EntitySpectatorShadersContext context) {
-        context.registerSpectatorShader(ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"),
-                ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
-                ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value());
-        context.registerSpectatorShader(ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"),
-                ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
-                ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value());
+        context.registerSpectatorShader(ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
+                ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"));
+        context.registerSpectatorShader(ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value(),
+                ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"));
+        context.registerSpectatorShader(ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
+                ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"));
+        context.registerSpectatorShader(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(),
+                ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"));
     }
 
     @Override

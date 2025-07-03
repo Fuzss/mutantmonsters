@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
-import fuzs.puzzleslib.api.entity.v1.EntityHelper;
+import fuzs.puzzleslib.api.util.v1.EntityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;

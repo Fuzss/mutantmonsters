@@ -9,7 +9,6 @@ import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.level.MutatedExplosionHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -26,6 +25,8 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -144,8 +145,8 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
                 this.dismountTicks--;
             }
             Entity rootVehicle = this.getRootVehicle();
-            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING)) ||
-                    this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
+            if (this.isInWall() || !(rootVehicle.hasPose(Pose.STANDING) || rootVehicle.hasPose(Pose.CROUCHING))
+                    || this.dismountTicks <= 0 && rootVehicle.isShiftKeyDown() || rootVehicle.isSpectator()) {
                 this.stopRiding();
                 this.playMountingSound(false);
             }
@@ -159,8 +160,8 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
             if (--this.age <= 0) {
                 EntityReference<LivingEntity> entityReference = this.getOwnerReference();
                 if (entityReference != null) {
-                    if (entityReference.getEntity(this.level(), LivingEntity.class) instanceof Player player &&
-                            this.distanceToSqr(player) < 4096.0) {
+                    if (entityReference.getEntity(this.level(), LivingEntity.class) instanceof Player player
+                            && this.distanceToSqr(player) < 4096.0) {
                         this.hatch(player);
                     } else {
                         this.age = 1200;
@@ -255,25 +256,25 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putInt("Health", this.health);
-        compound.putInt("Age", this.age);
-        compound.putInt("RecentlyHit", this.recentlyHit);
-        compound.putBoolean("Charged", this.isCharged());
-        compound.putByte("DismountTicks", (byte) this.dismountTicks);
+    protected void addAdditionalSaveData(ValueOutput valueOutput) {
+        valueOutput.putInt("Health", this.health);
+        valueOutput.putInt("Age", this.age);
+        valueOutput.putInt("RecentlyHit", this.recentlyHit);
+        valueOutput.putBoolean("Charged", this.isCharged());
+        valueOutput.putByte("DismountTicks", (byte) this.dismountTicks);
         EntityReference<LivingEntity> entityReference = this.getOwnerReference();
         if (entityReference != null) {
-            entityReference.store(compound, "Owner");
+            entityReference.store(valueOutput, "Owner");
         }
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
-        compound.getInt("Health").ifPresent(this::setHealth);
-        compound.getInt("Age").ifPresent(this::setAge);
-        this.recentlyHit = compound.getIntOr("RecentlyHit", 0);
-        this.setCharged(compound.getBooleanOr("Charged", false));
-        this.dismountTicks = compound.getByteOr("DismountTicks", (byte) 0);
-        this.setOwnerReference(EntityReference.readWithOldOwnerConversion(compound, "Owner", this.level()));
+    protected void readAdditionalSaveData(ValueInput valueInput) {
+        valueInput.getInt("Health").ifPresent(this::setHealth);
+        valueInput.getInt("Age").ifPresent(this::setAge);
+        this.recentlyHit = valueInput.getIntOr("RecentlyHit", 0);
+        this.setCharged(valueInput.getBooleanOr("Charged", false));
+        this.dismountTicks = valueInput.getByteOr("DismountTicks", (byte) 0);
+        this.setOwnerReference(EntityReference.readWithOldOwnerConversion(valueInput, "Owner", this.level()));
     }
 }
