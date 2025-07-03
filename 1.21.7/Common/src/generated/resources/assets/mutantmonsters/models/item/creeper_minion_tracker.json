@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mutantmonsters:item/creeper_minion_tracker"
+  }
+}
