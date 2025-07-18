@@ -14,8 +14,10 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -50,6 +52,34 @@ public class CreeperMinionOnShoulderLayer extends RenderLayer<PlayerRenderState,
         this.model = new CreeperMinionModel(context.bakeLayer(ModelLayerLocations.CREEPER_MINION_SHOULDER));
         this.chargedModel = new CreeperMinionModel(context.bakeLayer(ModelLayerLocations.CREEPER_MINION_SHOULDER_ARMOR));
         this.renderState.inSittingPose = true;
+    }
+
+    public static void addLivingEntityRenderLayers(EntityType<?> entityType, LivingEntityRenderer<?, ?, ?> entityRenderer, EntityRendererProvider.Context context) {
+        if (entityRenderer instanceof PlayerRenderer playerRenderer) {
+            playerRenderer.addLayer(new CreeperMinionOnShoulderLayer(playerRenderer, context));
+        }
+    }
+
+    public static void onExtractRenderState(Entity entity, EntityRenderState entityRenderState, float partialTick) {
+        if (entity instanceof AbstractClientPlayer player && entityRenderState instanceof PlayerRenderState) {
+            RenderPropertyKey.set(entityRenderState,
+                    CREEPER_ON_LEFT_SHOULDER_RENDER_PROPERTY_KEY,
+                    getMinionOnShoulder(player, true));
+            RenderPropertyKey.set(entityRenderState,
+                    CREEPER_ON_RIGHT_SHOULDER_RENDER_PROPERTY_KEY,
+                    getMinionOnShoulder(player, false));
+        }
+    }
+
+    private static Optional<Boolean> getMinionOnShoulder(AbstractClientPlayer player, boolean leftShoulder) {
+        CompoundTag compoundTag = leftShoulder ? player.getShoulderEntityLeft() : player.getShoulderEntityRight();
+        if (compoundTag.isEmpty()) {
+            return Optional.empty();
+        } else {
+            EntityType<?> entityType = compoundTag.read("id", EntityType.CODEC).orElse(null);
+            return entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value() ? compoundTag.getBoolean("Powered") :
+                    Optional.empty();
+        }
     }
 
     @Override
@@ -112,27 +142,5 @@ public class CreeperMinionOnShoulderLayer extends RenderLayer<PlayerRenderState,
         this.renderState.walkAnimationSpeed = renderState.walkAnimationSpeed;
         this.renderState.yRot = yRot;
         this.renderState.xRot = xRot;
-    }
-
-    public static void onExtractRenderState(Entity entity, EntityRenderState entityRenderState, float partialTick) {
-        if (entity instanceof AbstractClientPlayer player && entityRenderState instanceof PlayerRenderState) {
-            RenderPropertyKey.set(entityRenderState,
-                    CREEPER_ON_LEFT_SHOULDER_RENDER_PROPERTY_KEY,
-                    getMinionOnShoulder(player, true));
-            RenderPropertyKey.set(entityRenderState,
-                    CREEPER_ON_RIGHT_SHOULDER_RENDER_PROPERTY_KEY,
-                    getMinionOnShoulder(player, false));
-        }
-    }
-
-    private static Optional<Boolean> getMinionOnShoulder(AbstractClientPlayer player, boolean leftShoulder) {
-        CompoundTag compoundTag = leftShoulder ? player.getShoulderEntityLeft() : player.getShoulderEntityRight();
-        if (compoundTag.isEmpty()) {
-            return Optional.empty();
-        } else {
-            EntityType<?> entityType = compoundTag.read("id", EntityType.CODEC).orElse(null);
-            return entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value() ? compoundTag.getBoolean("Powered") :
-                    Optional.empty();
-        }
     }
 }

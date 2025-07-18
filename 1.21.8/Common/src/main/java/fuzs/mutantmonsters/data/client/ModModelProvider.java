@@ -27,7 +27,7 @@ public class ModModelProvider extends AbstractModelProvider {
 
     @Override
     public void addBlockModels(BlockModelGenerators blockModelGenerators) {
-        ItemModelGenerationHelper.createHead(ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(),
+        ItemModelGenerationHelper.generateHead(ModRegistry.MUTANT_SKELETON_SKULL_BLOCK.value(),
                 ModRegistry.MUTANT_SKELETON_WALL_SKULL_BLOCK.value(),
                 ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
                 blockModelGenerators);
