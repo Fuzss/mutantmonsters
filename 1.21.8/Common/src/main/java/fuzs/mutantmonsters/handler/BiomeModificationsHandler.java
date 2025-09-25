@@ -7,6 +7,7 @@ import fuzs.mutantmonsters.init.ModTags;
 import fuzs.puzzleslib.api.biome.v1.BiomeLoadingContext;
 import fuzs.puzzleslib.api.biome.v1.BiomeLoadingPhase;
 import fuzs.puzzleslib.api.biome.v1.BiomeModificationContext;
+import fuzs.puzzleslib.api.biome.v1.SpawnerDataBuilder;
 import fuzs.puzzleslib.api.core.v1.context.BiomeModificationsContext;
 import net.minecraft.core.Holder;
 import net.minecraft.tags.TagKey;
