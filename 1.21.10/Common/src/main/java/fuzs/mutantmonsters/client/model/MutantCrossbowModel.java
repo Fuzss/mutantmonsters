@@ -1,34 +1,30 @@
 package fuzs.mutantmonsters.client.model;
 
+import fuzs.mutantmonsters.client.renderer.entity.state.MutantSkeletonRenderState;
+import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Unit;
 
-/**
- * TODO refactor setupAnim methods, also restrict access to model parts directly
- */
-public class MutantCrossbowModel extends Model<Unit> {
-    public final ModelPart armWear;
-    public final ModelPart middle;
-    public final ModelPart middle1;
-    public final ModelPart middle2;
-    public final ModelPart side1;
-    public final ModelPart side2;
-    public final ModelPart side3;
-    public final ModelPart side4;
-    public final ModelPart rope1;
-    public final ModelPart rope2;
+public class MutantCrossbowModel extends Model<MutantSkeletonRenderState> {
+    private final ModelPart middle1;
+    private final ModelPart middle2;
+    private final ModelPart side1;
+    private final ModelPart side2;
+    private final ModelPart side3;
+    private final ModelPart side4;
+    private final ModelPart rope1;
+    private final ModelPart rope2;
 
     public MutantCrossbowModel(ModelPart modelPart) {
         super(modelPart, RenderType::entityCutoutNoCull);
-        this.armWear = modelPart.getChild("arm_wear");
-        this.middle = this.armWear.getChild("middle");
-        this.middle1 = this.middle.getChild("middle1");
-        this.middle2 = this.middle.getChild("middle2");
+        ModelPart armWear = modelPart.getChild("arm_wear");
+        ModelPart middle = armWear.getChild("middle");
+        this.middle1 = middle.getChild("middle1");
+        this.middle2 = middle.getChild("middle2");
         this.side1 = this.middle1.getChild("side1");
         this.side2 = this.middle2.getChild("side2");
         this.side3 = this.side1.getChild("side3");
@@ -80,7 +76,7 @@ public class MutantCrossbowModel extends Model<Unit> {
     }
 
     @Override
-    public void setupAnim(Unit renderState) {
+    public void setupAnim(MutantSkeletonRenderState renderState) {
         super.setupAnim(renderState);
         this.middle1.xRot = Mth.PI / 8.0F;
         this.middle2.xRot = -Mth.PI / 8.0F;
@@ -88,11 +84,59 @@ public class MutantCrossbowModel extends Model<Unit> {
         this.side2.xRot = Mth.PI / 5.0F;
         this.side3.xRot = -Mth.PI / 4.0F;
         this.side4.xRot = Mth.PI / 4.0F;
-        this.rotateRope();
+        this.animate(renderState);
     }
 
-    public void rotateRope() {
+    private void animate(MutantSkeletonRenderState renderState) {
+        if (renderState.animation == MutantSkeleton.SHOOT_ANIMATION) {
+            this.animShoot(renderState);
+        } else if (renderState.animation == MutantSkeleton.MULTI_SHOT_ANIMATION) {
+            this.animMultiShoot(renderState);
+        } else {
+            this.animRope();
+        }
+    }
+
+    private void animRope() {
         this.rope1.xRot = -(this.middle1.xRot + this.side1.xRot + this.side3.xRot);
         this.rope2.xRot = -(this.middle2.xRot + this.side2.xRot + this.side4.xRot);
+    }
+
+    private void animShoot(MutantSkeletonRenderState renderState) {
+        if (renderState.animationTime < 5.0F) {
+            this.animRope();
+        } else if (renderState.animationTime < 12.0F) {
+            float time = (renderState.animationTime - 5.0F) / 7.0F;
+            this.animShoot(Mth.sin(time * Mth.PI / 2.0F * 0.4F));
+        } else if (renderState.animationTime < 26.0F) {
+            float time = Mth.clamp(renderState.animationTime - 25.0F, 0.0F, 1.0F);
+            this.animShoot(Mth.cos(time * Mth.PI / 2.0F));
+        } else if (renderState.animationTime < 30.0F) {
+            this.animRope();
+        }
+    }
+
+    private void animMultiShoot(MutantSkeletonRenderState renderState) {
+        if (renderState.animationTime < 17.0F) {
+            this.animRope();
+        } else if (renderState.animationTime < 20.0F) {
+            float time = (renderState.animationTime - 17.0F) / 3.0F;
+            this.animShoot(Mth.sin(time * Mth.PI / 2.0F * 0.4F));
+        } else if (renderState.animationTime < 24.0F) {
+            float time = Mth.clamp(renderState.animationTime - 25.0F, 0.0F, 1.0F);
+            this.animShoot(Mth.cos(time * Mth.PI / 2.0F));
+        } else if (renderState.animationTime < 28.0F) {
+            this.animRope();
+        }
+    }
+
+    private void animShoot(float amount) {
+        this.middle1.xRot += -amount * Mth.PI / 16.0F;
+        this.side1.xRot += -amount * Mth.PI / 24.0F;
+        this.middle2.xRot += amount * Mth.PI / 16.0F;
+        this.side2.xRot += amount * Mth.PI / 24.0F;
+        this.animRope();
+        this.rope1.xRot += amount * Mth.PI / 6.0F;
+        this.rope2.xRot += -amount * Mth.PI / 6.0F;
     }
 }

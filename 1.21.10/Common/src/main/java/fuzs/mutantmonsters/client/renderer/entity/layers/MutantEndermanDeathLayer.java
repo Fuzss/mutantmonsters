@@ -27,24 +27,26 @@ public class MutantEndermanDeathLayer extends RenderLayer<MutantEndermanRenderSt
         // parent model is not rendered at the same time
         if (renderState.deathTime > 80.0F) {
             int color = ARGB.colorFromFloat(MutantEndermanRenderer.getDeathProgress(renderState), 1.0F, 1.0F, 1.0F);
-            nodeCollector.submitModel(this.getParentModel(),
-                    renderState,
-                    poseStack,
-                    RenderType.dragonExplosionAlpha(DEATH_TEXTURE_LOCATION),
-                    renderState.lightCoords,
-                    OverlayTexture.NO_OVERLAY,
-                    color,
-                    null,
-                    renderState.outlineColor,
-                    null);
-            nodeCollector.submitModel(this.getParentModel(),
-                    renderState,
-                    poseStack,
-                    DEATH_RENDER_TYPE,
-                    renderState.lightCoords,
-                    OverlayTexture.NO_OVERLAY,
-                    renderState.outlineColor,
-                    null);
+            nodeCollector.order(0)
+                    .submitModel(this.getParentModel(),
+                            renderState,
+                            poseStack,
+                            RenderType.dragonExplosionAlpha(DEATH_TEXTURE_LOCATION),
+                            renderState.lightCoords,
+                            OverlayTexture.NO_OVERLAY,
+                            color,
+                            null,
+                            renderState.outlineColor,
+                            null);
+            nodeCollector.order(1)
+                    .submitModel(this.getParentModel(),
+                            renderState,
+                            poseStack,
+                            DEATH_RENDER_TYPE,
+                            renderState.lightCoords,
+                            OverlayTexture.NO_OVERLAY,
+                            renderState.outlineColor,
+                            null);
         }
     }
 }

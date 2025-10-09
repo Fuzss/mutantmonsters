@@ -210,6 +210,5 @@ public class MutantCreeperModel extends EntityModel<MutantCreeperRenderState> {
             this.body.xRot += swingAnim * 3.1415927F / 3.0F;
             this.neck.xRot -= swingAnim * 3.1415927F / 4.0F;
         }
-
     }
 }

@@ -20,7 +20,7 @@ public class MutantSkeletonPartModel extends Model<Unit> {
         ImmutableMap.Builder<MutantSkeletonBodyPart.BodyPart, ModelPart> builder = ImmutableMap.builder();
         builder.put(MutantSkeletonBodyPart.BodyPart.PELVIS, modelPart.getChild("pelvis"));
         MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart);
-        spine.setAngles(false);
+        spine.setupAnim(false);
         builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_UPPER_RIB, spine.side1[0]);
         builder.put(MutantSkeletonBodyPart.BodyPart.RIGHT_UPPER_RIB, spine.side2[0]);
         builder.put(MutantSkeletonBodyPart.BodyPart.LEFT_MIDDLE_RIB, spine.side1[0]);

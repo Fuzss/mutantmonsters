@@ -16,8 +16,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
         super(context,
-                new MutantSkeletonModel(context.bakeLayer(ModModelLayers.MUTANT_SKELETON),
-                        context.bakeLayer(ModModelLayers.MUTANT_CROSSBOW)),
+                new MutantSkeletonModel(context.bakeLayer(ModModelLayers.MUTANT_SKELETON)),
                 0.6F);
         this.addLayer(new MutantSkeletonCrossbowLayer(this, context.getModelSet()));
     }

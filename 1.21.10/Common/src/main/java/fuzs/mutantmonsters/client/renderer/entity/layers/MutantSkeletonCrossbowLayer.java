@@ -3,9 +3,10 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
+import fuzs.mutantmonsters.client.model.MutantCrossbowModel;
 import fuzs.mutantmonsters.client.model.MutantSkeletonModel;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.MutantArrowRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantSkeletonRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
@@ -21,11 +22,13 @@ import net.minecraft.world.entity.HumanoidArm;
 public class MutantSkeletonCrossbowLayer extends RenderLayer<MutantSkeletonRenderState, MutantSkeletonModel> {
     public static final ResourceLocation CROSSBOW_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_crossbow.png");
-    private final MutantArrowModel model;
+    private final MutantCrossbowModel crossbowModel;
+    private final MutantArrowModel arrowModel;
 
     public MutantSkeletonCrossbowLayer(RenderLayerParent<MutantSkeletonRenderState, MutantSkeletonModel> renderer, EntityModelSet entityModelSet) {
         super(renderer);
-        this.model = new MutantArrowModel(entityModelSet.bakeLayer(ModModelLayers.MUTANT_ARROW));
+        this.crossbowModel = new MutantCrossbowModel(entityModelSet.bakeLayer(ModModelLayers.MUTANT_CROSSBOW));
+        this.arrowModel = new MutantArrowModel(entityModelSet.bakeLayer(ModModelLayers.MUTANT_ARROW));
     }
 
     @Override
@@ -37,10 +40,10 @@ public class MutantSkeletonCrossbowLayer extends RenderLayer<MutantSkeletonRende
             poseStack.scale(-1.0F, 1.0F, -1.0F);
         }
 
-        nodeCollector.submitModel(this.getParentModel().getCrossbow(),
-                Unit.INSTANCE,
+        nodeCollector.submitModel(this.crossbowModel,
+                renderState,
                 poseStack,
-                this.getParentModel().getCrossbow().renderType(CROSSBOW_TEXTURE_LOCATION),
+                this.crossbowModel.renderType(CROSSBOW_TEXTURE_LOCATION),
                 packedLight,
                 OverlayTexture.NO_OVERLAY,
                 renderState.outlineColor,
@@ -55,10 +58,10 @@ public class MutantSkeletonCrossbowLayer extends RenderLayer<MutantSkeletonRende
             poseStack.translate(leftHanded ? 0.2 : -0.2, 0.4, -1.8);
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
             poseStack.scale(1.2F, 1.2F, 1.2F);
-            nodeCollector.submitModel(this.model,
+            nodeCollector.submitModel(this.arrowModel,
                     Unit.INSTANCE,
                     poseStack,
-                    this.model.renderType(MutantArrowRenderer.TEXTURE_LOCATION),
+                    this.arrowModel.renderType(MutantArrowRenderer.TEXTURE_LOCATION),
                     packedLight,
                     OverlayTexture.NO_OVERLAY,
                     renderState.outlineColor,

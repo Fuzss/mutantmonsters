@@ -121,20 +121,6 @@ public class Animator {
         modelPart.zRot += z;
     }
 
-    @Deprecated(forRemoval = true)
-    public static void resetAngles(ModelPart... modelParts) {
-        for (ModelPart box : modelParts) {
-            resetAngles(box);
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void resetAngles(ModelPart modelPart) {
-        modelPart.xRot = 0.0F;
-        modelPart.yRot = 0.0F;
-        modelPart.zRot = 0.0F;
-    }
-
     public static void setScale(ModelPart modelPart, float scale) {
         modelPart.xScale = modelPart.yScale = modelPart.zScale = scale;
     }

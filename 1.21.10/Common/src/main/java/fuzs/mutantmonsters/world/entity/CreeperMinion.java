@@ -510,6 +510,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
         valueOutput.putBoolean("Ignited", this.hasIgnited());
         valueOutput.putFloat("ExplosionRadius", this.getExplosionRadius());
         valueOutput.putBoolean("Powered", this.isCharged());
+        valueOutput.putBoolean("dropped_skulls", this.droppedSkulls);
     }
 
     @Override
@@ -519,11 +520,12 @@ public class CreeperMinion extends ShoulderRidingEntity {
         this.setCanExplodeContinuously(valueInput.getBooleanOr("ExplodesContinuously", false));
         this.setDestroyBlocks(valueInput.getBooleanOr("DestroysBlocks", false));
         this.setCanRideOnShoulder(valueInput.getBooleanOr("CanRideOnShoulder", false));
-        this.setCharged(valueInput.getBooleanOr("Powered", false));
-        this.setExplosionRadius(valueInput.getFloatOr("ExplosionRadius", 0.0F));
         if (valueInput.getBooleanOr("Ignited", false)) {
             this.ignite();
         }
+        this.setExplosionRadius(valueInput.getFloatOr("ExplosionRadius", 0.0F));
+        this.setCharged(valueInput.getBooleanOr("Powered", false));
+        this.droppedSkulls = valueInput.getBooleanOr("dropped_skulls", false);
     }
 
     class CreeperMinionFollowOwnerGoal extends FollowOwnerGoal {
