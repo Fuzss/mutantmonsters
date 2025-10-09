@@ -1,2 +1,0 @@
-accessWidener   v2  named
-accessible  method  net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer  getColorForLayer    (Lnet/minecraft/client/resources/model/EquipmentClientInfo$Layer;I)I

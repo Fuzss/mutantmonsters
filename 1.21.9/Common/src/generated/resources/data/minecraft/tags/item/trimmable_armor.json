@@ -1,9 +1,0 @@
-{
-  "remove": [
-    "mutantmonsters:mutant_skeleton_skull",
-    "mutantmonsters:mutant_skeleton_chestplate",
-    "mutantmonsters:mutant_skeleton_leggings",
-    "mutantmonsters:mutant_skeleton_boots"
-  ],
-  "values": []
-}
