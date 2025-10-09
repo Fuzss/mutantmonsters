@@ -230,8 +230,6 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
         this.innerforeleg1.xRot = 0.31415927F;
         this.foreleg2.zRot = 0.1308997F;
         this.innerforeleg2.xRot = 0.31415927F;
-        this.crossbow.setAngles(3.1415927F);
-        this.crossbow.rotateRope();
     }
 
     private void animate(MutantSkeletonRenderState renderState, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
@@ -446,10 +444,6 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
                 this.crossbow.rotateRope();
             }
         }
-    }
-
-    private Spine[] getSpines() {
-        return this.spine;
     }
 
     private void animateMultiShoot(MutantSkeletonRenderState renderState, float facePitch, float faceYaw) {
@@ -739,6 +733,13 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
             }
         }
 
+        public static LayerDefinition createBodyLayer() {
+            MeshDefinition meshDefinition = new MeshDefinition();
+            PartDefinition root = meshDefinition.getRoot();
+            MutantSkeletonModel.Spine.createSpineLayer(root, -1);
+            return LayerDefinition.create(meshDefinition, 128, 128);
+        }
+
         public static void createSpineLayer(PartDefinition root, int index) {
             PartPose partPose = PartPose.ZERO;
             if (index == 0) {
@@ -746,7 +747,8 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
             } else if (index > 0) {
                 partPose = PartPose.offset(0.0F, -5.0F, 0.0F);
             }
-            final boolean skeletonPart = index < 0;
+
+            boolean skeletonPart = index < 0;
             String indexString = skeletonPart ? "" : "" + (index + 1);
             PartDefinition middle = root.addOrReplaceChild("middle" + indexString,
                     CubeListBuilder.create()

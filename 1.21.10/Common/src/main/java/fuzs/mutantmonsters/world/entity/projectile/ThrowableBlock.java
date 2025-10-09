@@ -197,7 +197,7 @@ public class ThrowableBlock extends ThrowableProjectile {
     @Override
     public void tick() {
         if (this.isHeld()) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.setSharedFlag(6, this.hasGlowingTag());
             }
 
@@ -223,7 +223,7 @@ public class ThrowableBlock extends ThrowableProjectile {
                 double offset = 0.6;
                 this.setDeltaMovement(x * offset, y * offset, z * offset);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (!this.level().isClientSide && (!thrower.isAlive() || thrower.isSpectator()
+                if (!this.level().isClientSide() && (!thrower.isAlive() || thrower.isSpectator()
                         || !((LivingEntity) thrower).isHolding(ModItems.ENDERSOUL_HAND_ITEM.value()))) {
                     this.setHeld(false);
                 }
@@ -255,23 +255,23 @@ public class ThrowableBlock extends ThrowableProjectile {
             return InteractionResult.PASS;
         } else if (this.isHeld()) {
             if (this.getOwner() == player) {
-                if (!this.level().isClientSide) {
+                if (!this.level().isClientSide()) {
                     this.setHeld(false);
                     this.throwBlock(player);
                 }
 
                 ItemHelper.hurtAndBreak(itemStack, 1, player, interactionHand);
-                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
             } else {
                 return InteractionResult.PASS;
             }
         } else {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.setHeld(true);
                 this.setOwner(player);
             }
 
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
         }
     }
 
@@ -308,7 +308,7 @@ public class ThrowableBlock extends ThrowableProjectile {
                     entity.hurtServer(serverLevel, damageSource, 4.0F);
                 }
 
-                if (!this.level().isClientSide) {
+                if (!this.level().isClientSide()) {
                     this.level().broadcastEntityEvent(this, EntityEvent.DEATH);
                     this.discard();
                 }

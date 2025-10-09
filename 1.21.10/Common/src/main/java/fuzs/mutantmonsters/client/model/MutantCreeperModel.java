@@ -118,6 +118,7 @@ public class MutantCreeperModel extends EntityModel<MutantCreeperRenderState> {
     @Override
     public void setupAnim(MutantCreeperRenderState renderState) {
         super.setupAnim(renderState);
+        // TODO finish removing this
 //        this.setupInitialAngles();
         this.animate(renderState,
                 renderState.walkAnimationPos,

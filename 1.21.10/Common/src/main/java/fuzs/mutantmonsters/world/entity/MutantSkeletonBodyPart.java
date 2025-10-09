@@ -149,7 +149,7 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
             ++this.despawnTimer;
         }
 
-        if (!this.level().isClientSide && this.despawnTimer >= this.getMaxAge()) {
+        if (!this.level().isClientSide() && this.despawnTimer >= this.getMaxAge()) {
             this.discard();
         }
     }
@@ -169,8 +169,9 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
                 }
             }
         }
+
         this.discard();
-        return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+        return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
     }
 
     private boolean canHarm(Entity entity) {

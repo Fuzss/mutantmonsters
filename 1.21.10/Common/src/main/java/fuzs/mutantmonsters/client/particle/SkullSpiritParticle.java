@@ -1,35 +1,37 @@
 package fuzs.mutantmonsters.client.particle;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.RandomSource;
 
-public class SkullSpiritParticle extends TextureSheetParticle {
+public class SkullSpiritParticle extends SingleQuadParticle {
 
-    private SkullSpiritParticle(ClientLevel clientLevel, double x, double y, double z, double xx, double yy, double zz) {
-        super(clientLevel, x, y, z, 0.0, 0.0, 0.0);
+    protected SkullSpiritParticle(ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, TextureAtlasSprite sprite) {
+        super(clientLevel, x, y, z, 0.0, 0.0, 0.0, sprite);
         this.xd *= 0.1;
         this.yd *= 0.1;
         this.zd *= 0.1;
-        this.xd += xx;
-        this.yd += yy;
-        this.zd += zz;
-        float color = 1.0F - (float) (Math.random() * 0.2);
+        this.xd += xSpeed;
+        this.yd += ySpeed;
+        this.zd += zSpeed;
+        float color = 1.0F - this.random.nextFloat() * 0.2F;
         this.setColor(color, color, color);
         float scale = 0.4F + this.random.nextFloat() * 0.6F;
         this.quadSize *= scale;
-        this.lifetime = (int) (8.0 / (Math.random() * 0.8 + 0.2));
-        this.lifetime = (int) ((float) this.lifetime * scale);
+        this.lifetime = (int) (8.0F / (this.random.nextFloat() * 0.8F + 0.2F) * scale);
         this.hasPhysics = false;
     }
 
     @Override
-    public float getQuadSize(float partialTicks) {
-        float timeScale = ((float) this.age + partialTicks) / (float) this.lifetime * 32.0F;
-        timeScale = Mth.clamp(timeScale, 0.0F, 1.0F);
-        return this.quadSize * timeScale;
+    public float getQuadSize(float partialTick) {
+        float scale = (this.age + partialTick) / this.lifetime * 32.0F;
+        return this.quadSize * Mth.clamp(scale, 0.0F, 1.0F);
     }
 
     @Override
@@ -54,29 +56,27 @@ public class SkullSpiritParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    protected Layer getLayer() {
+        return Layer.OPAQUE;
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
+        private final SpriteSet sprites;
 
-        public Factory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
+        public Factory(SpriteSet sprites) {
+            this.sprites = sprites;
         }
 
         @Override
-        @Nullable
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SkullSpiritParticle skullSpiritParticle = new SkullSpiritParticle(clientLevel,
+        public Particle createParticle(SimpleParticleType typeIn, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource randomSource) {
+            return new SkullSpiritParticle(clientLevel,
                     x,
                     y,
                     z,
                     xSpeed,
                     ySpeed,
-                    zSpeed);
-            skullSpiritParticle.pickSprite(this.spriteSet);
-            return skullSpiritParticle;
+                    zSpeed,
+                    this.sprites.get(randomSource));
         }
     }
 }

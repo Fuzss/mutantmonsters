@@ -1,4 +1,4 @@
-package fuzs.mutantmonsters.client.init;
+package fuzs.mutantmonsters.client.model.geom;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.puzzleslib.api.client.init.v1.ModelLayerFactory;
@@ -7,7 +7,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
-public class ModelLayerLocations {
+public class ModModelLayers {
     static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);
     public static final ModelLayerLocation MUTANT_SKELETON_SKULL = REGISTRY.registerModelLayer("mutant_skeleton_skull");
     public static final ModelLayerLocation CREEPER_MINION_EGG = REGISTRY.registerModelLayer("creeper_minion_egg");
@@ -39,7 +39,8 @@ public class ModelLayerLocations {
             "mutant_skeleton_part",
             "spine");
     public static final ModelLayerLocation MUTANT_SNOW_GOLEM = REGISTRY.registerModelLayer("mutant_snow_golem");
-    public static final ModelLayerLocation MUTANT_SNOW_GOLEM_HEAD = REGISTRY.registerModelLayer("mutant_snow_golem_head");
+    public static final ModelLayerLocation MUTANT_SNOW_GOLEM_HEAD = REGISTRY.registerModelLayer("mutant_snow_golem",
+            "head");
     public static final ModelLayerLocation MUTANT_ZOMBIE = REGISTRY.registerModelLayer("mutant_zombie");
     public static final ModelLayerLocation SPIDER_PIG = REGISTRY.registerModelLayer("spider_pig");
     public static final ModelLayerLocation SPIDER_PIG_BABY = REGISTRY.registerModelLayer("spider_pig_baby");

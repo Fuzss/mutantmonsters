@@ -69,7 +69,7 @@ public class SkullSpirit extends Entity {
     }
 
     public void setTarget(@Nullable LivingEntity livingEntity) {
-        this.entityData.set(DATA_TARGETUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::new));
+        this.entityData.set(DATA_TARGETUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::of));
     }
 
     public void setTargetReference(@Nullable EntityReference<LivingEntity> entityReference) {
@@ -93,7 +93,7 @@ public class SkullSpirit extends Entity {
     public void tick() {
         if (this.getTarget() instanceof Mob target && target.isAlive()) {
             if (this.isAttached()) {
-                if (!this.level().isClientSide) {
+                if (!this.level().isClientSide()) {
                     target.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.1F,
                             target.getDeltaMovement().y,
                             (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
@@ -167,7 +167,8 @@ public class SkullSpirit extends Entity {
                     this.setDeltaMovement(this.getDeltaMovement().add(x / d * 0.2, y / d * 0.2, z / d * 0.2));
                     this.move(MoverType.SELF, this.getDeltaMovement());
                 }
-                if (!this.level().isClientSide && this.distanceToSqr(target) < 1.0) {
+
+                if (!this.level().isClientSide() && this.distanceToSqr(target) < 1.0) {
                     this.setAttached(true);
                 }
 

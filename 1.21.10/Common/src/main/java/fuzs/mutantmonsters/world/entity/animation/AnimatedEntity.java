@@ -37,7 +37,7 @@ public interface AnimatedEntity extends AdditionalSpawnDataEntity {
     }
 
     static <T extends Entity & AnimatedEntity> void sendAnimationPacket(T entity, EntityAnimation animation) {
-        if (!entity.level().isClientSide) {
+        if (!entity.level().isClientSide()) {
             entity.setAnimation(animation);
             entity.setAnimationTick(0);
             PlayerSet playerSet = PlayerSet.nearEntity(entity);

@@ -4,18 +4,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.client.renderer.entity.state.ThrowableBlockRenderState;
 import fuzs.mutantmonsters.world.entity.projectile.ThrowableBlock;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock, ThrowableBlockRenderState> {
-    private final BlockRenderDispatcher blockRenderer;
 
     public ThrowableBlockRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.blockRenderer = context.getBlockRenderDispatcher();
         this.shadowRadius = 0.6F;
     }
 
@@ -33,8 +31,8 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock, Throw
     }
 
     @Override
-    public void render(ThrowableBlockRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        super.render(renderState, poseStack, bufferSource, packedLight);
+    public void submit(ThrowableBlockRenderState renderState, PoseStack poseStack, SubmitNodeCollector nodeCollector, CameraRenderState cameraRenderState) {
+        super.submit(renderState, poseStack, nodeCollector, cameraRenderState);
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5, 0.0);
         if (renderState.isLarge) {
@@ -48,11 +46,11 @@ public class ThrowableBlockRenderer extends EntityRenderer<ThrowableBlock, Throw
         poseStack.mulPose(Axis.ZN.rotationDegrees(renderState.ageInTicks * 12.0F));
         poseStack.translate(-0.5F, -0.5F, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-        this.blockRenderer.renderSingleBlock(renderState.blockState,
-                poseStack,
-                bufferSource,
-                packedLight,
-                OverlayTexture.NO_OVERLAY);
+        nodeCollector.submitBlock(poseStack,
+                renderState.blockState,
+                renderState.lightCoords,
+                OverlayTexture.NO_OVERLAY,
+                renderState.outlineColor);
         poseStack.popPose();
     }
 }

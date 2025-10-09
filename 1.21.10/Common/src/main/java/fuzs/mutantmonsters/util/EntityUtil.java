@@ -1,6 +1,6 @@
 package fuzs.mutantmonsters.util;
 
-import com.google.common.collect.ImmutableMap;
+import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.network.ClientboundMutantLevelParticlesMessage;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,29 +26,17 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.Optional;
 
 public final class EntityUtil {
-    private static final Map<EntityType<?>, Item> VANILLA_SKULLS_MAP = ImmutableMap.of(EntityType.CREEPER,
-            Items.CREEPER_HEAD,
-            EntityType.ZOMBIE,
-            Items.ZOMBIE_HEAD,
-            EntityType.SKELETON,
-            Items.SKELETON_SKULL,
-            EntityType.WITHER_SKELETON,
-            Items.WITHER_SKELETON_SKULL,
-            EntityType.ENDER_DRAGON,
-            Items.DRAGON_HEAD);
 
     private EntityUtil() {
-
+        // NO-OP
     }
 
     public static float getHeadAngle(LivingEntity livingEntity, double x, double z) {
@@ -189,8 +178,14 @@ public final class EntityUtil {
         }
     }
 
-    public static ItemStack getSkullDrop(EntityType<?> entityType) {
-        if (!VANILLA_SKULLS_MAP.containsKey(entityType)) return ItemStack.EMPTY;
-        return new ItemStack(VANILLA_SKULLS_MAP.get(entityType));
+    public static Optional<Boolean> extractCreeperMinion(CompoundTag tag) {
+        if (!tag.isEmpty()) {
+            EntityType<?> entityType = tag.read("id", EntityType.CODEC).orElse(null);
+            if (entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()) {
+                return tag.getBoolean("Powered");
+            }
+        }
+
+        return Optional.empty();
     }
 }

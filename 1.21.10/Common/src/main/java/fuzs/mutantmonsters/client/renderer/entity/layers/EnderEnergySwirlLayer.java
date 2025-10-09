@@ -1,11 +1,11 @@
 package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.EndersoulCloneRenderer;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -19,15 +19,23 @@ public abstract class EnderEnergySwirlLayer<S extends LivingEntityRenderState, M
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, S renderState, float yRot, float xRot) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, S renderState, float yRot, float xRot) {
         poseStack.pushPose();
         this.scale(poseStack, this.getScale(renderState));
-        this.getModel().setupAnim(renderState);
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(ModRenderType.energySwirl(EndersoulCloneRenderer.TEXTURE_LOCATION,
+        RenderType renderType = ModRenderType.energySwirl(EndersoulCloneRenderer.TEXTURE_LOCATION,
                 renderState.ageInTicks * 0.008F,
-                renderState.ageInTicks * 0.008F));
+                renderState.ageInTicks * 0.008F);
         int color = ARGB.colorFromFloat(this.getAlpha(renderState), 0.9F, 0.3F, 1.0F);
-        this.getModel().renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+        nodeCollector.submitModel(this.getModel(),
+                renderState,
+                poseStack,
+                renderType,
+                packedLight,
+                OverlayTexture.NO_OVERLAY,
+                color,
+                null,
+                renderState.outlineColor,
+                null);
         poseStack.popPose();
     }
 

@@ -1,8 +1,8 @@
 package fuzs.mutantmonsters.client;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.*;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
 import fuzs.mutantmonsters.client.renderer.ModRenderType;
@@ -24,9 +24,6 @@ import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 
 public class MutantMonstersClient implements ClientModConstructor {
@@ -89,58 +86,47 @@ public class MutantMonstersClient implements ClientModConstructor {
 
     @Override
     public void onRegisterLayerDefinitions(LayerDefinitionsContext context) {
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SKELETON_SKULL,
-                ModelLayerLocations::createSkullModelLayer);
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_EGG,
-                () -> CreeperMinionEggModel.createBodyLayer(new CubeDeformation(0.0F)));
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_EGG_ARMOR,
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SKELETON_SKULL, ModModelLayers::createSkullModelLayer);
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION_EGG,
+                () -> CreeperMinionEggModel.createBodyLayer(CubeDeformation.NONE));
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION_EGG_ARMOR,
                 () -> CreeperMinionEggModel.createBodyLayer(new CubeDeformation(1.0F)));
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION,
-                () -> CreeperModel.createBodyLayer(new CubeDeformation(0.0F))
-                        .apply(CreeperMinionModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_ARMOR,
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION,
+                () -> CreeperModel.createBodyLayer(CubeDeformation.NONE).apply(CreeperMinionModel.BABY_TRANSFORMER));
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION_ARMOR,
                 () -> CreeperModel.createBodyLayer(new CubeDeformation(2.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_SHOULDER,
-                () -> CreeperModel.createBodyLayer(new CubeDeformation(0.0F))
-                        .apply(CreeperMinionModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.CREEPER_MINION_SHOULDER_ARMOR,
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION_SHOULDER,
+                () -> CreeperModel.createBodyLayer(CubeDeformation.NONE).apply(CreeperMinionModel.BABY_TRANSFORMER));
+        context.registerLayerDefinition(ModModelLayers.CREEPER_MINION_SHOULDER_ARMOR,
                 () -> CreeperModel.createBodyLayer(new CubeDeformation(2.0F))
                         .apply(CreeperMinionModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_CLONE, EndermanModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_FRAGMENT,
-                EndersoulFragmentModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_HAND_LEFT,
+        context.registerLayerDefinition(ModModelLayers.ENDERSOUL_CLONE, EndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.ENDERSOUL_FRAGMENT, EndersoulFragmentModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.ENDERSOUL_HAND_LEFT,
                 () -> EndersoulHandModel.createBodyLayer(false));
-        context.registerLayerDefinition(ModelLayerLocations.ENDERSOUL_HAND_RIGHT,
+        context.registerLayerDefinition(ModModelLayers.ENDERSOUL_HAND_RIGHT,
                 () -> EndersoulHandModel.createBodyLayer(true));
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_ARROW, MutantArrowModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_CREEPER,
-                () -> MutantCreeperModel.createBodyLayer(new CubeDeformation(0.0F)));
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_CREEPER_ARMOR,
+        context.registerLayerDefinition(ModModelLayers.MUTANT_ARROW, MutantArrowModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_CREEPER,
+                () -> MutantCreeperModel.createBodyLayer(CubeDeformation.NONE));
+        context.registerLayerDefinition(ModModelLayers.MUTANT_CREEPER_ARMOR,
                 () -> MutantCreeperModel.createBodyLayer(new CubeDeformation(2.0F)));
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_CROSSBOW, MutantCrossbowModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_ENDERMAN, MutantEndermanModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.ENDERMAN_CLONE, EndermanModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SKELETON, MutantSkeletonModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SKELETON_PART,
-                MutantSkeletonPartModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SKELETON_PART_SPINE, () -> {
-            MeshDefinition mesh = new MeshDefinition();
-            PartDefinition root = mesh.getRoot();
-            MutantSkeletonModel.Spine.createSpineLayer(root, -1);
-            return LayerDefinition.create(mesh, 128, 128);
-        });
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SNOW_GOLEM,
-                () -> MutantSnowGolemModel.createBodyLayer(128, 64));
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_SNOW_GOLEM_HEAD,
-                () -> MutantSnowGolemModel.createBodyLayer(64, 32));
-        context.registerLayerDefinition(ModelLayerLocations.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG, () -> SpiderPigModel.createBodyLayer());
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY,
+        context.registerLayerDefinition(ModModelLayers.MUTANT_CROSSBOW, MutantCrossbowModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_ENDERMAN, MutantEndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.ENDERMAN_CLONE, EndermanModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SKELETON, MutantSkeletonModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SKELETON_PART, MutantSkeletonPartModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SKELETON_PART_SPINE,
+                MutantSkeletonModel.Spine::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SNOW_GOLEM, MutantSnowGolemModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_SNOW_GOLEM_HEAD, MutantSnowGolemModel::createHeadLayer);
+        context.registerLayerDefinition(ModModelLayers.MUTANT_ZOMBIE, MutantZombieModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.SPIDER_PIG, SpiderPigModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.SPIDER_PIG_BABY,
                 () -> SpiderPigModel.createBodyLayer().apply(SpiderPigModel.BABY_TRANSFORMER));
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_SADDLE, () -> SpiderPigModel.createBodyLayer());
-        context.registerLayerDefinition(ModelLayerLocations.SPIDER_PIG_BABY_SADDLE,
+        context.registerLayerDefinition(ModModelLayers.SPIDER_PIG_SADDLE, SpiderPigModel::createBodyLayer);
+        context.registerLayerDefinition(ModModelLayers.SPIDER_PIG_BABY_SADDLE,
                 () -> SpiderPigModel.createBodyLayer().apply(SpiderPigModel.BABY_TRANSFORMER));
     }
 
@@ -149,7 +135,7 @@ public class MutantMonstersClient implements ClientModConstructor {
         context.registerSkullRenderer(ModRegistry.MUTANT_SKELETON_SKULL_TYPE,
                 MutantSkeletonRenderer.TEXTURE_LOCATION,
                 (EntityModelSet entityModelSet) -> {
-                    return new SkullModel(entityModelSet.bakeLayer(ModelLayerLocations.MUTANT_SKELETON_SKULL));
+                    return new SkullModel(entityModelSet.bakeLayer(ModModelLayers.MUTANT_SKELETON_SKULL));
                 });
     }
 

@@ -113,7 +113,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     }
 
     public void setOwner(@Nullable LivingEntity livingEntity) {
-        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::new));
+        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::of));
     }
 
     public void setOwnerReference(@Nullable EntityReference<LivingEntity> entityReference) {
@@ -155,7 +155,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide && this.getSwimJump()) {
+        if (this.level().isClientSide() && this.getSwimJump()) {
             this.level().broadcastEntityEvent(this, (byte) 36);
             this.level().broadcastEntityEvent(this, (byte) 37);
         }
@@ -398,12 +398,12 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         } else if (itemInHand.getItem() == Items.SNOWBALL) {
             return InteractionResult.PASS;
         } else if (itemInHand.isEmpty() && this.getOwnerReference() == null) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.setOwner(player);
                 this.level().broadcastEntityEvent(this, (byte) 18);
             }
 
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
         } else {
             return InteractionResult.PASS;
         }

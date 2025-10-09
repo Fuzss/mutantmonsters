@@ -80,7 +80,6 @@ public class Animator {
             float animTick = this.renderState.animationTime;
             if (animTick >= this.prevTempTick && animTick < this.tempTick) {
                 if (stationary) {
-
                     for (ModelPart modelPart : this.prevTransformMap.keySet()) {
                         Transform transform = this.prevTransformMap.get(modelPart);
                         transform.rotate(modelPart, 1.0F);
@@ -90,7 +89,6 @@ public class Animator {
                     float tick = (animTick - this.prevTempTick) / (float) (this.tempTick - this.prevTempTick);
                     float inc = Mth.sin(tick * 3.1415927F / 2.0F);
                     float dec = 1.0F - inc;
-
                     ModelPart model;
                     Transform transform;
                     for (ModelPart modelPart : this.prevTransformMap.keySet()) {
@@ -123,12 +121,14 @@ public class Animator {
         modelPart.zRot += z;
     }
 
+    @Deprecated(forRemoval = true)
     public static void resetAngles(ModelPart... modelParts) {
         for (ModelPart box : modelParts) {
             resetAngles(box);
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static void resetAngles(ModelPart modelPart) {
         modelPart.xRot = 0.0F;
         modelPart.yRot = 0.0F;

@@ -1,21 +1,26 @@
 package fuzs.mutantmonsters.client.particle;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
-public class EndersoulParticle extends TextureSheetParticle {
+public class EndersoulParticle extends SingleQuadParticle {
 
-    private EndersoulParticle(ClientLevel clientLevel, double x, double y, double z, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
-        super(clientLevel, x, y, z, 0.0, 0.0, 0.0);
+    protected EndersoulParticle(ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, TextureAtlasSprite sprite) {
+        super(clientLevel, x, y, z, 0.0, 0.0, 0.0, sprite);
         this.lifetime = (int) (Math.random() * 15.0) + 10;
         this.xd *= 0.1;
         this.yd *= 0.1;
         this.zd *= 0.1;
-        this.xd += xSpeedIn;
-        this.yd += ySpeedIn;
-        this.zd += zSpeedIn;
+        this.xd += xSpeed;
+        this.yd += ySpeed;
+        this.zd += zSpeed;
         this.quadSize = 0.1F * (this.random.nextFloat() * 0.4F + 2.4F);
         float color = this.random.nextFloat() * 0.6F + 0.4F;
         this.rCol = color * 0.9F;
@@ -25,8 +30,8 @@ public class EndersoulParticle extends TextureSheetParticle {
     }
 
     @Override
-    public float getQuadSize(float partialTicks) {
-        float scale = 1.0F - ((float) this.age + partialTicks) / (float) this.lifetime;
+    public float getQuadSize(float partialTick) {
+        float scale = 1.0F - ((float) this.age + partialTick) / (float) this.lifetime;
         scale *= scale;
         scale = 1.0F - scale;
         return this.quadSize * scale;
@@ -59,23 +64,20 @@ public class EndersoulParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    protected Layer getLayer() {
+        return Layer.OPAQUE;
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
+        private final SpriteSet sprites;
 
-        public Factory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
+        public Factory(SpriteSet sprites) {
+            this.sprites = sprites;
         }
 
         @Override
-        @Nullable
-        public Particle createParticle(SimpleParticleType particleType, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            EndersoulParticle endersoulParticle = new EndersoulParticle(clientLevel, x, y, z, xSpeed, ySpeed, zSpeed);
-            endersoulParticle.pickSprite(this.spriteSet);
-            return endersoulParticle;
+        public Particle createParticle(SimpleParticleType particleType, ClientLevel clientLevel, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource randomSource) {
+            return new EndersoulParticle(clientLevel, x, y, z, xSpeed, ySpeed, zSpeed, this.sprites.get(randomSource));
         }
     }
 }

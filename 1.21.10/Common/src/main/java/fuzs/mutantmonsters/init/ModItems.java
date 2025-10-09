@@ -25,30 +25,30 @@ public class ModItems {
     public static final ArmorMaterial MUTANT_SKELETON_HELMET_ARMOR_MATERIAL = ArmorMaterialBuilder.copyOf(
             MUTANT_SKELETON_ARMOR_MATERIAL).setNoAssetId().build();
 
-    public static final Holder.Reference<Item> CREEPER_MINION_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> CREEPER_MINION_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.CREEPER_MINION_ENTITY_TYPE,
             0x0DA70B);
-    public static final Holder.Reference<Item> MUTANT_CREEPER_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> MUTANT_CREEPER_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE,
             5349438,
             11013646);
-    public static final Holder.Reference<Item> MUTANT_ENDERMAN_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> MUTANT_ENDERMAN_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE,
             1447446,
             8860812);
-    public static final Holder.Reference<Item> MUTANT_SKELETON_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> MUTANT_SKELETON_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.MUTANT_SKELETON_ENTITY_TYPE,
             12698049,
             6310217);
-    public static final Holder.Reference<Item> MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.MUTANT_SNOW_GOLEM_ENTITY_TYPE,
             15073279,
             16753434);
-    public static final Holder.Reference<Item> MUTANT_ZOMBIE_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> MUTANT_ZOMBIE_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE,
             7969893,
             44975);
-    public static final Holder.Reference<Item> SPIDER_PIG_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerSpawnEggItem(
+    public static final Holder.Reference<Item> SPIDER_PIG_SPAWN_EGG_ITEM = ModRegistry.REGISTRIES.registerLegacySpawnEggItem(
             ModEntityTypes.SPIDER_PIG_ENTITY_TYPE,
             3419431,
             15771042);

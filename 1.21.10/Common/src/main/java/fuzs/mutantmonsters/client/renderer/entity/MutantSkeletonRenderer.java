@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantSkeletonModel;
 import fuzs.mutantmonsters.client.renderer.entity.layers.MutantSkeletonCrossbowLayer;
 import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
@@ -16,8 +16,8 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
         super(context,
-                new MutantSkeletonModel(context.bakeLayer(ModelLayerLocations.MUTANT_SKELETON),
-                        context.bakeLayer(ModelLayerLocations.MUTANT_CROSSBOW)),
+                new MutantSkeletonModel(context.bakeLayer(ModModelLayers.MUTANT_SKELETON),
+                        context.bakeLayer(ModModelLayers.MUTANT_CROSSBOW)),
                 0.6F);
         this.addLayer(new MutantSkeletonCrossbowLayer(this, context.getModelSet()));
     }

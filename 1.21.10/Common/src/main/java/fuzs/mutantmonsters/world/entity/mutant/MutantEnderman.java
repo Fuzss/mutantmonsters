@@ -332,7 +332,8 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
             this.refreshDimensions();
         }
 
-        if (DATA_TELEPORT_POSITION.equals(key) && this.getTeleportPosition().isPresent() && this.level().isClientSide) {
+        if (DATA_TELEPORT_POSITION.equals(key) && this.getTeleportPosition().isPresent() && this.level()
+                .isClientSide()) {
             this.animation = TELEPORT_ANIMATION;
             this.animationTick = 0;
             this.spawnTeleportParticles();
@@ -459,7 +460,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
 
         this.updateTargetTick();
         this.updateScreamEntities();
-        if (this.level().isClientSide && !this.isClone()) {
+        if (this.level().isClientSide() && !this.isClone()) {
             for (int i = 0; i < 3; ++i) {
                 this.level()
                         .addParticle(ParticleTypes.PORTAL,
@@ -854,7 +855,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     public void die(DamageSource damageSource) {
         super.die(damageSource);
         this.capturedEntities = null;
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.deathCause = damageSource;
             for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
                 if (goal.isRunning()) {
@@ -911,7 +912,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
                         .getEntities(this, this.getBoundingBox().inflate(10.0, 8.0, 10.0), ENDER_TARGETS);
             }
 
-            if (!this.level().isClientSide && this.random.nextInt(3) != 0) {
+            if (!this.level().isClientSide() && this.random.nextInt(3) != 0) {
                 EndersoulFragment orb = new EndersoulFragment(this.level(), this);
                 orb.setPos(this.getX(), this.getY() + 3.8, this.getZ());
                 orb.setDeltaMovement((this.random.nextDouble() - 0.5) * 1.5,

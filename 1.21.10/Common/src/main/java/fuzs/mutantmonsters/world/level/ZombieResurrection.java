@@ -59,22 +59,23 @@ public class ZombieResurrection extends BlockPos {
                 return -1;
             }
 
-            if ((!checkDay || world.getFluidState(startPos).is(FluidTags.LAVA)) &&
-                    !world.getFluidState(startPos).isEmpty()) {
+            if ((!checkDay || world.getFluidState(startPos).is(FluidTags.LAVA)) && !world.getFluidState(startPos)
+                    .isEmpty()) {
                 break;
             }
 
             if (world.isEmptyBlock(startPos)) {
                 --i;
             } else {
-                if (!world.isEmptyBlock(startPos) && world.isEmptyBlock(posUp) &&
-                        blockState.getCollisionShape(world, startPos).isEmpty()) {
+                if (!world.isEmptyBlock(startPos) && world.isEmptyBlock(posUp) && blockState.getCollisionShape(world,
+                        startPos).isEmpty()) {
                     --i;
                     break;
                 }
 
-                if (world.isEmptyBlock(startPos) || world.isEmptyBlock(posUp) ||
-                        world.getBlockState(posUp).getCollisionShape(world, posUp).isEmpty()) {
+                if (world.isEmptyBlock(startPos) || world.isEmptyBlock(posUp) || world.getBlockState(posUp)
+                        .getCollisionShape(world, posUp)
+                        .isEmpty()) {
                     break;
                 }
 
@@ -94,8 +95,8 @@ public class ZombieResurrection extends BlockPos {
     }
 
     public static EntityType<? extends Zombie> getZombieByLocation(Level level, BlockPos pos) {
-        if ((level.getBiome(pos).is(BiomeTags.IS_OCEAN) || level.getBiome(pos).is(BiomeTags.IS_RIVER)) &&
-                level.isWaterAt(pos)) {
+        if ((level.getBiome(pos).is(BiomeTags.IS_OCEAN) || level.getBiome(pos).is(BiomeTags.IS_RIVER))
+                && level.isWaterAt(pos)) {
             return EntityType.DROWNED;
         } else if (level.isBrightOutside() && level.canSeeSky(pos)) {
             return EntityType.HUSK;
@@ -137,7 +138,7 @@ public class ZombieResurrection extends BlockPos {
                         zombieEntity.getMaxHealth() * (0.6F + 0.4F * zombieEntity.getRandom().nextFloat()));
                 zombieEntity.playAmbientSound();
                 level.levelEvent(2001, abovePos, Block.getId(level.getBlockState(this)));
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     zombieEntity.snapTo(abovePos, mutantZombie.getYRot(), 0.0F);
                     zombieEntity.goalSelector.addGoal(0, new TrackSummonerGoal(zombieEntity, mutantZombie));
                     zombieEntity.goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(zombieEntity, 1.0));

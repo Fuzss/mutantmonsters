@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
 import fuzs.mutantmonsters.client.renderer.entity.layers.MutantSnowGolemHeldBlockLayer;
 import fuzs.mutantmonsters.client.renderer.entity.layers.MutantSnowGolemJackOLanternLayer;
@@ -17,7 +17,7 @@ public class MutantSnowGolemRenderer extends MobRenderer<MutantSnowGolem, Mutant
             "textures/entity/mutant_snow_golem/mutant_snow_golem.png");
 
     public MutantSnowGolemRenderer(EntityRendererProvider.Context context) {
-        super(context, new MutantSnowGolemModel(context.bakeLayer(ModelLayerLocations.MUTANT_SNOW_GOLEM)), 0.7F);
+        super(context, new MutantSnowGolemModel(context.bakeLayer(ModModelLayers.MUTANT_SNOW_GOLEM)), 0.7F);
         this.addLayer(new MutantSnowGolemJackOLanternLayer(this, context.getModelSet()));
         this.addLayer(new MutantSnowGolemHeldBlockLayer(this, context.getBlockRenderDispatcher()));
     }

@@ -1,6 +1,6 @@
 {
   "values": [
-    "mutantmonsters:spider_pig",
-    "#mutantmonsters:mutants"
+    "#mutantmonsters:mutants",
+    "mutantmonsters:spider_pig"
   ]
 }

@@ -1,13 +1,12 @@
 package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.entity.MutantEndermanRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -22,13 +21,21 @@ public class MutantEndermanEyesLayer extends RenderLayer<MutantEndermanRenderSta
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
         if (!renderState.isClone) {
-            VertexConsumer vertexConsumer = bufferSource.getBuffer(EYES_RENDER_TYPE);
             float alpha =
                     renderState.deathTime > 80.0F ? 1.0F - MutantEndermanRenderer.getDeathProgress(renderState) : 1.0F;
             int color = ARGB.colorFromFloat(alpha, 1.0F, 1.0F, 1.0F);
-            this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY, color);
+            nodeCollector.submitModel(this.getParentModel(),
+                    renderState,
+                    poseStack,
+                    EYES_RENDER_TYPE,
+                    0xF00000,
+                    OverlayTexture.NO_OVERLAY,
+                    color,
+                    null,
+                    renderState.outlineColor,
+                    null);
         }
     }
 }

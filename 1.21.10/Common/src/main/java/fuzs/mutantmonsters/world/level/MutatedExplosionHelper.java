@@ -6,10 +6,8 @@ import fuzs.mutantmonsters.world.entity.SkullSpirit;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,10 +58,7 @@ public class MutatedExplosionHelper {
                         entity.getZ(),
                         radius,
                         fire,
-                        explosionInteraction,
-                        ParticleTypes.EXPLOSION,
-                        ParticleTypes.EXPLOSION_EMITTER,
-                        SoundEvents.GENERIC_EXPLODE);
+                        explosionInteraction);
     }
 
     public static class MutatedExplosionDamageCalculator extends ExplosionDamageCalculator {

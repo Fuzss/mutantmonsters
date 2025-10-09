@@ -15,19 +15,31 @@ public class ModEntityTypes {
             () -> EntityType.Builder.of(CreeperMinion::new, MobCategory.MISC).sized(0.3F, 0.85F));
     public static final Holder.Reference<EntityType<MutantCreeper>> MUTANT_CREEPER_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "mutant_creeper",
-            () -> EntityType.Builder.of(MutantCreeper::new, MobCategory.MONSTER).sized(1.99F, 2.8F).eyeHeight(2.6F));
+            () -> EntityType.Builder.of(MutantCreeper::new, MobCategory.MONSTER)
+                    .sized(1.99F, 2.8F)
+                    .eyeHeight(2.6F)
+                    .notInPeaceful());
     public static final Holder.Reference<EntityType<MutantEnderman>> MUTANT_ENDERMAN_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "mutant_enderman",
-            () -> EntityType.Builder.of(MutantEnderman::new, MobCategory.MONSTER).sized(1.2F, 4.2F).eyeHeight(3.9F));
+            () -> EntityType.Builder.of(MutantEnderman::new, MobCategory.MONSTER)
+                    .sized(1.2F, 4.2F)
+                    .eyeHeight(3.9F)
+                    .notInPeaceful());
     public static final Holder.Reference<EntityType<MutantSkeleton>> MUTANT_SKELETON_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "mutant_skeleton",
-            () -> EntityType.Builder.of(MutantSkeleton::new, MobCategory.MONSTER).sized(1.2F, 3.6F).eyeHeight(3.25F));
+            () -> EntityType.Builder.of(MutantSkeleton::new, MobCategory.MONSTER)
+                    .sized(1.2F, 3.6F)
+                    .eyeHeight(3.25F)
+                    .notInPeaceful());
     public static final Holder.Reference<EntityType<MutantSnowGolem>> MUTANT_SNOW_GOLEM_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "mutant_snow_golem",
             () -> EntityType.Builder.of(MutantSnowGolem::new, MobCategory.MISC).sized(1.15F, 2.3F).eyeHeight(2.0F));
     public static final Holder.Reference<EntityType<MutantZombie>> MUTANT_ZOMBIE_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "mutant_zombie",
-            () -> EntityType.Builder.of(MutantZombie::new, MobCategory.MONSTER).sized(1.8F, 3.2F).eyeHeight(2.8F));
+            () -> EntityType.Builder.of(MutantZombie::new, MobCategory.MONSTER)
+                    .sized(1.8F, 3.2F)
+                    .eyeHeight(2.8F)
+                    .notInPeaceful());
     public static final Holder.Reference<EntityType<SpiderPig>> SPIDER_PIG_ENTITY_TYPE = ModRegistry.REGISTRIES.registerEntityType(
             "spider_pig",
             () -> EntityType.Builder.of(SpiderPig::new, MobCategory.CREATURE).sized(1.4F, 0.9F).eyeHeight(0.675F));

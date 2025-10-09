@@ -2,7 +2,6 @@ package fuzs.mutantmonsters.handler;
 
 import fuzs.mutantmonsters.init.ModTags;
 import fuzs.mutantmonsters.util.EntityUtil;
-import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import fuzs.mutantmonsters.world.entity.mutant.SpiderPig;
@@ -14,7 +13,6 @@ import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,17 +37,16 @@ public class EntityEventsHandler {
         if (entity instanceof PathfinderMob creature) {
             if (EntityUtil.isFeline(creature)) {
                 creature.goalSelector.addGoal(2,
-                        new AvoidEntityGoal<>(creature, MutantCreeper.class, 16.0F, 1.33, 1.33)
-                );
+                        new AvoidEntityGoal<>(creature, MutantCreeper.class, 16.0F, 1.33, 1.33));
             }
 
             if (creature.getType() == EntityType.PIG) {
                 creature.goalSelector.addGoal(2,
                         new AvoidEntityGoal<>(creature, Player.class, 10.0F, 1.25, 1.25, livingEntity -> {
-                            return livingEntity instanceof Player player && (PIG_POISON_INGREDIENT.test(
-                                    player.getMainHandItem()) || PIG_POISON_INGREDIENT.test(player.getOffhandItem()));
-                        })
-                );
+                            return livingEntity instanceof Player player && (
+                                    PIG_POISON_INGREDIENT.test(player.getMainHandItem()) || PIG_POISON_INGREDIENT.test(
+                                            player.getOffhandItem()));
+                        }));
             }
 
             if (creature.getType() == EntityType.VILLAGER) {
@@ -73,7 +70,7 @@ public class EntityEventsHandler {
                 }
 
                 pig.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 600));
-                return EventResultHolder.interrupt(InteractionResultHelper.sidedSuccess(level.isClientSide));
+                return EventResultHolder.interrupt(InteractionResultHelper.sidedSuccess(level.isClientSide()));
             }
         }
         return EventResultHolder.pass();
@@ -89,7 +86,8 @@ public class EntityEventsHandler {
                 }
 
                 ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
-                if (!itemStack.has(DataComponents.DAMAGE_RESISTANT) || !itemStack.get(DataComponents.DAMAGE_RESISTANT).isResistantTo(damageSource)) {
+                if (!itemStack.has(DataComponents.DAMAGE_RESISTANT) || !itemStack.get(DataComponents.DAMAGE_RESISTANT)
+                        .isResistantTo(damageSource)) {
                     ItemHelper.hurtAndBreak(itemStack, (int) damage, entity, EquipmentSlot.HEAD);
                 }
             }
@@ -98,18 +96,11 @@ public class EntityEventsHandler {
     }
 
     public static EventResult onLivingDrops(LivingEntity entity, DamageSource damageSource, Collection<ItemEntity> itemDrops, boolean recentlyHit) {
-        Entity attacker = damageSource.getEntity();
-        if (entity.getType().is(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG) && attacker instanceof SpiderPig) {
+        if (damageSource.getEntity() instanceof SpiderPig && entity.getType()
+                .is(ModTags.SPIDER_PIG_TARGETS_ENTITY_TYPE_TAG)) {
             return EventResult.INTERRUPT;
-        } else if ((attacker instanceof MutantCreeper && ((MutantCreeper) attacker).isCharged() ||
-                attacker instanceof CreeperMinion && ((CreeperMinion) attacker).isCharged()) && damageSource.is(
-                DamageTypeTags.IS_EXPLOSION)) {
-            ItemStack itemStack = EntityUtil.getSkullDrop(entity.getType());
-            if (!itemStack.isEmpty()) {
-                itemDrops.add(new ItemEntity(attacker.level(), entity.getX(), entity.getY(), entity.getZ(), itemStack));
-            }
+        } else {
+            return EventResult.PASS;
         }
-
-        return EventResult.PASS;
     }
 }

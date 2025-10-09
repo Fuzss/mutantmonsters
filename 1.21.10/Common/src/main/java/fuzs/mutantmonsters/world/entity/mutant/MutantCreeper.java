@@ -1,6 +1,7 @@
 package fuzs.mutantmonsters.world.entity.mutant;
 
 import fuzs.mutantmonsters.init.ModEntityTypes;
+import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.mutantmonsters.init.ModSoundEvents;
 import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
@@ -152,6 +154,21 @@ public class MutantCreeper extends MutantMonster {
     }
 
     @Override
+    public boolean killedEntity(ServerLevel level, LivingEntity entity, DamageSource damageSource) {
+        if (this.shouldDropLoot(level) && this.isCharged()) {
+            entity.dropFromLootTable(level,
+                    damageSource,
+                    false,
+                    ModRegistry.CHARGED_MUTANT_CREEPER_LOOT_TABLE,
+                    (ItemStack itemStack) -> {
+                        entity.spawnAtLocation(level, itemStack);
+                    });
+        }
+
+        return super.killedEntity(level, entity, damageSource);
+    }
+
+    @Override
     public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float damageAmount) {
         if (this.isInvulnerableTo(serverLevel, damageSource)) {
             return false;
@@ -169,7 +186,7 @@ public class MutantCreeper extends MutantMonster {
             if (this.isCharging()) {
                 if (!damageSource.is(DamageTypeTags.WITCH_RESISTANT_TO)
                         && damageSource.getDirectEntity() instanceof LivingEntity) {
-                    damageSource.getDirectEntity().hurt(this.damageSources().thorns(this), 2.0F);
+                    damageSource.getDirectEntity().hurtServer(serverLevel, this.damageSources().thorns(this), 2.0F);
                 }
 
                 if (takenDamage && damageAmount > 0.0F) {
@@ -240,7 +257,9 @@ public class MutantCreeper extends MutantMonster {
 
             ++this.jumpTick;
             this.stuckSpeedMultiplier = Vec3.ZERO;
-            if (!this.level().isClientSide && (this.onGround() || !this.getInBlockState().getFluidState().isEmpty())) {
+            if (!this.level().isClientSide() && (this.onGround() || !this.getInBlockState()
+                    .getFluidState()
+                    .isEmpty())) {
                 float sizeIn = this.isCharged() ? 6.0F : 4.0F;
                 MutatedExplosionHelper.explode(this, sizeIn, false, Level.ExplosionInteraction.MOB);
                 this.setJumpAttacking(false);
@@ -266,19 +285,19 @@ public class MutantCreeper extends MutantMonster {
         livingEntity.hurtMarked = true;
     }
 
-    public float getOverlayColor(float partialTicks) {
+    public float getOverlayColor(float partialTick) {
         if (this.deathTime > 0) {
-            return (this.deathTime + partialTicks) / 100.0F;
+            return (this.deathTime + partialTick) / MAX_DEATH_TIME;
         } else if (this.isCharging()) {
-            return (this.tickCount + partialTicks) % 20.0F < 10.0F ? 0.6F : 0.0F;
+            return (this.tickCount + partialTick) % 20.0F < 10.0F ? 0.6F : 0.0F;
         } else {
-            return Mth.lerp(partialTicks, (float) this.lastJumpTick, (float) this.jumpTick) / 28.0F;
+            return Mth.lerp(partialTick, (float) this.lastJumpTick, (float) this.jumpTick) / 28.0F;
         }
     }
 
     @Override
     public void die(DamageSource cause) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.deathCause = cause;
             this.setCharging(false);
             this.level().broadcastEntityEvent(this, (byte) 3);
@@ -309,7 +328,7 @@ public class MutantCreeper extends MutantMonster {
             double y = this.getY() - entity.getY();
             double z = this.getZ() - entity.getZ();
             double d = Math.sqrt(x * x + y * y + z * z);
-            float scale = (float) this.deathTime / 100.0F;
+            float scale = (float) this.deathTime / MAX_DEATH_TIME;
             entity.setDeltaMovement(entity.getDeltaMovement()
                     .add(x / d * (double) scale * 0.09, y / d * (double) scale * 0.09, z / d * (double) scale * 0.09));
         }
@@ -317,10 +336,9 @@ public class MutantCreeper extends MutantMonster {
         this.setPosRaw(this.getX() + (double) (this.random.nextFloat() * 0.2F) - 0.1,
                 this.getY(),
                 this.getZ() + (double) (this.random.nextFloat() * 0.2F) - 0.1);
-        if (this.deathTime >= 100) {
+        if (this.deathTime >= MAX_DEATH_TIME) {
             if (this.level() instanceof ServerLevel serverLevel) {
-                boolean causesFireIn = this.isOnFire();
-                MutatedExplosionHelper.explode(this, power, causesFireIn, Level.ExplosionInteraction.MOB);
+                MutatedExplosionHelper.explode(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
                 if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null
                         && this.lastHurtByPlayerMemoryTime > 0) {
@@ -435,7 +453,7 @@ public class MutantCreeper extends MutantMonster {
                     && MutantCreeper.this.distanceToSqr(target) < 25.0) {
                 return false;
             } else {
-                return MutantCreeper.this.chargeTime < 100 && MutantCreeper.this.chargeHits > 0;
+                return MutantCreeper.this.chargeTime < MAX_CHARGE_TIME && MutantCreeper.this.chargeHits > 0;
             }
         }
 
@@ -473,7 +491,7 @@ public class MutantCreeper extends MutantMonster {
                         MutantCreeper.this.getY(),
                         MutantCreeper.this.getZ());
                 MutantCreeper.this.level().addFreshEntity(lightningBoltEntity);
-            } else if (MutantCreeper.this.chargeTime >= 100) {
+            } else if (MutantCreeper.this.chargeTime >= MAX_CHARGE_TIME) {
                 MutantCreeper.this.heal(30.0F);
                 MutantCreeper.this.level().broadcastEntityEvent(MutantCreeper.this, (byte) 6);
             }

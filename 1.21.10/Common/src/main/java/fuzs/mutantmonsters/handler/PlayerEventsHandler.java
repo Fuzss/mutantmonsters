@@ -62,12 +62,12 @@ public class PlayerEventsHandler {
     }
 
     public static void onEndPlayerTick(Player player) {
-        playShoulderEntitySound(player, player.getShoulderEntityLeft());
-        playShoulderEntitySound(player, player.getShoulderEntityRight());
-        if (player.level() instanceof ServerLevel serverLevel) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            playShoulderEntityAmbientSound(serverPlayer, serverPlayer.getShoulderEntityLeft());
+            playShoulderEntityAmbientSound(serverPlayer, serverPlayer.getShoulderEntityRight());
             SeismicWave seismicWave = SeismicWave.poll(player);
             if (seismicWave != null) {
-                handleSeismicWave(serverLevel, player, seismicWave);
+                handleSeismicWave(serverPlayer.level(), player, seismicWave);
             }
         }
     }
@@ -91,21 +91,24 @@ public class PlayerEventsHandler {
         }
     }
 
-    private static void playShoulderEntitySound(Player player, @Nullable CompoundTag compoundTag) {
+    /**
+     * @see ServerPlayer#playShoulderEntityAmbientSound(CompoundTag)
+     */
+    private static void playShoulderEntityAmbientSound(ServerPlayer serverPlayer, @Nullable CompoundTag compoundTag) {
         if (compoundTag != null && !compoundTag.isEmpty() && !compoundTag.getBooleanOr("Silent", false)) {
-            EntityType<?> entityType = compoundTag.read("id", EntityType.CODEC).orElse(null);
-            if (entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()) {
-                if (player.level().random.nextInt(500) == 0) {
-                    player.level()
+            if (serverPlayer.level().random.nextInt(500) == 0) {
+                EntityType<?> entityType = compoundTag.read("id", EntityType.CODEC).orElse(null);
+                if (entityType == ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value()) {
+                    serverPlayer.level()
                             .playSound(null,
-                                    player.getX(),
-                                    player.getY(),
-                                    player.getZ(),
+                                    serverPlayer.getX(),
+                                    serverPlayer.getY(),
+                                    serverPlayer.getZ(),
                                     ModSoundEvents.ENTITY_CREEPER_MINION_AMBIENT_SOUND_EVENT.value(),
-                                    player.getSoundSource(),
+                                    serverPlayer.getSoundSource(),
                                     1.0F,
-                                    (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F
-                                            + 1.5F);
+                                    (serverPlayer.level().random.nextFloat() - serverPlayer.level().random.nextFloat())
+                                            * 0.2F + 1.5F);
                 }
             }
         }

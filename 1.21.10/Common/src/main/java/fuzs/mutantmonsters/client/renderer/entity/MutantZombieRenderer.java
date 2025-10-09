@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantZombieModel;
 import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantZombieRenderState;
@@ -21,7 +21,7 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_zombie.png");
 
     public MutantZombieRenderer(EntityRendererProvider.Context context) {
-        super(context, new MutantZombieModel(context.bakeLayer(ModelLayerLocations.MUTANT_ZOMBIE)), 1.0F);
+        super(context, new MutantZombieModel(context.bakeLayer(ModModelLayers.MUTANT_ZOMBIE)), 1.0F);
     }
 
     @Override

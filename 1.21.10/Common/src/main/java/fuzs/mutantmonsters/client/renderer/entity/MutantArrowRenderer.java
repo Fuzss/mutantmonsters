@@ -1,20 +1,22 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
 import fuzs.mutantmonsters.client.model.MutantArrowModel;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantArrowRenderState;
 import fuzs.mutantmonsters.world.entity.projectile.MutantArrow;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Unit;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantArrowRenderer extends EntityRenderer<MutantArrow, MutantArrowRenderState> {
@@ -24,7 +26,7 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow, MutantArrow
 
     public MutantArrowRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new MutantArrowModel(context.bakeLayer(ModelLayerLocations.MUTANT_ARROW));
+        this.model = new MutantArrowModel(context.bakeLayer(ModModelLayers.MUTANT_ARROW));
     }
 
     @Override
@@ -47,8 +49,8 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow, MutantArrow
     }
 
     @Override
-    public void render(MutantArrowRenderState renderState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        super.render(renderState, poseStack, bufferSource, packedLight);
+    public void submit(MutantArrowRenderState renderState, PoseStack poseStack, SubmitNodeCollector nodeCollector, CameraRenderState cameraRenderState) {
+        super.submit(renderState, poseStack, nodeCollector, cameraRenderState);
         for (int i = 0; i < renderState.clones; ++i) {
             poseStack.pushPose();
             poseStack.translate(0.0F, -2.35F, 0.5F);
@@ -57,9 +59,18 @@ public class MutantArrowRenderer extends EntityRenderer<MutantArrow, MutantArrow
             poseStack.mulPose(Axis.YP.rotationDegrees(renderState.yRot));
             poseStack.mulPose(Axis.XP.rotationDegrees(renderState.xRot));
             poseStack.scale(1.2F, 1.2F, 1.2F);
-            VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
+            RenderType renderType = this.model.renderType(TEXTURE_LOCATION);
             int color = ARGB.colorFromFloat(1.0F - i * 0.08F, 1.0F, 1.0F, 1.0F);
-            this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
+            nodeCollector.submitModel(this.model,
+                    Unit.INSTANCE,
+                    poseStack,
+                    renderType,
+                    renderState.lightCoords,
+                    OverlayTexture.NO_OVERLAY,
+                    color,
+                    null,
+                    renderState.outlineColor,
+                    null);
             poseStack.popPose();
         }
     }

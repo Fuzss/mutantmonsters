@@ -2,13 +2,13 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -19,13 +19,13 @@ public class MutantEndermanCloneLayer extends EnderEnergySwirlLayer<MutantEnderm
 
     public MutantEndermanCloneLayer(RenderLayerParent<MutantEndermanRenderState, MutantEndermanModel> renderer, EntityModelSet entityModelSet) {
         super(renderer);
-        this.model = new EndermanModel<>(entityModelSet.bakeLayer(ModelLayerLocations.ENDERMAN_CLONE));
+        this.model = new EndermanModel<>(entityModelSet.bakeLayer(ModModelLayers.ENDERMAN_CLONE));
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
         if (renderState.isClone) {
-            super.render(poseStack, bufferSource, packedLight, renderState, yRot, xRot);
+            super.submit(poseStack, nodeCollector, packedLight, renderState, yRot, xRot);
         }
     }
 

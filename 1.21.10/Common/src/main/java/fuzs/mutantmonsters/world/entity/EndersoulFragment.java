@@ -175,7 +175,7 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
             this.setOwner(player);
             this.explodeTick += 600;
             this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 0.8F + this.level().random.nextFloat() * 0.4F);
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
         } else {
             return super.interact(player, interactionHand);
         }

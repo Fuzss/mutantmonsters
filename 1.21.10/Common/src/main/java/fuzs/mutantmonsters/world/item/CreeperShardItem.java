@@ -49,8 +49,8 @@ public class CreeperShardItem extends Item {
         int damageValue = itemStack.getDamageValue();
         if (damageValue > 0) {
             itemStack.setDamageValue(damageValue - 1);
-            if ((!((LivingEntity) attacker instanceof Player player) || !player.isCreative()) &&
-                    attacker.getRandom().nextInt(4) == 0) {
+            if ((!((LivingEntity) attacker instanceof Player player) || !player.isCreative())
+                    && attacker.getRandom().nextInt(4) == 0) {
                 attacker.addEffect(new MobEffectInstance(MobEffects.POISON, 80 + attacker.getRandom().nextInt(40)));
             }
         }
@@ -71,7 +71,7 @@ public class CreeperShardItem extends Item {
         int maxDamage = itemInHand.getMaxDamage();
         int damageValue = itemInHand.getDamageValue();
         if (damageValue < maxDamage) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 float radius = 5.0F * (maxDamage - damageValue) / 16.0F;
                 if (damageValue == 0) {
                     radius += 2.0F;
@@ -88,8 +88,7 @@ public class CreeperShardItem extends Item {
                         player.mayBuild() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
             }
 
-            itemInHand.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand));
-
+            itemInHand.hurtAndBreak(1, player, interactionHand.asEquipmentSlot());
             player.getCooldowns().addCooldown(itemInHand, (maxDamage - damageValue) * 2);
             player.awardStat(Stats.ITEM_USED.get(this));
             return InteractionResultHelper.success(itemInHand);

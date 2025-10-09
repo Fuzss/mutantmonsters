@@ -1,6 +1,5 @@
 package fuzs.mutantmonsters.client.gui.screens;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionNameMessage;
 import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionTrackerMessage;
@@ -13,6 +12,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -103,13 +103,12 @@ public class CreeperMinionTrackerScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_ESCAPE && this.shouldCloseOnEsc()) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (keyEvent.isEscape() && this.shouldCloseOnEsc()) {
             this.onClose();
             return true;
         } else {
-            return this.name.keyPressed(keyCode, scanCode, modifiers) || this.name.canConsumeInput()
-                    || super.keyPressed(keyCode, scanCode, modifiers);
+            return this.name.keyPressed(keyEvent) || this.name.canConsumeInput() || super.keyPressed(keyEvent);
         }
     }
 

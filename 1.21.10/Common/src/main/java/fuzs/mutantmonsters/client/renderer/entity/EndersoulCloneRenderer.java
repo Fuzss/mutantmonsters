@@ -1,7 +1,7 @@
 package fuzs.mutantmonsters.client.renderer.entity;
 
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.state.EndersoulCloneRenderState;
 import fuzs.mutantmonsters.world.entity.EndersoulClone;
@@ -18,7 +18,7 @@ public class EndersoulCloneRenderer extends MobRenderer<EndersoulClone, Endersou
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/endersoul.png");
 
     public EndersoulCloneRenderer(EntityRendererProvider.Context context) {
-        super(context, new EndermanModel<>(context.bakeLayer(ModelLayerLocations.ENDERSOUL_CLONE)), 0.5F);
+        super(context, new EndermanModel<>(context.bakeLayer(ModModelLayers.ENDERSOUL_CLONE)), 0.5F);
         this.shadowStrength = 0.5F;
     }
 

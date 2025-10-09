@@ -75,6 +75,7 @@ public class MutantEndermanModel extends EntityModel<MutantEndermanRenderState> 
     @Override
     public void setupAnim(MutantEndermanRenderState renderState) {
         super.setupAnim(renderState);
+        // TODO remove setting initial angles like so
         this.setupInitialAngles();
         float limbSwing = renderState.walkAnimationPos;
         float limbSwingAmount = renderState.walkAnimationSpeed;

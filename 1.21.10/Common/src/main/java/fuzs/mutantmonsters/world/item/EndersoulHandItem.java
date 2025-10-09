@@ -72,12 +72,12 @@ public class EndersoulHandItem extends Item {
         } else if (!player.mayUseItemAt(pos, context.getClickedFace(), itemStack)) {
             return InteractionResult.PASS;
         } else {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 level.addFreshEntity(new ThrowableBlock(player, blockState, pos));
                 level.removeBlock(pos, false);
             }
 
-            return InteractionResultHelper.sidedSuccess(level.isClientSide);
+            return InteractionResultHelper.sidedSuccess(level.isClientSide());
         }
     }
 
@@ -132,7 +132,7 @@ public class EndersoulHandItem extends Item {
                 player.fallDistance = 0.0F;
                 player.swing(interactionHand);
                 player.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHelper.sidedSuccess(itemInHand, level.isClientSide);
+                return InteractionResultHelper.sidedSuccess(itemInHand, level.isClientSide());
             }
         }
     }

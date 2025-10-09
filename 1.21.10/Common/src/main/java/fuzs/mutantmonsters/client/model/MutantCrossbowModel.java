@@ -5,8 +5,13 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 
-public class MutantCrossbowModel extends Model {
+/**
+ * TODO refactor setupAnim methods, also restrict access to model parts directly
+ */
+public class MutantCrossbowModel extends Model<Unit> {
     public final ModelPart armWear;
     public final ModelPart middle;
     public final ModelPart middle1;
@@ -35,26 +40,55 @@ public class MutantCrossbowModel extends Model {
     public static LayerDefinition createBodyLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        PartDefinition armWear = root.addOrReplaceChild("arm_wear", CubeListBuilder.create().texOffs(0, 64).addBox(-2.0F, -3.0F, -2.0F, 4.0F, 6.0F, 4.0F, new CubeDeformation(0.3F)), PartPose.offset(0.0F, 8.0F, 0.0F));
-        PartDefinition middle = armWear.addOrReplaceChild("middle", CubeListBuilder.create().texOffs(16, 64).addBox(-2.0F, -2.0F, -3.0F, 4.0F, 4.0F, 6.0F), PartPose.offset(-3.5F, 0.0F, 0.0F));
-        PartDefinition middle1 = middle.addOrReplaceChild("middle1", CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F), PartPose.offset(0.0F, 0.6F, -4.0F));
-        PartDefinition middle2 = middle.addOrReplaceChild("middle2", CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F), PartPose.offset(0.0F, 0.6F, 4.0F));
-        PartDefinition side1 = middle1.addOrReplaceChild("side1", CubeListBuilder.create().texOffs(0, 74).addBox(-1.0F, -1.0F, -8.0F, 2.0F, 2.0F, 8.0F), PartPose.offset(0.0F, 0.0F, -2.0F));
-        PartDefinition side2 = middle2.addOrReplaceChild("side2", CubeListBuilder.create().texOffs(0, 74).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F), PartPose.offset(0.0F, 0.0F, 2.0F));
-        PartDefinition side3 = side1.addOrReplaceChild("side3", CubeListBuilder.create().texOffs(20, 74).addBox(-0.5F, -0.5F, -8.0F, 1.0F, 1.0F, 8.0F), PartPose.offset(0.0F, 0.0F, -5.0F));
-        PartDefinition side4 = side2.addOrReplaceChild("side4", CubeListBuilder.create().texOffs(20, 74).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 8.0F), PartPose.offset(0.0F, 0.0F, 5.0F));
-        side3.addOrReplaceChild("rope1", CubeListBuilder.create().texOffs(0, 84).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 15.0F, new CubeDeformation(-0.4F)), PartPose.offset(0.0F, 0.0F, -6.0F));
-        side4.addOrReplaceChild("rope2", CubeListBuilder.create().texOffs(0, 84).addBox(-0.5F, -0.5F, -15.0F, 1.0F, 1.0F, 15.0F, new CubeDeformation(-0.4F)), PartPose.offset(0.0F, 0.0F, 6.0F));
+        PartDefinition armWear = root.addOrReplaceChild("arm_wear",
+                CubeListBuilder.create()
+                        .texOffs(0, 64)
+                        .addBox(-2.0F, -3.0F, -2.0F, 4.0F, 6.0F, 4.0F, new CubeDeformation(0.3F)),
+                PartPose.offset(0.0F, 8.0F, 0.0F));
+        PartDefinition middle = armWear.addOrReplaceChild("middle",
+                CubeListBuilder.create().texOffs(16, 64).addBox(-2.0F, -2.0F, -3.0F, 4.0F, 4.0F, 6.0F),
+                PartPose.offset(-3.5F, 0.0F, 0.0F));
+        PartDefinition middle1 = middle.addOrReplaceChild("middle1",
+                CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F),
+                PartPose.offset(0.0F, 0.6F, -4.0F));
+        PartDefinition middle2 = middle.addOrReplaceChild("middle2",
+                CubeListBuilder.create().texOffs(36, 64).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 6.0F),
+                PartPose.offset(0.0F, 0.6F, 4.0F));
+        PartDefinition side1 = middle1.addOrReplaceChild("side1",
+                CubeListBuilder.create().texOffs(0, 74).addBox(-1.0F, -1.0F, -8.0F, 2.0F, 2.0F, 8.0F),
+                PartPose.offset(0.0F, 0.0F, -2.0F));
+        PartDefinition side2 = middle2.addOrReplaceChild("side2",
+                CubeListBuilder.create().texOffs(0, 74).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+        PartDefinition side3 = side1.addOrReplaceChild("side3",
+                CubeListBuilder.create().texOffs(20, 74).addBox(-0.5F, -0.5F, -8.0F, 1.0F, 1.0F, 8.0F),
+                PartPose.offset(0.0F, 0.0F, -5.0F));
+        PartDefinition side4 = side2.addOrReplaceChild("side4",
+                CubeListBuilder.create().texOffs(20, 74).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 8.0F),
+                PartPose.offset(0.0F, 0.0F, 5.0F));
+        side3.addOrReplaceChild("rope1",
+                CubeListBuilder.create()
+                        .texOffs(0, 84)
+                        .addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 15.0F, new CubeDeformation(-0.4F)),
+                PartPose.offset(0.0F, 0.0F, -6.0F));
+        side4.addOrReplaceChild("rope2",
+                CubeListBuilder.create()
+                        .texOffs(0, 84)
+                        .addBox(-0.5F, -0.5F, -15.0F, 1.0F, 1.0F, 15.0F, new CubeDeformation(-0.4F)),
+                PartPose.offset(0.0F, 0.0F, 6.0F));
         return LayerDefinition.create(mesh, 128, 128);
     }
 
-    public void setAngles(float PI) {
-        this.middle1.xRot = PI / 8.0F;
-        this.middle2.xRot = -PI / 8.0F;
-        this.side1.xRot = -PI / 5.0F;
-        this.side2.xRot = PI / 5.0F;
-        this.side3.xRot = -PI / 4.0F;
-        this.side4.xRot = PI / 4.0F;
+    @Override
+    public void setupAnim(Unit renderState) {
+        super.setupAnim(renderState);
+        this.middle1.xRot = Mth.PI / 8.0F;
+        this.middle2.xRot = -Mth.PI / 8.0F;
+        this.side1.xRot = -Mth.PI / 5.0F;
+        this.side2.xRot = Mth.PI / 5.0F;
+        this.side3.xRot = -Mth.PI / 4.0F;
+        this.side4.xRot = Mth.PI / 4.0F;
+        this.rotateRope();
     }
 
     public void rotateRope() {

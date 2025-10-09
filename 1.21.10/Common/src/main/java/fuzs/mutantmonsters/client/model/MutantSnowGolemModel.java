@@ -9,6 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
 import java.util.List;
+import java.util.Set;
 
 public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState> {
     private final List<ModelPart> parts;
@@ -61,10 +62,20 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState
         this.innerForeLeg2 = this.foreLeg2.getChild("inner_fore_leg2");
     }
 
-    public static LayerDefinition createBodyLayer(int textureWidth, int textureHeight) {
+    public static LayerDefinition createHeadLayer() {
+        return LayerDefinition.create(createBodyMesh(), 64, 32).apply((MeshDefinition meshDefinition) -> {
+            meshDefinition.getRoot().retainPartsAndChildren(Set.of("head"));
+            return meshDefinition;
+        });
+    }
 
-        MeshDefinition mesh = new MeshDefinition();
-        PartDefinition root = mesh.getRoot();
+    public static LayerDefinition createBodyLayer() {
+        return LayerDefinition.create(createBodyMesh(), 128, 64);
+    }
+
+    private static MeshDefinition createBodyMesh() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition root = meshDefinition.getRoot();
 
         PartDefinition pelvis = root.addOrReplaceChild("pelvis",
                 CubeListBuilder.create().texOffs(0, 0),
@@ -160,13 +171,7 @@ public class MutantSnowGolemModel extends EntityModel<MutantSnowGolemRenderState
                 CubeListBuilder.create().texOffs(88, 32).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 8.0F, 6.0F),
                 PartPose.rotation(0.69813174F, 0.0F, 0.0F));
 
-        return LayerDefinition.create(mesh, textureWidth, textureHeight);
-    }
-
-    public MutantSnowGolemModel setRenderHeadOnly() {
-        this.parts.forEach((ModelPart modelPart) -> modelPart.skipDraw = true);
-        this.head.skipDraw = this.innerHead.skipDraw = false;
-        return this;
+        return meshDefinition;
     }
 
     @Override

@@ -240,16 +240,16 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
                     && this.getHealth() < this.getMaxHealth()) {
                 this.usePlayerItem(player, interactionHand, itemInHand);
                 this.heal((float) itemInHand.get(DataComponents.FOOD).nutrition());
-                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
             } else {
                 InteractionResult interactionResult = super.mobInteract(player, interactionHand);
                 if (!interactionResult.consumesAction()) {
                     if (this.isSaddled() && !player.isSecondaryUseActive() && this.isOwnedBy(player)) {
-                        if (!this.level().isClientSide) {
+                        if (!this.level().isClientSide()) {
                             player.startRiding(this);
                         }
 
-                        return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+                        return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
                     } else if (this.isEquippableInSlot(itemInHand, EquipmentSlot.SADDLE)) {
                         return itemInHand.interactLivingEntity(player, this, interactionHand);
                     }
@@ -450,11 +450,10 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
             attribute.removeModifier(STEP_HEIGHT_MODIFIER_WITH_PASSENGER_ID);
             super.travel(travelVector);
         }
-
     }
 
     @Override
-    public boolean killedEntity(ServerLevel serverLevel, LivingEntity livingEntity) {
+    public boolean killedEntity(ServerLevel serverLevel, LivingEntity livingEntity, DamageSource damageSource) {
         if (livingEntity instanceof CreeperMinion minion && !this.isTame()) {
             LivingEntity owner = minion.getOwner();
             if (owner instanceof Player && !CommonAbstractions.INSTANCE.onAnimalTame(this, (Player) owner)) {

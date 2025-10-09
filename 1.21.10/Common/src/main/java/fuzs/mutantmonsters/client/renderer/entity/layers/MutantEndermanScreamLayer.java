@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 
 public class MutantEndermanScreamLayer extends EnderEnergySwirlLayer<MutantEndermanRenderState, MutantEndermanModel> {
@@ -14,9 +14,9 @@ public class MutantEndermanScreamLayer extends EnderEnergySwirlLayer<MutantEnder
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
+    public void submit(PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, MutantEndermanRenderState renderState, float yRot, float xRot) {
         if (renderState.animation == MutantEnderman.SCREAM_ANIMATION) {
-            super.render(poseStack, bufferSource, packedLight, renderState, yRot, xRot);
+            super.submit(poseStack, nodeCollector, packedLight, renderState, yRot, xRot);
         }
     }
 

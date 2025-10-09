@@ -1,13 +1,13 @@
 package fuzs.mutantmonsters.client.model;
 
-import fuzs.mutantmonsters.client.animation.Animator;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.Unit;
 
-public class EndersoulHandModel extends Model {
+public class EndersoulHandModel extends Model<Unit> {
     private final ModelPart hand;
     private final ModelPart[] finger = new ModelPart[3];
     private final ModelPart[] foreFinger = new ModelPart[3];
@@ -22,15 +22,21 @@ public class EndersoulHandModel extends Model {
             this.finger[i] = this.hand.getChild("finger" + i);
             this.foreFinger[i] = this.finger[i].getChild("fore_finger" + i);
         }
+
         this.thumb = this.hand.getChild("thumb");
     }
 
     public static LayerDefinition createBodyLayer(boolean right) {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        PartDefinition hand = root.addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 0), PartPose.offset(0.0F, 17.5F, 0.0F));
-        for(int i = 0; i < 3; ++i) {
-            CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(i * 4, 0).addBox(-0.5F, 0.0F, -0.5F, 1.0F, i == 1 ? 6.0F : 5.0F, 1.0F, new CubeDeformation(0.6F)).mirror(!right);
+        PartDefinition hand = root.addOrReplaceChild("hand",
+                CubeListBuilder.create().texOffs(0, 0),
+                PartPose.offset(0.0F, 17.5F, 0.0F));
+        for (int i = 0; i < 3; ++i) {
+            CubeListBuilder cubeListBuilder = CubeListBuilder.create()
+                    .texOffs(i * 4, 0)
+                    .addBox(-0.5F, 0.0F, -0.5F, 1.0F, i == 1 ? 6.0F : 5.0F, 1.0F, new CubeDeformation(0.6F))
+                    .mirror(!right);
             PartPose partPose;
             if (i == 0) {
                 partPose = PartPose.offset(right ? -0.5F : 0.5F, 0.0F, -1.0F);
@@ -42,22 +48,33 @@ public class EndersoulHandModel extends Model {
             hand.addOrReplaceChild("finger" + i, cubeListBuilder, partPose);
         }
 
-        for(int i = 0; i < 3; ++i) {
-            hand.getChild("finger" + i).addOrReplaceChild("fore_finger" + i, CubeListBuilder.create().texOffs(1 + i * 5, 0).addBox(-0.5F, 0.0F, -0.5F, 1.0F, i == 1 ? 6.0F : 5.0F, 1.0F, new CubeDeformation(0.6F - 0.01F)).mirror(!right), PartPose.offset(0.0F, 0.5F + (float)(i == 1 ? 6 : 5), 0.0F));
+        for (int i = 0; i < 3; ++i) {
+            hand.getChild("finger" + i)
+                    .addOrReplaceChild("fore_finger" + i,
+                            CubeListBuilder.create()
+                                    .texOffs(1 + i * 5, 0)
+                                    .addBox(-0.5F,
+                                            0.0F,
+                                            -0.5F,
+                                            1.0F,
+                                            i == 1 ? 6.0F : 5.0F,
+                                            1.0F,
+                                            new CubeDeformation(0.6F - 0.01F))
+                                    .mirror(!right),
+                            PartPose.offset(0.0F, 0.5F + (float) (i == 1 ? 6 : 5), 0.0F));
         }
-        hand.addOrReplaceChild("thumb", CubeListBuilder.create().texOffs(14, 0).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 5.0F, 1.0F, new CubeDeformation(0.6F)), PartPose.offset(right ? 0.5F : -0.5F, 0.0F, -0.5F));
+
+        hand.addOrReplaceChild("thumb",
+                CubeListBuilder.create()
+                        .texOffs(14, 0)
+                        .addBox(-0.5F, 0.0F, -0.5F, 1.0F, 5.0F, 1.0F, new CubeDeformation(0.6F)),
+                PartPose.offset(right ? 0.5F : -0.5F, 0.0F, -0.5F));
         return LayerDefinition.create(mesh, 32, 32);
     }
 
-    public void setAngles() {
-        Animator.resetAngles(this.hand);
-
-        for(int i = 0; i < this.finger.length; ++i) {
-            Animator.resetAngles(this.finger[i]);
-            Animator.resetAngles(this.foreFinger[i]);
-        }
-
-        Animator.resetAngles(this.thumb);
+    @Override
+    public void setupAnim(Unit renderState) {
+        super.setupAnim(renderState);
         if (this.right) {
             this.hand.yRot = -0.3926991F;
             this.finger[0].xRot = -0.2617994F;

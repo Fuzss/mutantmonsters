@@ -8,7 +8,7 @@ import fuzs.puzzleslib.api.client.data.v2.AbstractModelProvider;
 import fuzs.puzzleslib.api.client.data.v2.models.ItemModelGenerationHelper;
 import fuzs.puzzleslib.api.client.data.v2.models.ModelLocationHelper;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
-import fuzs.puzzleslib.impl.init.DyedSpawnEggItem;
+import fuzs.puzzleslib.impl.init.LegacySpawnEggItem;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.ItemModelUtils;
@@ -85,7 +85,7 @@ public class ModModelProvider extends AbstractModelProvider {
     public static void generateSpawnEgg(Item item, ItemModelGenerators itemModelGenerators) {
         itemModelGenerators.itemModelOutput.accept(item,
                 ItemModelUtils.tintedModel(TEMPLATE_SPAWN_EGG,
-                        ItemModelUtils.constantTint(((DyedSpawnEggItem) item).backgroundColor()),
-                        ItemModelUtils.constantTint(((DyedSpawnEggItem) item).highlightColor())));
+                        ItemModelUtils.constantTint(((LegacySpawnEggItem) item).getBackgroundColor()),
+                        ItemModelUtils.constantTint(((LegacySpawnEggItem) item).getHighlightColor())));
     }
 }

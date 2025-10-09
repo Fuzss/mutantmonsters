@@ -1,7 +1,7 @@
 {
   "values": [
     "minecraft:fall",
-    "#minecraft:is_projectile",
-    "#minecraft:is_explosion"
+    "#minecraft:is_explosion",
+    "#minecraft:is_projectile"
   ]
 }

@@ -79,7 +79,7 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
     }
 
     public void setOwner(@Nullable Player livingEntity) {
-        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::new));
+        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(livingEntity).map(EntityReference::of));
     }
 
     public void setOwnerReference(@Nullable EntityReference<LivingEntity> entityReference) {
@@ -196,16 +196,18 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
         if (!player.isSecondaryUseActive() && player.hasPose(Pose.STANDING) && !player.hasPassenger(this)) {
             if (this.startRiding(this.getTopPassenger(player))) {
-                if (!this.level().isClientSide) {
+                if (!this.level().isClientSide()) {
                     this.setOwner(player);
                     this.playMountingSound(true);
                 } else {
                     player.displayClientMessage(Component.translatable("mount.onboard", Component.keybind("key.sneak")),
                             true);
                 }
-                return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+
+                return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
             }
         }
+
         return super.interact(player, interactionHand);
     }
 

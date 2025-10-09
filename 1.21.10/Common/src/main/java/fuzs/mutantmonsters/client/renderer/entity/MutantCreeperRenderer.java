@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.init.ModelLayerLocations;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantCreeperModel;
 import fuzs.mutantmonsters.client.renderer.entity.layers.PowerableLayer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantCreeperRenderState;
@@ -16,9 +16,9 @@ public class MutantCreeperRenderer extends MobRenderer<MutantCreeper, MutantCree
     public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_creeper.png");
 
     public MutantCreeperRenderer(EntityRendererProvider.Context context) {
-        super(context, new MutantCreeperModel(context.bakeLayer(ModelLayerLocations.MUTANT_CREEPER)), 1.5F);
+        super(context, new MutantCreeperModel(context.bakeLayer(ModModelLayers.MUTANT_CREEPER)), 1.5F);
         this.addLayer(new PowerableLayer<>(this,
-                new MutantCreeperModel(context.bakeLayer(ModelLayerLocations.MUTANT_CREEPER_ARMOR))));
+                new MutantCreeperModel(context.bakeLayer(ModModelLayers.MUTANT_CREEPER_ARMOR))));
     }
 
     @Override

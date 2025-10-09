@@ -238,7 +238,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                             this.getSoundSource(),
                             1.0F,
                             this.random.nextFloat() * 0.4F + 0.8F);
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.igniteForSeconds(8.0F);
                 if (!itemInHand.isDamageableItem()) {
                     itemInHand.shrink(1);
@@ -247,7 +247,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                 }
                 player.awardStat(Stats.ITEM_USED.get(itemInHand.getItem()));
             }
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide);
+            return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
         } else {
             return InteractionResult.PASS;
         }
@@ -345,7 +345,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
             ++this.animationTick;
         }
 
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             if (this.animation == THROW_ANIMATION) {
                 if (this.hasThrowAttackHit()) {
                     if (this.throwHitTick == -1) {
@@ -424,13 +424,14 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
 
     @Override
     public void die(DamageSource damageSource) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.deathCause = damageSource;
             for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
                 if (goal.isRunning()) {
                     goal.stop();
                 }
             }
+
             this.setLastHurtMob(this.getLastHurtByMob());
             this.level().broadcastEntityEvent(this, (byte) 3);
             if (this.lastHurtByPlayerMemoryTime > 0) {
@@ -447,10 +448,11 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
 
         if (this.isOnFire()) {
             if (this.vanishTime == 0) {
-                if (level() instanceof ServerLevel level) {
-                    level.getChunkSource()
-                            .broadcast(this,
-                                    new ClientboundSetEntityDataPacket(getId(), getEntityData().getNonDefaultValues()));
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.getChunkSource()
+                            .sendToTrackingPlayers(this,
+                                    new ClientboundSetEntityDataPacket(this.getId(),
+                                            this.getEntityData().getNonDefaultValues()));
                 }
             }
 
@@ -472,7 +474,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
         }
 
         if (this.vanishTime >= MAX_VANISH_TIME || this.getLives() <= 0 && this.deathTime > 25) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 super.die(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
             }
 
@@ -508,15 +510,15 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     }
 
     @Override
-    public boolean killedEntity(ServerLevel level, LivingEntity entity) {
-        boolean bl = super.killedEntity(level, entity);
-        if ((level.getDifficulty() == Difficulty.NORMAL || level.getDifficulty() == Difficulty.HARD)
+    public boolean killedEntity(ServerLevel serverLevel, LivingEntity entity, DamageSource damageSource) {
+        boolean bl = super.killedEntity(serverLevel, entity, damageSource);
+        if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD)
                 && entity instanceof Villager villager) {
-            if (level.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+            if (serverLevel.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
                 return bl;
             }
 
-            if (this.convertVillagerToZombieVillager(level, villager)) {
+            if (this.convertVillagerToZombieVillager(serverLevel, villager)) {
                 bl = false;
             }
         }
