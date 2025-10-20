@@ -15,7 +15,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.math.Fraction;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public final class BiomeModificationsHandler {
 
@@ -46,15 +46,25 @@ public final class BiomeModificationsHandler {
                 ModEntityTypes.MUTANT_ZOMBIE_ENTITY_TYPE);
     }
 
-    private static void registerMutantSpawn(BiomeModificationsContext context, TagKey<Biome> withoutSpawnsTag, DoubleSupplier spawnWeightSupplier, Holder.Reference<? extends EntityType<?>> vanillaEntityType, Holder.Reference<? extends EntityType<?>> mutantEntityType) {
+    private static void registerMutantSpawn(BiomeModificationsContext context, TagKey<Biome> withoutSpawnsTag, Supplier<Double> spawnWeightSupplier, Holder.Reference<? extends EntityType<?>> vanillaEntityType, Holder.Reference<? extends EntityType<?>> mutantEntityType) {
         context.registerBiomeModification(BiomeLoadingPhase.ADDITIONS, (BiomeLoadingContext biomeLoadingContext) -> {
             return !biomeLoadingContext.is(withoutSpawnsTag);
         }, (BiomeModificationContext biomeModificationContext) -> {
+            Fraction spawnWeight = getSpawnWeight(spawnWeightSupplier);
             SpawnerDataBuilder.create(biomeModificationContext.mobSpawnSettings(), vanillaEntityType.value())
-                    .setWeight(Fraction.getFraction(1, Math.round(1.0F / (float) spawnWeightSupplier.getAsDouble())))
+                    .setWeight(spawnWeight)
                     .setMinCount(1)
                     .setMaxCount(1)
                     .apply(mutantEntityType.value());
         });
+    }
+
+    private static Fraction getSpawnWeight(Supplier<Double> spawnWeightSupplier) {
+        float spawnWeight = spawnWeightSupplier.get().floatValue();
+        if (spawnWeight == 0.0F) {
+            return Fraction.ZERO;
+        } else {
+            return Fraction.getFraction(1, Math.round(1.0F / spawnWeight));
+        }
     }
 }
