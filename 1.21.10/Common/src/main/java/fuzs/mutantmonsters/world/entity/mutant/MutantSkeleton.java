@@ -89,16 +89,6 @@ public class MutantSkeleton extends MutantMonster implements AnimatedEntity {
     }
 
     @Override
-    public int getMaxSpawnClusterSize() {
-        return 1;
-    }
-
-    @Override
-    protected void updateNoActionTime() {
-        // NO-OP
-    }
-
-    @Override
     public void aiStep() {
         super.aiStep();
         if (this.isAnimationPlaying()) {
@@ -130,21 +120,6 @@ public class MutantSkeleton extends MutantMonster implements AnimatedEntity {
         return !(damageSource.getEntity() instanceof MutantSkeleton) && super.hurtServer(serverLevel,
                 damageSource,
                 damageAmount);
-    }
-
-    @Override
-    protected boolean canRide(Entity entityIn) {
-        return false;
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
-    @Override
-    protected void blockedByItem(LivingEntity livingEntity) {
-        livingEntity.hurtMarked = true;
     }
 
     @Override

@@ -306,11 +306,6 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     }
 
     @Override
-    public int getMaxSpawnClusterSize() {
-        return 1;
-    }
-
-    @Override
     public int getMaxFallDistance() {
         return this.isClone() ? 3 : super.getMaxFallDistance();
     }
@@ -318,11 +313,6 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     @Override
     public boolean isPickable() {
         return super.isPickable() && this.animation != TELEPORT_ANIMATION;
-    }
-
-    @Override
-    protected void updateNoActionTime() {
-        // NO-OP
     }
 
     @Override
@@ -833,21 +823,11 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     }
 
     @Override
-    protected boolean canRide(Entity entityIn) {
-        return false;
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
-    @Override
     protected void blockedByItem(LivingEntity livingEntity) {
         if (this.isClone()) {
-            super.blockedByItem(livingEntity);
+            this.knockbackBlockedAttacker(livingEntity);
         } else {
-            livingEntity.hurtMarked = true;
+            super.blockedByItem(livingEntity);
         }
     }
 

@@ -64,9 +64,13 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     public static final Animation SLAM_GROUND_ANIMATION = new Animation(25);
     public static final Animation THROW_ANIMATION = new Animation(15);
     public static final Animation ROAR_ANIMATION = new Animation(120);
-    private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Byte> THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class, EntityDataSerializers.BYTE);
-    private static final Animation[] ANIMATIONS = new Animation[]{SLAM_GROUND_ANIMATION, THROW_ANIMATION, ROAR_ANIMATION};
+    private static final EntityDataAccessor<Integer> LIVES = SynchedEntityData.defineId(MutantZombie.class,
+            EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Byte> THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class,
+            EntityDataSerializers.BYTE);
+    private static final Animation[] ANIMATIONS = new Animation[]{
+            SLAM_GROUND_ANIMATION, THROW_ANIMATION, ROAR_ANIMATION
+    };
     private final List<SeismicWave> seismicWaveList;
     private final List<ZombieResurrection> resurrectionList;
     public int throwHitTick;
@@ -88,7 +92,11 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     }
 
     public static AttributeSupplier.Builder registerAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0).add(Attributes.ATTACK_DAMAGE, 12.0).add(Attributes.FOLLOW_RANGE, 35.0).add(Attributes.MOVEMENT_SPEED, 0.26).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 150.0)
+                .add(Attributes.ATTACK_DAMAGE, 12.0)
+                .add(Attributes.FOLLOW_RANGE, 35.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.26)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
     @Override
@@ -106,7 +114,8 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, (new HurtByNearestTargetGoal(this, WitherBoss.class)).setAlertOthers());
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
-        this.targetSelector.addGoal(2, (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(2,
+                (new NearestAttackableTargetGoal<>(this, Player.class, true)).setUnseenMemoryTicks(300));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
@@ -204,11 +213,6 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     }
 
     @Override
-    public boolean isPushable() {
-        return !this.onClimbable();
-    }
-
-    @Override
     public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
         // we cannot use #mobInteract as it does not trigger for dead mobs
         if (player.isSpectator()) return InteractionResult.PASS;
@@ -216,7 +220,8 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         ItemStack itemInHandCopy = itemInHand.copy();
         InteractionResult interactionResult = this.deadMobInteract(player, hand);
         if (interactionResult.consumesAction()) {
-            if (player.getAbilities().instabuild && itemInHand == player.getItemInHand(hand) && itemInHand.getCount() < itemInHandCopy.getCount()) {
+            if (player.getAbilities().instabuild && itemInHand == player.getItemInHand(hand)
+                    && itemInHand.getCount() < itemInHandCopy.getCount()) {
                 itemInHand.setCount(itemInHandCopy.getCount());
             }
             if (itemInHand.isEmpty() && !player.getAbilities().instabuild) {
@@ -232,8 +237,17 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     private InteractionResult deadMobInteract(Player player, InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
-        if (itemInHand.is(ItemTags.CREEPER_IGNITERS) && !this.isAlive() && !this.isOnFire() && !this.isInWaterOrRain()) {
-            this.level().playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
+        if (itemInHand.is(ItemTags.CREEPER_IGNITERS) && !this.isAlive() && !this.isOnFire()
+                && !this.isInWaterOrRain()) {
+            this.level()
+                    .playSound(player,
+                            this.getX(),
+                            this.getY(),
+                            this.getZ(),
+                            SoundEvents.FLINTANDSTEEL_USE,
+                            this.getSoundSource(),
+                            1.0F,
+                            this.random.nextFloat() * 0.4F + 0.8F);
             if (!this.level().isClientSide) {
                 this.setSecondsOnFire(8);
                 if (!itemInHand.isDamageableItem()) {
@@ -248,6 +262,14 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         } else {
             return InteractionResult.PASS;
+        }
+    }
+
+    @Override
+    public void setSecondsOnFire(int seconds) {
+        super.setSecondsOnFire(seconds);
+        if (this.level() instanceof ServerLevel && this.isDeadOrDying()) {
+            this.setLives(0);
         }
     }
 
@@ -268,7 +290,9 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     @Override
     protected void customServerAiStep() {
-        if (!this.isAnimationPlaying() && this.getTarget() != null && Math.abs(this.getY() - this.getTarget().getY()) <= 1.0 && this.distanceToSqr(this.getTarget()) <= 49.0 && this.random.nextInt(20) == 0) {
+        if (!this.isAnimationPlaying() && this.getTarget() != null
+                && Math.abs(this.getY() - this.getTarget().getY()) <= 1.0
+                && this.distanceToSqr(this.getTarget()) <= 49.0 && this.random.nextInt(20) == 0) {
             this.animation = SLAM_GROUND_ANIMATION;
         }
 
@@ -280,7 +304,8 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             return false;
         } else {
             Entity entity = source.getEntity();
-            return (entity == null || this.canHarm(entity) && (this.animation != THROW_ANIMATION || entity != this.getTarget())) && super.hurt(source, amount);
+            return (entity == null || this.canHarm(entity) && (this.animation != THROW_ANIMATION
+                    || entity != this.getTarget())) && super.hurt(source, amount);
         }
     }
 
@@ -295,7 +320,8 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         this.fixRotation();
         this.updateAnimation();
         this.updateMeleeGrounds();
-        if (this.level().isNight() && this.tickCount % 100 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()) {
+        if (this.level().isNight() && this.tickCount % 100 == 0 && this.isAlive()
+                && this.getHealth() < this.getMaxHealth()) {
             this.heal(2.0F);
         }
 
@@ -366,16 +392,26 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         if (!this.seismicWaveList.isEmpty()) {
             SeismicWave wave = this.seismicWaveList.remove(0);
             wave.affectBlocks(this.level(), this);
-            AABB box = new AABB(wave.getX(), (double) wave.getY() + 1.0, wave.getZ(), (double) wave.getX() + 1.0, (double) wave.getY() + 2.0, (double) wave.getZ() + 1.0);
+            AABB box = new AABB(wave.getX(),
+                    (double) wave.getY() + 1.0,
+                    wave.getZ(),
+                    (double) wave.getX() + 1.0,
+                    (double) wave.getY() + 2.0,
+                    (double) wave.getZ() + 1.0);
             if (wave.isFirst()) {
                 double addScale = this.random.nextDouble() * 0.75;
                 box = box.inflate(0.25 + addScale, 0.25 + addScale * 0.5, 0.25 + addScale);
             }
 
-            DamageSource source = DamageSourcesHelper.source(this.level(), ModRegistry.EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE, this);
+            DamageSource source = DamageSourcesHelper.source(this.level(),
+                    ModRegistry.EFFECTS_BYPASSING_MOB_ATTACK_DAMAGE_TYPE,
+                    this);
 
-            for (Entity entity : this.level().getEntities(this, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(this::canHarm))) {
-                if (entity instanceof LivingEntity && entity.hurt(source, wave.isFirst() ? (float) (9 + this.random.nextInt(4)) : (float) (6 + this.random.nextInt(3))) && this.random.nextInt(5) == 0) {
+            for (Entity entity : this.level()
+                    .getEntities(this, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(this::canHarm))) {
+                if (entity instanceof LivingEntity && entity.hurt(source,
+                        wave.isFirst() ? (float) (9 + this.random.nextInt(4)) : (float) (6 + this.random.nextInt(3)))
+                        && this.random.nextInt(5) == 0) {
                     ((LivingEntity) entity).addEffect(new MobEffectInstance(MobEffects.HUNGER, 160, 1));
                 }
 
@@ -412,6 +448,10 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     @Override
     public void die(DamageSource cause) {
         if (!this.level().isClientSide) {
+            if (this.isOnFire()) {
+                this.setLives(0);
+            }
+
             this.deathCause = cause;
             this.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
             this.setLastHurtMob(this.getLastHurtByMob());
@@ -424,47 +464,51 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
     @Override
     protected void tickDeath() {
-        if (this.deathTime <= 25 || !this.isOnFire() || this.deathTime >= 100) {
-            ++this.deathTime;
-        }
-
-        if (this.isOnFire()) {
-            if (this.vanishTime == 0) {
-                EntityUtil.sendMetadataPacket(this);
+        if (this.getLives() > 0) {
+            if (++this.deathTime >= MAX_DEATH_TIME) {
+                this.deathTime = 0;
+                this.deathCause = null;
+                this.setHealth(this.getMaxHealth() / 4.0F);
+                this.setLives(this.getLives() - 1);
             }
-
-            ++this.vanishTime;
         } else {
-            this.vanishTime = Math.max(0, this.vanishTime - 1);
-        }
-
-        if (this.deathTime >= 140) {
-            this.deathTime = 0;
-            this.vanishTime = 0;
-            this.deathCause = null;
-            this.setLives(this.getLives() - 1);
-            if (this.getLastHurtMob() != null) {
-                this.getLastHurtMob().setLastHurtByMob(this);
+            if (this.deathTime > MAX_VANISH_TIME) {
+                this.deathTime--;
+            } else if (this.deathTime < MAX_VANISH_TIME) {
+                this.deathTime++;
             }
 
-            this.setHealth((float) Math.round(this.getMaxHealth() / 3.75F));
-        }
-
-        if (this.vanishTime >= 100 || this.getLives() <= 0 && this.deathTime > 25) {
-            if (!this.level().isClientSide) {
-                super.die(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
+            if (++this.vanishTime >= MAX_VANISH_TIME) {
+                DamageSource killedByDamageSource = this.deathCause;
+                super.die(killedByDamageSource != null ? killedByDamageSource : this.damageSources().generic());
+                super.tickDeath();
             }
-
-            for (int i = 0; i < 30; ++i) {
-                double d0 = this.random.nextGaussian() * 0.02;
-                double d1 = this.random.nextGaussian() * 0.02;
-                double d2 = this.random.nextGaussian() * 0.02;
-                this.level().addParticle(this.isOnFire() ? ParticleTypes.FLAME : ParticleTypes.POOF, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
-            }
-
-            this.discard();
         }
+    }
 
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == 60) {
+            this.makePoofParticles();
+        } else {
+            super.handleEntityEvent(id);
+        }
+    }
+
+    public void makePoofParticles() {
+        for (int i = 0; i < 30; ++i) {
+            double d0 = this.random.nextGaussian() * 0.02;
+            double d1 = this.random.nextGaussian() * 0.02;
+            double d2 = this.random.nextGaussian() * 0.02;
+            this.level()
+                    .addParticle(this.isOnFire() ? ParticleTypes.FLAME : ParticleTypes.POOF,
+                            this.getRandomX(1.0),
+                            this.getRandomY() + 0.5,
+                            this.getRandomZ(1.0),
+                            d0,
+                            d1,
+                            d2);
+        }
     }
 
     @Override
@@ -474,12 +518,15 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
     }
 
     private boolean canHarm(Entity entity) {
-        return entity.getType() != EntityType.ZOMBIE && entity.getType() != EntityType.ZOMBIE_VILLAGER && entity.getType() != EntityType.HUSK && entity.getType() != EntityType.DROWNED && !(entity instanceof MutantZombie);
+        return entity.getType() != EntityType.ZOMBIE && entity.getType() != EntityType.ZOMBIE_VILLAGER
+                && entity.getType() != EntityType.HUSK && entity.getType() != EntityType.DROWNED
+                && !(entity instanceof MutantZombie);
     }
 
     @Override
     public boolean killedEntity(ServerLevel serverWorld, LivingEntity livingEntity) {
-        if ((serverWorld.getDifficulty() == Difficulty.NORMAL && this.random.nextBoolean() || serverWorld.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
+        if ((serverWorld.getDifficulty() == Difficulty.NORMAL && this.random.nextBoolean()
+                || serverWorld.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
             EntityUtil.convertMobWithNBT(livingEntity, EntityType.ZOMBIE_VILLAGER, false);
             if (!livingEntity.isSilent()) {
                 serverWorld.levelEvent(null, 1026, livingEntity.blockPosition(), 0);
@@ -520,7 +567,10 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         for (int i = 0; i < listNBT.size(); ++i) {
             CompoundTag compoundNBT = listNBT.getCompound(i);
-            this.resurrectionList.add(i, new ZombieResurrection(this.level(), NbtUtils.readBlockPos(compoundNBT), compoundNBT.getInt("Tick")));
+            this.resurrectionList.add(i,
+                    new ZombieResurrection(this.level(),
+                            NbtUtils.readBlockPos(compoundNBT),
+                            compoundNBT.getInt("Tick")));
         }
 
     }
@@ -614,7 +664,7 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             } else if (!target.isAlive()) {
                 return false;
             } else {
-                return !(target instanceof Player) || !target.isSpectator() && !((Player)target).isCreative();
+                return !(target instanceof Player) || !target.isSpectator() && !((Player) target).isCreative();
             }
         }
 
@@ -636,7 +686,8 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                     double d2 = this.mob.distanceToSqr(target.getX(), target.getBoundingBox().minY, target.getZ());
                     if (d2 < d1 && !this.mob.hasThrowAttackHit()) {
                         this.mob.setThrowAttackHit(true);
-                        if (!target.hurt(this.mob.level().damageSources().mobAttack(this.mob), (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+                        if (!target.hurt(this.mob.level().damageSources().mobAttack(this.mob),
+                                (float) this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                             EntityUtil.disableShield(target, 150);
                         }
 
@@ -647,10 +698,13 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
                         target.invulnerableTime = 10;
                         EntityUtil.sendPlayerVelocityPacket(target);
                         EntityUtil.stunRavager(target);
-                        this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+                        this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_GRUNT_SOUND_EVENT.get(),
+                                0.3F,
+                                0.8F + this.mob.random.nextFloat() * 0.4F);
                     }
 
-                    if ((this.mob.onGround() || !this.mob.getFeetBlockState().getFluidState().isEmpty()) && !this.mob.isThrowAttackFinished()) {
+                    if ((this.mob.onGround() || !this.mob.getFeetBlockState().getFluidState().isEmpty())
+                            && !this.mob.isThrowAttackFinished()) {
                         this.finish = 0;
                         this.mob.setThrowAttackFinished(true);
                     }
@@ -684,7 +738,10 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
 
         @Override
         public boolean canUse() {
-            return this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && this.mob.getTarget() != null && this.mob.onGround() && this.mob.resurrectionList.isEmpty() && this.mob.distanceToSqr(this.mob.getTarget()) > 16.0 && this.mob.random.nextFloat() * 100.0F < 0.35F;
+            return this.mob.tickCount % 3 == 0 && !this.mob.isAnimationPlaying() && this.mob.getTarget() != null
+                    && this.mob.onGround() && this.mob.resurrectionList.isEmpty()
+                    && this.mob.distanceToSqr(this.mob.getTarget()) > 16.0
+                    && this.mob.random.nextFloat() * 100.0F < 0.35F;
         }
 
         @Override
@@ -702,15 +759,20 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
             }
 
             if (this.mob.animationTick == 10) {
-                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ROAR_SOUND_EVENT.get(), 3.0F, 0.7F + this.mob.random.nextFloat() * 0.2F);
+                this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ROAR_SOUND_EVENT.get(),
+                        3.0F,
+                        0.7F + this.mob.random.nextFloat() * 0.2F);
 
-                for (Entity entity : this.mob.level().getEntities(this.mob, this.mob.getBoundingBox().inflate(12.0, 8.0, 12.0))) {
+                for (Entity entity : this.mob.level()
+                        .getEntities(this.mob, this.mob.getBoundingBox().inflate(12.0, 8.0, 12.0))) {
                     if (this.mob.canHarm(entity) && this.mob.distanceToSqr(entity) <= 196.0) {
                         double x = entity.getX() - this.mob.getX();
                         double z = entity.getZ() - this.mob.getZ();
                         double d = Math.sqrt(x * x + z * z);
                         entity.setDeltaMovement(x / d * 0.7, 0.3, z / d * 0.7);
-                        entity.hurt(DamageSourcesHelper.source(this.mob.level(), ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE, this.mob), (float) (2 + this.mob.random.nextInt(2)));
+                        entity.hurt(DamageSourcesHelper.source(this.mob.level(),
+                                ModRegistry.PIERCING_MOB_ATTACK_DAMAGE_TYPE,
+                                this.mob), (float) (2 + this.mob.random.nextInt(2)));
                         EntityUtil.sendPlayerVelocityPacket(entity);
                     }
                 }
@@ -754,7 +816,9 @@ public class MutantZombie extends AbstractMutantMonster implements AnimatedEntit
         public void start() {
             super.start();
             this.mob.ambientSoundTime = -this.mob.getAmbientSoundInterval();
-            this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(), 0.3F, 0.8F + this.mob.random.nextFloat() * 0.4F);
+            this.mob.playSound(ModRegistry.ENTITY_MUTANT_ZOMBIE_ATTACK_SOUND_EVENT.get(),
+                    0.3F,
+                    0.8F + this.mob.random.nextFloat() * 0.4F);
         }
 
         @Override

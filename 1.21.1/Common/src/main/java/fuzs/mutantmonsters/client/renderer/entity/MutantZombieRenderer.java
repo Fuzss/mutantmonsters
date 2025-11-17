@@ -82,6 +82,6 @@ public class MutantZombieRenderer extends AlternateMobRenderer<MutantZombie, Mut
 
     @Override
     protected boolean showsHurtColor(MutantZombie mob) {
-        return super.showsHurtColor(mob) || mob.deathTime > 0 && mob.getLives() <= 0;
+        return super.showsHurtColor(mob) || mob.deathTime > 0 && mob.getRemainingLives() <= 0;
     }
 }

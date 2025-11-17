@@ -148,7 +148,10 @@ public class MutantCreeper extends MutantMonster {
         double y = target.getY() - this.getY();
         double z = target.getZ() - this.getZ();
         double d = Math.sqrt(x * x + y * y + z * z);
-        target.push(x / d * 0.5, y / d * 0.05 + 0.15, z / d * 0.5);
+        if (d > 0.0) {
+            target.push(x / d * 0.5, y / d * 0.05 + 0.15, z / d * 0.5);
+        }
+
         this.swing(InteractionHand.MAIN_HAND);
         return hurt;
     }
@@ -210,15 +213,6 @@ public class MutantCreeper extends MutantMonster {
     }
 
     @Override
-    public int getMaxSpawnClusterSize() {
-        return 1;
-    }
-
-    @Override
-    protected void updateNoActionTime() {
-    }
-
-    @Override
     public void handleEntityEvent(byte id) {
         if (id == 6) {
             for (int i = 0; i < 15; ++i) {
@@ -268,21 +262,6 @@ public class MutantCreeper extends MutantMonster {
             this.jumpTick = 0;
         }
 
-    }
-
-    @Override
-    protected boolean canRide(Entity entityIn) {
-        return false;
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
-    @Override
-    protected void blockedByItem(LivingEntity livingEntity) {
-        livingEntity.hurtMarked = true;
     }
 
     public float getOverlayColor(float partialTick) {

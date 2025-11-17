@@ -3,8 +3,8 @@ package fuzs.mutantmonsters.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fuzs.mutantmonsters.MutantMonsters;
-import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.model.MutantZombieModel;
+import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantZombieRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
@@ -32,12 +32,13 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
     @Override
     public void extractRenderState(MutantZombie entity, MutantZombieRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
-        reusedState.hasRedOverlay = entity.hurtTime > 0 || entity.deathTime > 0 && entity.getLives() <= 0;
+        reusedState.hasRedOverlay = entity.hurtTime > 0 || entity.deathTime > 0 && entity.getRemainingLives() <= 0;
         AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity,
                 reusedState,
                 partialTick,
                 this.itemModelResolver);
-        reusedState.vanishTime = entity.vanishTime > 0 ? entity.vanishTime + partialTick : entity.vanishTime;
+        reusedState.deathTime = entity.getDeathTime(partialTick);
+        reusedState.vanishTime = entity.getVanishingProgress(partialTick);
         reusedState.throwHitTime = entity.throwHitTick == -1 ? -1.0F : entity.throwHitTick + partialTick;
         reusedState.throwFinishTime = entity.throwFinishTick == -1 ? -1.0F : entity.throwFinishTick + partialTick;
     }
@@ -101,7 +102,7 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
     @Override
     protected int getModelTint(MutantZombieRenderState renderState) {
         if (renderState.vanishTime > 0.0F) {
-            float alpha = 1.0F - renderState.vanishTime / (float) MutantZombie.MAX_VANISH_TIME * 0.6F;
+            float alpha = 1.0F - renderState.vanishTime;
             return ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
         } else {
             return super.getModelTint(renderState);

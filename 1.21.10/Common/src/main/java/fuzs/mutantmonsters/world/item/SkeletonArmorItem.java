@@ -17,7 +17,7 @@ public class SkeletonArmorItem extends Item {
         super(skeletonProperties(armorMaterial, armorType, properties));
     }
 
-    static Item.Properties skeletonProperties(ArmorMaterial armorMaterial, ArmorType armorType, Properties properties) {
+    private static Item.Properties skeletonProperties(ArmorMaterial armorMaterial, ArmorType armorType, Properties properties) {
         properties.humanoidArmor(armorMaterial, armorType);
         switch (armorType) {
             case BOOTS ->
@@ -28,7 +28,7 @@ public class SkeletonArmorItem extends Item {
         return properties;
     }
 
-    static ItemAttributeModifiers withJumpStrength(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
+    private static ItemAttributeModifiers withJumpStrength(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
         EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(armorType.getSlot());
         ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + armorType.getName());
         return itemAttributeModifiers.withModifierAdded(Attributes.JUMP_STRENGTH,
@@ -39,14 +39,19 @@ public class SkeletonArmorItem extends Item {
                         equipmentSlotGroup);
     }
 
-    static ItemAttributeModifiers withMovementSpeed(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
+    private static ItemAttributeModifiers withMovementSpeed(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
         EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(armorType.getSlot());
         ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + armorType.getName());
         return itemAttributeModifiers.withModifierAdded(Attributes.MOVEMENT_SPEED,
-                new AttributeModifier(resourceLocation,
-                        0.2 * amplifier,
-                        AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
-                equipmentSlotGroup);
+                        new AttributeModifier(resourceLocation,
+                                0.2 * amplifier,
+                                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                        equipmentSlotGroup)
+                .withModifierAdded(Attributes.STEP_HEIGHT,
+                        new AttributeModifier(resourceLocation,
+                                0.25 * amplifier,
+                                AttributeModifier.Operation.ADD_VALUE),
+                        equipmentSlotGroup);
     }
 
     public Component getDescriptionComponent() {

@@ -4,7 +4,9 @@ import fuzs.puzzleslib.api.util.v1.EntityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
@@ -76,5 +78,34 @@ public abstract class MutantMonster extends Monster {
                 }
             }
         }
+    }
+
+    @Override
+    protected boolean canRide(Entity entityIn) {
+        return false;
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+
+    @Override
+    protected void blockedByItem(LivingEntity livingEntity) {
+        livingEntity.hurtMarked = true;
+    }
+
+    protected void knockbackBlockedAttacker(LivingEntity livingEntity) {
+        super.blockedByItem(livingEntity);
+    }
+
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return 1;
+    }
+
+    @Override
+    protected void updateNoActionTime() {
+        // NO-OP
     }
 }

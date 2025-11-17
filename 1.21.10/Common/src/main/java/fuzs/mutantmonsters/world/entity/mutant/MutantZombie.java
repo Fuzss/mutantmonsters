@@ -14,13 +14,11 @@ import fuzs.mutantmonsters.world.level.SeismicWave;
 import fuzs.mutantmonsters.world.level.ZombieResurrection;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import fuzs.puzzleslib.api.util.v1.DamageHelper;
-import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -29,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -58,18 +57,19 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
 public class MutantZombie extends MutantMonster implements AnimatedEntity {
-    public static final int MAX_VANISH_TIME = 100;
-    public static final int MAX_DEATH_TIME = 140;
+    private static final int VANISH_WHEN_ACTUALLY_DEAD_TIME = 100;
+    private static final int REVIVE_AFTER_DEATH_TIME = 140;
     public static final EntityAnimation SLAM_GROUND_ANIMATION = new EntityAnimation("mutant_zombie_slam_ground", 25);
     public static final EntityAnimation THROW_ANIMATION = new EntityAnimation("mutant_zombie_throw", 15);
     public static final EntityAnimation ROAR_ANIMATION = new EntityAnimation("mutant_zombie_roar", 120);
-    private static final EntityDataAccessor<Byte> DATA_LIVES = SynchedEntityData.defineId(MutantZombie.class,
+    private static final EntityDataAccessor<Byte> DATA_REMAINING_LIVES = SynchedEntityData.defineId(MutantZombie.class,
             EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> DATA_THROW_ATTACK_STATE = SynchedEntityData.defineId(MutantZombie.class,
             EntityDataSerializers.BYTE);
@@ -78,18 +78,18 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     };
     private final List<SeismicWave> seismicWaveList = new ArrayList<>();
     private final List<ZombieResurrection> resurrectionList = new ArrayList<>();
-    public int throwHitTick;
-    public int throwFinishTick;
-    public int vanishTime;
-    private EntityAnimation animation;
+    public int throwHitTick = -1;
+    public int throwFinishTick = -1;
+    private int vanishTime;
+    private int oldDeathTime;
+    private EntityAnimation animation = EntityAnimation.NONE;
     private int animationTick;
-    private DamageSource deathCause;
+    @Nullable
+    private DamageSource killedByDamageSource;
+    private long killedByMemoryTime;
 
-    public MutantZombie(EntityType<? extends MutantZombie> type, Level worldIn) {
-        super(type, worldIn);
-        this.animation = EntityAnimation.NONE;
-        this.throwHitTick = -1;
-        this.throwFinishTick = -1;
+    public MutantZombie(EntityType<? extends MutantZombie> type, Level level) {
+        super(type, level);
         this.xpReward = Enemy.XP_REWARD_HUGE;
     }
 
@@ -125,16 +125,17 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(DATA_LIVES, (byte) 3);
+        builder.define(DATA_REMAINING_LIVES, (byte) 3);
         builder.define(DATA_THROW_ATTACK_STATE, (byte) 0);
     }
 
-    public int getLives() {
-        return this.entityData.get(DATA_LIVES);
+    public int getRemainingLives() {
+        return this.entityData.get(DATA_REMAINING_LIVES);
     }
 
-    private void setLives(int lives) {
-        this.entityData.set(DATA_LIVES, (byte) lives);
+    private void setRemainingLives(int lives) {
+        this.entityData.set(DATA_REMAINING_LIVES, (byte) lives);
+        this.vanishTime = 0;
     }
 
     public boolean hasThrowAttackHit() {
@@ -188,44 +189,38 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     }
 
     @Override
-    public int getMaxSpawnClusterSize() {
-        return 1;
-    }
-
-    @Override
     public int getMaxFallDistance() {
         return this.getTarget() != null ? (int) this.distanceTo(this.getTarget()) : 3;
     }
 
     @Override
-    public boolean isPushable() {
-        return !this.onClimbable();
-    }
-
-    @Override
-    public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
+    public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand interactionHand) {
         // we cannot use #mobInteract as it does not trigger for dead mobs
-        if (player.isSpectator()) return InteractionResult.PASS;
-        ItemStack itemInHand = player.getItemInHand(hand);
-        ItemStack itemInHandCopy = itemInHand.copy();
-        InteractionResult interactionResult = this.deadMobInteract(player, hand);
-        if (interactionResult.consumesAction()) {
-            if (player.getAbilities().instabuild && itemInHand == player.getItemInHand(hand)
-                    && itemInHand.getCount() < itemInHandCopy.getCount()) {
-                itemInHand.setCount(itemInHandCopy.getCount());
-            }
-            if (itemInHand.isEmpty() && !player.getAbilities().instabuild) {
-                player.setItemInHand(hand, ItemStack.EMPTY);
-            }
-            this.gameEvent(GameEvent.ENTITY_INTERACT);
-
-            return interactionResult;
+        if (player.isSpectator()) {
+            return InteractionResult.PASS;
         }
 
-        return super.interactAt(player, vec, hand);
+        ItemStack itemInHand = player.getItemInHand(interactionHand);
+        ItemStack originalItemInHand = itemInHand.copy();
+        InteractionResult interactionResult = this.mobInteractWhenDead(player, interactionHand);
+        if (interactionResult.consumesAction()) {
+            if (player.getAbilities().instabuild && itemInHand == player.getItemInHand(interactionHand)
+                    && itemInHand.getCount() < originalItemInHand.getCount()) {
+                itemInHand.setCount(originalItemInHand.getCount());
+            }
+
+            if (itemInHand.isEmpty() && !player.getAbilities().instabuild) {
+                player.setItemInHand(interactionHand, ItemStack.EMPTY);
+            }
+
+            this.gameEvent(GameEvent.ENTITY_INTERACT);
+            return interactionResult;
+        } else {
+            return super.interactAt(player, vec, interactionHand);
+        }
     }
 
-    private InteractionResult deadMobInteract(Player player, InteractionHand interactionHand) {
+    private InteractionResult mobInteractWhenDead(Player player, InteractionHand interactionHand) {
         ItemStack itemInHand = player.getItemInHand(interactionHand);
         if (itemInHand.is(ItemTags.CREEPER_IGNITERS) && !this.isAlive() && !this.isOnFire()
                 && !this.isInWaterOrRain()) {
@@ -245,11 +240,21 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                 } else {
                     ItemHelper.hurtAndBreak(itemInHand, 1, player, interactionHand);
                 }
+
                 player.awardStat(Stats.ITEM_USED.get(itemInHand.getItem()));
             }
-            return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
+
+            return InteractionResult.SUCCESS;
         } else {
             return InteractionResult.PASS;
+        }
+    }
+
+    @Override
+    public void igniteForTicks(int ticks) {
+        super.igniteForTicks(ticks);
+        if (this.level() instanceof ServerLevel && this.isDeadOrDying()) {
+            this.setRemainingLives(0);
         }
     }
 
@@ -275,6 +280,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                 && this.distanceToSqr(this.getTarget()) <= 49.0 && this.random.nextInt(20) == 0) {
             this.animation = SLAM_GROUND_ANIMATION;
         }
+
         super.customServerAiStep(serverLevel);
     }
 
@@ -290,18 +296,15 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     }
 
     @Override
-    protected void updateNoActionTime() {
-
-    }
-
-    @Override
     public void tick() {
+        this.oldDeathTime = this.deathTime;
         super.tick();
-        this.fixRotation();
+        this.snapRotation();
         this.updateAnimation();
         if (this.level() instanceof ServerLevel serverLevel) {
             this.updateMeleeGrounds(serverLevel);
         }
+
         if (this.level().isDarkOutside() && this.tickCount % 100 == 0 && this.isAlive()
                 && this.getHealth() < this.getMaxHealth()) {
             this.heal(2.0F);
@@ -313,15 +316,9 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                 this.resurrectionList.remove(zr);
             }
         }
-
-        if (this.getHealth() > 0.0F) {
-            this.deathTime = 0;
-            this.vanishTime = 0;
-        }
-
     }
 
-    private void fixRotation() {
+    private void snapRotation() {
         float yaw;
         yaw = this.yHeadRot - this.yBodyRot;
         while (yaw < -180.0F) {
@@ -388,7 +385,6 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
             DamageSource damageSource = DamageHelper.damageSource(this.level(),
                     ModRegistry.MUTANT_ZOMBIE_SEISMIC_WAVE_DAMAGE_TYPE,
                     this);
-
             for (Entity entity : this.level()
                     .getEntities(this, box, EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(this::canHarm))) {
                 float damageAmount =
@@ -408,130 +404,127 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     }
 
     @Override
-    protected boolean canRide(Entity entityIn) {
-        return false;
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
-    @Override
-    protected void blockedByItem(LivingEntity livingEntity) {
-        livingEntity.hurtMarked = true;
-    }
-
-    @Override
     public void die(DamageSource damageSource) {
-        if (!this.level().isClientSide()) {
-            this.deathCause = damageSource;
-            for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
-                if (goal.isRunning()) {
-                    goal.stop();
-                }
+        if (this.level() instanceof ServerLevel serverLevel) {
+            if (this.isOnFire()) {
+                this.setRemainingLives(0);
             }
 
-            this.setLastHurtMob(this.getLastHurtByMob());
-            this.level().broadcastEntityEvent(this, (byte) 3);
-            if (this.lastHurtByPlayerMemoryTime > 0) {
-                this.lastHurtByPlayerMemoryTime += MAX_DEATH_TIME;
+            this.killedByDamageSource = damageSource;
+            this.killedByMemoryTime = serverLevel.getGameTime();
+            if (this.getRemainingLives() > 0) {
+                this.stopAllGoals();
+                this.getNavigation().stop();
+                serverLevel.broadcastEntityEvent(this, (byte) 3);
+                if (this.lastHurtByPlayerMemoryTime > 0) {
+                    this.lastHurtByPlayerMemoryTime += REVIVE_AFTER_DEATH_TIME;
+                }
+            }
+        }
+    }
+
+    private void stopAllGoals() {
+        for (WrappedGoal goal : this.goalSelector.getAvailableGoals()) {
+            if (goal.isRunning()) {
+                goal.stop();
             }
         }
     }
 
     @Override
     protected void tickDeath() {
-        if (this.deathTime <= 25 || !this.isOnFire() || this.deathTime >= MAX_VANISH_TIME) {
-            ++this.deathTime;
-        }
-
-        if (this.isOnFire()) {
-            if (this.vanishTime == 0) {
-                if (this.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.getChunkSource()
-                            .sendToTrackingPlayers(this,
-                                    new ClientboundSetEntityDataPacket(this.getId(),
-                                            this.getEntityData().getNonDefaultValues()));
-                }
+        if (this.getRemainingLives() > 0) {
+            if (++this.deathTime >= REVIVE_AFTER_DEATH_TIME) {
+                this.deathTime = 0;
+                this.killedByDamageSource = null;
+                this.setHealth(this.getMaxHealth() / 4.0F);
+                this.setRemainingLives(this.getRemainingLives() - 1);
             }
-
-            ++this.vanishTime;
         } else {
-            this.vanishTime = Math.max(0, this.vanishTime - 1);
-        }
-
-        if (this.deathTime >= MAX_DEATH_TIME) {
-            this.deathTime = 0;
-            this.vanishTime = 0;
-            this.deathCause = null;
-            this.setLives(this.getLives() - 1);
-            if (this.getLastHurtMob() != null) {
-                this.getLastHurtMob().setLastHurtByMob(this);
+            if (this.deathTime > VANISH_WHEN_ACTUALLY_DEAD_TIME) {
+                this.deathTime--;
+            } else if (this.deathTime < VANISH_WHEN_ACTUALLY_DEAD_TIME) {
+                this.deathTime++;
             }
 
-            this.setHealth((float) Math.round(this.getMaxHealth() / 3.75F));
-        }
-
-        if (this.vanishTime >= MAX_VANISH_TIME || this.getLives() <= 0 && this.deathTime > 25) {
-            if (!this.level().isClientSide()) {
-                super.die(this.deathCause != null ? this.deathCause : this.level().damageSources().generic());
+            if (++this.vanishTime >= VANISH_WHEN_ACTUALLY_DEAD_TIME) {
+                DamageSource killedByDamageSource = this.getKilledByDamageSource();
+                super.die(killedByDamageSource != null ? killedByDamageSource : this.damageSources().generic());
+                super.tickDeath();
             }
-
-            for (int i = 0; i < 30; ++i) {
-                double d0 = this.random.nextGaussian() * 0.02;
-                double d1 = this.random.nextGaussian() * 0.02;
-                double d2 = this.random.nextGaussian() * 0.02;
-                this.level()
-                        .addParticle(this.isOnFire() ? ParticleTypes.FLAME : ParticleTypes.POOF,
-                                this.getRandomX(1.0),
-                                this.getRandomY() + 0.5,
-                                this.getRandomZ(1.0),
-                                d0,
-                                d1,
-                                d2);
-            }
-
-            this.discard();
         }
+    }
 
+    /**
+     * @see LivingEntity#getLastDamageSource()
+     */
+    public @Nullable DamageSource getKilledByDamageSource() {
+        if (this.level().getGameTime() - this.killedByMemoryTime > REVIVE_AFTER_DEATH_TIME * 2L) {
+            return this.killedByDamageSource = null;
+        } else {
+            return this.killedByDamageSource;
+        }
+    }
+
+    public float getDeathTime(float partialTick) {
+        return Mth.lerp(partialTick, this.oldDeathTime, this.deathTime);
+    }
+
+    public float getVanishingProgress(float partialTick) {
+        return this.getRemainingLives() <= 0 ?
+                Math.min(1.0F, (this.vanishTime + partialTick) / VANISH_WHEN_ACTUALLY_DEAD_TIME) : 0;
+    }
+
+    @Override
+    public void makePoofParticles() {
+        for (int i = 0; i < 30; ++i) {
+            double d0 = this.random.nextGaussian() * 0.02;
+            double d1 = this.random.nextGaussian() * 0.02;
+            double d2 = this.random.nextGaussian() * 0.02;
+            this.level()
+                    .addParticle(this.isOnFire() ? ParticleTypes.FLAME : ParticleTypes.POOF,
+                            this.getRandomX(1.0),
+                            this.getRandomY() + 0.5,
+                            this.getRandomZ(1.0),
+                            d0,
+                            d1,
+                            d2);
+        }
     }
 
     @Override
     public void kill(ServerLevel serverLevel) {
         super.kill(serverLevel);
-        this.setLives(0);
+        this.setRemainingLives(0);
     }
 
-    private boolean canHarm(Entity entity) {
-        return entity.getType() != EntityType.ZOMBIE && entity.getType() != EntityType.ZOMBIE_VILLAGER
-                && entity.getType() != EntityType.HUSK && entity.getType() != EntityType.DROWNED
-                && !(entity instanceof MutantZombie);
+    public boolean canHarm(Entity entity) {
+        return !entity.getType().is(EntityTypeTags.ZOMBIES);
     }
 
     @Override
     public boolean killedEntity(ServerLevel serverLevel, LivingEntity entity, DamageSource damageSource) {
-        boolean bl = super.killedEntity(serverLevel, entity, damageSource);
+        boolean killedEntity = super.killedEntity(serverLevel, entity, damageSource);
         if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD)
                 && entity instanceof Villager villager) {
             if (serverLevel.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
-                return bl;
+                return killedEntity;
             }
 
             if (this.convertVillagerToZombieVillager(serverLevel, villager)) {
-                bl = false;
+                killedEntity = false;
             }
         }
 
-        return bl;
+        return killedEntity;
     }
 
-    private boolean convertVillagerToZombieVillager(ServerLevel level, Villager villager) {
+    private boolean convertVillagerToZombieVillager(ServerLevel serverLevel, Villager villager) {
         ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER,
                 ConversionParams.single(villager, true, true),
                 zombieVillagerx -> {
-                    zombieVillagerx.finalizeSpawn(level,
-                            level.getCurrentDifficultyAt(zombieVillagerx.blockPosition()),
+                    zombieVillagerx.finalizeSpawn(serverLevel,
+                            serverLevel.getCurrentDifficultyAt(zombieVillagerx.blockPosition()),
                             EntitySpawnReason.CONVERSION,
                             new Zombie.ZombieGroupData(false, true));
                     zombieVillagerx.setVillagerData(villager.getVillagerData());
@@ -539,7 +532,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
                     zombieVillagerx.setTradeOffers(villager.getOffers().copy());
                     zombieVillagerx.setVillagerXp(villager.getVillagerXp());
                     if (!this.isSilent()) {
-                        level.levelEvent(null, 1026, this.blockPosition(), 0);
+                        serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
                     }
                 });
         return zombieVillager != null;
@@ -548,7 +541,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     @Override
     protected void addAdditionalSaveData(ValueOutput valueOutput) {
         super.addAdditionalSaveData(valueOutput);
-        valueOutput.putInt("Lives", this.getLives());
+        valueOutput.putInt("Lives", this.getRemainingLives());
         valueOutput.putShort("VanishTime", (short) this.vanishTime);
         valueOutput.store("Resurrections", ZombieResurrection.LIST_CODEC, this.resurrectionList);
     }
@@ -556,7 +549,7 @@ public class MutantZombie extends MutantMonster implements AnimatedEntity {
     @Override
     protected void readAdditionalSaveData(ValueInput valueInput) {
         super.readAdditionalSaveData(valueInput);
-        valueInput.getInt("Lives").ifPresent(this::setLives);
+        valueInput.getInt("Lives").ifPresent(this::setRemainingLives);
         this.vanishTime = valueInput.getShortOr("VanishTime", (short) 0);
         valueInput.read("Resurrections", ZombieResurrection.LIST_CODEC).ifPresent(this.resurrectionList::addAll);
     }
