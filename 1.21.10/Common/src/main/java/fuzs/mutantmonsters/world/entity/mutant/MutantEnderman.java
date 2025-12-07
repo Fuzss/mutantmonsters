@@ -67,6 +67,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -146,6 +147,23 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
         this.xpReward = Enemy.XP_REWARD_BOSS;
     }
 
+    public static AttributeSupplier.Builder createAttributes() {
+        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 200.0)
+                .add(Attributes.ATTACK_DAMAGE, 7.0)
+                .add(Attributes.FOLLOW_RANGE, 96.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.3)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
+                .add(Attributes.STEP_HEIGHT, 1.4);
+    }
+
+    public static boolean checkMutantEndermanSpawnRules(EntityType<MutantEnderman> entityType, ServerLevelAccessor serverLevel, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource) {
+        return randomSource.nextInt(3) == 0 && checkMonsterSpawnRules(entityType,
+                serverLevel,
+                entitySpawnReason,
+                blockPos,
+                randomSource);
+    }
+
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -167,23 +185,6 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
         this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, false));
     }
 
-    public static AttributeSupplier.Builder createAttributes() {
-        return createMonsterAttributes().add(Attributes.MAX_HEALTH, 200.0)
-                .add(Attributes.ATTACK_DAMAGE, 7.0)
-                .add(Attributes.FOLLOW_RANGE, 96.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.3)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
-                .add(Attributes.STEP_HEIGHT, 1.4);
-    }
-
-    public static boolean checkMutantEndermanSpawnRules(EntityType<MutantEnderman> entityType, ServerLevelAccessor serverLevel, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource) {
-        return randomSource.nextInt(3) == 0 && checkMonsterSpawnRules(entityType,
-                serverLevel,
-                entitySpawnReason,
-                blockPos,
-                randomSource);
-    }
-
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
@@ -193,6 +194,13 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
         for (EntityDataAccessor<Optional<BlockState>> dataHeldBlock : DATA_HELD_BLOCKS) {
             builder.define(dataHeldBlock, Optional.empty());
         }
+    }
+
+    @Override
+    public float getWalkTargetValue(BlockPos pos, LevelReader level) {
+        // Required for PathfinderMob::checkSpawnRules to achieve proper spawning in the End dimension.
+        // This has been necessary since Minecraft 1.21.9+ when skylight was added to the End.
+        return 0.0F;
     }
 
     public Optional<BlockPos> getTeleportPosition() {
@@ -444,8 +452,10 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
             ++this.animationTick;
         }
 
-        if (this.animation == DEATH_ANIMATION) {
-            this.deathTime = this.animationTick;
+        // resume death animation after reloading
+        if (this.isDeadOrDying() && this.animation != DEATH_ANIMATION) {
+            AnimatedEntity.sendAnimationPacket(this, DEATH_ANIMATION);
+            this.animationTick = this.deathTime;
         }
 
         this.updateTargetTick();
@@ -874,6 +884,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
                 for (ItemStack itemStack2 : blockState.getDrops(builder)) {
                     this.spawnAtLocation(level, itemStack2);
                 }
+
                 this.setHeldBlock(i, Optional.empty(), 0);
             }
         }
@@ -881,6 +892,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
 
     @Override
     protected void tickDeath() {
+        this.deathTime++;
         this.setDeltaMovement(0.0, Math.min(this.getDeltaMovement().y, 0.0), 0.0);
         if (this.deathTime == 80) {
             this.playSound(ModSoundEvents.ENTITY_MUTANT_ENDERMAN_DEATH_SOUND_EVENT.value(), 5.0F, this.getVoicePitch());

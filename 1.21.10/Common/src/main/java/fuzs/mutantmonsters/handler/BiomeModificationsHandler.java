@@ -64,7 +64,7 @@ public final class BiomeModificationsHandler {
         if (spawnWeight == 0.0F) {
             return Fraction.ZERO;
         } else {
-            return Fraction.getFraction(1, Math.round(1.0F / spawnWeight));
+            return Fraction.getFraction(spawnWeight);
         }
     }
 }

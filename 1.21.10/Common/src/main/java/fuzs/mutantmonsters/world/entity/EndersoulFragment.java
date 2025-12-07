@@ -8,7 +8,6 @@ import fuzs.mutantmonsters.util.EntityUtil;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
 import fuzs.puzzleslib.api.util.v1.DamageHelper;
 import fuzs.puzzleslib.api.util.v1.InteractionResultHelper;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -24,27 +23,18 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.UUID;
-
 /**
  * Owner implementation adapted from {@link net.minecraft.world.entity.projectile.Projectile}.
  */
 public class EndersoulFragment extends Entity implements TraceableEntity {
     @Nullable
-    private final MutantEnderman spawner;
-    public final float[][] stickRotations;
+    private EntityReference<Entity> owner;
     private int explodeTick;
-    @Nullable
-    private UUID ownerUUID;
-    @Nullable
-    private Entity cachedOwner;
+    public final float[][] stickRotations;
 
-    private EndersoulFragment(EntityType<? extends EndersoulFragment> entityType, Level level, MutantEnderman mutantEnderman) {
+    public EndersoulFragment(EntityType<? extends EndersoulFragment> entityType, Level level) {
         super(entityType, level);
         this.stickRotations = new float[8][3];
-        this.explodeTick = 20 + this.random.nextInt(20);
-        this.spawner = mutantEnderman;
         for (int i = 0; i < this.stickRotations.length; ++i) {
             for (int j = 0; j < this.stickRotations[i].length; ++j) {
                 this.stickRotations[i][j] = this.random.nextFloat() * 2.0F * Mth.PI;
@@ -52,8 +42,10 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
         }
     }
 
-    public EndersoulFragment(EntityType<? extends EndersoulFragment> entityType, Level level) {
-        this(entityType, level, null);
+    private EndersoulFragment(EntityType<? extends EndersoulFragment> entityType, Level level, MutantEnderman mutantEnderman) {
+        this(entityType, level);
+        this.setOwner(mutantEnderman);
+        this.explodeTick = 20 + this.random.nextInt(20);
     }
 
     public EndersoulFragment(Level level, MutantEnderman mutantEnderman) {
@@ -74,48 +66,29 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
         // NO-OP
     }
 
+    protected void setOwner(@Nullable EntityReference<Entity> owner) {
+        this.owner = owner;
+    }
+
     public void setOwner(@Nullable Entity owner) {
-        if (owner != null) {
-            this.ownerUUID = owner.getUUID();
-            this.cachedOwner = owner;
-        }
+        this.setOwner(EntityReference.of(owner));
     }
 
     @Nullable
     @Override
     public Entity getOwner() {
-        if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {
-            return this.cachedOwner;
-        } else if (this.ownerUUID != null) {
-            this.cachedOwner = this.findOwner(this.ownerUUID);
-            return this.cachedOwner;
-        } else {
-            return null;
-        }
-    }
-
-    @Nullable
-    protected Entity findOwner(UUID entityUuid) {
-        return this.level() instanceof ServerLevel serverLevel ? serverLevel.getEntity(entityUuid) : null;
+        return EntityReference.getEntity(this.owner, this.level());
     }
 
     public boolean ownedBy(Entity entity) {
-        return entity.getUUID().equals(this.ownerUUID);
-    }
-
-    protected void setOwnerThroughUUID(@Nullable UUID uuid) {
-        if (!Objects.equals(this.ownerUUID, uuid)) {
-            this.ownerUUID = uuid;
-            this.cachedOwner = uuid != null ? this.findOwner(uuid) : null;
-        }
+        return this.owner != null && this.owner.matches(entity);
     }
 
     @Override
     public void restoreFrom(Entity entity) {
         super.restoreFrom(entity);
         if (entity instanceof EndersoulFragment endersoulFragment) {
-            this.ownerUUID = endersoulFragment.ownerUUID;
-            this.cachedOwner = endersoulFragment.cachedOwner;
+            this.owner = endersoulFragment.owner;
         }
     }
 
@@ -164,6 +137,7 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
             this.setPos(this.position().add(this.getDeltaMovement()));
             this.applyEffectsFromBlocks();
         }
+
         if (this.level() instanceof ServerLevel serverLevel && --this.explodeTick <= 0) {
             this.explode(serverLevel);
         }
@@ -171,10 +145,13 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
-        if (!this.ownedBy(player) && !player.isSecondaryUseActive()) {
-            this.setOwner(player);
-            this.explodeTick += 600;
-            this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 0.8F + this.level().random.nextFloat() * 0.4F);
+        if (!player.isSecondaryUseActive()) {
+            if (this.level() instanceof ServerLevel && !this.ownedBy(player)) {
+                this.setOwner(player);
+                this.explodeTick += 600;
+                this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 0.8F + this.level().random.nextFloat() * 0.4F);
+            }
+
             return InteractionResultHelper.sidedSuccess(this.level().isClientSide());
         } else {
             return super.interact(player, interactionHand);
@@ -202,7 +179,7 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
         for (Entity entity : serverLevel.getEntities(this,
                 this.getBoundingBox().inflate(5.0),
                 MutantEnderman.ENDER_TARGETS)) {
-            if (!this.ownedBy(entity)) {
+            if (!(entity instanceof EndersoulFragment) && !this.ownedBy(entity)) {
                 boolean hitChance = this.random.nextInt(3) != 0;
                 if (isProtected(entity)) {
                     hitChance = this.random.nextInt(3) == 0;
@@ -218,7 +195,7 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
                     DamageSource damageSource = DamageHelper.damageSource(serverLevel,
                             ModRegistry.ENDERSOUL_FRAGMENT_EXPLOSION_DAMAGE_TYPE,
                             this,
-                            this.spawner != null ? this.spawner : this);
+                            this.getOwner());
                     entity.hurtServer(serverLevel, damageSource, 1.0F);
                 }
             }
@@ -229,13 +206,13 @@ public class EndersoulFragment extends Entity implements TraceableEntity {
 
     @Override
     protected void addAdditionalSaveData(ValueOutput valueOutput) {
-        valueOutput.storeNullable("Owner", UUIDUtil.CODEC, this.ownerUUID);
+        EntityReference.store(this.owner, valueOutput, "Owner");
         valueOutput.putInt("ExplodeTick", this.explodeTick);
     }
 
     @Override
     protected void readAdditionalSaveData(ValueInput valueInput) {
-        this.setOwnerThroughUUID(valueInput.read("Owner", UUIDUtil.CODEC).orElse(null));
+        this.setOwner(EntityReference.read(valueInput, "Owner"));
         valueInput.getInt("ExplodeTick").ifPresent(this::setExplodeTick);
     }
 }

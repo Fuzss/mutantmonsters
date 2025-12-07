@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v21.10.3-1.21.10] - 2025-12-07
+
+### Changed
+
+- Mutant endermen are no longer permitted to spawn on the main island in the End
+
+### Fixed
+
+- Fix mutant endermen being unable to spawn on the surface in the End dimension
+- Fix mutant endermen becoming stuck when dying after being reloaded
+- Fix crash caused by high spawn weights set in the common config file
+
 ## [v21.10.2-1.21.10] - 2025-11-17
 
 ### Fixed

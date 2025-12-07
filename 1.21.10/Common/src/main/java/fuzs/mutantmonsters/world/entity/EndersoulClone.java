@@ -36,17 +36,17 @@ public class EndersoulClone extends Monster {
         this.setPathfindingMalus(PathType.DAMAGE_OTHER, -1.0F);
     }
 
-    @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new MutantMeleeAttackGoal(this, 1.2));
-    }
-
     public static AttributeSupplier.Builder createAttributes() {
         return createMonsterAttributes().add(Attributes.MAX_HEALTH, 1.0)
                 .add(Attributes.ATTACK_DAMAGE, 1.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.STEP_HEIGHT, 1.0);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new MutantMeleeAttackGoal(this, 1.2));
     }
 
     public void setCloner(MutantEnderman cloner) {

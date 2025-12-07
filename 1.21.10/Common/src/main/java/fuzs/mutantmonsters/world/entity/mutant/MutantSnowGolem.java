@@ -69,6 +69,10 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
         this.setPathfindingMalus(PathType.WATER, -1.0F);
     }
 
+    public static AttributeSupplier.Builder createAttributes() {
+        return createMobAttributes().add(Attributes.MAX_HEALTH, 80.0).add(Attributes.MOVEMENT_SPEED, 0.26);
+    }
+
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimJumpGoal(this));
@@ -93,10 +97,6 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
                             return livingEntity instanceof Enemy && (!(livingEntity instanceof Creeper)
                                     || ((Creeper) livingEntity).getTarget() == this);
                         }));
-    }
-
-    public static AttributeSupplier.Builder createAttributes() {
-        return createMobAttributes().add(Attributes.MAX_HEALTH, 80.0).add(Attributes.MOVEMENT_SPEED, 0.26);
     }
 
     @Override

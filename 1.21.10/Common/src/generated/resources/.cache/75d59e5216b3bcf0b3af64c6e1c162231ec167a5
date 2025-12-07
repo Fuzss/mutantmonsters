@@ -1,5 +1,5 @@
-// 1.21.10	2025-10-09T18:49:22.01485	Tags for minecraft:worldgen/biome mod id vanilla
+// 1.21.10	2025-12-07T18:46:07.205974	Tags for minecraft:worldgen/biome mod id vanilla
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/mutantmonsters/tags/worldgen/biome/without_mutant_creeper_spawns.json
-35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/mutantmonsters/tags/worldgen/biome/without_mutant_enderman_spawns.json
+21a543c6639e978f1255df73bdc67d5b240e2a18 data/mutantmonsters/tags/worldgen/biome/without_mutant_enderman_spawns.json
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/mutantmonsters/tags/worldgen/biome/without_mutant_skeleton_spawns.json
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/mutantmonsters/tags/worldgen/biome/without_mutant_zombie_spawns.json
