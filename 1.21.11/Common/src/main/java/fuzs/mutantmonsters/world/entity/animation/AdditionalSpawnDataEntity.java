@@ -10,8 +10,9 @@ import net.minecraft.world.entity.Entity;
 /**
  * An interface attached to {@link Entity} to send additional data to clients when the entity is added to the client
  * level.
- * <p>Using this interface requires overriding {@link Entity#getAddEntityPacket()} and returning
- * {@link #getPacket(Entity)}
+ * <p>
+ * Using this interface requires overriding {@link Entity#getAddEntityPacket(ServerEntity)} and returning
+ * {@link #getPacket(Entity, ServerEntity)}
  */
 public interface AdditionalSpawnDataEntity {
 
