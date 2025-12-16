@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "mutantmonsters:item/endersoul_hand"
+        },
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:special",
+      "base": "mutantmonsters:item/endersoul_hand_in_hand",
+      "model": {
+        "type": "mutantmonsters:endersoul_hand"
+      }
+    },
+    "property": "minecraft:display_context"
+  }
+}
