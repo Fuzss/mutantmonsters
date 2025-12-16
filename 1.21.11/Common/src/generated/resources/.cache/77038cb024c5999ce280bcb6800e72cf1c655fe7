@@ -1,4 +1,4 @@
-// 1.21.11	2025-12-16T13:41:59.359511	Model Definitions
+// 1.21.11	2025-12-16T23:54:06.923446	Model Definitions
 94ee00eebd82061338b6db439a84b3fdf98f3942 assets/mutantmonsters/blockstates/mutant_skeleton_skull.json
 94ee00eebd82061338b6db439a84b3fdf98f3942 assets/mutantmonsters/blockstates/mutant_skeleton_wall_skull.json
 d06c8c82f9d9440a3cbf6139996e07db8a36f852 assets/mutantmonsters/items/chemical_x.json
@@ -20,7 +20,7 @@ c8539f258e3d8143eb6a37dff2feceb49eabddf5 assets/mutantmonsters/items/mutant_skel
 989f7a53a2260c0bb9f1aa3b2af3c022784306c6 assets/mutantmonsters/items/mutant_skeleton_shoulder_pad.json
 fe00dcd7267c86babc8780f61f7a6be251cd00cc assets/mutantmonsters/items/mutant_skeleton_skull.json
 0b677542f3039fc60f2ba03e1ec2a666a5eb69cd assets/mutantmonsters/items/mutant_skeleton_spawn_egg.json
-03e5cd346bd665f59e353c711a51cf05123f222d assets/mutantmonsters/items/mutant_snow_golem_spawn_egg.json
+603f54b550d3e3fd604ed76526b664573171e278 assets/mutantmonsters/items/mutant_snow_golem_spawn_egg.json
 03e5cd346bd665f59e353c711a51cf05123f222d assets/mutantmonsters/items/mutant_zombie_spawn_egg.json
 ba4d8a575ce1ce7ec950623629660c7dbe682860 assets/mutantmonsters/items/spider_pig_spawn_egg.json
 6f8a47dfad9387b7127b6d51ea91a98d4c96986e assets/mutantmonsters/models/item/chemical_x.json
