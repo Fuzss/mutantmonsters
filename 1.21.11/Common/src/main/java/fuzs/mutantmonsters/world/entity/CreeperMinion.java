@@ -37,18 +37,18 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.ShoulderRidingEntity;
+import net.minecraft.world.entity.animal.parrot.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 
@@ -266,7 +266,7 @@ public class CreeperMinion extends ShoulderRidingEntity {
                             this.canDestroyBlocks() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
                     MutatedExplosionHelper.explode(this, sizeIn, false, interaction);
                     if (!this.canExplodeContinuously()) {
-                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
+                        if (serverLevel.getGameRules().get(GameRules.SHOW_DEATH_MESSAGES)
                                 && this.getOwner() instanceof ServerPlayer serverPlayer) {
                             serverPlayer.sendSystemMessage(Component.translatable("death.attack.explosion",
                                     this.getDisplayName()));

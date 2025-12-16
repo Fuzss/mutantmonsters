@@ -6,15 +6,15 @@ import fuzs.mutantmonsters.client.model.CreeperMinionModel;
 import fuzs.mutantmonsters.client.renderer.entity.layers.PowerableLayer;
 import fuzs.mutantmonsters.client.renderer.entity.state.CreeperMinionRenderState;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class CreeperMinionRenderer extends MobRenderer<CreeperMinion, CreeperRenderState, CreeperMinionModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = ResourceLocationHelper.withDefaultNamespace(
+    public static final Identifier TEXTURE_LOCATION = Identifier.withDefaultNamespace(
             "textures/entity/creeper/creeper.png");
 
     public CreeperMinionRenderer(EntityRendererProvider.Context context) {
@@ -55,7 +55,7 @@ public class CreeperMinionRenderer extends MobRenderer<CreeperMinion, CreeperRen
     }
 
     @Override
-    public ResourceLocation getTextureLocation(CreeperRenderState renderState) {
+    public Identifier getTextureLocation(CreeperRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 }

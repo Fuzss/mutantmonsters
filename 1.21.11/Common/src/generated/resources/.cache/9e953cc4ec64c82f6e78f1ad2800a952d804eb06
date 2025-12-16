@@ -1,4 +1,4 @@
-// 1.21.10	2025-11-17T13:49:52.138216	Tags for minecraft:entity_type mod id vanilla
+// 1.21.11	2025-12-16T13:41:59.359281	Tags for minecraft:entity_type mod id vanilla
 acdc99df8da88744ee2f13c39250c7f6da7fc965 data/enderzoology/tags/entity_type/concussion_immune.json
 e5a8ec2f43036495bb95f251aabbbae976b92553 data/minecraft/tags/entity_type/arthropod.json
 e5a8ec2f43036495bb95f251aabbbae976b92553 data/minecraft/tags/entity_type/can_equip_saddle.json
@@ -7,7 +7,7 @@ e5a8ec2f43036495bb95f251aabbbae976b92553 data/minecraft/tags/entity_type/can_equ
 6a7a0d483c991e3e2ccc8793c6bea5f67684440a data/minecraft/tags/entity_type/impact_projectiles.json
 1b89c042c04a200a23a8eda70e1507ff3ea39323 data/minecraft/tags/entity_type/skeletons.json
 ad045d1a4ce1e90906fa9151fd31d16c9753c429 data/minecraft/tags/entity_type/zombies.json
-18b4c7c09956cbea94683040770f2de2f4a9a9e5 data/mutantmonsters/tags/entity_type/ender_friends.json
+7d686c1649a63212b636a48cf6e5b01549f1d71c data/mutantmonsters/tags/entity_type/ender_friends.json
 d7c9ba57130326b03ed79c69df452468d39f73e3 data/mutantmonsters/tags/entity_type/mutants.json
 01638d610c6219dd5cbb376cb43055526a336c32 data/mutantmonsters/tags/entity_type/spider_pig_friends.json
 9a1ab3b675a727ef3447d64972e7cad6cc7eb0c5 data/mutantmonsters/tags/entity_type/spider_pig_targets.json

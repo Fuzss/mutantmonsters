@@ -6,7 +6,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
 
 public class MutantCrossbowModel extends Model<MutantSkeletonRenderState> {
@@ -20,7 +20,7 @@ public class MutantCrossbowModel extends Model<MutantSkeletonRenderState> {
     private final ModelPart rope2;
 
     public MutantCrossbowModel(ModelPart modelPart) {
-        super(modelPart, RenderType::entityCutoutNoCull);
+        super(modelPart, RenderTypes::entityCutoutNoCull);
         ModelPart armWear = modelPart.getChild("arm_wear");
         ModelPart middle = armWear.getChild("middle");
         this.middle1 = middle.getChild("middle1");

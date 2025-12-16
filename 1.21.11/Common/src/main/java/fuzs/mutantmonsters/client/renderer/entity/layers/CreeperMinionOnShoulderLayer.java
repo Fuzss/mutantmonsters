@@ -4,13 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.model.CreeperMinionModel;
 import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
-import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.CreeperMinionRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.CreeperMinionRenderState;
+import fuzs.mutantmonsters.client.renderer.rendertype.ModRenderTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
 import fuzs.puzzleslib.api.client.renderer.v1.RenderStateExtraData;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -20,6 +19,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.EquipmentAssetManager;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
@@ -126,7 +126,7 @@ public class CreeperMinionOnShoulderLayer extends RenderLayer<AvatarRenderState,
                 avatarRenderState.outlineColor,
                 null);
         if (renderState.isPowered) {
-            RenderType renderType = ModRenderType.energySwirl(PowerableLayer.LIGHTNING_TEXTURE,
+            RenderType renderType = ModRenderTypes.energySwirl(PowerableLayer.LIGHTNING_TEXTURE,
                     avatarRenderState.ageInTicks * 0.01F,
                     avatarRenderState.ageInTicks * 0.01F);
             int color = ARGB.colorFromFloat(1.0F, 0.5F, 0.5F, 0.5F);

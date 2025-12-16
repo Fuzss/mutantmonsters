@@ -9,10 +9,10 @@ import fuzs.mutantmonsters.client.renderer.entity.state.MutantSkeletonRenderStat
 import fuzs.mutantmonsters.world.entity.mutant.MutantSkeleton;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSkeletonRenderState, MutantSkeletonModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_skeleton.png");
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_skeleton.png");
 
     public MutantSkeletonRenderer(EntityRendererProvider.Context context) {
         super(context,
@@ -25,9 +25,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
     public void extractRenderState(MutantSkeleton entity, MutantSkeletonRenderState reusedState, float partialTick) {
         super.extractRenderState(entity, reusedState, partialTick);
         AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity,
-                reusedState,
-                partialTick,
-                this.itemModelResolver);
+                reusedState, this.itemModelResolver, partialTick);
     }
 
     @Override
@@ -41,7 +39,7 @@ public class MutantSkeletonRenderer extends MobRenderer<MutantSkeleton, MutantSk
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantSkeletonRenderState renderState) {
+    public Identifier getTextureLocation(MutantSkeletonRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 }

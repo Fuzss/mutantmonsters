@@ -25,7 +25,6 @@ import fuzs.puzzleslib.api.core.v1.context.BiomeModificationsContext;
 import fuzs.puzzleslib.api.core.v1.context.EntityAttributesContext;
 import fuzs.puzzleslib.api.core.v1.context.PayloadTypesContext;
 import fuzs.puzzleslib.api.core.v1.context.SpawnPlacementsContext;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.event.v1.entity.ServerEntityLevelEvents;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingDropsCallback;
 import fuzs.puzzleslib.api.event.v1.entity.living.LivingHurtCallback;
@@ -35,7 +34,7 @@ import fuzs.puzzleslib.api.event.v1.entity.player.ItemEntityEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerInteractEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerTickEvents;
 import fuzs.puzzleslib.api.event.v1.level.ExplosionEvents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.animal.Animal;
@@ -62,7 +61,7 @@ public class MutantMonsters implements ModConstructor {
 
     private static void registerEventHandlers() {
         LivingHurtCallback.EVENT.register(EntityEventsHandler::onLivingHurt);
-        UseItemEvents.TICK.register(PlayerEventsHandler::onItemUseTick);
+        UseItemEvents.TICK.register(PlayerEventsHandler::onUseItemTick);
         ArrowLooseCallback.EVENT.register(PlayerEventsHandler::onArrowLoose);
         PlayerInteractEvents.USE_ENTITY.register(EntityEventsHandler::onEntityInteract);
         PlayerTickEvents.END.register(PlayerEventsHandler::onEndPlayerTick);
@@ -153,7 +152,7 @@ public class MutantMonsters implements ModConstructor {
         BiomeModificationsHandler.onRegisterBiomeModifications(context);
     }
 
-    public static ResourceLocation id(String name) {
-        return ResourceLocationHelper.fromNamespaceAndPath(MOD_ID, name);
+    public static Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 }

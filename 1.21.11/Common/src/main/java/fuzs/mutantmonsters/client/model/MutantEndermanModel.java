@@ -9,7 +9,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 
@@ -833,7 +833,7 @@ public class MutantEndermanModel extends EntityModel<MutantEndermanRenderState> 
         private final boolean right;
 
         public Arm(ModelPart modelPart, String prefix, boolean right) {
-            super(modelPart.getChild(prefix + "arm"), RenderType::entityCutoutNoCull);
+            super(modelPart.getChild(prefix + "arm"), RenderTypes::entityCutoutNoCull);
             this.right = right;
             this.arm = this.root;
             this.foreArm = this.root.getChild("fore_arm");

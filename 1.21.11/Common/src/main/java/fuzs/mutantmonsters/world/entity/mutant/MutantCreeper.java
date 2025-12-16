@@ -27,7 +27,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.player.Player;
@@ -35,14 +35,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 
@@ -319,7 +319,7 @@ public class MutantCreeper extends MutantMonster {
             if (this.level() instanceof ServerLevel serverLevel) {
                 MutatedExplosionHelper.explode(this, power, this.isOnFire(), Level.ExplosionInteraction.MOB);
                 super.die(this.deathCause != null ? this.deathCause : this.damageSources().generic());
-                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.lastHurtByPlayer != null
+                if (serverLevel.getGameRules().get(GameRules.MOB_DROPS) && this.lastHurtByPlayer != null
                         && this.lastHurtByPlayerMemoryTime > 0) {
                     CreeperMinionEgg creeperMinionEgg = new CreeperMinionEgg(this);
                     Player player = EntityReference.get(this.lastHurtByPlayer, this.level(), Player.class);

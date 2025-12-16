@@ -12,13 +12,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -128,18 +128,17 @@ public class SeismicWave extends BlockPos {
             BlockState blockstate = level.getBlockState(this);
             Block block = blockstate.getBlock();
             Player playerEntity = entity instanceof Player ? (Player) entity : null;
-            if (playerEntity != null && playerEntity.mayBuild() ||
-                    level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-                if (blockstate.is(Blocks.GRASS_BLOCK) || blockstate.is(Blocks.DIRT_PATH) ||
-                        blockstate.is(Blocks.FARMLAND) || blockstate.is(Blocks.PODZOL) ||
-                        blockstate.is(Blocks.MYCELIUM)) {
+            if (playerEntity != null && playerEntity.mayBuild() || level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+                if (blockstate.is(Blocks.GRASS_BLOCK) || blockstate.is(Blocks.DIRT_PATH)
+                        || blockstate.is(Blocks.FARMLAND) || blockstate.is(Blocks.PODZOL)
+                        || blockstate.is(Blocks.MYCELIUM)) {
                     level.setBlockAndUpdate(this, Blocks.DIRT.defaultBlockState());
                 }
 
                 BlockState blockstateAbove = level.getBlockState(posAbove);
                 float hardness = blockstateAbove.getDestroySpeed(level, posAbove);
-                if (blockstateAbove.getCollisionShape(level, posAbove).isEmpty() && hardness > -1.0F &&
-                        hardness <= 1.0F) {
+                if (blockstateAbove.getCollisionShape(level, posAbove).isEmpty() && hardness > -1.0F
+                        && hardness <= 1.0F) {
                     level.destroyBlock(posAbove, playerEntity != null);
                 }
 
@@ -196,6 +195,7 @@ public class SeismicWave extends BlockPos {
             seismicWaves = seismicWaves.subList(seismicWaves.size() - MAX_SEISMIC_WAVES_PER_PLAYER,
                     seismicWaves.size());
         }
+
         if (!seismicWaves.isEmpty()) {
             SeismicWave seismicWave = seismicWaves.getFirst();
             seismicWaves = seismicWaves.subList(1, seismicWaves.size());

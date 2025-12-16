@@ -6,19 +6,20 @@ import fuzs.mutantmonsters.client.model.MutantSnowGolemModel;
 import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantSnowGolemRenderState;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 public class MutantSnowGolemJackOLanternLayer extends RenderLayer<MutantSnowGolemRenderState, MutantSnowGolemModel> {
-    public static final ResourceLocation JACK_O_LANTERN_TEXTURE_LOCATION = MutantMonsters.id(
+    public static final Identifier JACK_O_LANTERN_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_snow_golem/jack_o_lantern.png");
-    public static final RenderType GLOW_RENDER_TYPE = RenderType.eyes(MutantMonsters.id(
+    public static final RenderType GLOW_RENDER_TYPE = RenderTypes.eyes(MutantMonsters.id(
             "textures/entity/mutant_snow_golem/glow.png"));
 
     private final MutantSnowGolemModel model;

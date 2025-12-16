@@ -5,8 +5,6 @@ import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionNameMessage;
 import fuzs.mutantmonsters.network.client.ServerboundCreeperMinionTrackerMessage;
 import fuzs.mutantmonsters.world.entity.CreeperMinion;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -16,15 +14,16 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public class CreeperMinionTrackerScreen extends Screen {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/gui/creeper_minion_tracker.png");
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id("textures/gui/creeper_minion_tracker.png");
     public static final Component HEALTH_COMPONENT = createComponent("health");
     public static final Component EXPLOSION_COMPONENT = createComponent("explosion");
     public static final Component BLAST_RADIUS_COMPONENT = createComponent("blast_radius");
@@ -212,9 +211,9 @@ public class CreeperMinionTrackerScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
+    public void resize(int width, int height) {
         String string = this.name.getValue();
-        this.init(minecraft, width, height);
+        super.resize(width, height);
         this.name.setValue(string);
     }
 

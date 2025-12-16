@@ -8,17 +8,17 @@ import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.state.AnimatedEntityRenderState;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantZombieRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombieRenderState, MutantZombieModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_zombie.png");
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_zombie.png");
 
     public MutantZombieRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantZombieModel(context.bakeLayer(ModModelLayers.MUTANT_ZOMBIE)), 1.0F);
@@ -34,9 +34,7 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
         super.extractRenderState(entity, reusedState, partialTick);
         reusedState.hasRedOverlay = entity.hurtTime > 0 || entity.deathTime > 0 && entity.getRemainingLives() <= 0;
         AnimatedEntityRenderState.extractAnimatedEntityRenderState(entity,
-                reusedState,
-                partialTick,
-                this.itemModelResolver);
+                reusedState, this.itemModelResolver, partialTick);
         reusedState.deathTime = entity.getDeathTime(partialTick);
         reusedState.vanishTime = entity.getVanishingProgress(partialTick);
         reusedState.throwHitTime = entity.throwHitTick == -1 ? -1.0F : entity.throwHitTick + partialTick;
@@ -49,7 +47,7 @@ public class MutantZombieRenderer extends MobRenderer<MutantZombie, MutantZombie
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantZombieRenderState renderState) {
+    public Identifier getTextureLocation(MutantZombieRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 

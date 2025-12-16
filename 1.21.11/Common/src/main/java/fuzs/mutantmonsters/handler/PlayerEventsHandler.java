@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,19 +30,21 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class PlayerEventsHandler {
 
-    public static EventResult onItemUseTick(LivingEntity entity, ItemStack useItem, MutableInt useItemRemaining) {
+    public static EventResult onUseItemTick(LivingEntity livingEntity, ItemStack itemStack, InteractionHand interactionHand, MutableInt remainingUseDuration) {
         // quick charge for bows
-        if (entity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM)) {
-            if (useItem.getItem() instanceof BowItem
-                    && BowItem.getPowerForTime(useItem.getUseDuration(entity) - useItemRemaining.getAsInt()) < 1.0F) {
-                useItemRemaining.mapInt(i -> i - 2);
+        if (livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM)) {
+            if (itemStack.getItem() instanceof BowItem
+                    && BowItem.getPowerForTime(itemStack.getUseDuration(livingEntity) - remainingUseDuration.getAsInt())
+                    < 1.0F) {
+                remainingUseDuration.mapAsInt((int value) -> value - 2);
             }
         }
+
         return EventResult.PASS;
     }
 
@@ -72,7 +75,7 @@ public class PlayerEventsHandler {
         }
     }
 
-    private static void handleSeismicWave(ServerLevel serverLevel, Player player, @NotNull SeismicWave seismicWave) {
+    private static void handleSeismicWave(ServerLevel serverLevel, Player player, @NonNull SeismicWave seismicWave) {
         seismicWave.affectBlocks(serverLevel, player);
         AABB box = new AABB(seismicWave.getX(),
                 (double) seismicWave.getY() + 1.0,

@@ -7,16 +7,17 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MutantArrow extends Arrow {
-    private static final EntityDataAccessor<Integer> DATA_CLONES = SynchedEntityData.defineId(MutantArrow.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_CLONES = SynchedEntityData.defineId(MutantArrow.class,
+            EntityDataSerializers.INT);
 
     public MutantArrow(EntityType<? extends MutantArrow> type, Level level) {
         super(type, level);
@@ -103,14 +104,28 @@ public class MutantArrow extends Arrow {
 
     @Nullable
     protected EntityHitResult findHitEntity(Vec3 startVec, Vec3 endVec) {
-        return ProjectileUtil.getEntityHitResult(this.level(), this, startVec, endVec, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity, 1.0F);
+        return ProjectileUtil.getEntityHitResult(this.level(),
+                this,
+                startVec,
+                endVec,
+                this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D),
+                this::canHitEntity,
+                1.0F);
     }
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
         super.doPostHurtEffects(target);
         if (!this.isSilent()) {
-            this.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CROSSBOW_HIT, this.getSoundSource(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+            this.level()
+                    .playSound(null,
+                            target.getX(),
+                            target.getY(),
+                            target.getZ(),
+                            SoundEvents.CROSSBOW_HIT,
+                            this.getSoundSource(),
+                            1.0F,
+                            1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
         }
     }
 }

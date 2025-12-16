@@ -12,12 +12,12 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 
 public class SpiderPigRenderer extends MobRenderer<SpiderPig, SpiderPigRenderState, SpiderPigModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/spider_pig.png");
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id("textures/entity/spider_pig.png");
 
     private final AdultAndBabyModelPair<SpiderPigModel> models;
 
@@ -63,7 +63,7 @@ public class SpiderPigRenderer extends MobRenderer<SpiderPig, SpiderPigRenderSta
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SpiderPigRenderState renderState) {
+    public Identifier getTextureLocation(SpiderPigRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 }

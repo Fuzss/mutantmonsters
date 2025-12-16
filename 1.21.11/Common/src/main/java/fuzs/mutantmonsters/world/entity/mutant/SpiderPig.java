@@ -22,7 +22,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -60,15 +60,14 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, NeutralMob {
-    private static final ResourceLocation STEP_HEIGHT_MODIFIER_WITH_PASSENGER_ID = MutantMonsters.id("with_passenger");
+    private static final Identifier STEP_HEIGHT_MODIFIER_WITH_PASSENGER_ID = MutantMonsters.id("with_passenger");
     private static final AttributeModifier STEP_HEIGHT_MODIFIER_WITH_PASSENGER = new AttributeModifier(
             STEP_HEIGHT_MODIFIER_WITH_PASSENGER_ID,
             0.4,
@@ -85,8 +84,8 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
     private int chargingTick;
     private int chargeExhaustion;
     private boolean chargeExhausted;
-    private int angerTime;
-    private UUID angerTarget;
+    private long persistentAngerEndTime;
+    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
 
     public SpiderPig(EntityType<? extends SpiderPig> type, Level level) {
         super(type, level);
@@ -343,29 +342,28 @@ public class SpiderPig extends TamableAnimal implements PlayerRideableJumping, N
     }
 
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return this.angerTime;
-    }
-
-    @Override
-    public void setRemainingPersistentAngerTime(int angerTime) {
-        this.angerTime = angerTime;
-    }
-
-    @Override
-    @Nullable
-    public UUID getPersistentAngerTarget() {
-        return this.angerTarget;
-    }
-
-    @Override
-    public void setPersistentAngerTarget(@Nullable UUID angerTarget) {
-        this.angerTarget = angerTarget;
-    }
-
-    @Override
     public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
+        this.setTimeToRemainAngry(PERSISTENT_ANGER_TIME.sample(this.random));
+    }
+
+    @Override
+    public void setPersistentAngerEndTime(long persistentAngerEndTime) {
+        this.persistentAngerEndTime = persistentAngerEndTime;
+    }
+
+    @Override
+    public long getPersistentAngerEndTime() {
+        return this.persistentAngerEndTime;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> entityReference) {
+        this.persistentAngerTarget = entityReference;
+    }
+
+    @Override
+    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
     }
 
     @Override

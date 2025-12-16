@@ -3,22 +3,22 @@ package fuzs.mutantmonsters.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.Equippable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
     private final EM babyModel;
     private final int order;
 
-    public ModEquipmentLayer(RenderLayerParent<S, RM> renderLayerParent, ResourceKey<EquipmentAsset> assetId, ResourceLocation layer, String layerType, Function<S, ItemStack> itemGetter, EM adultModel, EM babyModel, int order) {
+    public ModEquipmentLayer(RenderLayerParent<S, RM> renderLayerParent, ResourceKey<EquipmentAsset> assetId, Identifier layer, String layerType, Function<S, ItemStack> itemGetter, EM adultModel, EM babyModel, int order) {
         super(renderLayerParent);
         this.equipmentAssets = Collections.singletonMap(assetId,
                 Collections.singletonList(new EquipmentClientInfo.Layer(layer)));
@@ -47,7 +47,7 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
         this.order = order;
     }
 
-    public ModEquipmentLayer(RenderLayerParent<S, RM> renderLayerParent, ResourceKey<EquipmentAsset> assetId, ResourceLocation layer, String layerType, Function<S, ItemStack> itemGetter, EM adultModel, EM babyModel) {
+    public ModEquipmentLayer(RenderLayerParent<S, RM> renderLayerParent, ResourceKey<EquipmentAsset> assetId, Identifier layer, String layerType, Function<S, ItemStack> itemGetter, EM adultModel, EM babyModel) {
         this(renderLayerParent, assetId, layer, layerType, itemGetter, adultModel, babyModel, 0);
     }
 
@@ -91,9 +91,9 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
 
     /**
      * @see EquipmentLayerRenderer#renderLayers(EquipmentClientInfo.LayerType, ResourceKey, Model, Object, ItemStack,
-     *         PoseStack, SubmitNodeCollector, int, ResourceLocation, int, int)
+     *         PoseStack, SubmitNodeCollector, int, Identifier, int, int)
      */
-    public void renderLayers(String layerType, ResourceKey<EquipmentAsset> equipmentAsset, Model<? super S> armorModel, S renderState, ItemStack item, PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, @Nullable ResourceLocation texture, int outlineColor, int order) {
+    public void renderLayers(String layerType, ResourceKey<EquipmentAsset> equipmentAsset, Model<? super S> armorModel, S renderState, ItemStack item, PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, @Nullable Identifier texture, int outlineColor, int order) {
         List<EquipmentClientInfo.Layer> list = this.equipmentAssets.get(equipmentAsset);
         if (!list.isEmpty()) {
             int dyeColor = DyedItemColor.getOrDefault(item, 0);
@@ -101,12 +101,12 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
             for (EquipmentClientInfo.Layer layer : list) {
                 int tintColor = EquipmentLayerRenderer.getColorForLayer(layer, dyeColor);
                 if (tintColor != 0) {
-                    ResourceLocation resourceLocation = this.layerTextureLookup(layer, layerType);
+                    Identifier identifier = this.layerTextureLookup(layer, layerType);
                     nodeCollector.order(order++)
                             .submitModel(armorModel,
                                     renderState,
                                     poseStack,
-                                    RenderType.armorCutoutNoCull(resourceLocation),
+                                    RenderTypes.armorCutoutNoCull(identifier),
                                     packedLight,
                                     OverlayTexture.NO_OVERLAY,
                                     tintColor,
@@ -118,7 +118,7 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
                                 .submitModel(armorModel,
                                         renderState,
                                         poseStack,
-                                        RenderType.armorEntityGlint(),
+                                        RenderTypes.armorEntityGlint(),
                                         packedLight,
                                         OverlayTexture.NO_OVERLAY,
                                         tintColor,
@@ -137,7 +137,7 @@ public class ModEquipmentLayer<S extends LivingEntityRenderState, RM extends Ent
      * @see EquipmentLayerRenderer#layerTextureLookup
      * @see EquipmentClientInfo.Layer#getTextureLocation(EquipmentClientInfo.LayerType)
      */
-    public ResourceLocation layerTextureLookup(EquipmentClientInfo.Layer layer, String type) {
+    public Identifier layerTextureLookup(EquipmentClientInfo.Layer layer, String type) {
         return layer.textureId()
                 .withPath((String string) -> "textures/entity/equipment/" + type + "/" + string + ".png");
     }

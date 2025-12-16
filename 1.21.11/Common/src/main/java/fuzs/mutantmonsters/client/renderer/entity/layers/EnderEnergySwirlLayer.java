@@ -1,14 +1,14 @@
 package fuzs.mutantmonsters.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.EndersoulCloneRenderer;
+import fuzs.mutantmonsters.client.renderer.rendertype.ModRenderTypes;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ARGB;
 
@@ -22,7 +22,7 @@ public abstract class EnderEnergySwirlLayer<S extends LivingEntityRenderState, M
     public void submit(PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, S renderState, float yRot, float xRot) {
         poseStack.pushPose();
         this.scale(poseStack, this.getScale(renderState));
-        RenderType renderType = ModRenderType.energySwirl(EndersoulCloneRenderer.TEXTURE_LOCATION,
+        RenderType renderType = ModRenderTypes.energySwirl(EndersoulCloneRenderer.TEXTURE_LOCATION,
                 renderState.ageInTicks * 0.008F,
                 renderState.ageInTicks * 0.008F);
         int color = ARGB.colorFromFloat(this.getAlpha(renderState), 0.9F, 0.3F, 1.0F);

@@ -7,20 +7,20 @@ import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.layers.*;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
 import fuzs.mutantmonsters.world.entity.mutant.MutantEnderman;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEndermanRenderState, MutantEndermanModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id(
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_enderman/mutant_enderman.png");
 
     private final MutantEndermanTeleportLayer teleportLayer;
@@ -143,7 +143,7 @@ public class MutantEndermanRenderer extends MobRenderer<MutantEnderman, MutantEn
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantEndermanRenderState renderState) {
+    public Identifier getTextureLocation(MutantEndermanRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 

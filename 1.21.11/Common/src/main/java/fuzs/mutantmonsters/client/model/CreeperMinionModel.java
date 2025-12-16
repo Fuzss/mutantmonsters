@@ -2,9 +2,9 @@ package fuzs.mutantmonsters.client.model;
 
 import fuzs.mutantmonsters.client.renderer.entity.state.CreeperMinionRenderState;
 import net.minecraft.client.model.BabyModelTransform;
-import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.MeshTransformer;
+import net.minecraft.client.model.monster.creeper.CreeperModel;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 
 import java.util.Set;

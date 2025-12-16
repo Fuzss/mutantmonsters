@@ -1,0 +1,64 @@
+{
+    "mod": {
+        "id": "mutantmonsters",
+        "group": "fuzs.mutantmonsters",
+        "name": "Mutant Monsters",
+        "version": "21.11.0",
+        "authors": [
+            "shcott21",
+            "Chumbanotz",
+            "Fuzs",
+            "tdstress"
+        ],
+        "description": "Mutant creatures and beasts to face off against. Will you triumph, or will you perish?",
+        "license": "AGPL-3.0-or-later"
+    },
+    "dependencies": [
+        {
+            "name": "fabricapi",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "forgeconfigapiport",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "puzzleslib",
+            "type": "required",
+            "platforms": [
+                "fabric",
+                "neoforge"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "name": "github",
+            "slug": "mutantmonsters"
+        },
+        {
+            "name": "curseforge",
+            "slug": "mutant-monsters",
+            "id": "852665"
+        },
+        {
+            "name": "modrinth",
+            "slug": "mutant-monsters",
+            "id": "derP0ten"
+        }
+    ],
+    "environments": {
+        "client": "required",
+        "server": "required"
+    },
+    "platforms": [
+        "fabric",
+        "neoforge"
+    ]
+}

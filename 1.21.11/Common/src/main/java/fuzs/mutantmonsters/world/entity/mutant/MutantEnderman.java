@@ -31,7 +31,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -65,20 +65,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -89,7 +89,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
             .and((Entity entity) -> {
                 return !entity.getType().is(ModTags.ENDER_FRIENDS_ENTITY_TYPE_TAG);
             });
-    private static final ResourceLocation STEP_HEIGHT_MODIFIER_CLONING_ID = MutantMonsters.id("cloning");
+    private static final Identifier STEP_HEIGHT_MODIFIER_CLONING_ID = MutantMonsters.id("cloning");
     private static final AttributeModifier STEP_HEIGHT_MODIFIER_CLONING = new AttributeModifier(
             STEP_HEIGHT_MODIFIER_CLONING_ID,
             -0.4,
@@ -137,9 +137,9 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     @Nullable
     private List<Entity> capturedEntities;
     private DamageSource deathCause;
-    private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
-    private int angerTime;
-    private UUID angerTarget;
+    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    private long persistentAngerEndTime;
+    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
 
     public MutantEnderman(EntityType<? extends MutantEnderman> entityType, Level level) {
         super(entityType, level);
@@ -247,29 +247,28 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
     }
 
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return this.angerTime;
-    }
-
-    @Override
-    public void setRemainingPersistentAngerTime(int angerTime) {
-        this.angerTime = angerTime;
-    }
-
-    @Override
-    @Nullable
-    public UUID getPersistentAngerTarget() {
-        return this.angerTarget;
-    }
-
-    @Override
-    public void setPersistentAngerTarget(@Nullable UUID angerTarget) {
-        this.angerTarget = angerTarget;
-    }
-
-    @Override
     public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
+        this.setTimeToRemainAngry(PERSISTENT_ANGER_TIME.sample(this.random));
+    }
+
+    @Override
+    public void setPersistentAngerEndTime(long persistentAngerEndTime) {
+        this.persistentAngerEndTime = persistentAngerEndTime;
+    }
+
+    @Override
+    public long getPersistentAngerEndTime() {
+        return this.persistentAngerEndTime;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> entityReference) {
+        this.persistentAngerTarget = entityReference;
+    }
+
+    @Override
+    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
     }
 
     @Override
@@ -944,7 +943,7 @@ public class MutantEnderman extends MutantMonster implements NeutralMob, Animate
         }
 
         if (this.level() instanceof ServerLevel serverLevel && this.deathTime >= 100 && this.deathTime < 150
-                && this.deathTime % 6 == 0 && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+                && this.deathTime % 6 == 0 && serverLevel.getGameRules().get(GameRules.MOB_DROPS)) {
             this.lootTable = Optional.of(ModRegistry.MUTANT_ENDERMAN_CONTINUOUS_LOOT_TABLE);
             this.dropFromLootTable(serverLevel,
                     this.deathCause != null ? this.deathCause : serverLevel.damageSources().generic(),

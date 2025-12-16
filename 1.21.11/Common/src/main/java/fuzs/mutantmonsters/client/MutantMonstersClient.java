@@ -5,9 +5,9 @@ import fuzs.mutantmonsters.client.model.*;
 import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.particle.EndersoulParticle;
 import fuzs.mutantmonsters.client.particle.SkullSpiritParticle;
-import fuzs.mutantmonsters.client.renderer.ModRenderType;
 import fuzs.mutantmonsters.client.renderer.entity.*;
 import fuzs.mutantmonsters.client.renderer.entity.layers.CreeperMinionOnShoulderLayer;
+import fuzs.mutantmonsters.client.renderer.rendertype.ModRenderTypes;
 import fuzs.mutantmonsters.client.renderer.special.EndersoulHandSpecialRenderer;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModRegistry;
@@ -18,13 +18,13 @@ import fuzs.puzzleslib.api.client.core.v1.context.*;
 import fuzs.puzzleslib.api.client.event.v1.renderer.AddLivingEntityRenderLayersCallback;
 import fuzs.puzzleslib.api.client.event.v1.renderer.ExtractRenderStateCallback;
 import fuzs.puzzleslib.api.client.gui.v2.tooltip.ItemTooltipRegistry;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
-import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.model.EndermanModel;
-import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.monster.creeper.CreeperModel;
+import net.minecraft.client.model.monster.enderman.EndermanModel;
+import net.minecraft.client.model.object.skull.SkullModel;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
+import net.minecraft.resources.Identifier;
 
 public class MutantMonstersClient implements ClientModConstructor {
 
@@ -142,17 +142,17 @@ public class MutantMonstersClient implements ClientModConstructor {
     @Override
     public void onRegisterEntitySpectatorShaders(EntitySpectatorShadersContext context) {
         context.registerSpectatorShader(ModEntityTypes.CREEPER_MINION_ENTITY_TYPE.value(),
-                ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"));
+                Identifier.withDefaultNamespace("shaders/post/creeper.json"));
         context.registerSpectatorShader(ModEntityTypes.MUTANT_CREEPER_ENTITY_TYPE.value(),
-                ResourceLocationHelper.withDefaultNamespace("shaders/post/creeper.json"));
+                Identifier.withDefaultNamespace("shaders/post/creeper.json"));
         context.registerSpectatorShader(ModEntityTypes.ENDERSOUL_CLONE_ENTITY_TYPE.value(),
-                ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"));
+                Identifier.withDefaultNamespace("shaders/post/invert.json"));
         context.registerSpectatorShader(ModEntityTypes.MUTANT_ENDERMAN_ENTITY_TYPE.value(),
-                ResourceLocationHelper.withDefaultNamespace("shaders/post/invert.json"));
+                Identifier.withDefaultNamespace("shaders/post/invert.json"));
     }
 
     @Override
     public void onRegisterRenderPipelines(RenderPipelinesContext context) {
-        context.registerRenderPipeline(ModRenderType.ENERGY_SWIRL_RENDER_PIPELINE);
+        context.registerRenderPipeline(ModRenderTypes.ENERGY_SWIRL_RENDER_PIPELINE);
     }
 }

@@ -3,7 +3,7 @@ package fuzs.mutantmonsters.world.entity.ai.goal;
 import fuzs.mutantmonsters.world.entity.mutant.MutantZombie;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 
 public class TrackSummonerGoal extends Goal {
     private final Zombie zombie;

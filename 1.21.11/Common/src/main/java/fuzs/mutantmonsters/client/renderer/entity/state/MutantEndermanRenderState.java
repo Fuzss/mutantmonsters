@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.entity.state.EndermanRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MutantEndermanRenderState extends EndermanRenderState {
     public float animationTime;

@@ -2,7 +2,7 @@ package fuzs.mutantmonsters.world.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -30,25 +30,25 @@ public class SkeletonArmorItem extends Item {
 
     private static ItemAttributeModifiers withJumpStrength(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
         EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(armorType.getSlot());
-        ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + armorType.getName());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + armorType.getName());
         return itemAttributeModifiers.withModifierAdded(Attributes.JUMP_STRENGTH,
-                        new AttributeModifier(resourceLocation, 0.1 * amplifier, AttributeModifier.Operation.ADD_VALUE),
+                        new AttributeModifier(identifier, 0.1 * amplifier, AttributeModifier.Operation.ADD_VALUE),
                         equipmentSlotGroup)
                 .withModifierAdded(Attributes.SAFE_FALL_DISTANCE,
-                        new AttributeModifier(resourceLocation, 1.0 * amplifier, AttributeModifier.Operation.ADD_VALUE),
+                        new AttributeModifier(identifier, 1.0 * amplifier, AttributeModifier.Operation.ADD_VALUE),
                         equipmentSlotGroup);
     }
 
     private static ItemAttributeModifiers withMovementSpeed(ArmorType armorType, ItemAttributeModifiers itemAttributeModifiers, int amplifier) {
         EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(armorType.getSlot());
-        ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + armorType.getName());
+        Identifier identifier = Identifier.withDefaultNamespace("armor." + armorType.getName());
         return itemAttributeModifiers.withModifierAdded(Attributes.MOVEMENT_SPEED,
-                        new AttributeModifier(resourceLocation,
+                        new AttributeModifier(identifier,
                                 0.2 * amplifier,
                                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                         equipmentSlotGroup)
                 .withModifierAdded(Attributes.STEP_HEIGHT,
-                        new AttributeModifier(resourceLocation,
+                        new AttributeModifier(identifier,
                                 0.25 * amplifier,
                                 AttributeModifier.Operation.ADD_VALUE),
                         equipmentSlotGroup);

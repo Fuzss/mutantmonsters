@@ -19,38 +19,38 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -145,7 +145,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
 
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader level) {
-        if (level.getBiome(pos).is(BiomeTags.SNOW_GOLEM_MELTS)) {
+        if (level.environmentAttributes().getValue(EnvironmentAttributes.SNOW_GOLEM_MELTS, this.position())) {
             return -10.0F;
         } else {
             return level.getBlockState(pos).getBlock() == Blocks.SNOW ? 10.0F : 0.0F;
@@ -168,9 +168,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             }
         }
 
-        if (this.level().dimensionType().ultraWarm() || this.level()
-                .getBiome(this.blockPosition())
-                .is(BiomeTags.SNOW_GOLEM_MELTS)) {
+        if (this.level().environmentAttributes().getValue(EnvironmentAttributes.SNOW_GOLEM_MELTS, this.position())) {
             if (this.random.nextFloat() > Math.min(80.0F, this.getHealth()) * 0.01F) {
                 this.level()
                         .addParticle(ParticleTypes.FALLING_WATER,
@@ -192,8 +190,10 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
             this.heal(1.0F);
         }
 
-        if (this.level() instanceof ServerLevel serverLevel && this.onGround() && !serverLevel.dimensionType()
-                .ultraWarm() && EntityHelper.isMobGriefingAllowed(serverLevel, this)) {
+        if (this.level() instanceof ServerLevel serverLevel && this.onGround() && !serverLevel.environmentAttributes()
+                .getValue(EnvironmentAttributes.SNOW_GOLEM_MELTS, this.position()) && EntityHelper.isMobGriefingAllowed(
+                serverLevel,
+                this)) {
             int x = Mth.floor(this.getX());
             int y = Mth.floor(this.getBoundingBox().minY);
             int z = Mth.floor(this.getZ());
@@ -417,7 +417,7 @@ public class MutantSnowGolem extends AbstractGolem implements RangedAttackMob, S
     @Override
     public void die(DamageSource cause) {
         if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules()
-                .getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer serverPlayer) {
+                .get(GameRules.SHOW_DEATH_MESSAGES) && this.getOwner() instanceof ServerPlayer serverPlayer) {
             serverPlayer.sendSystemMessage(this.getCombatTracker().getDeathMessage());
         }
 

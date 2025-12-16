@@ -8,7 +8,6 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.Nullable;
 
 public class EndersoulParticle extends SingleQuadParticle {
 

@@ -23,13 +23,13 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
@@ -233,7 +233,7 @@ public class ThrowableBlock extends ThrowableProjectile {
             // for some reason Fabric doesn't sync velocity updates to the client anymore since 1.19.4, so set this to force updates every tick while the block is flying
             // changing FabricEntityTypeBuilder::forceTrackedVelocityUpdates doesn't have any effect, it's on by default anyway which is the desired behavior which was working fine prior to 1.19.4
             // Forge is without the issue however and doesn't need this, Fabric behavior can be reproduced though by setting EntityType$Builder::setShouldReceiveVelocityUpdates to false
-            this.hasImpulse = true;
+            this.needsSync = true;
         }
     }
 
@@ -343,7 +343,7 @@ public class ThrowableBlock extends ThrowableProjectile {
                                 .levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK,
                                         blockPos,
                                         Block.getId(this.getBlockState()));
-                        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                        if (serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
                             Block.dropResources(this.getBlockState(), serverLevel, this.blockPosition());
                         }
                     }
@@ -358,7 +358,7 @@ public class ThrowableBlock extends ThrowableProjectile {
                         .levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK,
                                 this.blockPosition(),
                                 Block.getId(this.getBlockState()));
-                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                if (serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
                     Block.dropResources(this.getBlockState(), serverLevel, this.blockPosition());
                 }
             }

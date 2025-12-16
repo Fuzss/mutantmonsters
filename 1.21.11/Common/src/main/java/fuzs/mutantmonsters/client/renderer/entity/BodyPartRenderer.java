@@ -7,10 +7,10 @@ import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
 import fuzs.mutantmonsters.client.renderer.entity.state.BodyPartRenderState;
 import fuzs.mutantmonsters.world.entity.MutantSkeletonBodyPart;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 

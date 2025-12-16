@@ -1,4 +1,4 @@
-package fuzs.mutantmonsters.client.renderer;
+package fuzs.mutantmonsters.client.renderer.rendertype;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -8,11 +8,12 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fuzs.mutantmonsters.MutantMonsters;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.TextureTransform;
+import net.minecraft.resources.Identifier;
 
-public abstract class ModRenderType extends RenderType {
+public final class ModRenderTypes {
     public static final BlendFunction ALPHA_BLEND_FUNCTION = new BlendFunction(SourceFactor.SRC_ALPHA,
             DestFactor.ONE_MINUS_SRC_ALPHA);
     /**
@@ -33,23 +34,20 @@ public abstract class ModRenderType extends RenderType {
             .withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
             .build());
 
-    private ModRenderType(String string, int i, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {
-        super(string, i, bl, bl2, runnable, runnable2);
+    private ModRenderTypes() {
+        // NO-OP
     }
 
     /**
-     * @see RenderType#energySwirl(ResourceLocation, float, float)
+     * @see net.minecraft.client.renderer.rendertype.RenderTypes#energySwirl(Identifier, float, float)
      */
-    public static RenderType energySwirl(ResourceLocation resourceLocation, float u, float v) {
-        return create(MutantMonsters.id("energy_swirl").toString(),
-                1536,
-                false,
-                true,
-                ENERGY_SWIRL_RENDER_PIPELINE,
-                RenderType.CompositeState.builder()
-                        .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false))
-                        .setTexturingState(new RenderStateShard.OffsetTexturingStateShard(u, v))
-                        .setOverlayState(OVERLAY)
-                        .createCompositeState(false));
+    public static RenderType energySwirl(Identifier identifier, float u, float v) {
+        return RenderType.create(MutantMonsters.id("energy_swirl").toString(),
+                RenderSetup.builder(ENERGY_SWIRL_RENDER_PIPELINE)
+                        .withTexture("Sampler0", identifier)
+                        .setTextureTransform(new TextureTransform.OffsetTextureTransform(u, v))
+                        .useOverlay()
+                        .sortOnUpload()
+                        .createRenderSetup());
     }
 }

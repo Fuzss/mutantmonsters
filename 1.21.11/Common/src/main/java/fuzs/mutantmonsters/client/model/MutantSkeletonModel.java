@@ -9,7 +9,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 
@@ -642,7 +642,7 @@ public class MutantSkeletonModel extends EntityModel<MutantSkeletonRenderState> 
         }
 
         public Spine(ModelPart modelPart, String index) {
-            super(modelPart.getChild("middle" + index), RenderType::entityCutoutNoCull);
+            super(modelPart.getChild("middle" + index), RenderTypes::entityCutoutNoCull);
             this.middle = this.root;
             modelPart = this.root;
             for (int i = 0; i < 3; i++) {

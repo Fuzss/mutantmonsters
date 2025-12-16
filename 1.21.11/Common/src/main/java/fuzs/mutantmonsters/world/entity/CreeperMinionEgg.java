@@ -21,13 +21,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -237,7 +237,7 @@ public class CreeperMinionEgg extends Entity implements OwnableEntity {
                 if (this.health <= 0) {
                     float sizeIn = this.isCharged() ? 2.0F : 0.0F;
                     MutatedExplosionHelper.explode(this, sizeIn, false, Level.ExplosionInteraction.TNT);
-                    if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    if (serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
                         if (!this.isCharged() && this.random.nextInt(3) != 0) {
                             for (int i = 5 + this.random.nextInt(6); i > 0; --i) {
                                 this.spawnAtLocation(serverLevel, Items.GUNPOWDER);

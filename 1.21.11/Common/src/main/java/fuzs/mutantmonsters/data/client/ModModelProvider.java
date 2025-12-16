@@ -8,17 +8,16 @@ import fuzs.puzzleslib.api.client.data.v2.AbstractModelProvider;
 import fuzs.puzzleslib.api.client.data.v2.models.ItemModelGenerationHelper;
 import fuzs.puzzleslib.api.client.data.v2.models.ModelLocationHelper;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
-import fuzs.puzzleslib.impl.init.LegacySpawnEggItem;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
 public class ModModelProvider extends AbstractModelProvider {
-    public static final ResourceLocation TEMPLATE_SPAWN_EGG = ModelLocationHelper.getItemModel(MutantMonsters.id(
+    public static final Identifier TEMPLATE_SPAWN_EGG = ModelLocationHelper.getItemModel(MutantMonsters.id(
             "template_spawn_egg"));
 
     public ModModelProvider(DataProviderContext context) {
@@ -38,18 +37,18 @@ public class ModModelProvider extends AbstractModelProvider {
         itemModelGenerators.generateLayeredItem(TEMPLATE_SPAWN_EGG,
                 ModelLocationHelper.getItemTexture(MutantMonsters.id("spawn_egg")),
                 ModelLocationHelper.getItemTexture(MutantMonsters.id("spawn_egg_overlay")));
-        ItemModelGenerationHelper.generateSpawnEgg(ModItems.CREEPER_MINION_SPAWN_EGG_ITEM.value(), itemModelGenerators);
+        itemModelGenerators.generateFlatItem(ModItems.CREEPER_MINION_SPAWN_EGG_ITEM.value(), ModelTemplates.FLAT_ITEM);
         itemModelGenerators.generateFlatItem(ModItems.CREEPER_MINION_TRACKER_ITEM.value(), ModelTemplates.FLAT_ITEM);
         itemModelGenerators.generateFlatItem(ModItems.CREEPER_SHARD_ITEM.value(),
                 ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
         this.generateHulkHammer(itemModelGenerators);
         this.generateEndersoulHand(itemModelGenerators);
-        generateSpawnEgg(ModItems.MUTANT_CREEPER_SPAWN_EGG_ITEM.value(), itemModelGenerators);
-        generateSpawnEgg(ModItems.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.value(), itemModelGenerators);
-        generateSpawnEgg(ModItems.MUTANT_SKELETON_SPAWN_EGG_ITEM.value(), itemModelGenerators);
-        generateSpawnEgg(ModItems.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.value(), itemModelGenerators);
-        generateSpawnEgg(ModItems.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.value(), itemModelGenerators);
-        generateSpawnEgg(ModItems.SPIDER_PIG_SPAWN_EGG_ITEM.value(), itemModelGenerators);
+        generateSpawnEgg(ModItems.MUTANT_CREEPER_SPAWN_EGG_ITEM.value(), 5349438, 11013646, itemModelGenerators);
+        generateSpawnEgg(ModItems.MUTANT_ENDERMAN_SPAWN_EGG_ITEM.value(), 1447446, 8860812, itemModelGenerators);
+        generateSpawnEgg(ModItems.MUTANT_SKELETON_SPAWN_EGG_ITEM.value(), 12698049, 6310217, itemModelGenerators);
+        generateSpawnEgg(ModItems.MUTANT_ZOMBIE_SPAWN_EGG_ITEM.value(), 7969893, 44975, itemModelGenerators);
+        generateSpawnEgg(ModItems.MUTANT_SNOW_GOLEM_SPAWN_EGG_ITEM.value(), 15073279, 16753434, itemModelGenerators);
+        generateSpawnEgg(ModItems.SPIDER_PIG_SPAWN_EGG_ITEM.value(), 3419431, 15771042, itemModelGenerators);
         itemModelGenerators.generateFlatItem(ModItems.MUTANT_SKELETON_ARMS_ITEM.value(), ModelTemplates.FLAT_ITEM);
         itemModelGenerators.generateFlatItem(ModItems.MUTANT_SKELETON_BOOTS_ITEM.value(), ModelTemplates.FLAT_ITEM);
         itemModelGenerators.generateFlatItem(ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM.value(),
@@ -82,10 +81,10 @@ public class ModModelProvider extends AbstractModelProvider {
                 ItemModelGenerators.createFlatModelDispatch(itemModel, holdingModel));
     }
 
-    public static void generateSpawnEgg(Item item, ItemModelGenerators itemModelGenerators) {
+    public static void generateSpawnEgg(Item item, int backgroundColor, int highlightColor, ItemModelGenerators itemModelGenerators) {
         itemModelGenerators.itemModelOutput.accept(item,
                 ItemModelUtils.tintedModel(TEMPLATE_SPAWN_EGG,
-                        ItemModelUtils.constantTint(((LegacySpawnEggItem) item).getBackgroundColor()),
-                        ItemModelUtils.constantTint(((LegacySpawnEggItem) item).getHighlightColor())));
+                        ItemModelUtils.constantTint(backgroundColor),
+                        ItemModelUtils.constantTint(highlightColor)));
     }
 }

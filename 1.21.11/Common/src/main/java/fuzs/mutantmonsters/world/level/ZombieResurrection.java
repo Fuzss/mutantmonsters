@@ -12,7 +12,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -122,15 +122,15 @@ public class ZombieResurrection extends BlockPos {
             }
 
             if (--this.tick <= 0) {
-                Zombie zombieEntity = (Zombie) getZombieByLocation(level, abovePos).create(level,
+                Zombie zombieEntity = getZombieByLocation(level, abovePos).create(level,
                         EntitySpawnReason.MOB_SUMMONED);
-                if (level instanceof ServerLevelAccessor) {
-                    SpawnGroupData ilivingentitydata = zombieEntity.finalizeSpawn((ServerLevelAccessor) level,
-                            level.getCurrentDifficultyAt(this),
+                if (level instanceof ServerLevelAccessor serverLevel) {
+                    SpawnGroupData spawnGroupData = zombieEntity.finalizeSpawn(serverLevel,
+                            serverLevel.getCurrentDifficultyAt(this),
                             EntitySpawnReason.MOB_SUMMONED,
                             null);
-                    if (ilivingentitydata instanceof Zombie.ZombieGroupData) {
-                        new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) ilivingentitydata).isBaby, false);
+                    if (spawnGroupData instanceof Zombie.ZombieGroupData) {
+                        new Zombie.ZombieGroupData(((Zombie.ZombieGroupData) spawnGroupData).isBaby, false);
                     }
                 }
 

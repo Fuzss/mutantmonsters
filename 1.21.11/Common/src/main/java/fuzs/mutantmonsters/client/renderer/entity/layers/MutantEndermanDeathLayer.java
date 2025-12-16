@@ -5,18 +5,19 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.model.MutantEndermanModel;
 import fuzs.mutantmonsters.client.renderer.entity.MutantEndermanRenderer;
 import fuzs.mutantmonsters.client.renderer.entity.state.MutantEndermanRenderState;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
 public class MutantEndermanDeathLayer extends RenderLayer<MutantEndermanRenderState, MutantEndermanModel> {
-    private static final ResourceLocation DEATH_TEXTURE_LOCATION = MutantMonsters.id(
+    private static final Identifier DEATH_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_enderman/death.png");
-    private static final RenderType DEATH_RENDER_TYPE = RenderType.entityDecal(MutantEndermanRenderer.TEXTURE_LOCATION);
+    private static final RenderType DEATH_RENDER_TYPE = RenderTypes.entityDecal(MutantEndermanRenderer.TEXTURE_LOCATION);
 
     public MutantEndermanDeathLayer(RenderLayerParent<MutantEndermanRenderState, MutantEndermanModel> renderer) {
         super(renderer);
@@ -31,7 +32,7 @@ public class MutantEndermanDeathLayer extends RenderLayer<MutantEndermanRenderSt
                     .submitModel(this.getParentModel(),
                             renderState,
                             poseStack,
-                            RenderType.dragonExplosionAlpha(DEATH_TEXTURE_LOCATION),
+                            RenderTypes.dragonExplosionAlpha(DEATH_TEXTURE_LOCATION),
                             renderState.lightCoords,
                             OverlayTexture.NO_OVERLAY,
                             color,

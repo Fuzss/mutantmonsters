@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChemicalXMobEffect extends InstantenousMobEffect {
     public static final TargetingConditions.Selector IS_APPLICABLE = (LivingEntity livingEntity, ServerLevel serverLevel) -> {

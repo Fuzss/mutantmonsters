@@ -22,15 +22,15 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -156,8 +156,7 @@ public class MutantSkeletonBodyPart extends Entity implements TraceableEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules()
-                .getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
             ResourceKey<LootTable> resourceKey = this.getItemPartLootTableId();
             LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
             LootParams lootParams = new LootParams.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY,

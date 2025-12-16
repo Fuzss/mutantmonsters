@@ -5,23 +5,23 @@ import com.mojang.serialization.MapCodec;
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.client.model.EndersoulHandModel;
 import fuzs.mutantmonsters.client.model.geom.ModModelLayers;
-import fuzs.mutantmonsters.client.renderer.ModRenderType;
+import fuzs.mutantmonsters.client.renderer.rendertype.ModRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemDisplayContext;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.Set;
+import java.util.function.Consumer;
 
 public class EndersoulHandSpecialRenderer implements NoDataSpecialModelRenderer {
-    private static final ResourceLocation ENDERSOUL_HAND_TEXTURE_LOCATION = MutantMonsters.id(
+    private static final Identifier ENDERSOUL_HAND_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/item/endersoul_hand_model.png");
 
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -35,7 +35,7 @@ public class EndersoulHandSpecialRenderer implements NoDataSpecialModelRenderer 
     public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector nodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
         float partialTick = this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         float ageInTicks = this.minecraft.player.tickCount + partialTick;
-        RenderType renderType = ModRenderType.energySwirl(ENDERSOUL_HAND_TEXTURE_LOCATION,
+        RenderType renderType = ModRenderTypes.energySwirl(ENDERSOUL_HAND_TEXTURE_LOCATION,
                 ageInTicks * 0.008F,
                 ageInTicks * 0.008F);
         // ignore enchanting glint, it looks bad
@@ -53,7 +53,7 @@ public class EndersoulHandSpecialRenderer implements NoDataSpecialModelRenderer 
     }
 
     @Override
-    public void getExtents(Set<Vector3f> output) {
+    public void getExtents(Consumer<Vector3fc> output) {
         PoseStack poseStack = new PoseStack();
         this.model.setupAnim(Unit.INSTANCE);
         this.model.root().getExtentsForGui(poseStack, output);

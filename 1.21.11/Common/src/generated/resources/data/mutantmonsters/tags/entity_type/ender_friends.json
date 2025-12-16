@@ -1,6 +1,9 @@
 {
   "values": [
-    "#c:bosses",
+    {
+      "id": "#c:bosses",
+      "required": false
+    },
     "minecraft:enderman",
     "mutantmonsters:endersoul_clone",
     "mutantmonsters:mutant_enderman"

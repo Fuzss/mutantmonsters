@@ -10,11 +10,14 @@ public class AnimatedEntityRenderState extends ArmedEntityRenderState {
     public float animationTime;
     public EntityAnimation animation;
 
-    public static <T extends LivingEntity & AnimatedEntity> void extractAnimatedEntityRenderState(T animatedEntity, AnimatedEntityRenderState reusedState, float partialTick, ItemModelResolver itemModelResolver) {
-        ArmedEntityRenderState.extractArmedEntityRenderState(animatedEntity, reusedState, itemModelResolver);
-        reusedState.animationTime =
+    public static <T extends LivingEntity & AnimatedEntity> void extractAnimatedEntityRenderState(T animatedEntity, AnimatedEntityRenderState renderState, ItemModelResolver itemModelResolver, float partialTick) {
+        ArmedEntityRenderState.extractArmedEntityRenderState(animatedEntity,
+                renderState,
+                itemModelResolver,
+                partialTick);
+        renderState.animationTime =
                 animatedEntity.getAnimationTick() > 0 ? animatedEntity.getAnimationTick() + partialTick :
                         animatedEntity.getAnimationTick();
-        reusedState.animation = animatedEntity.getAnimation();
+        renderState.animation = animatedEntity.getAnimation();
     }
 }

@@ -2,10 +2,10 @@ package fuzs.mutantmonsters.client.model.geom;
 
 import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.puzzleslib.api.client.init.v1.ModelLayerFactory;
-import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.object.skull.SkullModel;
 
 public class ModModelLayers {
     static final ModelLayerFactory REGISTRY = ModelLayerFactory.from(MutantMonsters.MOD_ID);

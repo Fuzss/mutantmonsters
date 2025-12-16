@@ -18,6 +18,6 @@ public class ModEquipmentProvider extends AbstractEquipmentProvider {
     @Override
     public void addEquipmentAssets(BiConsumer<ResourceKey<EquipmentAsset>, EquipmentClientInfo> equipmentAssetConsumer) {
         equipmentAssetConsumer.accept(ModItems.MUTANT_SKELETON_ARMOR_MATERIAL.assetId(),
-                onlyHumanoid(ModItems.MUTANT_SKELETON_ARMOR_MATERIAL.assetId().location()));
+                onlyHumanoid(ModItems.MUTANT_SKELETON_ARMOR_MATERIAL.assetId().identifier()));
     }
 }

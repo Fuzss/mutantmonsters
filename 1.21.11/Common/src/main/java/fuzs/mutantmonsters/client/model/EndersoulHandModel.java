@@ -4,7 +4,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Unit;
 
 public class EndersoulHandModel extends Model<Unit> {
@@ -15,7 +15,7 @@ public class EndersoulHandModel extends Model<Unit> {
     private final boolean right;
 
     public EndersoulHandModel(ModelPart root, boolean right) {
-        super(root, RenderType::entitySolid);
+        super(root, RenderTypes::entitySolid);
         this.right = right;
         this.hand = root.getChild("hand");
         for (int i = 0; i < this.finger.length; i++) {

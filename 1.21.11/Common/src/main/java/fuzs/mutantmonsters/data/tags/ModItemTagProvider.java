@@ -32,10 +32,10 @@ public class ModItemTagProvider extends AbstractTagProvider<Item> {
         this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(ModItems.HULK_HAMMER_ITEM.value());
         this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(ModItems.HULK_HAMMER_ITEM.value());
         this.tag(ItemTags.TRIMMABLE_ARMOR)
-                .remove(ModItems.MUTANT_SKELETON_SKULL_ITEM.value(),
-                        ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM.value(),
-                        ModItems.MUTANT_SKELETON_LEGGINGS_ITEM.value(),
-                        ModItems.MUTANT_SKELETON_BOOTS_ITEM.value());
+                .remove(ModItems.MUTANT_SKELETON_SKULL_ITEM,
+                        ModItems.MUTANT_SKELETON_CHESTPLATE_ITEM,
+                        ModItems.MUTANT_SKELETON_LEGGINGS_ITEM,
+                        ModItems.MUTANT_SKELETON_BOOTS_ITEM);
         this.tag(ModTags.REPAIRS_SKELETON_ARMOR_ITEM_TAG).add(Items.BONE_BLOCK);
         this.tag(ModTags.SPIDER_PIG_FOOD_ITEM_TAG)
                 .add(Items.CARROT, Items.POTATO, Items.BEETROOT, Items.PORKCHOP, Items.SPIDER_EYE);

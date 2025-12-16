@@ -15,12 +15,12 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.HumanoidArm;
 
 public class MutantSkeletonCrossbowLayer extends RenderLayer<MutantSkeletonRenderState, MutantSkeletonModel> {
-    public static final ResourceLocation CROSSBOW_TEXTURE_LOCATION = MutantMonsters.id(
+    public static final Identifier CROSSBOW_TEXTURE_LOCATION = MutantMonsters.id(
             "textures/entity/mutant_crossbow.png");
     private final MutantCrossbowModel crossbowModel;
     private final MutantArrowModel arrowModel;

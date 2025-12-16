@@ -9,11 +9,11 @@ import fuzs.mutantmonsters.client.renderer.entity.state.MutantCreeperRenderState
 import fuzs.mutantmonsters.world.entity.mutant.MutantCreeper;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class MutantCreeperRenderer extends MobRenderer<MutantCreeper, MutantCreeperRenderState, MutantCreeperModel> {
-    public static final ResourceLocation TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_creeper.png");
+    public static final Identifier TEXTURE_LOCATION = MutantMonsters.id("textures/entity/mutant_creeper.png");
 
     public MutantCreeperRenderer(EntityRendererProvider.Context context) {
         super(context, new MutantCreeperModel(context.bakeLayer(ModModelLayers.MUTANT_CREEPER)), 1.5F);
@@ -61,7 +61,7 @@ public class MutantCreeperRenderer extends MobRenderer<MutantCreeper, MutantCree
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutantCreeperRenderState renderState) {
+    public Identifier getTextureLocation(MutantCreeperRenderState renderState) {
         return TEXTURE_LOCATION;
     }
 }

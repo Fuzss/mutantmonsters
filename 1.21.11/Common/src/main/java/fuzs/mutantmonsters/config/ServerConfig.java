@@ -8,9 +8,9 @@ import fuzs.puzzleslib.api.config.v3.ConfigCore;
 import fuzs.puzzleslib.api.config.v3.serialization.ConfigDataSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class ServerConfig implements ConfigCore {
 
     @Override
     public void afterConfigReload() {
-        record MutantXConversion(EntityType<?> entityType, @Nullable ResourceLocation convertsTo) {
+        record MutantXConversion(EntityType<?> entityType, @Nullable Identifier convertsTo) {
 
             public boolean isValid() {
                 if (this.convertsTo != null && BuiltInRegistries.ENTITY_TYPE.containsKey(this.convertsTo)) {
@@ -43,7 +43,7 @@ public class ServerConfig implements ConfigCore {
         };
         ConfigDataSet<EntityType<?>> configDataSet = ConfigDataSet.from(Registries.ENTITY_TYPE, this.mutantXConversionsRaw, (integer, o) -> true, String.class);
         this.mutantXConversions = configDataSet.toMap().entrySet().stream()
-                .map(data -> new MutantXConversion(data.getKey(), ResourceLocation.tryParse((String) data.getValue()[0])))
+                .map(data -> new MutantXConversion(data.getKey(), Identifier.tryParse((String) data.getValue()[0])))
                 .filter(MutantXConversion::isValid)
                 .collect(ImmutableMap.toImmutableMap(MutantXConversion::entityType, MutantXConversion::convertsToType));
     }

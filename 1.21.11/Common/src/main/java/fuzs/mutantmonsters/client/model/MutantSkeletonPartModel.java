@@ -7,7 +7,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Unit;
 
 import java.util.Map;
@@ -16,7 +16,7 @@ public class MutantSkeletonPartModel extends Model<Unit> {
     private final Map<MutantSkeletonBodyPart.BodyPart, ModelPart> bodyParts;
 
     public MutantSkeletonPartModel(ModelPart modelPart, ModelPart spineModelPart) {
-        super(modelPart, RenderType::entityCutoutNoCull);
+        super(modelPart, RenderTypes::entityCutoutNoCull);
         ImmutableMap.Builder<MutantSkeletonBodyPart.BodyPart, ModelPart> builder = ImmutableMap.builder();
         builder.put(MutantSkeletonBodyPart.BodyPart.PELVIS, modelPart.getChild("pelvis"));
         MutantSkeletonModel.Spine spine = new MutantSkeletonModel.Spine(spineModelPart);

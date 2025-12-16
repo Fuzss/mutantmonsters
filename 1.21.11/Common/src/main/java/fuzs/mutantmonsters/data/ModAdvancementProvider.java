@@ -4,20 +4,20 @@ import fuzs.mutantmonsters.MutantMonsters;
 import fuzs.mutantmonsters.init.ModEntityTypes;
 import fuzs.mutantmonsters.init.ModItems;
 import fuzs.mutantmonsters.init.ModTags;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.data.v2.AbstractAdvancementProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
-import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.*;
+import net.minecraft.advancements.criterion.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -52,7 +52,7 @@ public class ModAdvancementProvider extends AbstractAdvancementProvider {
         Advancement.Builder.advancement()
                 .display(display(ModItems.ENDERSOUL_HAND_ITEM.value().getDefaultInstance(),
                         ROOT_ADVANCEMENT.id(),
-                        ResourceLocationHelper.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png"),
+                        Identifier.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png"),
                         AdvancementType.TASK,
                         false))
                 .addCriterion("killed_something",
