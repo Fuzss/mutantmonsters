@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v21.10.4-1.21.10] - 2025-12-25
+
+### Changed
+
+- Creeper minions carried on your shoulders can no longer be seen by other players in multiplayer as a workaround for
+  the `Received attachment change for unknown target!` issue on Fabric (NeoForge remains unchanged)
+
 ## [v21.10.3-1.21.10] - 2025-12-07
 
 ### Changed
