@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 public interface AdditionalSpawnDataEntity {
 
     /**
-     * Create a custom packet to be returned from {@link Entity#getAddEntityPacket()}
+     * Create a custom packet to be returned from {@link Entity#getAddEntityPacket(ServerEntity)}
      *
      * @param entity the entity to read data from
      * @param <T>    entity type
