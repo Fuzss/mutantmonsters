@@ -21,7 +21,6 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
@@ -42,7 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ModRegistry {
     public static final RegistrySetBuilder REGISTRY_SET_BUILDER = new RegistrySetBuilder().add(Registries.DAMAGE_TYPE,
@@ -122,26 +121,16 @@ public class ModRegistry {
     public static final DataAttachmentType<Entity, Optional<Boolean>> LEFT_SHOULDER_CREEPER_MINION_ATTACHMENT_TYPE = DataAttachmentRegistry.<Optional<Boolean>>entityBuilder()
             .defaultValue(EntityType.PLAYER, Optional.empty())
             .networkSynchronized(ByteBufCodecs.BOOL.apply(ByteBufCodecs::optional),
-                    // Do not sync to other players to bypass this bug in Fabric: https://github.com/FabricMC/fabric-api/issues/4943
-                    ModLoaderEnvironment.INSTANCE.getModLoader().isFabric() ? (Entity entity) -> {
-                        return (Consumer<ServerPlayer> serverPlayerConsumer) -> {
-                            if (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null) {
-                                serverPlayerConsumer.accept(serverPlayer);
-                            }
-                        };
-                    } : PlayerSet::nearEntity)
+                    // Do not sync to players to bypass this bug in Fabric: https://github.com/FabricMC/fabric-api/issues/4943
+                    ModLoaderEnvironment.INSTANCE.getModLoader().isFabric() ?
+                            (Entity entity) -> Function.identity()::apply : PlayerSet::nearEntity)
             .build(MutantMonsters.id("left_shoulder_creeper_minion"));
     public static final DataAttachmentType<Entity, Optional<Boolean>> RIGHT_SHOULDER_CREEPER_MINION_ATTACHMENT_TYPE = DataAttachmentRegistry.<Optional<Boolean>>entityBuilder()
             .defaultValue(EntityType.PLAYER, Optional.empty())
             .networkSynchronized(ByteBufCodecs.BOOL.apply(ByteBufCodecs::optional),
-                    // Do not sync to other players to bypass this bug in Fabric: https://github.com/FabricMC/fabric-api/issues/4943
-                    ModLoaderEnvironment.INSTANCE.getModLoader().isFabric() ? (Entity entity) -> {
-                        return (Consumer<ServerPlayer> serverPlayerConsumer) -> {
-                            if (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null) {
-                                serverPlayerConsumer.accept(serverPlayer);
-                            }
-                        };
-                    } : PlayerSet::nearEntity)
+                    // Do not sync to players to bypass this bug in Fabric: https://github.com/FabricMC/fabric-api/issues/4943
+                    ModLoaderEnvironment.INSTANCE.getModLoader().isFabric() ?
+                            (Entity entity) -> Function.identity()::apply : PlayerSet::nearEntity)
             .build(MutantMonsters.id("right_shoulder_creeper_minion"));
 
     public static void bootstrap() {
